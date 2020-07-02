@@ -1,0 +1,1419 @@
+# Romanian translation for evolution-ews.
+# Copyright (C) 2020 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# Daniel Șerbănescu <daniel@serbanescu.dk>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews gnome-3-32\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
+"POT-Creation-Date: 2020-02-26 13:57+0000\n"
+"PO-Revision-Date: 2020-07-02 15:08+0200\n"
+"Last-Translator: \n"
+"Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n"
+"%100<=19) ? 1 : 2);\n"
+"X-Generator: Poedit 2.3.1\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:81
+#: ../src/configuration/e-ews-config-lookup.c:251
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
+msgid "Exchange Web Services"
+msgstr "Servicii web Exchange"
+
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:83
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Pentru accesarea serverelor Exchange folosind servicii web"
+
+#: ../src/addressbook/e-book-backend-ews.c:3496
+msgid "Failed to update GAL:"
+msgstr "Eroare la actualizarea GAL:"
+
+#: ../src/addressbook/e-book-backend-ews.c:3658
+msgid ""
+"Cannot save contact list, it’s only supported on EWS Server 2010 or later"
+msgstr ""
+"Nu s-a putut salva lista de contacte, este suportată numai pentru servere "
+"EWS 2010 sau ulterior"
+
+#: ../src/addressbook/e-book-backend-ews.c:3751
+msgid "Failed to set contact photo:"
+msgstr "Eșec la stabilirea fotografiei de contact:"
+
+#: ../src/calendar/e-cal-backend-ews.c:1812
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Liber"
+
+#: ../src/calendar/e-cal-backend-ews.c:1815
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Ocupat"
+
+#: ../src/calendar/e-cal-backend-ews.c:1817
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "În afara serviciului"
+
+#: ../src/calendar/e-cal-backend-ews.c:1819
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Tentativă"
+
+#: ../src/calendar/e-cal-backend-ews.c:2394
+#: ../src/calendar/e-cal-backend-ews.c:2572
+msgid "Cannot determine EWS ItemId"
+msgstr "Nu s-a putut determina Id-ul elementului EWS"
+
+#: ../src/calendar/e-cal-backend-ews.c:3567
+#, c-format
+msgid "Cannot find user “%s” between attendees"
+msgstr "Nu s-a putut găsi utilizatorul „%s” printre participanți"
+
+#: ../src/calendar/e-cal-backend-ews-utils.c:2124
+msgid "Invalid occurrence ID"
+msgstr "ID ocurență nevalidă"
+
+#: ../src/camel/camel-ews-folder.c:374
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Nu s-a putut deschide fișierul temporar cu conținut mime!"
+
+#: ../src/camel/camel-ews-folder.c:382
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Nu s-a putut genera analizatorul pentru conținutul mime!"
+
+#: ../src/camel/camel-ews-folder.c:391
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Nu s-a putut parsa cererea de întâlnire conținut mime!"
+
+#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Nu s-a putut crea fișierul cache"
+
+#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
+#, c-format
+msgid "Unable to create cache path “%s”: %s"
+msgstr "Nu s-a putut crea calea cache „%s”: %s"
+
+#. Translators: The first %s consists of the source file name,
+#. the second %s of the destination file name and
+#. the third %s of the error message.
+#: ../src/camel/camel-ews-folder.c:922
+#, c-format
+msgid "Failed to move message cache file from “%s” to “%s”: %s"
+msgstr "Eșec la mutarea fișierului de mesaj cache de la „%s” la „%s”: %s"
+
+#: ../src/camel/camel-ews-folder.c:1855
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Nu s-a putut încărca sumarul pentru %s"
+
+#: ../src/camel/camel-ews-folder.c:2328
+#, c-format
+msgid "Refreshing folder “%s”"
+msgstr "Se reîmprospătează dosarul „%s”"
+
+#: ../src/camel/camel-ews-folder.c:2512
+#, c-format
+msgid "Cannot perform actions on the folder while in offline mode"
+msgstr ""
+"Nu se pot executa acțiuni pe dosar în timp ce sunteți în modul deconectat"
+
+#: ../src/camel/camel-ews-provider.c:47
+msgid "Checking for new mail"
+msgstr "Se verifică după noi emailuri"
+
+#: ../src/camel/camel-ews-provider.c:49
+msgid "C_heck for new messages in all folders"
+msgstr "V_erifică pentru mesaje noi în toate dosarele"
+
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "Ascu_ltă după notificări de modificare ale serverului"
+
+#: ../src/camel/camel-ews-provider.c:54
+msgid "Options"
+msgstr "Opțiuni"
+
+#: ../src/camel/camel-ews-provider.c:56
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Aplică filtre noilor mesaje din inbox pe acest server"
+
+#: ../src/camel/camel-ews-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "Verifică noile mesaje pentru conținut _spam"
+
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Verifică pentru mesaje spam numai în dosarul IN_BOX"
+
+#: ../src/camel/camel-ews-provider.c:62
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr ""
+"Sincroni_zează emailurile de la distanță cu cele locale pentru toate dosarele"
+
+#: ../src/camel/camel-ews-provider.c:66
+msgid "Connection"
+msgstr "Conexiune"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:70
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "Conexiune expira_tă (în secunde) %s"
+
+#: ../src/camel/camel-ews-provider.c:72
+msgid "Override _User-Agent header value"
+msgstr "Suprascrie valoarea antetului _User-Agent"
+
+#: ../src/camel/camel-ews-provider.c:98
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:100
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"Această opțiune va conecta la serverul Exchange folosind parolă în text clar "
+"cu autentificare NTLM."
+
+#: ../src/camel/camel-ews-provider.c:108
+msgid "Basic"
+msgstr "Bază"
+
+#: ../src/camel/camel-ews-provider.c:110
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"Această opțiune va conecta la serverul Exchange folosind parolă în text clar "
+"cu autentificare de bază."
+
+#: ../src/camel/camel-ews-provider.c:118
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-ews-provider.c:120
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"Această opțiune va conecta la serverul Exchange folosind autentificare "
+"Kerberos/GSSAPI."
+
+#: ../src/camel/camel-ews-store.c:335
+#, c-format
+msgid "Session has no storage path"
+msgstr "Sesiunea nu are nicio cale de stocare"
+
+#. Translators: This composes a "Public Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Public Folders",
+#. * the %d with counter, thus it composes name like "Public Folders_1"
+#.
+#: ../src/camel/camel-ews-store.c:372
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#. Translators: This composes a "Foreign Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Foreign Folders",
+#. * the %d with counter, thus it composes name like "Foreign Folders_1"
+#.
+#: ../src/camel/camel-ews-store.c:505
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:651 ../src/camel/camel-ews-store.c:1291
+msgid "Checking “Out of Office” settings"
+msgstr "Se verifică configurările „Absent de la birou”"
+
+#: ../src/camel/camel-ews-store.c:1297
+msgid "Look up Exchange server categories"
+msgstr "Se caută categoriile serverului Exchange"
+
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1367
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "Parola va expira în %d zi. Deschideți „%s” pentru a o schimba."
+msgstr[1] "Parola va expira în %d zile. Deschideți „%s” pentru a o schimba."
+msgstr[2] "Parola va expira în %d de zile. Deschideți „%s” pentru a o schimba."
+
+#: ../src/camel/camel-ews-store.c:1373
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Parola va expira într-o zi."
+msgstr[1] "Parola va expira în %d zile."
+msgstr[2] "Parola va expira în %d de zile."
+
+#: ../src/camel/camel-ews-store.c:1593
+msgid "Updating foreign folder structure"
+msgstr "Se actualizează structura de dosare străine"
+
+#: ../src/camel/camel-ews-store.c:1729
+msgid "Updating foreign folders"
+msgstr "Se actualizează dosarele străine"
+
+#: ../src/camel/camel-ews-store.c:2145
+#, c-format
+msgid "No such folder: %s"
+msgstr "Nu există asemenea dosar: %s"
+
+#: ../src/camel/camel-ews-store.c:2454
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "Nu se poate lista dosarele publice EWS în modul deconectat"
+
+#: ../src/camel/camel-ews-store.c:2527
+msgid "Cannot find any EWS public folders"
+msgstr "Nu s-au putut găsi niciun dosar public EWS"
+
+#: ../src/camel/camel-ews-store.c:2636
+#, c-format
+msgid "Cannot create folder “%s”, folder already exists"
+msgstr "Nu s-a putut crea dosarul „%s”, dosarul există deja"
+
+#: ../src/camel/camel-ews-store.c:2651
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Dosarul părinte %s nu există"
+
+#: ../src/camel/camel-ews-store.c:2661
+#, c-format
+msgid ""
+"Cannot create folder under “%s”, it is used for folders of other users only"
+msgstr ""
+"Nu s-a putut crea dosarul sub „%s”, este folosit numai pentru dosare ale "
+"altor utilizatori"
+
+#: ../src/camel/camel-ews-store.c:2671
+#, c-format
+msgid "Cannot create folder under “%s”, it is used for public folders only"
+msgstr ""
+"Nu s-a putut crea dosarul sub „%s”, este folosit numai pentru dosarele "
+"publice"
+
+#: ../src/camel/camel-ews-store.c:2775
+#, c-format
+msgid "Folder does not exist"
+msgstr "Dosarul nu există"
+
+#: ../src/camel/camel-ews-store.c:2785
+#, c-format
+msgid "Cannot remove folder “%s”, it is used for folders of other users only"
+msgstr ""
+"Nu se poate elimina dosarul „%s”, este folosit numai pentru dosarele altor "
+"utilizatori"
+
+#: ../src/camel/camel-ews-store.c:2796
+#, c-format
+msgid "Cannot remove folder “%s”, it is used for public folders only"
+msgstr ""
+"Nu se poate elimina dosarul „%s”, este folosit numai pentru dosare publice"
+
+#: ../src/camel/camel-ews-store.c:2955
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Dosarul %s nu există"
+
+#: ../src/camel/camel-ews-store.c:2964
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Niciun record de modificare de cheie pentru dosarul %s"
+
+#: ../src/camel/camel-ews-store.c:3007
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Nu se poate redenumi și muta un dosar în același timp"
+
+#: ../src/camel/camel-ews-store.c:3041
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Nu s-a găsit ID-ul dosarului pentru dosarul părinte %s"
+
+#: ../src/camel/camel-ews-store.c:3093 ../src/camel/camel-ews-transport.c:318
+#, c-format
+msgid "Exchange server %s"
+msgstr "Server Exchange %s"
+
+#: ../src/camel/camel-ews-store.c:3096
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "Serviciu Exchange pentru %s pe %s"
+
+#: ../src/camel/camel-ews-store.c:3140
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "Nu s-a putut localiza dosarul Gunoi"
+
+#: ../src/camel/camel-ews-store.c:3200
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "Nu s-a putut localiza dosarul Spam"
+
+#: ../src/camel/camel-ews-store.c:3391
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "Nu se poate abona la dosare EWS în modul deconectat"
+
+#: ../src/camel/camel-ews-store.c:3414
+#, c-format
+msgid "Cannot subscribe folder “%s”, no public folder available"
+msgstr "Nu se poate abona dosarul „%s”, niciun dosar public disponibil"
+
+#: ../src/camel/camel-ews-store.c:3424
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder not found"
+msgstr "Nu se poate abona dosarul „%s”, dosarul nu a fost găsit"
+
+#: ../src/camel/camel-ews-store.c:3515
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "Nu se poate dezabona de la dosare EWS în modul deconectat"
+
+#: ../src/camel/camel-ews-store.c:3632
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Trebuie să lucrați în modul online pentru a completa această operație"
+
+#: ../src/camel/camel-ews-store.c:3676 ../src/camel/camel-ews-store.c:3713
+msgid "Unsetting the “Out of Office” status"
+msgstr "Se destabilește starea „Absent de la birou”"
+
+#: ../src/camel/camel-ews-store.h:56
+msgid "Foreign Folders"
+msgstr "Dosare străine"
+
+#: ../src/camel/camel-ews-store.h:58
+msgid "Public Folders"
+msgstr "Dosare publice"
+
+#: ../src/camel/camel-ews-transport.c:321
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Livrare email Exchange prin %s"
+
+#: ../src/camel/camel-ews-transport.c:370
+msgid "Cannot send message with no From address"
+msgstr "Nu se pot trimite mesaje fără a avea o adresă în câmpul „De la”"
+
+#: ../src/camel/camel-ews-transport.c:376
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"Serverul Exchange nu poate trimite mesaje cu adrese multiple în câmpul „De "
+"la”"
+
+#: ../src/camel/camel-ews-transport.c:386
+msgid "Failed to read From address"
+msgstr "Eșec la citire de la adresă"
+
+#: ../src/camel/camel-ews-transport.c:396
+#, c-format
+msgid "Service not connected"
+msgstr "Serviciu neconectat"
+
+#: ../src/collection/e-ews-backend.c:533
+#: ../src/configuration/e-mail-config-ews-gal.c:274
+msgid "Global Address List"
+msgstr "Agendă globală"
+
+#: ../src/collection/e-ews-backend.c:980
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
+msgstr ""
+"Nu s-a putut determina o clasă de dosare adecvată pentru noul dosar numit "
+"„%s”"
+
+#: ../src/collection/e-ews-backend.c:1068
+#, c-format
+msgid "Data source “%s” does not represent an Exchange Web Services folder"
+msgstr "Sursa de date „%s” nu reprezintă un dosar de Servicii Web Exchange"
+
+#: ../src/configuration/e-book-config-ews.c:100
+msgid "Use only _primary contact email address"
+msgstr "Utilizează numai adresele de email pentru contacte _primare"
+
+#: ../src/configuration/e-book-config-ews.c:101
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr ""
+"Când este bifat, contactele căutate în Agenda globală online vor conține "
+"numai adresele de email primare"
+
+#: ../src/configuration/e-book-config-ews.c:113
+msgid "_Fetch contact photos"
+msgstr "_Obține fotografiile contactelor"
+
+#: ../src/configuration/e-book-config-ews.c:114
+msgid "Tries to look up for user photo"
+msgstr "Încearcă să găsească fotografia utilizatorului"
+
+#: ../src/configuration/e-ews-config-lookup.c:192
+msgid "Exchange Web Services autodiscovery"
+msgstr "Autodescoperire Servicii Web Exchange"
+
+#: ../src/configuration/e-ews-config-lookup.c:235
+#, c-format
+msgid "User: %s"
+msgstr "Utilizator: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:240
+#, c-format
+msgid "Host URL: %s"
+msgstr "URL gazdă: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:245
+#, c-format
+msgid "OAB URL: %s"
+msgstr "OAB URL: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:322
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Necesită parola utilizatorului pentru a continua"
+
+#: ../src/configuration/e-ews-config-utils.c:574
+msgid "Folder"
+msgstr "Dosar"
+
+#: ../src/configuration/e-ews-config-utils.c:584
+msgid "Size"
+msgstr "Dimensiune"
+
+#: ../src/configuration/e-ews-config-utils.c:622
+#: ../src/configuration/e-ews-config-utils.c:627
+msgid "Unable to retrieve folder size information"
+msgstr "Nu s-a putut obține informațiile despre dimensiunea dosarelor"
+
+#: ../src/configuration/e-ews-config-utils.c:754
+msgid "Folder Sizes"
+msgstr "Dimensiunile dosarelor"
+
+#: ../src/configuration/e-ews-config-utils.c:757
+msgid "_Close"
+msgstr "În_chide"
+
+#: ../src/configuration/e-ews-config-utils.c:771
+msgid "Fetching folder list…"
+msgstr "Se preia lista cu dosare…"
+
+#: ../src/configuration/e-ews-config-utils.c:834
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:765
+msgid "Subscribe to folder of other EWS user…"
+msgstr "Abonează-te la dosarul altui utilizator EWS…"
+
+#: ../src/configuration/e-ews-config-utils.c:1021
+#, c-format
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr "Nu se pot edita permisiunile dosarului „%s”, alegeți alt dosar."
+
+#: ../src/configuration/e-ews-config-utils.c:1100
+msgid "Folder Sizes…"
+msgstr "Dimensiuni dosare…"
+
+#: ../src/configuration/e-ews-config-utils.c:1107
+msgid "Subscribe to folder of other user…"
+msgstr "Abonează-te la dosarul altui utilizator…"
+
+#: ../src/configuration/e-ews-config-utils.c:1116
+#: ../src/configuration/e-ews-config-utils.c:1452
+#: ../src/configuration/e-ews-config-utils.c:1490
+#: ../src/configuration/e-ews-config-utils.c:1528
+#: ../src/configuration/e-ews-config-utils.c:1566
+msgid "Permissions…"
+msgstr "Permisiuni…"
+
+#: ../src/configuration/e-ews-config-utils.c:1118
+msgid "Edit EWS folder permissions"
+msgstr "Editare permisiuni dosare EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:1454
+msgid "Edit EWS calendar permissions"
+msgstr "Editare permisiuni calendare EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:1492
+msgid "Edit EWS tasks permissions"
+msgstr "Editare permisiuni sarcini EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:1530
+msgid "Edit EWS memos permissions"
+msgstr "Editare permisiuni memouri EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:1568
+msgid "Edit EWS contacts permissions"
+msgstr "Editare permisiuni contacte EWS"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:85
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:416
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Niciunul"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:86
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Proprietar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:96
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Editorul publicării"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:105
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Editor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:113
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Autorul publicării"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:120
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Autor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:126
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Autor non-editor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:131
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Recenzent"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:134
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Contribuitor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:137
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "Timp liber/ocupat"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "Timp liber/ocupat, subiect, locație"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:439
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Personalizat"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:265
+msgid "Writing folder permissions, please wait…"
+msgstr "Se scriu permisiunile dosarului, așteptați…"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:779
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Anonim"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:782
+msgctxt "User"
+msgid "Default"
+msgstr "Implicit"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:788
+msgctxt "User"
+msgid "Unknown"
+msgstr "Necunoscut"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:871
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
+msgid "Name"
+msgstr "Nume"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:877
+msgid "Permission level"
+msgstr "Nivel de permisiune"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:929
+msgid "Edit EWS folder permissions…"
+msgstr "Editează permisiunile dosarului EWS…"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:954
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:786
+msgid "Account:"
+msgstr "Cont:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:982
+msgid "Folder name:"
+msgstr "Nume dosar:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1006
+msgid "Folder ID:"
+msgstr "ID dosar:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1071
+msgid "Permissions"
+msgstr "Permisiuni"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1093
+msgid "Permi_ssion level:"
+msgstr "Nivel permi_siune:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1127
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Citire"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1206
+msgctxt "Permissions"
+msgid "None"
+msgstr "Niciunul"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1145
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "Timp liber/ocupat"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "Timp liber/ocupat, subiect, locație"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Detalii complete"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Scriere"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Creare de obiecte"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Creare de subdosare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Editarea propriilor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Editarea tuturor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Ștergerea obiectelor"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1211
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Proprii"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "All"
+msgstr "Toate"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1222
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Altele"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Proprietarul dosarului"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Contactul dosarului"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1242
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Vizibilitatea dosarului"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1315
+msgid "Reading folder permissions, please wait…"
+msgstr "Se citesc permisiunile dosarului, așteptați…"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:182
+msgid "Unset on Server"
+msgstr "Destabilește pe Server"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:183
+msgid "Unset the “Out of Office” status"
+msgstr "Destabilește starea „Absent de la birou”"
+
+#: ../src/configuration/e-ews-search-user.c:206
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "Niciun utilizator găsit, numai un contact"
+msgstr[1] "Niciun utilizator găsit, numai %d contacte"
+msgstr[2] "Niciun utilizator găsit, numai %d de contacte"
+
+#: ../src/configuration/e-ews-search-user.c:211
+msgid "No users found"
+msgstr "Niciun utilizator găsit"
+
+#: ../src/configuration/e-ews-search-user.c:215
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "S-a găsit un utilizator"
+msgstr[1] "S-au găsit %d utilizatori"
+msgstr[2] "S-au găsit %d de utilizatori"
+
+#: ../src/configuration/e-ews-search-user.c:221
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+"S-au găsit mai mult de 100 de utilizatori, dar se afișează numai primii %d"
+msgstr[1] ""
+"S-au găsit mai mult de 100 de utilizatori, dar se afișează numai primii %d"
+msgstr[2] ""
+"S-au găsit mai mult de 100 de utilizatori, dar se afișează numai primii %d"
+
+#: ../src/configuration/e-ews-search-user.c:355
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "Caută după utilizator"
+
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching…"
+msgstr "Se caută…"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "Email"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user…"
+msgstr "Alegeți utilizator EWS…"
+
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "_Caută:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
+#: ../src/server/e-ews-folder.c:802
+#, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "Nu se poate adăuga dosar, dosarul există deja ca „%s”"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox — John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:113
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox — %s"
+msgstr "Căsuță poștală — %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
+msgid "Cannot test foreign folder availability when the account is offline"
+msgstr ""
+"Nu se poate testa disponibilitatea dosarului străin când contul este în "
+"modul deconectat"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:314
+#, c-format
+msgid "User “%s” was not found on the server"
+msgstr "Utilizatorul „%s” nu a fost găsit pe server"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:350
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "Numele de utilizator „%s” este ambiguu, specificați-l mai precis"
+
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:388
+msgid "Availability"
+msgstr "Disponibilitate"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#, c-format
+msgid ""
+"Folder “%s” not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Dosarul „%s” nu a fost găsit. Fie nu există sau nu aveți permisiunea de a-l "
+"accesa."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
+msgid "Cannot add folder, cannot determine folder’s type"
+msgstr "Nu se poate adăuga dosarul, nu se poate determina tipul dosarului"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith — Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:469
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s — %s"
+msgstr "%s — %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:582
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:866
+msgid "Inbox"
+msgstr "Inbox"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:584
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
+msgid "Contacts"
+msgstr "Contacte"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:586
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
+msgid "Calendar"
+msgstr "Calendar"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:588
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
+msgid "Free/Busy as Calendar"
+msgstr "Liber/Ocupat ca un Calendar"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:590
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
+msgid "Memos"
+msgstr "Memouri"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:592
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
+msgid "Tasks"
+msgstr "Sarcini"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:609
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr ""
+"Se testează disponibilitatea dosarului „%s” al utilizatorului „%s”, "
+"așteptați…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+msgid "Cannot search for user when the account is offline"
+msgstr "Nu se poate căuta utilizatorul când contul este în modul deconectat"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
+msgid "User"
+msgstr "Utilizator"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:818
+msgid "_User:"
+msgstr "_Utilizator:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:833
+msgid "C_hoose…"
+msgstr "_Alege…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:849
+msgid "_Folder name:"
+msgstr "Nume _dosar:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:880
+msgid "Include _subfolders"
+msgstr "Include _subdosare"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
+msgid "Querying Autodiscover service"
+msgstr "Se interoghează serviciul de autodescoperire"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
+msgid "Fetch _URL"
+msgstr "_URL preluare"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:178
+msgid "Configuration"
+msgstr "Configurare"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:196
+msgid "User_name:"
+msgstr "_Nume de utilizator:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:210
+msgid "_Host URL:"
+msgstr "URL _gazdă:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:229
+msgid "OAB U_RL:"
+msgstr "OAB U_RL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:243
+msgid "Open _Mailbox of other user"
+msgstr "Deschide _căsuța poștală a altui utilizator"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:277
+msgid "S_earch…"
+msgstr "Căutar_e…"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:288
+msgid "Authentication"
+msgstr "Autentificare"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:315
+msgid "_Override Office365 OAuth2 settings"
+msgstr "_Suprascrie configurările OAuth2 di Office365"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:319
+msgid "Help…"
+msgstr "Ajutor…"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:328
+msgid "_Tenant:"
+msgstr "_Tenant:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:353
+msgid "Default tenant is “common“"
+msgstr "Tenant-ul implicit este „common”"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:356
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Tenant-ul implicit este „%s”"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:358
+msgid "Application I_D:"
+msgstr "I_D aplicație:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:381
+msgid "There is not set any default application ID"
+msgstr "Nu este stabilit niciun ID implicit pentru aplicație"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:382
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "ID-ul implicit pentru aplicație este „%s”"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:384
+msgid "_Redirect URI:"
+msgstr "URI _redirecționare:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:406
+#: ../src/configuration/e-mail-config-ews-backend.c:409
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "URI-ul implicit pentru redirecționare este „%s”"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:583
+msgid "Host URL cannot be empty"
+msgstr "URL-ul gazdei nu poate fi gol"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:588
+msgid "User name cannot be empty"
+msgstr "Numele de utilizator nu poate fi gol"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:602
+msgid "Application ID cannot be empty"
+msgstr "ID-ul aplicației nu poate fi gol"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:417
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "Recenzent (poate citi elemente)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "Autor (poate citi și crea elemente)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "Editor (poate citi, crea și modifica elemente)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:524
+msgid "Delegate permissions"
+msgstr "Permisiuni delegat"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:542
+msgid "C_alendar"
+msgstr "C_alendar"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:545
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+"_Delegatul primește copii ale mesajelor legate de întâlniri trimise mie"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:550
+msgid "_Tasks"
+msgstr "_Sarcini"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:553
+msgid "_Inbox"
+msgstr "_Inbox"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:556
+msgid "C_ontacts"
+msgstr "C_ontacte"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:559
+msgid "_Notes"
+msgstr "_Notițe"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:562
+msgid "_Journal"
+msgstr "_Journal"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:565
+#, c-format
+msgid "Delegate “%s” has the following permissions"
+msgstr "Delegatul „%s” are următoarele permisiuni"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:583
+msgid "Delegate can see my _private items"
+msgstr "Delegatul poate vedea elementele mele _private"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:905
+msgid "Retrieving current user permissions, please wait…"
+msgstr "Se preiau permisiunile curente ale utilizatorului, așteptați…"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1028
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1653
+msgid "Delegates"
+msgstr "Delegați"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1052
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"Delegații pot trimite elemente în numele dvs., incluzând crearea și "
+"răspunderea la invitații de întâlnire. Dacă doriți să acordați permisiuni "
+"pentru dosare fără a acorda permisiuni de a trimite în numele dvs., "
+"închideți acest dialog, apăsați clic dreapta pe dosar, clic Permisiuni și "
+"modificați opțiunile de acolo."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1103
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"Livrează cereri de întâlniri adresate mie și răspunsurile la cererile de "
+"întâlniri unde sunt organizator:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1114
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"Numai delegaților mei, dar _trimite o copie a cererilor de întâlnire\n"
+"și ale răspunsurilor mie (recomdandat)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1121
+msgid "My d_elegates only"
+msgstr "Numai d_elegaților mei"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1128
+msgid "My delegates a_nd me"
+msgstr "Delegații mei și _mie"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1725
+msgid "Retrieving “Delegates” settings"
+msgstr "Se preiau configurările „Delegaților”"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "Configurări EWS"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
+msgid "View the size of all Exchange folders"
+msgstr "Vizualizează dimensiunea tuturor dosarelor Exchange"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:204
+msgid "Folder _Sizes"
+msgstr "Dimensiunea do_sarelor"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:222
+msgid "Locating offline address books"
+msgstr "Se localizează agendele offline"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:301
+msgid "Cache o_ffline address book"
+msgstr "Stochează în cache agendele o_ffline"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:327
+msgid "Select ad_dress list:"
+msgstr "Selectează lista de a_drese:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:351
+msgid "Fetch List"
+msgstr "Obține lista"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:934
+msgid "Out of Office"
+msgstr "Absent din birou"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"Mesajele specificate mai jos vor fi trimise automat către fiecare persoană "
+"internă și externă care trimite emailuri dumneavoastră."
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:422
+msgid "Do _not send Out of Office replies"
+msgstr "_Nu trimite răspunsuri „Absent de la birou”"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:430
+msgid "_Send Out of Office replies"
+msgstr "_Trimite răspunsuri „Absent de la birou”"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:438
+msgid "Send Out of Office replies only _during this time period:"
+msgstr ""
+"Trimite răspunsuri „Absent de la birou” numai în _timpul acestei perioade de "
+"timp:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:458
+msgid "_From:"
+msgstr "_De la:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:483
+msgid "_To:"
+msgstr "Până _la:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:508
+msgid "I_nternal:"
+msgstr "I_nterne:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
+msgid "Message to be sent within the organization"
+msgstr "Mesaj de trimis în cadrul organizației"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:545
+msgid "E_xternal:"
+msgstr "E_xtern:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:553
+msgid "Message to be sent outside the organization"
+msgstr "Mesaj de trimis în afara organizației"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+msgid "Do not reply to senders outside the organization"
+msgstr "Nu răspunde trimițătorilor din afara organizației"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
+msgid "Reply only to known senders outside the organization"
+msgstr "Răspunde numai trimițătorilor cunoscuți din afara organizației"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:569
+msgid "Reply to any sender outside the organization"
+msgstr "Răspunde oricărui trimițător din afara organizației"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1006
+msgid "Retrieving “Out of Office” settings"
+msgstr "Se obțin configurările „Absent de la birou”"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Interogarea de autodescoperire a eșuat."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was “{0}”."
+msgstr "Eroarea raportată a fost „{0}”."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "Eșec la localizarea agendelor offline."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve “Out of Office” settings."
+msgstr "Eșec la obținerea configurările „Absent de la birou”."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve “Delegates” settings."
+msgstr "Eșec la obținerea configurările „Delegate”."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
+msgstr ""
+"Contul dvs. Exchange „{0}” are starea stabilită la „Absent de la birou”."
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:23
+msgid "OAuth2 (Office365)"
+msgstr "OAuth2 (Office365)"
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:24
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Office365."
+"com server"
+msgstr ""
+"Această opțiune va folosi un jeton de acces OAuth 2.0 pentru a vă conecta la "
+"serverul Office365.com"
+
+#: ../src/server/e-ews-calendar-utils.c:1220
+#, c-format
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr ""
+"Nu s-a putut stoca această recurență. Schimbați-o într-o simplă recurență "
+"zilnică, săptămânală, lunară sau anuală fără excepții și cu o dată de start."
+
+#: ../src/server/e-ews-camel-common.c:394
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "Apelul CreateItem a eșuat să returneze un ID pentru noul mesaj"
+
+#: ../src/server/e-ews-connection.c:796
+msgid "Operation Cancelled"
+msgstr "Operație anulată"
+
+#: ../src/server/e-ews-connection.c:966
+msgid "Authentication failed"
+msgstr "Autentificare eșuată"
+
+#: ../src/server/e-ews-connection.c:988
+#, c-format
+msgid "No response: %s"
+msgstr "Niciun răspuns: %s"
+
+#: ../src/server/e-ews-connection.c:1051
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] ""
+"Serverul Exchange este ocupat, se așteaptă reîncercarea (%d:%02d minut)"
+msgstr[1] ""
+"Serverul Exchange este ocupat, se așteaptă reîncercarea (%d:%02d minute)"
+msgstr[2] ""
+"Serverul Exchange este ocupat, se așteaptă reîncercarea (%d:%02d de minute)"
+
+#: ../src/server/e-ews-connection.c:1057
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] ""
+"Serverul Exchange este ocupat, se așteaptă reîncercarea (%d secundă)"
+msgstr[1] ""
+"Serverul Exchange este ocupat, se așteaptă reîncercarea (%d secunde)"
+msgstr[2] ""
+"Serverul Exchange este ocupat, se așteaptă reîncercarea (%d de secunde)"
+
+#: ../src/server/e-ews-connection.c:3111
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Eșec la parsarea răspunsului XML autodiscover"
+
+#: ../src/server/e-ews-connection.c:3118
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "Eșec la găsirea elementului <Autodiscover>"
+
+#: ../src/server/e-ews-connection.c:3129
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "Eșec la găsirea elementului <Response>"
+
+#: ../src/server/e-ews-connection.c:3140
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "Eșec la găsirea elementului <Account>"
+
+#: ../src/server/e-ews-connection.c:3186
+#, c-format
+msgid "Failed to find <ASUrl> in autodiscover response"
+msgstr "Eșec la găsirea <ASUrl> în răspunsul autodiscover"
+
+#: ../src/server/e-ews-connection.c:3372
+msgid "URL cannot be NULL"
+msgstr "URL nu poate fi NULL"
+
+#: ../src/server/e-ews-connection.c:3380
+#, c-format
+msgid "URL “%s” is not valid"
+msgstr "URL-ul „%s” nu este valid"
+
+#: ../src/server/e-ews-connection.c:3677
+msgid "Email address is missing a domain part"
+msgstr "Adresei de email îi lipsește porțiunea cu domeniul"
+
+#: ../src/server/e-ews-connection.c:3986
+msgid "Failed to parse oab XML"
+msgstr "Eșec la parsarea oab XML"
+
+#: ../src/server/e-ews-connection.c:3994
+msgid "Failed to find <OAB> element\n"
+msgstr "Eșec la găsirea elementului <OAB>\n"
+
+#: ../src/server/e-ews-connection.c:5277
+msgid "No items found"
+msgstr "Niciun element găsit"
+
+#: ../src/server/e-ews-connection-utils.c:197
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Parola a expirat. Schimbați parola la „%s”."
+
+#: ../src/server/e-ews-connection-utils.c:200
+msgid "Password expired."
+msgstr "Parola a expirat."
+
+#: ../src/server/e-ews-connection-utils.c:430
+msgid "Unknown error"
+msgstr "Eroare necunoscută"
+
+#: ../src/server/e-ews-folder.c:757
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Nu s-a putut adăuga dosarul, tip de dosar nesuportat"
+
+#: ../src/server/e-ews-folder.c:762
+msgid "Cannot add folder, master source not found"
+msgstr "Nu s-a putut adăuga dosarul, sursa principală nu a fost găsită"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/server/e-oauth2-service-office365.c:109
+msgctxt "OAuth2Service"
+msgid "Office365"
+msgstr "Office365"
+
+#~ msgid "There is not set any default tenant"
+#~ msgstr "Nu este stabilit niciun tenant implicit"
+
+#~ msgid "Tenant cannot be empty"
+#~ msgstr "Tenant-ul nu poate fi gol"
