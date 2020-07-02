@@ -24,7 +24,6 @@
 
 #include "camel-o365-settings.h"
 #include "e-o365-json-utils.h"
-#include "e-o365-soup-logger.h"
 
 #include "e-o365-connection.h"
 
@@ -1229,7 +1228,7 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 			success = input_stream != NULL;
 
 			if (success && o365_log_enabled ())
-				input_stream = e_o365_soup_logger_attach (message, input_stream);
+				input_stream = e_soup_logger_attach (message, input_stream);
 
 			/* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
 			if (message->status_code == 429 ||

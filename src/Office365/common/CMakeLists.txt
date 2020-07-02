@@ -10,8 +10,6 @@ set(SOURCES
 	e-o365-enums.h
 	e-o365-json-utils.c
 	e-o365-json-utils.h
-	e-o365-soup-logger.c
-	e-o365-soup-logger.h
 	e-oauth2-service-office365.c
 	e-oauth2-service-office365.h
 	e-source-o365-folder.c
