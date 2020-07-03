@@ -1732,20 +1732,20 @@ camel_o365_store_init (CamelO365Store *o365_store)
 }
 
 CamelO365StoreSummary *
-camel_o365_store_ref_store_summary (CamelO365Store *store)
+camel_o365_store_ref_store_summary (CamelO365Store *o365_store)
 {
 	CamelO365StoreSummary *summary;
 
-	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), NULL);
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), NULL);
 
-	LOCK (store);
+	LOCK (o365_store);
 
-	summary = store->priv->summary;
+	summary = o365_store->priv->summary;
 
 	if (summary)
 		g_object_ref (summary);
 
-	UNLOCK (store);
+	UNLOCK (o365_store);
 
 	return summary;
 }
@@ -1800,17 +1800,17 @@ camel_o365_store_ensure_connected (CamelO365Store *o365_store,
 }
 
 void
-camel_o365_store_maybe_disconnect (CamelO365Store *store,
+camel_o365_store_maybe_disconnect (CamelO365Store *o365_store,
 				   const GError *error)
 {
 	CamelService *service;
 
-	g_return_if_fail (CAMEL_IS_O365_STORE (store));
+	g_return_if_fail (CAMEL_IS_O365_STORE (o365_store));
 
 	if (!error)
 		return;
 
-	service = CAMEL_SERVICE (store);
+	service = CAMEL_SERVICE (o365_store);
 
 	if (camel_service_get_connection_status (service) != CAMEL_SERVICE_CONNECTED)
 		return;
@@ -1823,16 +1823,16 @@ camel_o365_store_maybe_disconnect (CamelO365Store *store,
 }
 
 void
-camel_o365_store_connect_folder_summary (CamelO365Store *store,
+camel_o365_store_connect_folder_summary (CamelO365Store *o365_store,
 					 CamelFolderSummary *folder_summary)
 {
-	g_return_if_fail (CAMEL_IS_O365_STORE (store));
+	g_return_if_fail (CAMEL_IS_O365_STORE (o365_store));
 	g_return_if_fail (CAMEL_IS_FOLDER_SUMMARY (folder_summary));
 
-	LOCK (store);
+	LOCK (o365_store);
 
-	if (store->priv->summary)
-		camel_o365_store_summary_connect_folder_summary (store->priv->summary, folder_summary);
+	if (o365_store->priv->summary)
+		camel_o365_store_summary_connect_folder_summary (o365_store->priv->summary, folder_summary);
 
-	UNLOCK (store);
+	UNLOCK (o365_store);
 }

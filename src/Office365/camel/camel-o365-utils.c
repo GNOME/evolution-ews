@@ -163,11 +163,11 @@ camel_o365_utils_rename_label (const gchar *cat,
 	/* This is a mapping from Outlook categories to
 	 * Evolution labels based on the standard colors */
 	const gchar *labels[] = {
-		"Red Category", "$Labelimportant",
-		"Orange Category", "$Labelwork",
-		"Green Category", "$Labelpersonal",
-		"Blue Category", "$Labeltodo",
-		"Purple Category", "$Labellater",
+		"Red category", "$Labelimportant",
+		"Orange category", "$Labelwork",
+		"Green category", "$Labelpersonal",
+		"Blue category", "$Labeltodo",
+		"Purple category", "$Labellater",
 		NULL, NULL
 	};
 
@@ -663,10 +663,10 @@ o365_utils_get_body_part (CamelMimeMessage *message,
 	return body_part;
 }
 
-static void
-o365_utils_add_message_flags (JsonBuilder *builder,
-			      CamelMessageInfo *info,
-			      CamelMimeMessage *message)
+void
+camel_o365_utils_add_message_flags (JsonBuilder *builder,
+				    CamelMessageInfo *info,
+				    CamelMimeMessage *message)
 {
 	guint32 flags = 0;
 
@@ -865,7 +865,7 @@ camel_o365_utils_create_message_sync (EO365Connection *cnc,
 	}
 
 	if (info || is_send)
-		o365_utils_add_message_flags (builder, info, is_send ? message : NULL);
+		camel_o365_utils_add_message_flags (builder, info, is_send ? message : NULL);
 
 	e_o365_json_end_object_member (builder);
 

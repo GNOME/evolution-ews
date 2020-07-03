@@ -32,6 +32,11 @@
 
 #define X_EVO_O365_DATA "X-EVO-O365-DATA"
 
+typedef enum _CSMFlags {
+	CSM_DEFAULT		= 0,
+	CSM_DISABLE_RESPONSE	= 1 << 0
+} CSMFlags;
+
 struct _EO365ConnectionPrivate {
 	GRecMutex property_lock;
 
@@ -1457,6 +1462,7 @@ e_o365_read_json_object_response_cb (EO365Connection *cnc,
 static SoupMessage *
 o365_connection_new_soup_message (const gchar *method,
 				  const gchar *uri,
+				  CSMFlags csm_flags,
 				  GError **error)
 {
 	SoupMessage *message;
@@ -1469,6 +1475,9 @@ o365_connection_new_soup_message (const gchar *method,
 	if (message) {
 		soup_message_headers_append (message->request_headers, "Connection", "Close");
 		soup_message_headers_append (message->request_headers, "User-Agent", "Evolution-O365/" VERSION);
+
+		if ((csm_flags & CSM_DISABLE_RESPONSE) != 0)
+			soup_message_headers_append (message->request_headers, "Prefer", "return=minimal");
 	} else {
 		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 	}
@@ -1524,7 +1533,7 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 		"$top", "1",
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -1880,7 +1889,7 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 	uri = e_o365_connection_construct_uri (cnc, FALSE, NULL, api_version, "",
 		"$batch", NULL, NULL, NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2123,7 +2132,7 @@ e_o365_connection_get_categories_sync (EO365Connection *cnc,
 		NULL,
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2170,7 +2179,7 @@ e_o365_connection_list_mail_folders_sync (EO365Connection *cnc,
 		"$select", select,
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2212,7 +2221,7 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 	g_return_val_if_fail (func != NULL, FALSE);
 
 	if (delta_link)
-		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, NULL);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
 		gchar *uri;
@@ -2224,7 +2233,7 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 			"$select", select,
 			NULL);
 
-		message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
 		if (!message) {
 			g_free (uri);
@@ -2270,7 +2279,7 @@ e_o365_connection_create_mail_folder_sync (EO365Connection *cnc,
 					   GCancellable *cancellable,
 					   GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	JsonBuilder *builder;
 	gboolean success;
 	gchar *uri;
@@ -2285,7 +2294,7 @@ e_o365_connection_create_mail_folder_sync (EO365Connection *cnc,
 		parent_folder_id ? "childFolders" : NULL,
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2321,7 +2330,7 @@ e_o365_connection_delete_mail_folder_sync (EO365Connection *cnc,
 					   GCancellable *cancellable,
 					   GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	gboolean success;
 	gchar *uri;
 
@@ -2331,7 +2340,7 @@ e_o365_connection_delete_mail_folder_sync (EO365Connection *cnc,
 	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 		"mailFolders", folder_id, NULL, NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2361,7 +2370,7 @@ e_o365_connection_copy_move_mail_folder_sync (EO365Connection *cnc,
 					      GCancellable *cancellable,
 					      GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	JsonBuilder *builder;
 	gboolean success;
 	gchar *uri;
@@ -2376,7 +2385,7 @@ e_o365_connection_copy_move_mail_folder_sync (EO365Connection *cnc,
 		do_copy ? "copy" : "move",
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2414,7 +2423,7 @@ e_o365_connection_rename_mail_folder_sync (EO365Connection *cnc,
 					   GCancellable *cancellable,
 					   GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	JsonBuilder *builder;
 	gboolean success;
 	gchar *uri;
@@ -2429,7 +2438,7 @@ e_o365_connection_rename_mail_folder_sync (EO365Connection *cnc,
 		NULL,
 		NULL);
 
-	message = o365_connection_new_soup_message ("PATCH", uri, error);
+	message = o365_connection_new_soup_message ("PATCH", uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2481,7 +2490,7 @@ e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
 	g_return_val_if_fail (func != NULL, FALSE);
 
 	if (delta_link)
-		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, NULL);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
 		gchar *uri;
@@ -2494,7 +2503,7 @@ e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
 			"$select", select,
 			NULL);
 
-		message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
 		if (!message) {
 			g_free (uri);
@@ -2540,7 +2549,7 @@ e_o365_connection_get_mail_message_sync (EO365Connection *cnc,
 					 GCancellable *cancellable,
 					 GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	gboolean success;
 	gchar *uri;
 
@@ -2557,7 +2566,7 @@ e_o365_connection_get_mail_message_sync (EO365Connection *cnc,
 		"", "$value",
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2585,7 +2594,7 @@ e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
 					    GCancellable *cancellable,
 					    GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	gboolean success;
 	gchar *uri;
 
@@ -2599,7 +2608,7 @@ e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
 		folder_id ? "messages" : NULL,
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2629,7 +2638,7 @@ e_o365_connection_add_mail_message_attachment_sync (EO365Connection *cnc,
 						    GCancellable *cancellable,
 						    GError **error)
 {
-	SoupMessage *message = NULL;
+	SoupMessage *message;
 	JsonObject *added_attachment = NULL;
 	gboolean success;
 	gchar *uri;
@@ -2643,7 +2652,7 @@ e_o365_connection_add_mail_message_attachment_sync (EO365Connection *cnc,
 		"attachments",
 		NULL);
 
-	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -2664,6 +2673,362 @@ e_o365_connection_add_mail_message_attachment_sync (EO365Connection *cnc,
 		json_object_unref (added_attachment);
 
 	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/message-update?view=graph-rest-1.0&tabs=http */
+
+SoupMessage *
+e_o365_connection_prepare_update_mail_message (EO365Connection *cnc,
+					       const gchar *user_override, /* for which user, NULL to use the account user */
+					       const gchar *message_id,
+					       JsonBuilder *mail_message, /* values to update, as a mailMessage object */
+					       GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), NULL);
+	g_return_val_if_fail (message_id != NULL, NULL);
+	g_return_val_if_fail (mail_message != NULL, NULL);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"messages",
+		message_id,
+		NULL,
+		NULL);
+
+	/* The server returns the mailMessage object back, but it can be ignored here */
+	message = o365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return NULL;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, mail_message);
+
+	return message;
+}
+
+gboolean
+e_o365_connection_update_mail_message_sync (EO365Connection *cnc,
+					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    const gchar *message_id,
+					    JsonBuilder *mail_message, /* values to update, as a mailMessage object */
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (message_id != NULL, FALSE);
+	g_return_val_if_fail (mail_message != NULL, FALSE);
+
+	message = e_o365_connection_prepare_update_mail_message (cnc, user_override, message_id, mail_message, error);
+
+	if (!message)
+		return FALSE;
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/message-copy?view=graph-rest-1.0&tabs=http
+   https://docs.microsoft.com/en-us/graph/api/message-move?view=graph-rest-1.0&tabs=http
+ */
+static SoupMessage *
+e_o365_connection_prepare_copy_move_mail_message (EO365Connection *cnc,
+						  const gchar *user_override,
+						  const gchar *message_id,
+						  const gchar *des_folder_id,
+						  gboolean do_copy,
+						  GError **error)
+{
+	SoupMessage *message;
+	JsonBuilder *builder;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), NULL);
+	g_return_val_if_fail (message_id != NULL, NULL);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"messages",
+		message_id,
+		do_copy ? "copy" : "move",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_add_string_member (builder, "destinationId", des_folder_id);
+	e_o365_json_end_object_member (builder);
+
+	e_o365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	return message;
+}
+
+/* out_des_message_ids: Camel-pooled gchar *, new ids, in the same order as in message_ids; can be partial */
+gboolean
+e_o365_connection_copy_move_mail_messages_sync (EO365Connection *cnc,
+						const gchar *user_override, /* for which user, NULL to use the account user */
+						const GSList *message_ids, /* const gchar * */
+						const gchar *des_folder_id,
+						gboolean do_copy,
+						GSList **out_des_message_ids, /* Camel-pooled gchar * */
+						GCancellable *cancellable,
+						GError **error)
+{
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (message_ids != NULL, FALSE);
+	g_return_val_if_fail (des_folder_id != NULL, FALSE);
+	g_return_val_if_fail (out_des_message_ids != NULL, FALSE);
+
+	*out_des_message_ids = NULL;
+
+	if (g_slist_next (message_ids)) {
+		GPtrArray *requests;
+		GSList *link;
+		guint total, done = 0;
+
+		total = g_slist_length ((GSList *) message_ids);
+		requests = g_ptr_array_new_full (MIN (E_O365_BATCH_MAX_REQUESTS, 50), g_object_unref);
+
+		for (link = (GSList *) message_ids; link && success; link = g_slist_next (link)) {
+			const gchar *id = link->data;
+			SoupMessage *message;
+
+			message = e_o365_connection_prepare_copy_move_mail_message (cnc, user_override, id, des_folder_id, do_copy, error);
+
+			if (!message) {
+				success = FALSE;
+				break;
+			}
+
+			g_ptr_array_add (requests, message);
+
+			if (requests->len == E_O365_BATCH_MAX_REQUESTS || !link->next) {
+				if (requests->len == 1) {
+					JsonObject *response = NULL;
+
+					success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, &response, cancellable, error);
+
+					if (response) {
+						*out_des_message_ids = g_slist_prepend (*out_des_message_ids,
+							(gpointer) camel_pstring_strdup (e_o365_mail_message_get_id (response)));
+						json_object_unref (response);
+					} else {
+						success = FALSE;
+					}
+				} else {
+					success = e_o365_connection_batch_request_sync (cnc, E_O365_API_V1_0, requests, cancellable, error);
+
+					if (success) {
+						guint ii;
+
+						for (ii = 0; success && ii < requests->len; ii++) {
+							JsonNode *node = NULL;
+
+							message = g_ptr_array_index (requests, ii);
+
+							success = e_o365_connection_json_node_from_message (message, NULL, &node, cancellable, error);
+
+							if (success && node && JSON_NODE_HOLDS_OBJECT (node)) {
+								JsonObject *response;
+
+								response = json_node_get_object (node);
+
+								if (response) {
+									*out_des_message_ids = g_slist_prepend (*out_des_message_ids,
+										(gpointer) camel_pstring_strdup (e_o365_mail_message_get_id (response)));
+								} else {
+									success = FALSE;
+								}
+							} else {
+								success = FALSE;
+							}
+
+							if (node)
+								json_node_unref (node);
+						}
+					}
+				}
+
+				g_ptr_array_remove_range (requests, 0, requests->len);
+
+				done += requests->len;
+
+				camel_operation_progress (cancellable, done * 100.0 / total);
+			}
+		}
+
+		g_ptr_array_free (requests, TRUE);
+	} else {
+		SoupMessage *message;
+
+		message = e_o365_connection_prepare_copy_move_mail_message (cnc, user_override, message_ids->data, des_folder_id, do_copy, error);
+
+		if (message) {
+			JsonObject *response = NULL;
+
+			success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, &response, cancellable, error);
+
+			if (response) {
+				*out_des_message_ids = g_slist_prepend (*out_des_message_ids,
+					(gpointer) camel_pstring_strdup (e_o365_mail_message_get_id (response)));
+				json_object_unref (response);
+			} else {
+				success = FALSE;
+			}
+
+			g_clear_object (&message);
+		} else {
+			success = FALSE;
+		}
+	}
+
+	*out_des_message_ids = g_slist_reverse (*out_des_message_ids);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/message-delete?view=graph-rest-1.0&tabs=http */
+
+static SoupMessage *
+e_o365_connection_prepare_delete_mail_message (EO365Connection *cnc,
+					       const gchar *user_override, /* for which user, NULL to use the account user */
+					       const gchar *message_id,
+					       GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), NULL);
+	g_return_val_if_fail (message_id != NULL, NULL);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"messages",
+		message_id,
+		NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return NULL;
+	}
+
+	g_free (uri);
+
+	return message;
+}
+
+gboolean
+e_o365_connection_delete_mail_messages_sync (EO365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     const GSList *message_ids, /* const gchar * */
+					     GSList **out_deleted_ids, /* (transfer container): const gchar *, borrowed from message_ids */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (message_ids != NULL, FALSE);
+
+	if (g_slist_next (message_ids)) {
+		GPtrArray *requests;
+		GSList *link, *from_link = (GSList *) message_ids;
+		guint total, done = 0;
+
+		total = g_slist_length ((GSList *) message_ids);
+		requests = g_ptr_array_new_full (MIN (E_O365_BATCH_MAX_REQUESTS, 50), g_object_unref);
+
+		for (link = (GSList *) message_ids; link && success; link = g_slist_next (link)) {
+			const gchar *id = link->data;
+			SoupMessage *message;
+
+			message = e_o365_connection_prepare_delete_mail_message (cnc, user_override, id, error);
+
+			if (!message) {
+				success = FALSE;
+				break;
+			}
+
+			g_ptr_array_add (requests, message);
+
+			if (requests->len == E_O365_BATCH_MAX_REQUESTS || !link->next) {
+				if (requests->len == 1) {
+					success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+				} else {
+					success = e_o365_connection_batch_request_sync (cnc, E_O365_API_V1_0, requests, cancellable, error);
+				}
+
+				if (success && out_deleted_ids) {
+					while (from_link) {
+						*out_deleted_ids = g_slist_prepend (*out_deleted_ids, from_link->data);
+
+						if (from_link == link)
+							break;
+
+						from_link = g_slist_next (from_link);
+					}
+				}
+
+				g_ptr_array_remove_range (requests, 0, requests->len);
+				from_link = g_slist_next (link);
+
+				done += requests->len;
+
+				camel_operation_progress (cancellable, done * 100.0 / total);
+			}
+		}
+
+		g_ptr_array_free (requests, TRUE);
+	} else {
+		SoupMessage *message;
+
+		message = e_o365_connection_prepare_delete_mail_message (cnc, user_override, message_ids->data, error);
+
+		if (message) {
+			success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+			if (success && out_deleted_ids)
+				*out_deleted_ids = g_slist_prepend (*out_deleted_ids, message_ids->data);
+
+			g_clear_object (&message);
+		} else {
+			success = FALSE;
+		}
+	}
+
+	if (out_deleted_ids && *out_deleted_ids && g_slist_next (*out_deleted_ids))
+		*out_deleted_ids = g_slist_reverse (*out_deleted_ids);
 
 	return success;
 }

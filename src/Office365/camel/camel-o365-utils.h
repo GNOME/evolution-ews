@@ -33,6 +33,10 @@ gboolean	camel_o365_utils_is_system_user_flag
 						(const gchar *name);
 const gchar *	camel_o365_utils_rename_label	(const gchar *cat,
 						 gboolean from_cat);
+void		camel_o365_utils_add_message_flags
+						(JsonBuilder *builder,
+						 CamelMessageInfo *info,
+						 CamelMimeMessage *message);
 gboolean	camel_o365_utils_create_message_sync
 						(EO365Connection *cnc,
 						 const gchar *folder_id,

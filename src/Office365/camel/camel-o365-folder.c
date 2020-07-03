@@ -1094,6 +1094,477 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 	return success;
 }
 
+static gboolean
+o365_folder_copy_move_to_folder_sync (CamelFolder *folder,
+				      CamelO365Store *o365_store,
+				      const GSList *uids,
+				      const gchar *des_folder_id,
+				      gboolean do_copy,
+				      GCancellable *cancellable,
+				      GError **error)
+{
+	CamelO365StoreSummary *o365_store_summary;
+	EO365Connection *cnc = NULL;
+	GSList *des_ids = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (des_folder_id != NULL, FALSE);
+
+	o365_store_summary = camel_o365_store_ref_store_summary (o365_store);
+
+	if (g_strcmp0 (des_folder_id, "junkemail") == 0) {
+		des_folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store_summary, CAMEL_FOLDER_TYPE_JUNK);
+	} else if (g_strcmp0 (des_folder_id, "deleteditems") == 0) {
+		des_folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store_summary, CAMEL_FOLDER_TYPE_TRASH);
+	} else if (g_strcmp0 (des_folder_id, "inbox") == 0) {
+		des_folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store_summary, CAMEL_FOLDER_TYPE_INBOX);
+	}
+
+	g_clear_object (&o365_store_summary);
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
+		return FALSE;
+
+	success = e_o365_connection_copy_move_mail_messages_sync (cnc, NULL, uids, des_folder_id, do_copy,
+		&des_ids, cancellable, error);
+
+	g_clear_object (&cnc);
+
+	if (!do_copy) {
+		CamelFolderChangeInfo *src_changes;
+		CamelO365Folder *o365_folder;
+		GSList *des_link, *src_link;
+		GList *removed_uids = NULL;
+
+		src_changes = camel_folder_change_info_new ();
+		o365_folder = CAMEL_O365_FOLDER (folder);
+
+		camel_folder_lock (folder);
+
+		/* Can succeed partially, thus always check the moved ids */
+		for (src_link = (GSList *) uids, des_link = des_ids;
+		     src_link && des_link;
+		     src_link = g_slist_next (src_link), des_link = g_slist_next (des_link)) {
+			const gchar *src_uid = src_link->data;
+
+			o365_folder_cache_remove (o365_folder, src_uid, NULL);
+
+			removed_uids = g_list_prepend (removed_uids, (gpointer) src_uid);
+			camel_folder_change_info_remove_uid (src_changes, src_uid);
+		}
+
+		if (removed_uids) {
+			CamelFolderSummary *summary;
+
+			summary = camel_folder_get_folder_summary (folder);
+			camel_folder_summary_remove_uids (summary, removed_uids);
+
+			g_list_free (removed_uids);
+		}
+
+		if (camel_folder_change_info_changed (src_changes))
+			camel_folder_changed (folder, src_changes);
+
+		camel_folder_change_info_free (src_changes);
+
+		camel_folder_unlock (folder);
+	}
+
+	g_slist_free_full (des_ids, (GDestroyNotify) camel_pstring_free);
+
+	return success;
+}
+
+static gboolean
+o365_folder_delete_messages_sync (CamelFolder *folder,
+				  CamelO365Store *o365_store,
+				  const GSList *uids,
+				  gboolean is_trash_folder,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	EO365Connection *cnc = NULL;
+	gboolean success;
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
+		return FALSE;
+
+	if (is_trash_folder) {
+		GSList *deleted_uids = NULL, *link;
+
+		success = e_o365_connection_delete_mail_messages_sync (cnc, NULL, uids, &deleted_uids, cancellable, error);
+
+		if (deleted_uids) {
+			CamelFolderChangeInfo *changes;
+			CamelO365Folder *o365_folder;
+			GList *removed_uids = NULL;
+
+			o365_folder = CAMEL_O365_FOLDER (folder);
+			changes = camel_folder_change_info_new ();
+
+			camel_folder_lock (folder);
+
+			/* Can succeed partially, thus always check the moved ids */
+			for (link = deleted_uids; link; link = g_slist_next (link)) {
+				const gchar *uid = link->data;
+
+				o365_folder_cache_remove (o365_folder, uid, NULL);
+
+				removed_uids = g_list_prepend (removed_uids, (gpointer) uid);
+				camel_folder_change_info_remove_uid (changes, uid);
+			}
+
+			if (removed_uids) {
+				CamelFolderSummary *summary;
+
+				summary = camel_folder_get_folder_summary (folder);
+				camel_folder_summary_remove_uids (summary, removed_uids);
+
+				g_list_free (removed_uids);
+			}
+
+			if (camel_folder_change_info_changed (changes))
+				camel_folder_changed (folder, changes);
+
+			camel_folder_change_info_free (changes);
+
+			camel_folder_unlock (folder);
+
+			g_slist_free (deleted_uids);
+		}
+	} else {
+		success = o365_folder_copy_move_to_folder_sync (folder, o365_store,
+			uids, "deleteditems", FALSE, cancellable, error);
+	}
+
+	g_clear_object (&cnc);
+
+	return success;
+}
+
+static JsonBuilder *
+o365_folder_message_info_changes_to_json (CamelMessageInfo *mi)
+{
+	JsonBuilder *builder;
+
+	builder = json_builder_new_immutable ();
+	e_o365_json_begin_object_member (builder, NULL);
+
+	camel_o365_utils_add_message_flags (builder, mi, NULL);
+
+	e_o365_json_end_object_member (builder);
+
+	return builder;
+}
+
+static gboolean
+o365_folder_save_flags_sync (CamelFolder *folder,
+			     CamelO365Store *o365_store,
+			     GSList *mi_list, /* CamelMessageInfo * */
+			     GCancellable *cancellable,
+			     GError **error)
+{
+	EO365Connection *cnc = NULL;
+	gboolean success = TRUE;
+
+	/* Trap an error, but do not stop other processing */
+	g_return_val_if_fail (mi_list != NULL, TRUE);
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
+		return FALSE;
+
+	if (mi_list->next) {
+		GSList *link;
+		GPtrArray *requests;
+
+		requests = g_ptr_array_new_full (g_slist_length (mi_list), g_object_unref);
+
+		for (link = mi_list; link && success; link = g_slist_next (link)) {
+			CamelMessageInfo *mi = link->data;
+			SoupMessage *message;
+			JsonBuilder *builder;
+
+			builder = o365_folder_message_info_changes_to_json (mi);
+
+			message = e_o365_connection_prepare_update_mail_message (cnc, NULL,
+				camel_message_info_get_uid (mi), builder, error);
+
+			g_clear_object (&builder);
+
+			if (!message)
+				success = FALSE;
+			else
+				g_ptr_array_add (requests, message);
+		}
+
+		if (success)
+			success = e_o365_connection_batch_request_sync (cnc, E_O365_API_V1_0, requests, cancellable, error);
+
+		g_ptr_array_free (requests, TRUE);
+	} else {
+		CamelMessageInfo *mi = mi_list->data;
+		JsonBuilder *builder;
+
+		builder = o365_folder_message_info_changes_to_json (mi);
+
+		success = e_o365_connection_update_mail_message_sync (cnc, NULL,
+			camel_message_info_get_uid (mi), builder, cancellable, error);
+
+		g_clear_object (&builder);
+	}
+
+	g_object_unref (cnc);
+
+	if (success) {
+		GSList *link;
+
+		camel_folder_lock (folder);
+
+		for (link = mi_list; link; link = g_slist_next (link)) {
+			CamelMessageInfo *mi = link->data;
+
+			camel_message_info_set_folder_flagged (mi, FALSE);
+		}
+
+		camel_folder_unlock (folder);
+	}
+
+	return success;
+}
+
+static gboolean
+o365_folder_is_of_type (CamelFolder *folder,
+			guint32 folder_type)
+{
+	CamelStore *parent_store;
+	CamelO365Store *o365_store;
+	CamelO365StoreSummary *o365_store_summary;
+	gboolean is_of_type;
+	const gchar *folder_id;
+
+	g_return_val_if_fail (folder != NULL, FALSE);
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	if (!parent_store)
+		return FALSE;
+
+	o365_store = CAMEL_O365_STORE (parent_store);
+
+	g_return_val_if_fail (o365_store != NULL, FALSE);
+
+	o365_store_summary = camel_o365_store_ref_store_summary (o365_store);
+
+	folder_type = folder_type & CAMEL_FOLDER_TYPE_MASK;
+	folder_id = camel_o365_folder_get_id (CAMEL_O365_FOLDER (folder));
+	is_of_type = folder_id &&
+		(camel_o365_store_summary_get_folder_flags (o365_store_summary, folder_id) & CAMEL_FOLDER_TYPE_MASK) == folder_type;
+
+	g_clear_object (&o365_store_summary);
+
+	return is_of_type;
+}
+
+static gboolean
+o365_folder_synchronize_sync (CamelFolder *folder,
+			      gboolean expunge,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	CamelO365Store *o365_store;
+	CamelStore *parent_store;
+	CamelFolderSummary *folder_summary;
+	GPtrArray *uids;
+	GSList *mi_list = NULL, *deleted_uids = NULL, *junk_uids = NULL, *inbox_uids = NULL;
+	gint mi_list_len = 0;
+	gboolean is_junk_folder;
+	gboolean success = TRUE;
+	guint ii;
+	GError *local_error = NULL;
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	if (!parent_store) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
+		return FALSE;
+	}
+
+	o365_store = CAMEL_O365_STORE (parent_store);
+
+	if (!camel_o365_store_ensure_connected (o365_store, NULL, cancellable, error))
+		return FALSE;
+
+	folder_summary = camel_folder_get_folder_summary (folder);
+
+	if (camel_folder_summary_get_deleted_count (folder_summary) > 0 ||
+	    camel_folder_summary_get_junk_count (folder_summary) > 0) {
+		camel_folder_summary_prepare_fetch_all (folder_summary, NULL);
+		uids = camel_folder_summary_get_array (folder_summary);
+	} else {
+		uids = camel_folder_summary_get_changed (folder_summary);
+	}
+
+	if (!uids || !uids->len) {
+		camel_folder_summary_free_array (uids);
+		return TRUE;
+	}
+
+	is_junk_folder = o365_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_JUNK);
+
+	for (ii = 0; success && ii < uids->len; ii++) {
+		guint32 flags_changed, flags_set;
+		CamelMessageInfo *mi;
+		const gchar *uid;
+
+		uid = uids->pdata[ii];
+		mi = camel_folder_summary_get (folder_summary, uid);
+
+		if (!mi)
+			continue;
+
+		flags_set = camel_message_info_get_flags (mi);
+		flags_changed = camel_o365_message_info_get_server_flags (CAMEL_O365_MESSAGE_INFO (mi)) ^ flags_set;
+
+		if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0 &&
+		    (flags_changed & (CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_FLAGGED)) != 0) {
+			mi_list = g_slist_prepend (mi_list, mi);
+			mi_list_len++;
+
+			if (flags_set & CAMEL_MESSAGE_DELETED)
+				deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uid));
+			else if (flags_set & CAMEL_MESSAGE_JUNK)
+				junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uid));
+			else if (is_junk_folder && (flags_set & CAMEL_MESSAGE_NOTJUNK) != 0)
+				inbox_uids = g_slist_prepend (inbox_uids, (gpointer) camel_pstring_strdup (uid));
+		} else if (flags_set & CAMEL_MESSAGE_DELETED) {
+			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uid));
+			g_clear_object (&mi);
+		} else if (flags_set & CAMEL_MESSAGE_JUNK) {
+			junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uid));
+			g_clear_object (&mi);
+		} else if (is_junk_folder && (flags_set & CAMEL_MESSAGE_NOTJUNK) != 0) {
+			inbox_uids = g_slist_prepend (inbox_uids, (gpointer) camel_pstring_strdup (uid));
+			g_clear_object (&mi);
+		} else if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
+			/* OK, the change must have been the labels */
+			mi_list = g_slist_prepend (mi_list, mi);
+			mi_list_len++;
+		} else {
+			g_clear_object (&mi);
+		}
+
+		if (mi_list_len == E_O365_BATCH_MAX_REQUESTS) {
+			success = o365_folder_save_flags_sync (folder, o365_store, mi_list, cancellable, &local_error);
+			g_slist_free_full (mi_list, g_object_unref);
+			mi_list = NULL;
+			mi_list_len = 0;
+		}
+	}
+
+	if (mi_list != NULL && success)
+		success = o365_folder_save_flags_sync (folder, o365_store, mi_list, cancellable, &local_error);
+	g_slist_free_full (mi_list, g_object_unref);
+
+	if (deleted_uids && success)
+		success = o365_folder_delete_messages_sync (folder, o365_store, deleted_uids, o365_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, &local_error);
+	g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
+
+	if (junk_uids && success)
+		success = o365_folder_copy_move_to_folder_sync (folder, o365_store, junk_uids, "junkemail", FALSE, cancellable, &local_error);
+	g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
+
+	if (inbox_uids && success)
+		success = o365_folder_copy_move_to_folder_sync (folder, o365_store, inbox_uids, "inbox", FALSE, cancellable, &local_error);
+	g_slist_free_full (inbox_uids, (GDestroyNotify) camel_pstring_free);
+
+	camel_folder_summary_save (folder_summary, NULL);
+	camel_folder_summary_free_array (uids);
+
+	if (local_error) {
+		camel_o365_store_maybe_disconnect (o365_store, local_error);
+		g_propagate_error (error, local_error);
+	}
+
+	return success;
+}
+
+static gboolean
+o365_folder_expunge_sync (CamelFolder *folder,
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	/* it does nothing special here, everything is done as part of the o365_folder_synchronize_sync() */
+
+	return TRUE;
+}
+
+static gboolean
+o365_folder_transfer_messages_to_sync (CamelFolder *source,
+				       GPtrArray *uids,
+				       CamelFolder *destination,
+				       gboolean delete_originals,
+				       GPtrArray **transferred_uids,
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	CamelStore *parent_store;
+	CamelO365Store *o365_store;
+	GSList *uids_list = NULL;
+	gboolean success;
+	guint ii;
+	GError *local_error = NULL;
+
+	/* The parent class ensures this, but recheck anyway, for completeness */
+	g_return_val_if_fail (CAMEL_IS_O365_FOLDER (source), FALSE);
+	g_return_val_if_fail (CAMEL_IS_O365_FOLDER (destination), FALSE);
+	g_return_val_if_fail (uids != NULL, FALSE);
+
+	parent_store = camel_folder_get_parent_store (source);
+
+	if (!parent_store) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
+		return FALSE;
+	}
+
+	/* The parent class ensures this, but recheck anyway, for completeness */
+	g_return_val_if_fail (camel_folder_get_parent_store (destination) == parent_store, FALSE);
+
+	o365_store = CAMEL_O365_STORE (parent_store);
+
+	if (!camel_o365_store_ensure_connected (o365_store, NULL, cancellable, error))
+		return FALSE;
+
+	for (ii = 0; ii < uids->len; ii++) {
+		uids_list = g_slist_prepend (uids_list, g_ptr_array_index (uids, ii));
+	}
+
+	uids_list = g_slist_reverse (uids_list);
+
+	success = o365_folder_copy_move_to_folder_sync (source, o365_store,
+		uids_list, camel_o365_folder_get_id (CAMEL_O365_FOLDER (destination)),
+		!delete_originals, cancellable, &local_error);
+
+	g_slist_free (uids_list);
+
+	/* Update destination folder only if not frozen, to not update
+	   for each single message transfer during filtering.
+	 */
+	if (success && !camel_folder_is_frozen (destination)) {
+		camel_operation_progress (cancellable, -1);
+
+		o365_folder_refresh_info_sync (destination, cancellable, NULL);
+	}
+
+	if (local_error) {
+		camel_o365_store_maybe_disconnect (o365_store, local_error);
+		g_propagate_error (error, local_error);
+	}
+
+	return success;
+}
+
 static void
 o365_folder_prepare_content_refresh (CamelFolder *folder)
 {
@@ -1207,11 +1678,9 @@ camel_o365_folder_class_init (CamelO365FolderClass *klass)
 	folder_class->append_message_sync = o365_folder_append_message_sync;
 	folder_class->get_message_sync = o365_folder_get_message_sync;
 	folder_class->refresh_info_sync = o365_folder_refresh_info_sync;
-#if 0
 	folder_class->synchronize_sync = o365_folder_synchronize_sync;
 	folder_class->expunge_sync = o365_folder_expunge_sync;
 	folder_class->transfer_messages_to_sync = o365_folder_transfer_messages_to_sync;
-#endif
 	folder_class->prepare_content_refresh = o365_folder_prepare_content_refresh;
 	folder_class->get_filename = o365_folder_get_filename;
 }

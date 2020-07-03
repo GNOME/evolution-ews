@@ -252,6 +252,35 @@ gboolean	e_o365_connection_add_mail_message_attachment_sync
 						 gchar **out_attachment_id,
 						 GCancellable *cancellable,
 						 GError **error);
+SoupMessage *	e_o365_connection_prepare_update_mail_message
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *message_id,
+						 JsonBuilder *mail_message, /* values to update, as a mailMessage object */
+						 GError **error);
+gboolean	e_o365_connection_update_mail_message_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *message_id,
+						 JsonBuilder *mail_message, /* values to update, as a mailMessage object */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_copy_move_mail_messages_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const GSList *message_ids, /* const gchar * */
+						 const gchar *des_folder_id,
+						 gboolean do_copy,
+						 GSList **out_des_message_ids, /* Camel-pooled gchar *, can be partial */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_delete_mail_messages_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const GSList *message_ids, /* const gchar * */
+						 GSList **out_deleted_ids, /* (transfer container): const gchar *, borrowed from message_ids */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

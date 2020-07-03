@@ -61,19 +61,19 @@ GType		camel_o365_store_get_type	(void);
 
 CamelO365StoreSummary *
 		camel_o365_store_ref_store_summary
-						(CamelO365Store *store);
+						(CamelO365Store *o365_store);
 EO365Connection *
 		camel_o365_store_ref_connection	(CamelO365Store *o365_store);
 gboolean	camel_o365_store_ensure_connected
-						(CamelO365Store *store,
-						 EO365Connection **out_cnc, /* out, nullable, trasnfer full */
+						(CamelO365Store *o365_store,
+						 EO365Connection **out_cnc, /* out, nullable, transfer full */
 						 GCancellable *cancellable,
 						 GError **error);
 void		camel_o365_store_maybe_disconnect
-						(CamelO365Store *store,
+						(CamelO365Store *o365_store,
 						 const GError *error);
 void		camel_o365_store_connect_folder_summary
-						(CamelO365Store *store,
+						(CamelO365Store *o365_store,
 						 CamelFolderSummary *folder_summary);
 
 G_END_DECLS
