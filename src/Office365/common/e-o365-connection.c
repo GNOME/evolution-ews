@@ -3032,3 +3032,82 @@ e_o365_connection_delete_mail_messages_sync (EO365Connection *cnc,
 
 	return success;
 }
+
+/* https://docs.microsoft.com/en-us/graph/api/message-send?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_send_mail_message_sync (EO365Connection *cnc,
+				     const gchar *user_override, /* for which user, NULL to use the account user */
+				     const gchar *message_id,
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (message_id != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"messages",
+		message_id,
+		"send",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	soup_message_headers_append (message->request_headers, "Content-Length", "0");
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_send_mail_sync (EO365Connection *cnc,
+				  const gchar *user_override, /* for which user, NULL to use the account user */
+				  JsonBuilder *request, /* filled sendMail object */
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (request != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"sendMail", NULL, NULL, NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, request);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}

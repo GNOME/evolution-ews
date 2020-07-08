@@ -37,13 +37,22 @@ void		camel_o365_utils_add_message_flags
 						(JsonBuilder *builder,
 						 CamelMessageInfo *info,
 						 CamelMimeMessage *message);
+gboolean	camel_o365_utils_fill_message_object_sync
+						(JsonBuilder *builder,
+						 CamelMimeMessage *message,
+						 CamelMessageInfo *info,
+						 CamelAddress *override_from,
+						 CamelAddress *override_recipients, /* it merges them, not really override */
+						 gboolean is_send,
+						 GSList **out_attachments,
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	camel_o365_utils_create_message_sync
 						(EO365Connection *cnc,
 						 const gchar *folder_id,
 						 CamelMimeMessage *message,
 						 CamelMessageInfo *info,
-						 gboolean is_send,
-						 gchar **out_appended_uid,
+						 gchar **out_appended_id,
 						 GCancellable *cancellable,
 						 GError **error);
 

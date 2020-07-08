@@ -281,6 +281,18 @@ gboolean	e_o365_connection_delete_mail_messages_sync
 						 GSList **out_deleted_ids, /* (transfer container): const gchar *, borrowed from message_ids */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_send_mail_message_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *message_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_send_mail_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 JsonBuilder *request, /* filled sendMail object */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

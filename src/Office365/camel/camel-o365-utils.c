@@ -209,7 +209,9 @@ static void
 o365_utils_add_address_array (JsonBuilder *builder,
 			      CamelInternetAddress *addr,
 			      void (* begin_func) (JsonBuilder *builder),
-			      void (* end_func) (JsonBuilder *builder))
+			      void (* end_func) (JsonBuilder *builder),
+			      GHashTable *known_recipients,
+			      CamelAddress *expected_recipients)
 {
 	gint ii, len;
 	gboolean did_add = FALSE;
@@ -231,7 +233,33 @@ o365_utils_add_address_array (JsonBuilder *builder,
 				begin_func (builder);
 			}
 
+			if (known_recipients && address && *address)
+				g_hash_table_add (known_recipients, (gpointer) address);
+
 			e_o365_add_recipient (builder, NULL, name, address);
+		}
+	}
+
+	if (known_recipients && expected_recipients && CAMEL_IS_INTERNET_ADDRESS (expected_recipients)) {
+		CamelInternetAddress *iaddr = CAMEL_INTERNET_ADDRESS (expected_recipients);
+
+		len = camel_address_length (expected_recipients);
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *name = NULL, *address = NULL;
+
+			if (camel_internet_address_get (iaddr, 0, &name, &address) && address && *address &&
+			    !g_hash_table_contains (known_recipients, address)) {
+				if (!did_add) {
+					did_add = TRUE;
+					begin_func (builder);
+				}
+
+				if (known_recipients && address && *address)
+					g_hash_table_add (known_recipients, (gpointer) address);
+
+				e_o365_add_recipient (builder, NULL, name, address);
+			}
 		}
 	}
 
@@ -740,32 +768,51 @@ camel_o365_utils_add_message_flags (JsonBuilder *builder,
 	e_o365_mail_message_add_is_read (builder, (flags & CAMEL_MESSAGE_SEEN) != 0);
 }
 
-gboolean
-camel_o365_utils_create_message_sync (EO365Connection *cnc,
-				      const gchar *folder_id,
-				      CamelMimeMessage *message,
-				      CamelMessageInfo *info,
-				      gboolean is_send,
-				      gchar **out_appended_uid,
-				      GCancellable *cancellable,
-				      GError **error)
+static void
+o365_utils_add_attachment_object (JsonBuilder *builder,
+				  CamelDataWrapper *dw,
+				  GCancellable *cancellable)
 {
-	JsonBuilder *builder;
-	EO365MailMessage *appended_message = NULL;
+	CamelContentType *ct;
+
+	ct = camel_data_wrapper_get_mime_type_field (dw);
+
+	e_o365_attachment_begin_attachment (builder, E_O365_ATTACHMENT_DATA_TYPE_FILE);
+
+	if (camel_content_type_is (ct, "application", "x-pkcs7-mime") ||
+	    camel_content_type_is (ct, "application", "pkcs7-mime")) {
+		o365_utils_add_smime_encrypted_attachment (builder, dw, cancellable);
+	} else if (CAMEL_IS_MULTIPART_SIGNED (dw)) {
+		o365_utils_add_smime_signed_attachment (builder, dw, cancellable);
+	} else {
+		o365_utils_add_file_attachment (builder, dw, cancellable);
+	}
+
+	e_o365_json_end_object_member (builder);
+}
+
+gboolean
+camel_o365_utils_fill_message_object_sync (JsonBuilder *builder,
+					   CamelMimeMessage *message,
+					   CamelMessageInfo *info,
+					   CamelAddress *override_from,
+					   CamelAddress *override_recipients, /* it merges them, not really override */
+					   gboolean is_send,
+					   GSList **out_attachments,
+					   GCancellable *cancellable,
+					   GError **error)
+{
 	CamelInternetAddress *addr, *sender = NULL;
 	CamelMimePart *body_part;
+	GHashTable *known_recipients = NULL;
 	GSList *attachments = NULL;
 	time_t tt;
 	gint offset = 0;
 	const gchar *tmp;
-	gboolean success, request_read_receipt = FALSE;
+	gboolean success = TRUE, request_read_receipt = FALSE;
 
-	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (builder != NULL, FALSE);
 	g_return_val_if_fail (CAMEL_IS_MIME_MESSAGE (message), FALSE);
-
-	builder = json_builder_new_immutable ();
-
-	e_o365_json_begin_object_member (builder, NULL);
 
 	tmp = camel_mime_message_get_message_id (message);
 	if (tmp && *tmp)
@@ -795,20 +842,31 @@ camel_o365_utils_create_message_sync (EO365Connection *cnc,
 		e_o365_mail_message_add_received_date_time (builder, tt);
 	}
 
-	addr = camel_mime_message_get_from (message);
+	if (override_recipients)
+		known_recipients = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
+
+	if (override_from && CAMEL_IS_INTERNET_ADDRESS (override_from))
+		addr = CAMEL_INTERNET_ADDRESS (override_from);
+	else
+		addr = camel_mime_message_get_from (message);
 	o365_utils_add_address (builder, addr, e_o365_mail_message_add_from);
 
 	addr = camel_mime_message_get_reply_to (message);
-	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_reply_to, e_o365_mail_message_end_reply_to);
+	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_reply_to, e_o365_mail_message_end_reply_to, NULL, NULL);
 
 	addr = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_TO);
-	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_to_recipients, e_o365_mail_message_end_to_recipients);
+	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_to_recipients, e_o365_mail_message_end_to_recipients, known_recipients, NULL);
 
 	addr = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_CC);
-	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_cc_recipients, e_o365_mail_message_end_cc_recipients);
+	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_cc_recipients, e_o365_mail_message_end_cc_recipients, known_recipients, NULL);
 
 	addr = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_BCC);
-	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_bcc_recipients, e_o365_mail_message_end_bcc_recipients);
+	o365_utils_add_address_array (builder, addr, e_o365_mail_message_begin_bcc_recipients, e_o365_mail_message_end_bcc_recipients, known_recipients, override_recipients);
+
+	if (known_recipients) {
+		g_hash_table_destroy (known_recipients);
+		known_recipients = NULL;
+	}
 
 	o365_utils_add_headers (builder, camel_medium_get_headers (CAMEL_MEDIUM (message)), &sender, &request_read_receipt);
 
@@ -819,6 +877,8 @@ camel_o365_utils_create_message_sync (EO365Connection *cnc,
 			e_o365_mail_message_add_sender (builder, name, address);
 
 		g_clear_object (&sender);
+	} else if (override_from) {
+		/* Possibly force the Sender when the passed-in From doesn't match the account user address */
 	}
 
 	if (request_read_receipt)
@@ -867,6 +927,55 @@ camel_o365_utils_create_message_sync (EO365Connection *cnc,
 	if (info || is_send)
 		camel_o365_utils_add_message_flags (builder, info, is_send ? message : NULL);
 
+	if (out_attachments) {
+		*out_attachments = attachments;
+	} else if (attachments) {
+		GSList *link;
+
+		e_o365_json_begin_array_member (builder, "attachments");
+
+		for (link = attachments; link && success; link = g_slist_next (link)) {
+			CamelDataWrapper *dw = link->data;
+
+			o365_utils_add_attachment_object (builder, dw, cancellable);
+		}
+
+		e_o365_json_end_array_member (builder);
+
+		g_slist_free_full (attachments, g_object_unref);
+	}
+
+	return success;
+}
+
+gboolean
+camel_o365_utils_create_message_sync (EO365Connection *cnc,
+				      const gchar *folder_id,
+				      CamelMimeMessage *message,
+				      CamelMessageInfo *info,
+				      gchar **out_appended_id,
+				      GCancellable *cancellable,
+				      GError **error)
+{
+	EO365MailMessage *appended_message = NULL;
+	GSList *attachments = NULL;
+	JsonBuilder *builder;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (CAMEL_IS_MIME_MESSAGE (message), FALSE);
+
+	builder = json_builder_new_immutable ();
+
+	e_o365_json_begin_object_member (builder, NULL);
+
+	if (!camel_o365_utils_fill_message_object_sync (builder, message, info, NULL, NULL, FALSE, &attachments, cancellable, error)) {
+		g_slist_free_full (attachments, g_object_unref);
+		g_object_unref (builder);
+
+		return FALSE;
+	}
+
 	e_o365_json_end_object_member (builder);
 
 	success = e_o365_connection_create_mail_message_sync (cnc, NULL, folder_id, builder, &appended_message, cancellable, error);
@@ -881,28 +990,15 @@ camel_o365_utils_create_message_sync (EO365Connection *cnc,
 
 		message_id = e_o365_mail_message_get_id (appended_message);
 
-		if (out_appended_uid)
-			*out_appended_uid = g_strdup (message_id);
+		if (out_appended_id)
+			*out_appended_id = g_strdup (message_id);
 
 		for (link = attachments; link && success; link = g_slist_next (link)) {
 			CamelDataWrapper *dw = link->data;
-			CamelContentType *ct;
-
-			ct = camel_data_wrapper_get_mime_type_field (dw);
 
 			builder = json_builder_new_immutable ();
-			e_o365_attachment_begin_attachment (builder, E_O365_ATTACHMENT_DATA_TYPE_FILE);
 
-			if (camel_content_type_is (ct, "application", "x-pkcs7-mime") ||
-			    camel_content_type_is (ct, "application", "pkcs7-mime")) {
-				o365_utils_add_smime_encrypted_attachment (builder, dw, cancellable);
-			} else if (CAMEL_IS_MULTIPART_SIGNED (dw)) {
-				o365_utils_add_smime_signed_attachment (builder, dw, cancellable);
-			} else {
-				o365_utils_add_file_attachment (builder, dw, cancellable);
-			}
-
-			e_o365_json_end_object_member (builder);
+			o365_utils_add_attachment_object (builder, dw, cancellable);
 
 			success = e_o365_connection_add_mail_message_attachment_sync (cnc, NULL, message_id, builder, NULL, cancellable, error);
 

@@ -628,7 +628,7 @@ o365_folder_append_message_sync (CamelFolder *folder,
 		return FALSE;
 
 	success = camel_o365_utils_create_message_sync (cnc, camel_o365_folder_get_id (CAMEL_O365_FOLDER (folder)),
-		message, info, FALSE, appended_uid, cancellable, &local_error);
+		message, info, appended_uid, cancellable, &local_error);
 
 	g_clear_object (&cnc);
 
