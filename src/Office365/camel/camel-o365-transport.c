@@ -170,11 +170,15 @@ o365_transport_connect_sync (CamelService *service,
 	cnc = o365_transport_ref_connection (o365_transport);
 
 	if (!cnc) {
-		LOCK (o365_transport);
+		cnc = camel_o365_utils_new_connection (service, NULL);
 
-		o365_transport->priv->cnc = camel_o365_utils_new_connection (service, NULL);
+		if (cnc) {
+			LOCK (o365_transport);
 
-		UNLOCK (o365_transport);
+			o365_transport->priv->cnc = g_object_ref (cnc);
+
+			UNLOCK (o365_transport);
+		}
 	}
 
 	if (cnc) {

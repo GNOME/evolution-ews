@@ -521,11 +521,15 @@ o365_store_connect_sync (CamelService *service,
 	cnc = camel_o365_store_ref_connection (o365_store);
 
 	if (!cnc) {
-		LOCK (o365_store);
+		cnc = camel_o365_utils_new_connection (service, NULL);
 
-		o365_store->priv->cnc = camel_o365_utils_new_connection (service, NULL);
+		if (cnc) {
+			LOCK (o365_store);
 
-		UNLOCK (o365_store);
+			o365_store->priv->cnc = g_object_ref (cnc);
+
+			UNLOCK (o365_store);
+		}
 	}
 
 	if (cnc) {
