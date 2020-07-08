@@ -1877,7 +1877,7 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 {
 	SoupMessage *message;
 	JsonBuilder *builder;
-	gboolean success;
+	gboolean success = TRUE;
 	gchar *uri, buff[128];
 	guint ii;
 
@@ -1904,12 +1904,13 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 	e_o365_json_begin_object_member (builder, NULL);
 	e_o365_json_begin_array_member (builder, "requests");
 
-	for (ii = 0; ii < requests->len; ii++) {
+	for (ii = 0; success && ii < requests->len; ii++) {
 		SoupMessageHeadersIter iter;
 		SoupMessage *submessage;
 		SoupURI *suri;
 		gboolean has_headers = FALSE;
 		const gchar *hdr_name, *hdr_value, *use_uri;
+		gboolean is_application_json = FALSE;
 
 		submessage = g_ptr_array_index (requests, ii);
 
@@ -1946,7 +1947,13 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 		soup_message_headers_iter_init (&iter, submessage->request_headers);
 
 		while (soup_message_headers_iter_next (&iter, &hdr_name, &hdr_value)) {
-			if (hdr_name && *hdr_name && hdr_value) {
+			if (hdr_name && *hdr_name && hdr_value &&
+			    !camel_strcase_equal (hdr_name, "Connection") &&
+			    !camel_strcase_equal (hdr_name, "User-Agent")) {
+				if (camel_strcase_equal (hdr_name, "Content-Type") &&
+				    camel_strcase_equal (hdr_value, "application/json"))
+					is_application_json = TRUE;
+
 				if (!has_headers) {
 					has_headers = TRUE;
 
@@ -1966,7 +1973,29 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 			sbuffer = soup_message_body_flatten (submessage->request_body);
 
 			if (sbuffer && sbuffer->length > 0) {
-				e_o365_json_add_string_member (builder, "body", sbuffer->data);
+				if (is_application_json) {
+					/* The server needs it unpacked, not as a plain string */
+					JsonParser *parser;
+					JsonNode *node;
+
+					parser = json_parser_new_immutable ();
+
+					success = json_parser_load_from_data (parser, sbuffer->data, sbuffer->length, error);
+
+					if (!success)
+						g_prefix_error (error, "%s", _("Failed to parse own Json data"));
+
+					node = success ? json_parser_steal_root (parser) : NULL;
+
+					if (node) {
+						json_builder_set_member_name (builder, "body");
+						json_builder_add_value (builder, node);
+					}
+
+					g_clear_object (&parser);
+				} else {
+					e_o365_json_add_string_member (builder, "body", sbuffer->data);
+				}
 			}
 
 			if (sbuffer)
@@ -1985,7 +2014,7 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 
 	g_object_unref (builder);
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_batch_response_cb, NULL, requests, cancellable, error);
+	success = success && o365_connection_send_request_sync (cnc, message, e_o365_read_batch_response_cb, NULL, requests, cancellable, error);
 
 	g_clear_object (&message);
 

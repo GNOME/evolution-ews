@@ -32,7 +32,7 @@ e_o365_json_get_array_member (JsonObject *object,
 
 	node = json_object_get_member (object, member_name);
 
-	if (!node)
+	if (!node || JSON_NODE_HOLDS_NULL (node))
 		return NULL;
 
 	g_return_val_if_fail (JSON_NODE_HOLDS_ARRAY (node), NULL);
@@ -68,7 +68,7 @@ e_o365_json_get_boolean_member (JsonObject *object,
 
 	node = json_object_get_member (object, member_name);
 
-	if (!node)
+	if (!node || JSON_NODE_HOLDS_NULL (node))
 		return default_value;
 
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
@@ -99,7 +99,7 @@ e_o365_json_get_double_member (JsonObject *object,
 
 	node = json_object_get_member (object, member_name);
 
-	if (!node)
+	if (!node || JSON_NODE_HOLDS_NULL (node))
 		return default_value;
 
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
@@ -130,7 +130,7 @@ e_o365_json_get_int_member (JsonObject *object,
 
 	node = json_object_get_member (object, member_name);
 
-	if (!node)
+	if (!node || JSON_NODE_HOLDS_NULL (node))
 		return default_value;
 
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
@@ -190,7 +190,7 @@ e_o365_json_get_object_member (JsonObject *object,
 
 	node = json_object_get_member (object, member_name);
 
-	if (!node)
+	if (!node || JSON_NODE_HOLDS_NULL (node))
 		return NULL;
 
 	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), NULL);
@@ -226,7 +226,7 @@ e_o365_json_get_string_member (JsonObject *object,
 
 	node = json_object_get_member (object, member_name);
 
-	if (!node)
+	if (!node || JSON_NODE_HOLDS_NULL (node))
 		return default_value;
 
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
