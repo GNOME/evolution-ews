@@ -363,24 +363,26 @@ e_o365_category_get_color (EO365Category *category)
 	return NULL;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/resources/mailfolder?view=graph-rest-1.0 */
+/* https://docs.microsoft.com/en-us/graph/api/resources/mailfolder?view=graph-rest-1.0
+   https://docs.microsoft.com/en-us/graph/api/resources/contactfolder?view=graph-rest-1.0
+ */
 
 const gchar *
-e_o365_mail_folder_get_display_name (EO365MailFolder *folder)
-{
-	return e_o365_json_get_string_member (folder, "displayName", NULL);
-}
-
-const gchar *
-e_o365_mail_folder_get_id (EO365MailFolder *folder)
+e_o365_folder_get_id (EO365Folder *folder)
 {
 	return e_o365_json_get_string_member (folder, "id", NULL);
 }
 
 const gchar *
-e_o365_mail_folder_get_parent_folder_id (EO365MailFolder *folder)
+e_o365_folder_get_parent_folder_id (EO365Folder *folder)
 {
 	return e_o365_json_get_string_member (folder, "parentFolderId", NULL);
+}
+
+const gchar *
+e_o365_folder_get_display_name (EO365Folder *folder)
+{
+	return e_o365_json_get_string_member (folder, "displayName", NULL);
 }
 
 gint32

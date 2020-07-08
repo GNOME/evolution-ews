@@ -23,10 +23,17 @@
 #include "common/e-source-o365-folder.h"
 #include "common/camel-o365-settings.h"
 
+#include "e-source-o365-deltas.h"
+
 #include "e-o365-backend.h"
+
+#define LOCK(_backend) g_mutex_lock (&_backend->priv->property_lock)
+#define UNLOCK(_backend) g_mutex_unlock (&_backend->priv->property_lock)
 
 struct _EO365BackendPrivate {
 	GMutex property_lock;
+
+	GHashTable *folder_sources; /* gchar *folder_id ~> ESource * */
 
 	gboolean need_update_folders;
 
@@ -76,6 +83,269 @@ o365_backend_populate (ECollectionBackend *backend)
 		e_backend_schedule_authenticate (E_BACKEND (backend), NULL);
 }
 
+static void
+o365_backend_update_resource (EO365Backend *o365_backend,
+			      const gchar *extension_name,
+			      const gchar *id,
+			      const gchar *display_name,
+			      gboolean is_default,
+			      const gchar *calendar_color)
+{
+	ESource *source;
+	gboolean is_new;
+
+	LOCK (o365_backend);
+	source = g_hash_table_lookup (o365_backend->priv->folder_sources, id);
+	if (source)
+		g_object_ref (source);
+	UNLOCK (o365_backend);
+
+	is_new = !source;
+
+	if (is_new)
+		source = e_collection_backend_new_child (E_COLLECTION_BACKEND (o365_backend), id);
+
+	if (source) {
+		e_source_set_display_name (source, display_name);
+
+		if (calendar_color && g_ascii_strcasecmp (calendar_color, "auto") != 0 && (
+		    g_strcmp0 (extension_name, E_SOURCE_EXTENSION_CALENDAR) == 0 ||
+		    g_strcmp0 (extension_name, E_SOURCE_EXTENSION_TASK_LIST) == 0 ||
+		    g_strcmp0 (extension_name, E_SOURCE_EXTENSION_MEMO_LIST) == 0)) {
+			ESourceSelectable *selectable;
+
+			selectable = e_source_get_extension (source, extension_name);
+			e_source_selectable_set_color (selectable, calendar_color);
+		}
+
+		if (is_new) {
+			ESourceRegistryServer *server;
+			gpointer extension;
+
+			extension = e_source_get_extension (source, extension_name);
+			e_source_backend_set_backend_name (E_SOURCE_BACKEND (extension), "office365");
+
+			/* Do not notify with too old reminders */
+			if (g_strcmp0 (extension_name, E_SOURCE_EXTENSION_CALENDAR) == 0 ||
+			    g_strcmp0 (extension_name, E_SOURCE_EXTENSION_TASK_LIST) == 0) {
+				ESourceAlarms *alarms;
+				gchar *today;
+				GTimeVal today_tv;
+				GDate dt;
+
+				g_date_clear (&dt, 1);
+				g_get_current_time (&today_tv);
+				g_date_set_time_val (&dt, &today_tv);
+
+				/* midnight UTC */
+				today = g_strdup_printf ("%04d-%02d-%02dT00:00:00Z", g_date_get_year (&dt), g_date_get_month (&dt), g_date_get_day (&dt));
+
+				alarms = e_source_get_extension (source, E_SOURCE_EXTENSION_ALARMS);
+				e_source_alarms_set_last_notified (alarms, today);
+
+				g_free (today);
+			}
+
+			extension = e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER);
+			e_source_o365_folder_set_id (extension, id);
+			e_source_o365_folder_set_is_default (extension, is_default);
+
+			server = e_collection_backend_ref_server (E_COLLECTION_BACKEND (o365_backend));
+
+			e_source_registry_server_add_source (server, source);
+
+			g_clear_object (&server);
+		}
+	}
+
+	g_clear_object (&source);
+}
+
+static void
+o365_backend_remove_resource (EO365Backend *o365_backend,
+			      const gchar *extension_name,
+			      const gchar *id) /* NULL to remove the "is-default" resource for the extension_name */
+{
+	ESource *existing_source;
+
+	LOCK (o365_backend);
+
+	if (id) {
+		existing_source = g_hash_table_lookup (o365_backend->priv->folder_sources, id);
+	} else {
+		GHashTableIter iter;
+		gpointer value;
+
+		g_hash_table_iter_init (&iter, o365_backend->priv->folder_sources);
+		while (g_hash_table_iter_next (&iter, NULL, &value)) {
+			ESource *source = value;
+
+			if (value && e_source_has_extension (source, extension_name) &&
+			    e_source_o365_folder_get_is_default (e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER))) {
+				existing_source = source;
+				break;
+			}
+		}
+	}
+
+	if (existing_source)
+		g_object_ref (existing_source);
+
+	UNLOCK (o365_backend);
+
+	if (existing_source)
+		e_source_remove_sync (existing_source, NULL, NULL);
+
+	g_clear_object (&existing_source);
+}
+
+static void
+o365_backend_forget_folders (EO365Backend *o365_backend,
+			     const gchar *extension_name)
+{
+	GHashTableIter iter;
+	GSList *ids = NULL, *link;
+	gpointer value;
+
+	LOCK (o365_backend);
+
+	g_hash_table_iter_init (&iter, o365_backend->priv->folder_sources);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		ESource *source = value;
+
+		if (source && e_source_has_extension (source, extension_name))
+			ids = g_slist_prepend (ids, e_source_o365_folder_dup_id (e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER)));
+	}
+
+	UNLOCK (o365_backend);
+
+	for (link = ids; link; link = g_slist_next (link)) {
+		const gchar *id = link->data;
+
+		if (id)
+			o365_backend_remove_resource (o365_backend, extension_name, id);
+	}
+
+	g_slist_free_full (ids, g_free);
+}
+
+static gboolean
+o365_backend_got_contact_folders_delta_cb (EO365Connection *cnc,
+					   const GSList *results, /* JsonObject * - the returned objects from the server */
+					   gpointer user_data,
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	EO365Backend *o365_backend = user_data;
+	GSList *link;
+
+	g_return_val_if_fail (E_IS_O365_BACKEND (o365_backend), FALSE);
+
+	for (link = (GSList *) results; link; link = g_slist_next (link)) {
+		JsonObject *object = link->data;
+		const gchar *id = e_o365_folder_get_id (object);
+
+		if (!id)
+			continue;
+
+		if (e_o365_delta_is_removed_object (object)) {
+			o365_backend_remove_resource (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, id);
+		} else {
+			o365_backend_update_resource (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK,
+			      id, e_o365_folder_get_display_name (object),
+			      FALSE, NULL);
+		}
+	}
+
+	return TRUE;
+}
+
+static void
+o365_backend_sync_folders_thread (GTask *task,
+				  gpointer source_object,
+				  gpointer task_data,
+				  GCancellable *cancellable)
+{
+	EO365Backend *o365_backend = source_object;
+	EO365Connection *cnc = task_data;
+	ESourceO365Deltas *o365_deltas;
+	EO365Folder *user_contacts = NULL;
+	gchar *old_delta_link, *new_delta_link;
+	gboolean success;
+	GError *error = NULL;
+
+	g_return_if_fail (E_IS_O365_BACKEND (o365_backend));
+	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
+
+	o365_deltas = e_source_get_extension (e_backend_get_source (E_BACKEND (o365_backend)), E_SOURCE_EXTENSION_O365_DELTAS);
+
+	if (e_o365_connection_get_contacts_folder_sync (cnc, NULL, &user_contacts, cancellable, &error)) {
+		const gchar *id, *display_name;
+
+		id = e_o365_folder_get_id (user_contacts);
+		display_name = e_o365_folder_get_display_name (user_contacts);
+
+		g_warn_if_fail (id != NULL);
+		g_warn_if_fail (display_name != NULL);
+
+		o365_backend_update_resource (o365_backend,
+			E_SOURCE_EXTENSION_ADDRESS_BOOK,
+			id, display_name, TRUE, NULL);
+
+		json_object_unref (user_contacts);
+	} else if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_NOT_FOUND) ||
+		   g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		o365_backend_remove_resource (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, NULL);
+	}
+
+	g_clear_error (&error);
+
+	new_delta_link = NULL;
+	old_delta_link = e_source_o365_deltas_dup_contacts_link (o365_deltas);
+
+	success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_CONTACTS, NULL, old_delta_link, 0,
+		o365_backend_got_contact_folders_delta_cb, o365_backend, &new_delta_link, cancellable, &error);
+
+	if (old_delta_link && *old_delta_link && (
+	    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+	    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_BAD_REQUEST))) {
+		g_clear_pointer (&old_delta_link, g_free);
+		g_clear_error (&error);
+
+		o365_backend_forget_folders (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK);
+
+		success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_CONTACTS, NULL, NULL, 0,
+			o365_backend_got_contact_folders_delta_cb, o365_backend, &new_delta_link, cancellable, &error);
+	}
+
+	if (success)
+		e_source_o365_deltas_set_contacts_link (o365_deltas, new_delta_link);
+
+	g_clear_pointer (&old_delta_link, g_free);
+	g_clear_pointer (&new_delta_link, g_free);
+	g_clear_error (&error);
+}
+
+static void
+o365_backend_sync_folders (EO365Backend *o365_backend,
+			   EO365Connection *cnc,
+			   GCancellable *cancellable,
+			   GAsyncReadyCallback callback,
+			   gpointer user_data)
+{
+	GTask *task;
+
+	o365_backend->priv->need_update_folders = FALSE;
+
+	task = g_task_new (o365_backend, cancellable, callback, user_data);
+
+	g_task_set_check_cancellable (task, TRUE);
+	g_task_set_task_data (task, g_object_ref (cnc), g_object_unref);
+	g_task_run_in_thread (task, o365_backend_sync_folders_thread);
+
+	g_object_unref (task);
+}
+
 static gchar *
 o365_backend_dup_resource_id (ECollectionBackend *backend,
 			      ESource *child_source)
@@ -93,35 +363,19 @@ static void
 o365_backend_child_added (ECollectionBackend *backend,
 			  ESource *child_source)
 {
-#if 0
 	ESource *collection_source;
-	const gchar *extension_name;
-	gboolean is_mail = FALSE;
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
-	extension_name = E_SOURCE_EXTENSION_MAIL_ACCOUNT;
-	is_mail |= e_source_has_extension (child_source, extension_name);
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_IDENTITY;
-	is_mail |= e_source_has_extension (child_source, extension_name);
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_TRANSPORT;
-	is_mail |= e_source_has_extension (child_source, extension_name);
-
-	/* Synchronize mail-related user with the collection identity. */
-	extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
-	if (is_mail && e_source_has_extension (child_source, extension_name)) {
+	if (e_source_has_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION) && (
+	    e_source_has_extension (child_source, E_SOURCE_EXTENSION_MAIL_ACCOUNT) ||
+	    e_source_has_extension (child_source, E_SOURCE_EXTENSION_MAIL_IDENTITY) ||
+	    e_source_has_extension (child_source, E_SOURCE_EXTENSION_MAIL_TRANSPORT))) {
 		ESourceAuthentication *auth_child_extension;
 		ESourceCollection *collection_extension;
 
-		extension_name = E_SOURCE_EXTENSION_COLLECTION;
-		collection_extension = e_source_get_extension (
-			collection_source, extension_name);
-
-		extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
-		auth_child_extension = e_source_get_extension (
-			child_source, extension_name);
+		collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION);
+		auth_child_extension = e_source_get_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION);
 
 		e_binding_bind_property (
 			collection_extension, "identity",
@@ -130,22 +384,22 @@ o365_backend_child_added (ECollectionBackend *backend,
 	}
 
 	/* We track O365 folders in a hash table by folder ID. */
-	extension_name = E_SOURCE_EXTENSION_O365_FOLDER;
-	if (e_source_has_extension (child_source, extension_name)) {
+	if (e_source_has_extension (child_source, E_SOURCE_EXTENSION_O365_FOLDER)) {
 		ESourceO365Folder *extension;
 		gchar *folder_id;
 
-		extension = e_source_get_extension (
-			child_source, extension_name);
+		extension = e_source_get_extension (child_source, E_SOURCE_EXTENSION_O365_FOLDER);
 		folder_id = e_source_o365_folder_dup_id (extension);
-		if (folder_id != NULL) {
-			o365_backend_folders_insert (
-				E_O365_BACKEND (backend),
-				folder_id, child_source);
-			g_free (folder_id);
+
+		if (folder_id) {
+			EO365Backend *o365_backend = E_O365_BACKEND (backend);
+
+			LOCK (o365_backend);
+			g_hash_table_insert (o365_backend->priv->folder_sources, folder_id, g_object_ref (child_source));
+			UNLOCK (o365_backend);
 		}
 	}
-#endif
+
 	/* Chain up to parent's method. */
 	E_COLLECTION_BACKEND_CLASS (e_o365_backend_parent_class)->child_added (backend, child_source);
 }
@@ -154,23 +408,22 @@ static void
 o365_backend_child_removed (ECollectionBackend *backend,
 			    ESource *child_source)
 {
-#if 0
-	const gchar *extension_name;
-
 	/* We track O365 folders in a hash table by folder ID. */
-	extension_name = E_SOURCE_EXTENSION_O365_FOLDER;
-	if (e_source_has_extension (child_source, extension_name)) {
+	if (e_source_has_extension (child_source, E_SOURCE_EXTENSION_O365_FOLDER)) {
 		ESourceO365Folder *extension;
 		const gchar *folder_id;
 
-		extension = e_source_get_extension (
-			child_source, extension_name);
+		extension = e_source_get_extension (child_source, E_SOURCE_EXTENSION_O365_FOLDER);
 		folder_id = e_source_o365_folder_get_id (extension);
-		if (folder_id != NULL)
-			o365_backend_folders_remove (
-				E_O365_BACKEND (backend), folder_id);
+
+		if (folder_id) {
+			EO365Backend *o365_backend = E_O365_BACKEND (backend);
+
+			LOCK (o365_backend);
+			g_hash_table_remove (o365_backend->priv->folder_sources, folder_id);
+			UNLOCK (o365_backend);
+		}
 	}
-#endif
 
 	/* Chain up to parent's method. */
 	E_COLLECTION_BACKEND_CLASS (e_o365_backend_parent_class)->child_removed (backend, child_source);
@@ -379,7 +632,6 @@ o365_backend_authenticate_sync (EBackend *backend,
 				GError **error)
 {
 	CamelO365Settings *o365_settings;
-	/*EO365Backend *o365_backend;*/
 	EO365Connection *cnc;
 	ESourceAuthenticationResult result;
 
@@ -394,8 +646,7 @@ o365_backend_authenticate_sync (EBackend *backend,
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
-
-		/* e_o365_backend_sync_folders (o365_backend, NULL, o365_backend_folders_synced_cb, NULL); */
+		o365_backend_sync_folders (E_O365_BACKEND (backend), cnc, NULL, NULL, NULL);
 	} else if (result == E_SOURCE_AUTHENTICATION_REJECTED &&
 		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
 		result = E_SOURCE_AUTHENTICATION_REQUIRED;
@@ -453,6 +704,7 @@ o365_backend_finalize (GObject *object)
 {
 	EO365Backend *o365_backend = E_O365_BACKEND (object);
 
+	g_hash_table_destroy (o365_backend->priv->folder_sources);
 	g_mutex_clear (&o365_backend->priv->property_lock);
 
 	/* Chain up to parent's method. */
@@ -496,6 +748,7 @@ static void
 e_o365_backend_init (EO365Backend *backend)
 {
 	backend->priv = e_o365_backend_get_instance_private (backend);
+	backend->priv->folder_sources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 
 	g_mutex_init (&backend->priv->property_lock);
 }

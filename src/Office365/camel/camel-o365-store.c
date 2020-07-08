@@ -742,14 +742,14 @@ o365_store_create_folder_sync (CamelStore *store,
 	flags = e_o365_mail_folder_get_child_folder_count (mail_folder) ? CAMEL_STORE_INFO_FOLDER_CHILDREN : CAMEL_STORE_INFO_FOLDER_NOCHILDREN;
 
 	camel_o365_store_summary_set_folder (o365_store->priv->summary, TRUE,
-		e_o365_mail_folder_get_id (mail_folder),
-		e_o365_mail_folder_get_parent_folder_id (mail_folder),
-		e_o365_mail_folder_get_display_name (mail_folder),
+		e_o365_folder_get_id (mail_folder),
+		e_o365_folder_get_parent_folder_id (mail_folder),
+		e_o365_folder_get_display_name (mail_folder),
 		e_o365_mail_folder_get_total_item_count (mail_folder),
 		e_o365_mail_folder_get_unread_item_count (mail_folder),
 		flags, E_O365_FOLDER_KIND_MAIL, FALSE, FALSE);
 
-	fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, e_o365_mail_folder_get_id (mail_folder));
+	fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, e_o365_folder_get_id (mail_folder));
 
 	camel_store_folder_created (store, fi);
 	camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (o365_store), fi);
@@ -801,7 +801,7 @@ o365_store_move_mail_folder (CamelO365Store *o365_store,
 
 		fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, folder_id);
 
-		camel_o365_store_summary_set_folder_parent_id (o365_store->priv->summary, folder_id, e_o365_mail_folder_get_parent_folder_id (moved_mail_folder));
+		camel_o365_store_summary_set_folder_parent_id (o365_store->priv->summary, folder_id, e_o365_folder_get_parent_folder_id (moved_mail_folder));
 		camel_o365_store_summary_rebuild_hashes (o365_store->priv->summary);
 
 		camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (o365_store), fi);
@@ -1057,7 +1057,7 @@ o365_store_rename_folder_sync (CamelStore *store,
 
 		if (mail_folder) {
 			camel_o365_store_summary_set_folder_display_name (o365_store->priv->summary, folder_id,
-				e_o365_mail_folder_get_display_name (mail_folder), TRUE);
+				e_o365_folder_get_display_name (mail_folder), TRUE);
 
 			json_object_unref (mail_folder);
 		}
@@ -1126,7 +1126,7 @@ typedef struct _FoldersDeltaData {
 static gboolean
 camel_o365_got_folders_delta_cb (EO365Connection *cnc,
 				 const GSList *results, /* JsonObject * - the returned objects from the server */
-				 gpointer user_data, /* expects GSList **, aka pointer to a GSList *, where it copies the 'results' */
+				 gpointer user_data,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -1139,7 +1139,7 @@ camel_o365_got_folders_delta_cb (EO365Connection *cnc,
 
 	for (link = (GSList *) results; link; link = g_slist_next (link)) {
 		JsonObject *object = link->data;
-		const gchar *id = e_o365_mail_folder_get_id (object);
+		const gchar *id = e_o365_folder_get_id (object);
 
 		if (e_o365_delta_is_removed_object (object)) {
 			CamelFolderInfo *info;
@@ -1162,8 +1162,8 @@ camel_o365_got_folders_delta_cb (EO365Connection *cnc,
 			flags |= GPOINTER_TO_UINT (g_hash_table_lookup (fdd->o365_store->priv->default_folders, id));
 
 			camel_o365_store_summary_set_folder (fdd->o365_store->priv->summary, FALSE, id,
-				e_o365_mail_folder_get_parent_folder_id (object),
-				e_o365_mail_folder_get_display_name (object),
+				e_o365_folder_get_parent_folder_id (object),
+				e_o365_folder_get_display_name (object),
 				e_o365_mail_folder_get_total_item_count (object),
 				e_o365_mail_folder_get_unread_item_count (object),
 				flags, E_O365_FOLDER_KIND_MAIL, FALSE, FALSE);
@@ -1266,16 +1266,18 @@ o365_store_get_folder_info_sync (CamelStore *store,
 				fdd.renamed_data = NULL;
 				fdd.removed_fis = NULL;
 
-				success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, old_delta_link, 0,
+				success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, NULL, old_delta_link, 0,
 					camel_o365_got_folders_delta_cb, &fdd, &new_delta_link, cancellable, &local_error);
 
-				if (old_delta_link && *old_delta_link && g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+				if (old_delta_link && *old_delta_link && (
+				    g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+				    g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_BAD_REQUEST))) {
 					g_clear_pointer (&old_delta_link, g_free);
 					g_clear_error (&local_error);
 
 					o365_store_forget_all_folders (o365_store);
 
-					success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, NULL, 0,
+					success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, NULL, NULL, 0,
 						camel_o365_got_folders_delta_cb, &fdd, &new_delta_link, cancellable, error);
 				}
 

@@ -59,17 +59,15 @@ struct _ESourceO365FolderClass {
 GType		e_source_o365_folder_get_type	(void) G_GNUC_CONST;
 void		e_source_o365_folder_type_register
 						(GTypeModule *type_module);
-const gchar *	e_source_o365_folder_get_change_key
-						(ESourceO365Folder *extension);
-gchar *		e_source_o365_folder_dup_change_key
-						(ESourceO365Folder *extension);
-void		e_source_o365_folder_set_change_key
-						(ESourceO365Folder *extension,
-						 const gchar *change_key);
 const gchar *	e_source_o365_folder_get_id	(ESourceO365Folder *extension);
 gchar *		e_source_o365_folder_dup_id	(ESourceO365Folder *extension);
 void		e_source_o365_folder_set_id	(ESourceO365Folder *extension,
 						 const gchar *id);
+gboolean	e_source_o365_folder_get_is_default
+						(ESourceO365Folder *extension);
+void		e_source_o365_folder_set_is_default
+						(ESourceO365Folder *extension,
+						 gboolean value);
 
 G_END_DECLS
 

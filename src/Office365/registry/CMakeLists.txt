@@ -5,6 +5,8 @@ set(sources
 	e-o365-backend.h
 	e-o365-backend-factory.c
 	e-o365-backend-factory.h
+	e-source-o365-deltas.c
+	e-source-o365-deltas.h
 )
 set(extra_defines)
 set(extra_cflags)

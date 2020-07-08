@@ -24,6 +24,7 @@
 
 #include "e-o365-backend.h"
 #include "e-o365-backend-factory.h"
+#include "e-source-o365-deltas.h"
 
 /* Module Entry Points */
 void e_module_load (GTypeModule *type_module);
@@ -38,6 +39,7 @@ e_module_load (GTypeModule *type_module)
 	e_oauth2_service_office365_type_register (type_module);
 	e_source_o365_folder_type_register (type_module);
 
+	e_source_o365_deltas_type_register (type_module);
 	e_o365_backend_type_register (type_module);
 	e_o365_backend_factory_type_register (type_module);
 }

@@ -65,6 +65,7 @@ typedef enum _EO365ItemBodyContentTypeType {
 #define EO365Attachment			JsonObject
 #define EO365Category			JsonObject
 #define EO365DateTimeWithZone		JsonObject
+#define EO365Folder			JsonObject
 #define EO365FollowupFlag		JsonObject
 #define EO365InternetMessageHeader	JsonObject
 #define EO365ItemBody			JsonObject
@@ -124,9 +125,10 @@ const gchar *	e_o365_category_get_display_name	(EO365Category *category);
 const gchar *	e_o365_category_get_id			(EO365Category *category);
 const gchar *	e_o365_category_get_color		(EO365Category *category);
 
-const gchar *	e_o365_mail_folder_get_display_name	(EO365MailFolder *folder);
-const gchar *	e_o365_mail_folder_get_id		(EO365MailFolder *folder);
-const gchar *	e_o365_mail_folder_get_parent_folder_id	(EO365MailFolder *folder);
+const gchar *	e_o365_folder_get_id			(EO365Folder *folder);
+const gchar *	e_o365_folder_get_parent_folder_id	(EO365Folder *folder);
+const gchar *	e_o365_folder_get_display_name		(EO365Folder *folder);
+
 gint32		e_o365_mail_folder_get_child_folder_count
 							(EO365MailFolder *folder);
 gint32		e_o365_mail_folder_get_total_item_count	(EO365MailFolder *folder);

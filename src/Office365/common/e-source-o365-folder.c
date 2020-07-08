@@ -20,14 +20,14 @@
 #include "e-source-o365-folder.h"
 
 struct _ESourceO365FolderPrivate {
-	gchar *change_key;
 	gchar *id;
+	gboolean is_default;
 };
 
 enum {
 	PROP_0,
-	PROP_CHANGE_KEY,
-	PROP_ID
+	PROP_ID,
+	PROP_IS_DEFAULT
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ESourceO365Folder, e_source_o365_folder, E_TYPE_SOURCE_EXTENSION)
@@ -39,10 +39,10 @@ source_o365_folder_set_property (GObject *object,
 				 GParamSpec *pspec)
 {
 	switch (property_id) {
-		case PROP_CHANGE_KEY:
-			e_source_o365_folder_set_change_key (
+		case PROP_IS_DEFAULT:
+			e_source_o365_folder_set_is_default (
 				E_SOURCE_O365_FOLDER (object),
-				g_value_get_string (value));
+				g_value_get_boolean (value));
 			return;
 
 		case PROP_ID:
@@ -62,10 +62,10 @@ source_o365_folder_get_property (GObject *object,
 				 GParamSpec *pspec)
 {
 	switch (property_id) {
-		case PROP_CHANGE_KEY:
-			g_value_take_string (
+		case PROP_IS_DEFAULT:
+			g_value_set_boolean (
 				value,
-				e_source_o365_folder_dup_change_key (
+				e_source_o365_folder_get_is_default (
 				E_SOURCE_O365_FOLDER (object)));
 			return;
 
@@ -85,7 +85,6 @@ source_o365_folder_finalize (GObject *object)
 {
 	ESourceO365Folder *o365_folder = E_SOURCE_O365_FOLDER (object);
 
-	g_free (o365_folder->priv->change_key);
 	g_free (o365_folder->priv->id);
 
 	/* Chain up to parent's method. */
@@ -108,11 +107,11 @@ e_source_o365_folder_class_init (ESourceO365FolderClass *class)
 
 	g_object_class_install_property (
 		object_class,
-		PROP_CHANGE_KEY,
+		PROP_ID,
 		g_param_spec_string (
-			"change-key",
-			"Change Key",
-			"Essentially an entity tag, used when submitting changes",
+			"id",
+			"ID",
+			"The server-assigned folder ID",
 			NULL,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -121,12 +120,12 @@ e_source_o365_folder_class_init (ESourceO365FolderClass *class)
 
 	g_object_class_install_property (
 		object_class,
-		PROP_ID,
-		g_param_spec_string (
-			"id",
-			"ID",
-			"The server-assigned folder ID",
-			NULL,
+		PROP_IS_DEFAULT,
+		g_param_spec_boolean (
+			"is-default",
+			"Is Default",
+			"Whether it's user's default folder (like 'contacts', which are not part of the contactFolders)",
+			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS |
@@ -145,53 +144,6 @@ e_source_o365_folder_type_register (GTypeModule *type_module)
 	/* We need to ensure this is registered, because it's looked up
 	 * by name in e_source_get_extension(). */
 	g_type_ensure (E_TYPE_SOURCE_O365_FOLDER);
-}
-
-const gchar *
-e_source_o365_folder_get_change_key (ESourceO365Folder *extension)
-{
-	g_return_val_if_fail (E_IS_SOURCE_O365_FOLDER (extension), NULL);
-
-	return extension->priv->change_key;
-}
-
-gchar *
-e_source_o365_folder_dup_change_key (ESourceO365Folder *extension)
-{
-	const gchar *protected;
-	gchar *duplicate;
-
-	g_return_val_if_fail (E_IS_SOURCE_O365_FOLDER (extension), NULL);
-
-	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
-
-	protected = e_source_o365_folder_get_change_key (extension);
-	duplicate = g_strdup (protected);
-
-	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
-
-	return duplicate;
-}
-
-void
-e_source_o365_folder_set_change_key (ESourceO365Folder *extension,
-				     const gchar *change_key)
-{
-	g_return_if_fail (E_IS_SOURCE_O365_FOLDER (extension));
-
-	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
-
-	if (g_strcmp0 (extension->priv->change_key, change_key) == 0) {
-		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
-		return;
-	}
-
-	g_free (extension->priv->change_key);
-	extension->priv->change_key = g_strdup (change_key);
-
-	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
-
-	g_object_notify (G_OBJECT (extension), "change-key");
 }
 
 const gchar *
@@ -239,4 +191,32 @@ e_source_o365_folder_set_id (ESourceO365Folder *extension,
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
 	g_object_notify (G_OBJECT (extension), "id");
+}
+
+gboolean
+e_source_o365_folder_get_is_default (ESourceO365Folder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_O365_FOLDER (extension), FALSE);
+
+	return extension->priv->is_default;
+}
+
+void
+e_source_o365_folder_set_is_default (ESourceO365Folder *extension,
+				     gboolean value)
+{
+	g_return_if_fail (E_IS_SOURCE_O365_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if ((extension->priv->is_default ? 1 : 0) == (value ? 1 : 0)) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	extension->priv->is_default = value;
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "is-default");
 }

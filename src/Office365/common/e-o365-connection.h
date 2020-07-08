@@ -53,7 +53,7 @@
 
 G_BEGIN_DECLS
 
-typedef enum {
+typedef enum _EO365ApiVersion {
 	E_O365_API_V1_0,
 	E_O365_API_BETA
 } EO365ApiVersion;
@@ -173,9 +173,10 @@ gboolean	e_o365_connection_list_mail_folders_sync
 						 GSList **out_folders, /* EO365MailFolder * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_o365_connection_get_mail_folders_delta_sync
+gboolean	e_o365_connection_get_folders_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EO365FolderKind kind,
 						 const gchar *select, /* properties to select, nullable */
 						 const gchar *delta_link, /* previous delta link */
 						 guint max_page_size, /* 0 for default by the server */
@@ -291,6 +292,12 @@ gboolean	e_o365_connection_send_mail_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 JsonBuilder *request, /* filled sendMail object */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_contacts_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EO365Folder **out_folder,
 						 GCancellable *cancellable,
 						 GError **error);
 

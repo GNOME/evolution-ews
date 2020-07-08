@@ -2230,16 +2230,17 @@ e_o365_connection_list_mail_folders_sync (EO365Connection *cnc,
 }
 
 gboolean
-e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
-					       const gchar *user_override, /* for which user, NULL to use the account user */
-					       const gchar *select, /* properties to select, nullable */
-					       const gchar *delta_link, /* previous delta link */
-					       guint max_page_size, /* 0 for default by the server */
-					       EO365ConnectionJsonFunc func, /* function to call with each result set */
-					       gpointer func_user_data, /* user data passed into the 'func' */
-					       gchar **out_delta_link,
-					       GCancellable *cancellable,
-					       GError **error)
+e_o365_connection_get_folders_delta_sync (EO365Connection *cnc,
+					  const gchar *user_override, /* for which user, NULL to use the account user */
+					  EO365FolderKind kind,
+					  const gchar *select, /* properties to select, nullable */
+					  const gchar *delta_link, /* previous delta link */
+					  guint max_page_size, /* 0 for default by the server */
+					  EO365ConnectionJsonFunc func, /* function to call with each result set */
+					  gpointer func_user_data, /* user data passed into the 'func' */
+					  gchar **out_delta_link,
+					  GCancellable *cancellable,
+					  GError **error)
 {
 	EO365ResponseData rd;
 	SoupMessage *message = NULL;
@@ -2253,10 +2254,25 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
+		const gchar *kind_str = NULL;
 		gchar *uri;
 
+		switch (kind) {
+		case E_O365_FOLDER_KIND_CONTACTS:
+			kind_str = "contactFolders";
+			break;
+		case E_O365_FOLDER_KIND_MAIL:
+			kind_str = "mailFolders";
+			break;
+		default:
+			g_warn_if_reached ();
+			break;
+		}
+
+		g_return_val_if_fail (kind_str != NULL, FALSE);
+
 		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
-			"mailFolders",
+			kind_str,
 			NULL,
 			"delta",
 			"$select", select,
@@ -3135,6 +3151,43 @@ e_o365_connection_send_mail_sync (EO365Connection *cnc,
 	e_o365_connection_set_json_body (message, request);
 
 	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+gboolean
+e_o365_connection_get_contacts_folder_sync (EO365Connection *cnc,
+					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    EO365Folder **out_folder,
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_folder != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"contactFolders",
+		"contacts",
+		NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_folder, cancellable, error);
 
 	g_clear_object (&message);
 
