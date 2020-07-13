@@ -23,6 +23,21 @@
 
 G_BEGIN_DECLS
 
+/* Just for better readability */
+#define EO365Attachment			JsonObject
+#define EO365Category			JsonObject
+#define EO365Contact			JsonObject
+#define EO365DateTimeWithZone		JsonObject
+#define EO365EmailAddress		JsonObject
+#define EO365Folder			JsonObject
+#define EO365FollowupFlag		JsonObject
+#define EO365InternetMessageHeader	JsonObject
+#define EO365ItemBody			JsonObject
+#define EO365MailFolder			JsonObject
+#define EO365MailMessage		JsonObject
+#define EO365PhysicalAddress		JsonObject
+#define EO365Recipient			JsonObject
+
 typedef enum _EO365AttachmentDataType {
 	E_O365_ATTACHMENT_DATA_TYPE_NOT_SET,
 	E_O365_ATTACHMENT_DATA_TYPE_UNKNOWN,
@@ -61,18 +76,6 @@ typedef enum _EO365ItemBodyContentTypeType {
 	E_O365_ITEM_BODY_CONTENT_TYPE_HTML
 } EO365ItemBodyContentTypeType;
 
-/* Just for better readability */
-#define EO365Attachment			JsonObject
-#define EO365Category			JsonObject
-#define EO365DateTimeWithZone		JsonObject
-#define EO365Folder			JsonObject
-#define EO365FollowupFlag		JsonObject
-#define EO365InternetMessageHeader	JsonObject
-#define EO365ItemBody			JsonObject
-#define EO365MailFolder			JsonObject
-#define EO365MailMessage		JsonObject
-#define EO365Recipient			JsonObject
-
 JsonArray *	e_o365_json_get_array_member		(JsonObject *object,
 							 const gchar *member_name);
 void		e_o365_json_begin_array_member		(JsonBuilder *builder,
@@ -110,6 +113,13 @@ const gchar *	e_o365_json_get_string_member		(JsonObject *object,
 							 const gchar *member_name,
 							 const gchar *default_value);
 void		e_o365_json_add_string_member		(JsonBuilder *builder,
+							 const gchar *member_name,
+							 const gchar *value);
+void		e_o365_json_add_nonempty_string_member	(JsonBuilder *builder,
+							 const gchar *member_name,
+							 const gchar *value);
+void		e_o365_json_add_nonempty_or_null_string_member
+							(JsonBuilder *builder,
 							 const gchar *member_name,
 							 const gchar *value);
 
@@ -304,6 +314,156 @@ void		e_o365_file_attachment_add_content_bytes(JsonBuilder *builder,
 							 const gchar *base64_value);
 const gchar *	e_o365_file_attachment_get_content_id	(EO365Attachment *attachment);
 void		e_o365_file_attachment_add_content_id	(JsonBuilder *builder,
+							 const gchar *value);
+
+const gchar *	e_o365_email_address_get_name		(EO365EmailAddress *email);
+const gchar *	e_o365_email_address_get_address	(EO365EmailAddress *email);
+void		e_o365_add_email_address		(JsonBuilder *builder,
+							 const gchar *name,
+							 const gchar *address);
+const gchar *	e_o365_physical_address_get_city	(EO365PhysicalAddress *address);
+const gchar *	e_o365_physical_address_get_country_or_region
+							(EO365PhysicalAddress *address);
+const gchar *	e_o365_physical_address_get_postal_code	(EO365PhysicalAddress *address);
+const gchar *	e_o365_physical_address_get_state	(EO365PhysicalAddress *address);
+const gchar *	e_o365_physical_address_get_street	(EO365PhysicalAddress *address);
+void		e_o365_add_physical_address		(JsonBuilder *builder,
+							 const gchar *member_name,
+							 const gchar *city,
+							 const gchar *country_or_region,
+							 const gchar *postal_code,
+							 const gchar *state,
+							 const gchar *street);
+
+const gchar *	e_o365_contact_get_id			(EO365Contact *contact);
+const gchar *	e_o365_contact_get_parent_folder_id	(EO365Contact *contact);
+const gchar *	e_o365_contact_get_change_key		(EO365Contact *contact);
+time_t		e_o365_contact_get_created_date_time	(EO365Contact *contact);
+time_t		e_o365_contact_get_last_modified_date_time
+							(EO365Contact *contact);
+const gchar *	e_o365_contact_get_assistant_name	(EO365Contact *contact);
+void		e_o365_contact_add_assistant_name	(JsonBuilder *builder,
+							 const gchar *value);
+time_t		e_o365_contact_get_birthday		(EO365Contact *contact);
+void		e_o365_contact_add_birthday		(JsonBuilder *builder,
+							 time_t value);
+EO365PhysicalAddress *
+		e_o365_contact_get_business_address	(EO365Contact *contact);
+void		e_o365_contact_add_business_address	(JsonBuilder *builder,
+							 const gchar *city,
+							 const gchar *country_or_region,
+							 const gchar *postal_code,
+							 const gchar *state,
+							 const gchar *street);
+const gchar *	e_o365_contact_get_business_home_page	(EO365Contact *contact);
+void		e_o365_contact_add_business_home_page	(JsonBuilder *builder,
+							 const gchar *value);
+JsonArray *	e_o365_contact_get_business_phones	(EO365Contact *contact); /* const gchar * */
+void		e_o365_contact_begin_business_phones	(JsonBuilder *builder);
+void		e_o365_contact_end_business_phones	(JsonBuilder *builder);
+void		e_o365_contact_add_business_phone	(JsonBuilder *builder,
+							 const gchar *value);
+JsonArray *	e_o365_contact_get_categories		(EO365Contact *contact); /* const gchar * */
+void		e_o365_contact_begin_categories		(JsonBuilder *builder);
+void		e_o365_contact_end_categories		(JsonBuilder *builder);
+void		e_o365_contact_add_category		(JsonBuilder *builder,
+							 const gchar *category);
+JsonArray *	e_o365_contact_get_children		(EO365Contact *contact); /* const gchar * */
+void		e_o365_contact_begin_children		(JsonBuilder *builder);
+void		e_o365_contact_end_children		(JsonBuilder *builder);
+void		e_o365_contact_add_child		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_company_name		(EO365Contact *contact);
+void		e_o365_contact_add_company_name		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_department		(EO365Contact *contact);
+void		e_o365_contact_add_department		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_display_name		(EO365Contact *contact);
+void		e_o365_contact_add_display_name		(JsonBuilder *builder,
+							 const gchar *value);
+JsonArray *	e_o365_contact_get_email_addresses	(EO365Contact *contact); /* EO365EmailAddress * */
+void		e_o365_contact_begin_email_addresses	(JsonBuilder *builder);
+void		e_o365_contact_end_email_addresses	(JsonBuilder *builder);
+const gchar *	e_o365_contact_get_file_as		(EO365Contact *contact);
+void		e_o365_contact_add_file_as		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_generation		(EO365Contact *contact);
+void		e_o365_contact_add_generation		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_given_name		(EO365Contact *contact);
+void		e_o365_contact_add_given_name		(JsonBuilder *builder,
+							 const gchar *value);
+EO365PhysicalAddress *
+		e_o365_contact_get_home_address		(EO365Contact *contact);
+void		e_o365_contact_add_home_address		(JsonBuilder *builder,
+							 const gchar *city,
+							 const gchar *country_or_region,
+							 const gchar *postal_code,
+							 const gchar *state,
+							 const gchar *street);
+JsonArray *	e_o365_contact_get_home_phones		(EO365Contact *contact); /* const gchar * */
+void		e_o365_contact_begin_home_phones	(JsonBuilder *builder);
+void		e_o365_contact_end_home_phones		(JsonBuilder *builder);
+void		e_o365_contact_add_home_phone		(JsonBuilder *builder,
+							 const gchar *value);
+JsonArray *	e_o365_contact_get_im_addresses		(EO365Contact *contact); /* const gchar * */
+void		e_o365_contact_begin_im_addresses	(JsonBuilder *builder);
+void		e_o365_contact_end_im_addresses		(JsonBuilder *builder);
+void		e_o365_contact_add_im_address		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_initials		(EO365Contact *contact);
+void		e_o365_contact_add_initials		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_job_title		(EO365Contact *contact);
+void		e_o365_contact_add_job_title		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_manager		(EO365Contact *contact);
+void		e_o365_contact_add_manager		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_middle_name		(EO365Contact *contact);
+void		e_o365_contact_add_middle_name		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_mobile_phone		(EO365Contact *contact);
+void		e_o365_contact_add_mobile_phone		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_nick_name		(EO365Contact *contact);
+void		e_o365_contact_add_nick_name		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_office_location	(EO365Contact *contact);
+void		e_o365_contact_add_office_location	(JsonBuilder *builder,
+							 const gchar *value);
+EO365PhysicalAddress *
+		e_o365_contact_get_other_address	(EO365Contact *contact);
+void		e_o365_contact_add_other_address	(JsonBuilder *builder,
+							 const gchar *city,
+							 const gchar *country_or_region,
+							 const gchar *postal_code,
+							 const gchar *state,
+							 const gchar *street);
+const gchar *	e_o365_contact_get_personal_notes	(EO365Contact *contact);
+void		e_o365_contact_add_personal_notes	(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_profession		(EO365Contact *contact);
+void		e_o365_contact_add_profession		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_spouse_name		(EO365Contact *contact);
+void		e_o365_contact_add_spouse_name		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_surname		(EO365Contact *contact);
+void		e_o365_contact_add_surname		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_title		(EO365Contact *contact);
+void		e_o365_contact_add_title		(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_yomi_company_name	(EO365Contact *contact);
+void		e_o365_contact_add_yomi_company_name	(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_yomi_given_name	(EO365Contact *contact);
+void		e_o365_contact_add_yomi_given_name	(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_contact_get_yomi_surname		(EO365Contact *contact);
+void		e_o365_contact_add_yomi_surname		(JsonBuilder *builder,
 							 const gchar *value);
 
 G_END_DECLS

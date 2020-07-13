@@ -306,9 +306,7 @@ o365_backend_sync_folders_thread (GTask *task,
 	success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_CONTACTS, NULL, old_delta_link, 0,
 		o365_backend_got_contact_folders_delta_cb, o365_backend, &new_delta_link, cancellable, &error);
 
-	if (old_delta_link && *old_delta_link && (
-	    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
-	    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_BAD_REQUEST))) {
+	if (old_delta_link && *old_delta_link && e_o365_connection_util_delta_token_failed (error)) {
 		g_clear_pointer (&old_delta_link, g_free);
 		g_clear_error (&error);
 
@@ -642,7 +640,7 @@ o365_backend_authenticate_sync (EBackend *backend,
 
 	cnc = e_o365_connection_new (e_backend_get_source (backend), o365_settings);
 
-	result = e_o365_connection_authenticate_sync (cnc, cancellable, error);
+	result = e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_UNKNOWN, NULL, out_certificate_pem, out_certificate_errors, cancellable, error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);

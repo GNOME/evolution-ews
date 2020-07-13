@@ -85,6 +85,9 @@ struct _EO365ConnectionClass {
 	GObjectClass parent_class;
 };
 
+gboolean	e_o365_connection_util_delta_token_failed
+						(const GError *error);
+
 GType		e_o365_connection_get_type	(void) G_GNUC_CONST;
 
 EO365Connection *
@@ -126,6 +129,11 @@ gboolean	e_o365_connection_get_ssl_error_details
 ESourceAuthenticationResult
 		e_o365_connection_authenticate_sync
 						(EO365Connection *cnc,
+						 const gchar *user_override,
+						 EO365FolderKind kind,
+						 const gchar *folder_id,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_disconnect_sync
@@ -216,9 +224,10 @@ gboolean	e_o365_connection_rename_mail_folder_sync
 						 EO365MailFolder **out_mail_folder,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_o365_connection_get_mail_messages_delta_sync
+gboolean	e_o365_connection_get_objects_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EO365FolderKind kind,
 						 const gchar *folder_id, /* folder ID to get delta messages in */
 						 const gchar *select, /* properties to select, nullable */
 						 const gchar *delta_link, /* previous delta link */
@@ -298,6 +307,22 @@ gboolean	e_o365_connection_get_contacts_folder_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 EO365Folder **out_folder,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_contact_photo_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *contact_id,
+						 GByteArray **out_photo,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_update_contact_photo_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *contact_id,
+						 const GByteArray *jpeg_photo, /* nullable, to remove the photo */
 						 GCancellable *cancellable,
 						 GError **error);
 

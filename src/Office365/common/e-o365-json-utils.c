@@ -245,6 +245,30 @@ e_o365_json_add_string_member (JsonBuilder *builder,
 	json_builder_add_string_value (builder, value ? value : "");
 }
 
+void
+e_o365_json_add_nonempty_string_member (JsonBuilder *builder,
+					const gchar *member_name,
+					const gchar *value)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	if (value && *value)
+		e_o365_json_add_string_member (builder, member_name, value);
+}
+
+void
+e_o365_json_add_nonempty_or_null_string_member (JsonBuilder *builder,
+						const gchar *member_name,
+						const gchar *value)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	if (value && *value)
+		e_o365_json_add_string_member (builder, member_name, value);
+	else
+		e_o365_json_add_null_member (builder, member_name);
+}
+
 time_t
 e_o365_get_date_time_offset_member (JsonObject *object,
 				    const gchar *member_name)
@@ -276,7 +300,7 @@ e_o365_add_date_time_offset_member (JsonBuilder *builder,
 	GDateTime *dt;
 	gchar *value_str;
 
-	if ((time_t) value <= 0) {
+	if (value <= (time_t) 0) {
 		e_o365_json_add_null_member (builder, member_name);
 		return;
 	}
@@ -443,11 +467,8 @@ e_o365_add_recipient (JsonBuilder *builder,
 	e_o365_json_begin_object_member (builder, member_name);
 	e_o365_json_begin_object_member (builder, "emailAddress");
 
-	if (name && *name)
-		e_o365_json_add_string_member (builder, "name", name);
-
-	if (address && *address)
-		e_o365_json_add_string_member (builder, "address", address);
+	e_o365_json_add_nonempty_string_member (builder, "name", name);
+	e_o365_json_add_nonempty_string_member (builder, "address", address);
 
 	e_o365_json_end_object_member (builder); /* emailAddress */
 	e_o365_json_end_object_member (builder); /* member_name */
@@ -483,9 +504,7 @@ e_o365_add_date_time (JsonBuilder *builder,
 	e_o365_json_begin_object_member (builder, member_name);
 
 	e_o365_add_date_time_offset_member (builder, "dateTime", date_time);
-
-	if (zone && *zone)
-		e_o365_json_add_string_member (builder, "timeZone", zone);
+	e_o365_json_add_nonempty_string_member (builder, "timeZone", zone);
 
 	e_o365_json_end_object_member (builder);
 }
@@ -906,8 +925,7 @@ void
 e_o365_mail_message_add_internet_message_id (JsonBuilder *builder,
 					     const gchar *message_id)
 {
-	if (message_id && *message_id)
-		e_o365_json_add_string_member (builder, "internetMessageId", message_id);
+	e_o365_json_add_nonempty_string_member (builder, "internetMessageId", message_id);
 }
 
 gboolean
@@ -1037,8 +1055,7 @@ void
 e_o365_mail_message_add_subject (JsonBuilder *builder,
 				 const gchar *subject)
 {
-	if (subject)
-		e_o365_json_add_string_member (builder, "subject", subject);
+	e_o365_json_add_nonempty_string_member (builder, "subject", subject);
 }
 
 JsonArray * /* EO365Recipient * */
@@ -1212,4 +1229,639 @@ e_o365_file_attachment_add_content_id (JsonBuilder *builder,
 				       const gchar *value)
 {
 	e_o365_json_add_string_member (builder, "contentId", value);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/emailaddress?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_email_address_get_name (EO365EmailAddress *email)
+{
+	return e_o365_json_get_string_member (email, "name", NULL);
+}
+
+const gchar *
+e_o365_email_address_get_address (EO365EmailAddress *email)
+{
+	return e_o365_json_get_string_member (email, "address", NULL);
+}
+
+void
+e_o365_add_email_address (JsonBuilder *builder,
+			  const gchar *name,
+			  const gchar *address)
+{
+	g_return_if_fail ((name && *name) || (address && *address));
+
+	e_o365_json_begin_object_member (builder, NULL);
+
+	e_o365_json_add_nonempty_string_member (builder, "name", name);
+	e_o365_json_add_nonempty_string_member (builder, "address", address);
+
+	e_o365_json_end_object_member (builder); /* unnamed object */
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/physicaladdress?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_physical_address_get_city (EO365PhysicalAddress *address)
+{
+	return e_o365_json_get_string_member (address, "city", NULL);
+}
+
+const gchar *
+e_o365_physical_address_get_country_or_region (EO365PhysicalAddress *address)
+{
+	return e_o365_json_get_string_member (address, "countryOrRegion", NULL);
+}
+
+const gchar *
+e_o365_physical_address_get_postal_code (EO365PhysicalAddress *address)
+{
+	return e_o365_json_get_string_member (address, "postalCode", NULL);
+}
+
+const gchar *
+e_o365_physical_address_get_state (EO365PhysicalAddress *address)
+{
+	return e_o365_json_get_string_member (address, "state", NULL);
+}
+
+const gchar *
+e_o365_physical_address_get_street (EO365PhysicalAddress *address)
+{
+	return e_o365_json_get_string_member (address, "street", NULL);
+}
+
+void
+e_o365_add_physical_address (JsonBuilder *builder,
+			     const gchar *member_name,
+			     const gchar *city,
+			     const gchar *country_or_region,
+			     const gchar *postal_code,
+			     const gchar *state,
+			     const gchar *street)
+{
+	if ((city && *city) ||
+	    (country_or_region && *country_or_region) ||
+	    (postal_code && *postal_code) ||
+	    (state && *state) ||
+	    (street && *street)) {
+		e_o365_json_begin_object_member (builder, member_name);
+		e_o365_json_add_nonempty_string_member (builder, "city", city);
+		e_o365_json_add_nonempty_string_member (builder, "countryOrRegion", country_or_region);
+		e_o365_json_add_nonempty_string_member (builder, "postalCode", postal_code);
+		e_o365_json_add_nonempty_string_member (builder, "state", state);
+		e_o365_json_add_nonempty_string_member (builder, "street", street);
+		e_o365_json_end_object_member (builder);
+	} else {
+		e_o365_json_add_null_member (builder, member_name);
+	}
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/contact?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_contact_get_id (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "id", NULL);
+}
+
+const gchar *
+e_o365_contact_get_parent_folder_id (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "parentFolderId", NULL);
+}
+
+const gchar *
+e_o365_contact_get_change_key (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "changeKey", NULL);
+}
+
+time_t
+e_o365_contact_get_created_date_time (EO365Contact *contact)
+{
+	return e_o365_get_date_time_offset_member (contact, "createdDateTime");
+}
+
+time_t
+e_o365_contact_get_last_modified_date_time (EO365Contact *contact)
+{
+	return e_o365_get_date_time_offset_member (contact, "lastModifiedDateTime");
+}
+
+const gchar *
+e_o365_contact_get_assistant_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "assistantName", NULL);
+}
+
+void
+e_o365_contact_add_assistant_name (JsonBuilder *builder,
+				   const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "assistantName", value);
+}
+
+time_t
+e_o365_contact_get_birthday (EO365Contact *contact)
+{
+	return e_o365_get_date_time_offset_member (contact, "birthday");
+}
+
+void
+e_o365_contact_add_birthday (JsonBuilder *builder,
+			     time_t value)
+{
+	e_o365_add_date_time_offset_member (builder, "birthday", value);
+}
+
+EO365PhysicalAddress *
+e_o365_contact_get_business_address (EO365Contact *contact)
+{
+	return e_o365_json_get_object_member (contact, "businessAddress");
+}
+
+void
+e_o365_contact_add_business_address (JsonBuilder *builder,
+				     const gchar *city,
+				     const gchar *country_or_region,
+				     const gchar *postal_code,
+				     const gchar *state,
+				     const gchar *street)
+{
+	e_o365_add_physical_address (builder, "businessAddress", city, country_or_region, postal_code, state, street);
+}
+
+const gchar *
+e_o365_contact_get_business_home_page (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "businessHomePage", NULL);
+}
+
+void
+e_o365_contact_add_business_home_page (JsonBuilder *builder,
+				       const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "businessHomePage", value);
+}
+
+JsonArray * /* const gchar * */
+e_o365_contact_get_business_phones (EO365Contact *contact)
+{
+	return e_o365_json_get_array_member (contact, "businessPhones");
+}
+
+void
+e_o365_contact_begin_business_phones (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "businessPhones");
+}
+
+void
+e_o365_contact_end_business_phones (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_contact_add_business_phone (JsonBuilder *builder,
+				   const gchar *value)
+{
+	g_return_if_fail (value && *value);
+
+	json_builder_add_string_value (builder, value);
+}
+
+JsonArray * /* const gchar * */
+e_o365_contact_get_categories (EO365Contact *contact)
+{
+	return e_o365_json_get_array_member (contact, "categories");
+}
+
+void
+e_o365_contact_begin_categories (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "categories");
+}
+
+void
+e_o365_contact_end_categories (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_contact_add_category (JsonBuilder *builder,
+			     const gchar *category)
+{
+	g_return_if_fail (category && *category);
+
+	json_builder_add_string_value (builder, category);
+}
+
+JsonArray * /* const gchar * */
+e_o365_contact_get_children (EO365Contact *contact)
+{
+	return e_o365_json_get_array_member (contact, "children");
+}
+
+void
+e_o365_contact_begin_children (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "children");
+}
+
+void
+e_o365_contact_end_children (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_contact_add_child (JsonBuilder *builder,
+			  const gchar *value)
+{
+	g_return_if_fail (value && *value);
+
+	json_builder_add_string_value (builder, value);
+}
+
+const gchar *
+e_o365_contact_get_company_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "companyName", NULL);
+}
+
+void
+e_o365_contact_add_company_name (JsonBuilder *builder,
+				 const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "companyName", value);
+}
+
+const gchar *
+e_o365_contact_get_department (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "department", NULL);
+}
+
+void
+e_o365_contact_add_department (JsonBuilder *builder,
+			       const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "department", value);
+}
+
+const gchar *
+e_o365_contact_get_display_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "displayName", NULL);
+}
+
+void
+e_o365_contact_add_display_name (JsonBuilder *builder,
+				 const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "displayName", value);
+}
+
+JsonArray * /* EO365EmailAddress * */
+e_o365_contact_get_email_addresses (EO365Contact *contact)
+{
+	return e_o365_json_get_array_member (contact, "emailAddresses");
+}
+
+void
+e_o365_contact_begin_email_addresses (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "emailAddresses");
+}
+
+void
+e_o365_contact_end_email_addresses (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+const gchar *
+e_o365_contact_get_file_as (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "fileAs", NULL);
+}
+
+void
+e_o365_contact_add_file_as (JsonBuilder *builder,
+			    const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "fileAs", value);
+}
+
+const gchar *
+e_o365_contact_get_generation (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "generation", NULL);
+}
+
+void
+e_o365_contact_add_generation (JsonBuilder *builder,
+			       const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "generation", value);
+}
+
+const gchar *
+e_o365_contact_get_given_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "givenName", NULL);
+}
+
+void
+e_o365_contact_add_given_name (JsonBuilder *builder,
+			       const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "givenName", value);
+}
+
+EO365PhysicalAddress *
+e_o365_contact_get_home_address (EO365Contact *contact)
+{
+	return e_o365_json_get_object_member (contact, "homeAddress");
+}
+
+void
+e_o365_contact_add_home_address (JsonBuilder *builder,
+				 const gchar *city,
+				 const gchar *country_or_region,
+				 const gchar *postal_code,
+				 const gchar *state,
+				 const gchar *street)
+{
+	e_o365_add_physical_address (builder, "homeAddress", city, country_or_region, postal_code, state, street);
+}
+
+JsonArray * /* const gchar * */
+e_o365_contact_get_home_phones (EO365Contact *contact)
+{
+	return e_o365_json_get_array_member (contact, "homePhones");
+}
+
+void
+e_o365_contact_begin_home_phones (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "homePhones");
+}
+
+void
+e_o365_contact_end_home_phones (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_contact_add_home_phone (JsonBuilder *builder,
+			       const gchar *value)
+{
+	g_return_if_fail (value && *value);
+
+	json_builder_add_string_value (builder, value);
+}
+
+JsonArray * /* const gchar * */
+e_o365_contact_get_im_addresses (EO365Contact *contact)
+{
+	return e_o365_json_get_array_member (contact, "imAddresses");
+}
+
+void
+e_o365_contact_begin_im_addresses (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "imAddresses");
+}
+
+void
+e_o365_contact_end_im_addresses (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_contact_add_im_address (JsonBuilder *builder,
+			       const gchar *value)
+{
+	g_return_if_fail (value && *value);
+
+	json_builder_add_string_value (builder, value);
+}
+
+const gchar *
+e_o365_contact_get_initials (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "initials", NULL);
+}
+
+void
+e_o365_contact_add_initials (JsonBuilder *builder,
+			     const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "initials", value);
+}
+
+const gchar *
+e_o365_contact_get_job_title (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "jobTitle", NULL);
+}
+
+void
+e_o365_contact_add_job_title (JsonBuilder *builder,
+			      const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "jobTitle", value);
+}
+
+const gchar *
+e_o365_contact_get_manager (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "manager", NULL);
+}
+
+void
+e_o365_contact_add_manager (JsonBuilder *builder,
+			    const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "manager", value);
+}
+
+const gchar *
+e_o365_contact_get_middle_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "middleName", NULL);
+}
+
+void
+e_o365_contact_add_middle_name (JsonBuilder *builder,
+				const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "middleName", value);
+}
+
+const gchar *
+e_o365_contact_get_mobile_phone (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "mobilePhone", NULL);
+}
+
+void
+e_o365_contact_add_mobile_phone (JsonBuilder *builder,
+				 const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "mobilePhone", value);
+}
+
+const gchar *
+e_o365_contact_get_nick_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "nickName", NULL);
+}
+
+void
+e_o365_contact_add_nick_name (JsonBuilder *builder,
+			      const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "nickName", value);
+}
+
+const gchar *
+e_o365_contact_get_office_location (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "officeLocation", NULL);
+}
+
+void
+e_o365_contact_add_office_location (JsonBuilder *builder,
+				    const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "officeLocation", value);
+}
+
+EO365PhysicalAddress *
+e_o365_contact_get_other_address (EO365Contact *contact)
+{
+	return e_o365_json_get_object_member (contact, "otherAddress");
+}
+
+void
+e_o365_contact_add_other_address (JsonBuilder *builder,
+				  const gchar *city,
+				  const gchar *country_or_region,
+				  const gchar *postal_code,
+				  const gchar *state,
+				  const gchar *street)
+{
+	e_o365_add_physical_address (builder, "otherAddress", city, country_or_region, postal_code, state, street);
+}
+
+const gchar *
+e_o365_contact_get_personal_notes (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "personalNotes", NULL);
+}
+
+void
+e_o365_contact_add_personal_notes (JsonBuilder *builder,
+				   const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "personalNotes", value);
+}
+
+const gchar *
+e_o365_contact_get_profession (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "profession", NULL);
+}
+
+void
+e_o365_contact_add_profession (JsonBuilder *builder,
+			       const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "profession", value);
+}
+
+const gchar *
+e_o365_contact_get_spouse_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "spouseName", NULL);
+}
+
+void
+e_o365_contact_add_spouse_name (JsonBuilder *builder,
+				const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "spouseName", value);
+}
+
+const gchar *
+e_o365_contact_get_surname (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "surname", NULL);
+}
+
+void
+e_o365_contact_add_surname (JsonBuilder *builder,
+			    const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "surname", value);
+}
+
+const gchar *
+e_o365_contact_get_title (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "title", NULL);
+}
+
+void
+e_o365_contact_add_title (JsonBuilder *builder,
+			  const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "title", value);
+}
+
+const gchar *
+e_o365_contact_get_yomi_company_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "yomiCompanyName", NULL);
+}
+
+void
+e_o365_contact_add_yomi_company_name (JsonBuilder *builder,
+				      const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "yomiCompanyName", value);
+}
+
+const gchar *
+e_o365_contact_get_yomi_given_name (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "yomiGivenName", NULL);
+}
+
+void
+e_o365_contact_add_yomi_given_name (JsonBuilder *builder,
+				    const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "yomiGivenName", value);
+}
+
+const gchar *
+e_o365_contact_get_yomi_surname (EO365Contact *contact)
+{
+	return e_o365_json_get_string_member (contact, "yomiSurname", NULL);
+}
+
+void
+e_o365_contact_add_yomi_surname (JsonBuilder *builder,
+				 const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "yomiSurname", value);
 }

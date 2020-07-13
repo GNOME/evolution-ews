@@ -718,6 +718,13 @@ e_o365_connection_init (EO365Connection *cnc)
 		G_BINDING_DEFAULT);
 }
 
+gboolean
+e_o365_connection_util_delta_token_failed (const GError *error)
+{
+	return g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+	       g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_BAD_REQUEST);
+}
+
 EO365Connection *
 e_o365_connection_new (ESource *source,
 		       CamelO365Settings *settings)
@@ -1362,6 +1369,39 @@ e_o365_read_no_response_cb (EO365Connection *cnc,
 	return TRUE;
 }
 
+static gboolean
+e_o365_read_to_byte_array_cb (EO365Connection *cnc,
+			      SoupMessage *message,
+			      GInputStream *raw_data_stream,
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	GByteArray **out_byte_array = user_data;
+	gchar buffer[4096];
+	gssize n_read;
+
+	g_return_val_if_fail (message != NULL, FALSE);
+	g_return_val_if_fail (out_byte_array != NULL, FALSE);
+
+	if (!*out_byte_array) {
+		goffset content_length;
+
+		content_length = soup_message_headers_get_content_length (message->response_headers);
+
+		if (!content_length || content_length > 65536)
+			content_length = 65535;
+
+		*out_byte_array = g_byte_array_sized_new (content_length);
+	}
+
+	while (n_read = g_input_stream_read (raw_data_stream, buffer, sizeof (buffer), cancellable, error), n_read > 0) {
+		g_byte_array_append (*out_byte_array, (const guint8 *) buffer, n_read);
+	}
+
+	return !n_read;
+}
+
 typedef struct _EO365ResponseData {
 	EO365ConnectionJsonFunc json_func;
 	gpointer func_user_data;
@@ -1476,6 +1516,10 @@ o365_connection_new_soup_message (const gchar *method,
 		soup_message_headers_append (message->request_headers, "Connection", "Close");
 		soup_message_headers_append (message->request_headers, "User-Agent", "Evolution-O365/" VERSION);
 
+		/* Disable caching for proxies (RFC 4918, section 10.4.5) */
+		soup_message_headers_append (message->request_headers, "Cache-Control", "no-cache");
+		soup_message_headers_append (message->request_headers, "Pragma", "no-cache");
+
 		if ((csm_flags & CSM_DISABLE_RESPONSE) != 0)
 			soup_message_headers_append (message->request_headers, "Prefer", "return=minimal");
 	} else {
@@ -1511,26 +1555,52 @@ e_o365_connection_get_ssl_error_details (EO365Connection *cnc,
 
 ESourceAuthenticationResult
 e_o365_connection_authenticate_sync (EO365Connection *cnc,
+				     const gchar *user_override,
+				     EO365FolderKind kind,
+				     const gchar *folder_id,
+				     gchar **out_certificate_pem,
+				     GTlsCertificateFlags *out_certificate_errors,
 				     GCancellable *cancellable,
 				     GError **error)
 {
 	ESourceAuthenticationResult result = E_SOURCE_AUTHENTICATION_ERROR;
-	EO365ResponseData rd;
 	SoupMessage *message;
+	JsonObject *object = NULL;
 	gchar *uri;
+	const gchar *resource = NULL;
 	gboolean success;
-	GSList *folders = NULL;
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), result);
 
 	/* Just pick an inexpensive operation */
-	uri = e_o365_connection_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
-		"mailFolders",
-		NULL,
+	switch (kind) {
+	case E_O365_FOLDER_KIND_UNKNOWN:
+	case E_O365_FOLDER_KIND_MAIL:
+		resource = "mailFolders";
+
+		if (!folder_id || !*folder_id)
+			folder_id = "inbox";
+		break;
+	case E_O365_FOLDER_KIND_CONTACTS:
+		resource = "contactFolders";
+
+		if (!folder_id || !*folder_id)
+			folder_id = "contacts";
+		break;
+	default:
+		g_warn_if_reached ();
+
+		resource = "mailFolders";
+		folder_id = "inbox";
+		break;
+	}
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		resource,
+		folder_id,
 		NULL,
 		"$select", "displayName",
-		"$top", "1",
 		NULL);
 
 	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
@@ -1543,12 +1613,7 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 
 	g_free (uri);
 
-	memset (&rd, 0, sizeof (EO365ResponseData));
-
-	rd.read_only_once = TRUE;
-	rd.out_items = &folders;
-
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, &local_error);
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, &object, cancellable, &local_error);
 
 	if (success) {
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
@@ -1558,6 +1623,9 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 			local_error->code = G_IO_ERROR_CANCELLED;
 		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
 			result = E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED;
+
+			if (out_certificate_pem || out_certificate_errors)
+				e_o365_connection_get_ssl_error_details (cnc, out_certificate_pem, out_certificate_errors);
 		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 			ESoupAuthBearer *bearer;
 
@@ -1588,7 +1656,9 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 		}
 	}
 
-	g_slist_free_full (folders, (GDestroyNotify) json_object_unref);
+	if (object)
+		json_object_unref (object);
+
 	g_clear_object (&message);
 	g_clear_error (&local_error);
 
@@ -1756,7 +1826,7 @@ e_o365_connection_set_json_body (SoupMessage *message,
 
 	data = json_generator_to_data (generator, &data_length);
 
-	soup_message_headers_append (message->request_headers, "Content-Type", "application/json");
+	soup_message_headers_set_content_type (message->request_headers, "application/json", NULL);
 
 	if (data)
 		soup_message_body_append_take (message->request_body, (guchar *) data, data_length);
@@ -2510,20 +2580,22 @@ e_o365_connection_rename_mail_folder_sync (EO365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/message-delta?view=graph-rest-1.0&tabs=http */
+/* https://docs.microsoft.com/en-us/graph/api/message-delta?view=graph-rest-1.0&tabs=http
+   https://docs.microsoft.com/en-us/graph/api/contact-delta?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
-						const gchar *user_override, /* for which user, NULL to use the account user */
-						const gchar *folder_id, /* folder ID to get delta messages in */
-						const gchar *select, /* properties to select, nullable */
-						const gchar *delta_link, /* previous delta link */
-						guint max_page_size, /* 0 for default by the server */
-						EO365ConnectionJsonFunc func, /* function to call with each result set */
-						gpointer func_user_data, /* user data passed into the 'func' */
-						gchar **out_delta_link,
-						GCancellable *cancellable,
-						GError **error)
+e_o365_connection_get_objects_delta_sync (EO365Connection *cnc,
+					  const gchar *user_override, /* for which user, NULL to use the account user */
+					  EO365FolderKind kind,
+					  const gchar *folder_id, /* folder ID to get delta messages in */
+					  const gchar *select, /* properties to select, nullable */
+					  const gchar *delta_link, /* previous delta link */
+					  guint max_page_size, /* 0 for default by the server */
+					  EO365ConnectionJsonFunc func, /* function to call with each result set */
+					  gpointer func_user_data, /* user data passed into the 'func' */
+					  gchar **out_delta_link,
+					  GCancellable *cancellable,
+					  GError **error)
 {
 	EO365ResponseData rd;
 	SoupMessage *message = NULL;
@@ -2538,12 +2610,29 @@ e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
 		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
+		const gchar *kind_str = NULL, *kind_path_str = NULL;
 		gchar *uri;
 
+		switch (kind) {
+		case E_O365_FOLDER_KIND_CONTACTS:
+			kind_str = "contactFolders";
+			kind_path_str = "contacts";
+			break;
+		case E_O365_FOLDER_KIND_MAIL:
+			kind_str = "mailFolders";
+			kind_path_str = "messages";
+			break;
+		default:
+			g_warn_if_reached ();
+			break;
+		}
+
+		g_return_val_if_fail (kind_str != NULL && kind_path_str != NULL, FALSE);
+
 		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
-			"mailFolders",
+			kind_str,
 			folder_id,
-			"messages",
+			kind_path_str,
 			"", "delta",
 			"$select", select,
 			NULL);
@@ -2604,11 +2693,9 @@ e_o365_connection_get_mail_message_sync (EO365Connection *cnc,
 	g_return_val_if_fail (func != NULL, FALSE);
 
 	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
-		/*"mailFolders",
-		folder_id,*/
 		"messages",
-		"", message_id,
-		"", "$value",
+		message_id,
+		"$value",
 		NULL);
 
 	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
@@ -3188,6 +3275,101 @@ e_o365_connection_get_contacts_folder_sync (EO365Connection *cnc,
 	g_free (uri);
 
 	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_folder, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0 */
+
+gboolean
+e_o365_connection_get_contact_photo_sync (EO365Connection *cnc,
+					  const gchar *user_override, /* for which user, NULL to use the account user */
+					  const gchar *folder_id,
+					  const gchar *contact_id,
+					  GByteArray **out_photo,
+					  GCancellable *cancellable,
+					  GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (contact_id != NULL, FALSE);
+	g_return_val_if_fail (out_photo != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"contactFolders",
+		folder_id,
+		"contacts",
+		"", contact_id,
+		"", "photo",
+		"", "$value",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_to_byte_array_cb, out_photo, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/profilephoto-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_update_contact_photo_sync (EO365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     const gchar *folder_id,
+					     const gchar *contact_id,
+					     const GByteArray *jpeg_photo, /* nullable, to remove the photo */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"contactFolders",
+		folder_id,
+		"contacts",
+		"", contact_id,
+		"", "photo",
+		"", "$value",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_PUT, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	soup_message_headers_set_content_type (message->request_headers, "image/jpeg", NULL);
+	soup_message_headers_set_content_length (message->request_headers, jpeg_photo ? jpeg_photo->len : 0);
+
+	if (jpeg_photo)
+		soup_message_body_append (message->request_body, SOUP_MEMORY_STATIC, jpeg_photo->data, jpeg_photo->len);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
 
 	g_clear_object (&message);
 

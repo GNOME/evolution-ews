@@ -1045,11 +1045,11 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 	sdd.changes = NULL;
 	sdd.removed_uids = NULL;
 
-	success = e_o365_connection_get_mail_messages_delta_sync (cnc, NULL, folder_id, O365_FETCH_SUMMARY_PROPERTIES,
+	success = e_o365_connection_get_objects_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, folder_id, O365_FETCH_SUMMARY_PROPERTIES,
 		curr_delta_link, 0, o365_folder_got_summary_messages_cb, &sdd,
 		&new_delta_link, cancellable, &local_error);
 
-	if (curr_delta_link && g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	if (curr_delta_link && e_o365_connection_util_delta_token_failed (local_error)) {
 		g_clear_error (&local_error);
 		g_clear_pointer (&curr_delta_link, g_free);
 
@@ -1057,7 +1057,7 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 
 		o365_folder_forget_all_mails (o365_folder);
 
-		success = e_o365_connection_get_mail_messages_delta_sync (cnc, NULL, folder_id, O365_FETCH_SUMMARY_PROPERTIES,
+		success = e_o365_connection_get_objects_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, folder_id, O365_FETCH_SUMMARY_PROPERTIES,
 			NULL, 0, o365_folder_got_summary_messages_cb, &sdd,
 			&new_delta_link, cancellable, &local_error);
 	}

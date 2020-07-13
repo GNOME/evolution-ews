@@ -597,7 +597,7 @@ o365_store_authenticate_sync (CamelService *service,
 	if (!cnc)
 		return CAMEL_AUTHENTICATION_ERROR;
 
-	switch (e_o365_connection_authenticate_sync (cnc, cancellable, error)) {
+	switch (e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, NULL, NULL, NULL, cancellable, error)) {
 	case E_SOURCE_AUTHENTICATION_ERROR:
 	case E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED:
 	default:
@@ -1269,9 +1269,7 @@ o365_store_get_folder_info_sync (CamelStore *store,
 				success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, NULL, old_delta_link, 0,
 					camel_o365_got_folders_delta_cb, &fdd, &new_delta_link, cancellable, &local_error);
 
-				if (old_delta_link && *old_delta_link && (
-				    g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
-				    g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_BAD_REQUEST))) {
+				if (old_delta_link && *old_delta_link && e_o365_connection_util_delta_token_failed (local_error)) {
 					g_clear_pointer (&old_delta_link, g_free);
 					g_clear_error (&local_error);
 
