@@ -43,6 +43,27 @@ struct _EO365BackendPrivate {
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EO365Backend, e_o365_backend, E_TYPE_COLLECTION_BACKEND, 0,
 	G_ADD_PRIVATE_DYNAMIC (EO365Backend))
 
+static void
+o365_backend_claim_old_resources (ECollectionBackend *backend)
+{
+	ESourceRegistryServer *registry;
+	GList *old_resources, *iter;
+
+	g_return_if_fail (E_IS_COLLECTION_BACKEND (backend));
+
+	registry = e_collection_backend_ref_server (backend);
+	old_resources = e_collection_backend_claim_all_resources (backend);
+
+	for (iter = old_resources; iter; iter = g_list_next (iter)) {
+		ESource *source = iter->data;
+
+		e_source_registry_server_add_source (registry, source);
+	}
+
+	g_list_free_full (old_resources, g_object_unref);
+	g_clear_object (&registry);
+}
+
 static void o365_backend_populate (ECollectionBackend *backend);
 
 static void
@@ -78,6 +99,8 @@ o365_backend_populate (ECollectionBackend *backend)
 	/* do not do anything, if account is disabled */
 	if (!e_source_get_enabled (source))
 		return;
+
+	o365_backend_claim_old_resources (backend);
 
 	if (e_backend_get_online (E_BACKEND (backend)))
 		e_backend_schedule_authenticate (E_BACKEND (backend), NULL);

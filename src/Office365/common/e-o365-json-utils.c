@@ -1314,7 +1314,8 @@ e_o365_add_physical_address (JsonBuilder *builder,
 		e_o365_json_add_nonempty_string_member (builder, "street", street);
 		e_o365_json_end_object_member (builder);
 	} else {
-		e_o365_json_add_null_member (builder, member_name);
+		e_o365_json_begin_object_member (builder, member_name);
+		e_o365_json_end_object_member (builder);
 	}
 }
 

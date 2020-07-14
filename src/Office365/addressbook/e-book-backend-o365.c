@@ -762,6 +762,62 @@ ebb_o365_contact_add_file_as (EBookBackendO365 *bbo365,
 }
 
 static gboolean
+ebb_o365_contact_get_generation (EBookBackendO365 *bbo365,
+				 EO365Contact *o365_contact,
+				 EContact *inout_contact,
+				 EContactField field_id,
+				 EO365Connection *cnc,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	const gchar *value;
+
+	value = e_o365_contact_get_generation (o365_contact);
+
+	if (value && *value) {
+		EContactName *name = e_contact_get (inout_contact, field_id);
+		gchar *prev;
+
+		if (!name)
+			name = e_contact_name_new ();
+
+		prev = name->suffixes;
+		name->suffixes = (gchar *) value;
+
+		e_contact_set (inout_contact, field_id, name);
+
+		name->suffixes = prev;
+		e_contact_name_free (name);
+	}
+
+	return TRUE;
+}
+
+static gboolean
+ebb_o365_contact_add_generation (EBookBackendO365 *bbo365,
+				 EContact *new_contact,
+				 EContact *old_contact,
+				 EContactField field_id,
+				 const gchar *o365_id,
+				 JsonBuilder *builder,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EContactName *new_value, *old_value;
+
+	new_value = e_contact_get (new_contact, field_id);
+	old_value = old_contact ? e_contact_get (old_contact, field_id) : NULL;
+
+	if (!(new_value && old_value && g_strcmp0 (new_value->suffixes, old_value->suffixes) == 0))
+		e_o365_contact_add_generation (builder, new_value ? new_value->suffixes : NULL);
+
+	e_contact_name_free (new_value);
+	e_contact_name_free (old_value);
+
+	return TRUE;
+}
+
+static gboolean
 ebb_o365_contact_get_im_addresses (EBookBackendO365 *bbo365,
 				   EO365Contact *o365_contact,
 				   EContact *inout_contact,
@@ -938,7 +994,7 @@ ebb_o365_contact_get_title (EBookBackendO365 *bbo365,
 {
 	const gchar *value;
 
-	value = e_o365_contact_get_middle_name (o365_contact);
+	value = e_o365_contact_get_title (o365_contact);
 
 	if (value && *value) {
 		EContactName *name = e_contact_get (inout_contact, field_id);
@@ -952,7 +1008,7 @@ ebb_o365_contact_get_title (EBookBackendO365 *bbo365,
 
 		e_contact_set (inout_contact, field_id, name);
 
-		name->additional = prev;
+		name->prefixes = prev;
 		e_contact_name_free (name);
 	}
 
@@ -1076,8 +1132,10 @@ ebb_o365_contact_add_photo (EBookBackendO365 *bbo365,
 
 		if (!e_o365_connection_update_contact_photo_sync (bbo365->priv->cnc, NULL, bbo365->priv->folder_id,
 			o365_id ? o365_id : e_contact_get_const (new_contact, E_CONTACT_UID), jpeg_photo, cancellable, &local_error)) {
-			g_warning ("%s: Failed to store photo for '%s': %s", G_STRFUNC, (const gchar *) e_contact_get_const (new_contact, E_CONTACT_UID),
-				local_error ? local_error->message : "Unknown error");
+			if (local_error) {
+				g_propagate_error (error, local_error);
+				local_error = NULL;
+			}
 		}
 
 		UNLOCK (bbo365);
@@ -1129,8 +1187,7 @@ struct _mappings {
 	STRING_FIELD	(E_CONTACT_ORG,			e_o365_contact_get_company_name,	e_o365_contact_add_company_name),
 	STRING_FIELD	(E_CONTACT_ORG_UNIT,		e_o365_contact_get_department,		e_o365_contact_add_department),
 	COMPLEX_FIELD	(E_CONTACT_EMAIL,		ebb_o365_contact_get_emails,		ebb_o365_contact_add_emails),
-	COMPLEX_ADDFN	(E_CONTACT_FILE_AS,		e_o365_contact_get_file_as,		ebb_o365_contact_add_file_as),
-	/* STRING_FIELD	(???,				e_o365_contact_get_generation,		e_o365_contact_add_generation), */
+	COMPLEX_FIELD	(E_CONTACT_NAME,		ebb_o365_contact_get_generation,	ebb_o365_contact_add_generation),
 	STRING_FIELD	(E_CONTACT_GIVEN_NAME,		e_o365_contact_get_given_name,		e_o365_contact_add_given_name),
 	COMPLEX_FIELD	(E_CONTACT_ADDRESS_HOME,	ebb_o365_contact_get_address,		ebb_o365_contact_add_address),
 	COMPLEX_FIELD	(E_CONTACT_PHONE_HOME,		ebb_o365_contact_get_phone,		ebb_o365_contact_add_phone),
@@ -1151,6 +1208,7 @@ struct _mappings {
 	/* STRING_FIELD	(???,				e_o365_contact_get_yomi_company_name,	e_o365_contact_add_yomi_company_name), */
 	/* STRING_FIELD	(???,				e_o365_contact_get_yomi_given_name,	e_o365_contact_add_yomi_given_name), */
 	/* STRING_FIELD	(???,				e_o365_contact_get_yomi_surname,	e_o365_contact_add_yomi_surname), */
+	COMPLEX_ADDFN	(E_CONTACT_FILE_AS,		e_o365_contact_get_file_as,		ebb_o365_contact_add_file_as),
 	COMPLEX_FIELD_2	(E_CONTACT_PHOTO,		ebb_o365_contact_get_photo,		ebb_o365_contact_add_photo)
 };
 
@@ -1623,6 +1681,11 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 	g_return_val_if_fail (out_new_uid != NULL, FALSE);
 	g_return_val_if_fail (out_new_extra != NULL, FALSE);
 
+	if (GPOINTER_TO_INT (e_contact_get (contact, E_CONTACT_IS_LIST))) {
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED, _("Cannot save contact list into an Office 365 address book")));
+		return FALSE;
+	}
+
 	bbo365 = E_BOOK_BACKEND_O365 (meta_backend);
 
 	LOCK (bbo365);
@@ -1671,6 +1734,9 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 				vcard = ebb_o365_json_contact_to_vcard (bbo365, created_contact, bbo365->priv->cnc, out_new_extra, cancellable, error);
 				g_clear_object (&vcard);
 			}
+
+			if (created_contact)
+				json_object_unref (created_contact);
 		}
 
 		g_clear_object (&builder);
