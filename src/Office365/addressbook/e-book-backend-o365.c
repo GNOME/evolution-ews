@@ -149,8 +149,8 @@ ebb_o365_contact_add_birthday (EBookBackendO365 *bbo365,
 			       EContact *new_contact,
 			       EContact *old_contact,
 			       EContactField field_id,
+			       const gchar *o365_id,
 			       JsonBuilder *builder,
-			       EO365Connection *cnc,
 			       GCancellable *cancellable,
 			       GError **error)
 {
@@ -163,16 +163,19 @@ ebb_o365_contact_add_birthday (EBookBackendO365 *bbo365,
 	if (!e_contact_date_equal (new_dt, old_dt)) {
 		if (new_dt) {
 			GDateTime *gdt;
+			time_t value = (time_t) 0;
 
-			gdt = g_date_time_new_local (new_dt->year, new_dt->month, new_dt->day, 0, 0, 0.0);
+			gdt = g_date_time_new_local (new_dt->year, new_dt->month, new_dt->day, 11, 59, 0.0);
 
 			if (gdt) {
-				e_o365_contact_add_birthday (builder, g_date_time_to_unix (gdt));
+				value = g_date_time_to_unix (gdt);
+				value = value - (value % (24 * 60 * 60));
+				value = value + (((12 * 60) - 1) * 60);
 
 				g_date_time_unref (gdt);
-			} else {
-				e_o365_contact_add_birthday (builder, (time_t) 0);
 			}
+
+			e_o365_contact_add_birthday (builder, value);
 		} else {
 			e_o365_contact_add_birthday (builder, (time_t) 0);
 		}
@@ -202,7 +205,7 @@ ebb_o365_contact_get_address (EBookBackendO365 *bbo365,
 	else if (field_id == E_CONTACT_ADDRESS_OTHER)
 		phys_address = e_o365_contact_get_other_address (o365_contact);
 	else
-		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_field_name (field_id));
+		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
 
 	if (phys_address) {
 		EContactAddress addr;
@@ -249,8 +252,8 @@ ebb_o365_contact_add_address (EBookBackendO365 *bbo365,
 			      EContact *new_contact,
 			      EContact *old_contact,
 			      EContactField field_id,
+			      const gchar *o365_id,
 			      JsonBuilder *builder,
-			      EO365Connection *cnc,
 			      GCancellable *cancellable,
 			      GError **error)
 {
@@ -274,7 +277,7 @@ ebb_o365_contact_add_address (EBookBackendO365 *bbo365,
 		else if (field_id == E_CONTACT_ADDRESS_OTHER)
 			add_func = e_o365_contact_add_other_address;
 		else
-			g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_field_name (field_id));
+			g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
 
 		if (add_func) {
 			if (new_addr) {
@@ -378,7 +381,7 @@ ebb_o365_contact_get_phone (EBookBackendO365 *bbo365,
 		values = e_o365_contact_get_home_phones (o365_contact);
 		type_val = "HOME";
 	} else {
-		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_field_name (field_id));
+		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
 	}
 
 	if (values) {
@@ -388,7 +391,7 @@ ebb_o365_contact_get_phone (EBookBackendO365 *bbo365,
 		len = json_array_get_length (values);
 
 		for (ii = 0; ii < len; ii++) {
-			const gchar *str = json_array_get_string_element (values, ii);
+			const gchar *str = json_array_get_string_element (values, len - ii - 1);
 
 			if (str && *str) {
 				EVCardAttributeParam *param;
@@ -429,7 +432,8 @@ ebb_o365_extract_phones (EContact *contact,
 		if (only_type) {
 			use_it = e_vcard_attribute_has_type (attr, only_type);
 		} else {
-			use_it = !e_vcard_attribute_has_type (attr, "WORK");
+			use_it = !e_vcard_attribute_has_type (attr, "WORK") &&
+				 !e_vcard_attribute_has_type (attr, "CELL");
 		}
 
 		if (use_it)
@@ -444,8 +448,8 @@ ebb_o365_contact_add_phone (EBookBackendO365 *bbo365,
 			    EContact *new_contact,
 			    EContact *old_contact,
 			    EContactField field_id,
+			    const gchar *o365_id,
 			    JsonBuilder *builder,
-			    EO365Connection *cnc,
 			    GCancellable *cancellable,
 			    GError **error)
 {
@@ -464,9 +468,9 @@ ebb_o365_contact_add_phone (EBookBackendO365 *bbo365,
 		begin_func = e_o365_contact_begin_home_phones;
 		end_func = e_o365_contact_end_home_phones;
 		add_func = e_o365_contact_add_home_phone;
-		type_val = NULL; /* everythign else is treated as "HOME" phone */
+		type_val = NULL; /* everything else is treated as "HOME" phone */
 	} else {
-		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_field_name (field_id));
+		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
 	}
 
 	new_values = ebb_o365_extract_phones (new_contact, type_val);
@@ -573,8 +577,8 @@ ebb_o365_contact_add_categories (EBookBackendO365 *bbo365,
 				 EContact *new_contact,
 				 EContact *old_contact,
 				 EContactField field_id,
+				 const gchar *o365_id,
 				 JsonBuilder *builder,
-				 EO365Connection *cnc,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -614,7 +618,7 @@ ebb_o365_contact_get_emails (EBookBackendO365 *bbo365,
 {
 	JsonArray *values;
 
-	values = e_o365_contact_get_categories (o365_contact);
+	values = e_o365_contact_get_email_addresses (o365_contact);
 
 	if (values) {
 		EVCard *vcard = E_VCARD (inout_contact);
@@ -623,14 +627,30 @@ ebb_o365_contact_get_emails (EBookBackendO365 *bbo365,
 		len = json_array_get_length (values);
 
 		for (ii = 0; ii < len; ii++) {
-			const gchar *str = json_array_get_string_element (values, ii);
+			EO365EmailAddress *address = json_array_get_object_element (values, len - ii - 1);
 
-			if (str && *str) {
+			if (address) {
 				EVCardAttribute *attr;
 
 				attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+				e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
 
-				e_vcard_add_attribute_with_value (vcard, attr, str);
+				if (g_strcmp0 (e_o365_email_address_get_name (address), e_o365_email_address_get_address (address)) == 0) {
+					e_vcard_add_attribute_with_value (vcard, attr, e_o365_email_address_get_address (address));
+				} else {
+					gchar *formatted;
+
+					formatted = camel_internet_address_format_address (
+						e_o365_email_address_get_name (address),
+						e_o365_email_address_get_address (address));
+
+					if (formatted && *formatted)
+						e_vcard_add_attribute_with_value (vcard, attr, formatted);
+					else
+						e_vcard_attribute_free (attr);
+
+					g_free (formatted);
+				}
 			}
 		}
 	}
@@ -682,8 +702,8 @@ ebb_o365_contact_add_emails (EBookBackendO365 *bbo365,
 			     EContact *new_contact,
 			     EContact *old_contact,
 			     EContactField field_id,
+			     const gchar *o365_id,
 			     JsonBuilder *builder,
-			     EO365Connection *cnc,
 			     GCancellable *cancellable,
 			     GError **error)
 {
@@ -703,6 +723,8 @@ ebb_o365_contact_add_emails (EBookBackendO365 *bbo365,
 
 			if (ebb_o365_parse_qp_email (value, &name, &address))
 				e_o365_add_email_address (builder, name, address);
+			else
+				e_o365_add_email_address (builder, NULL, value);
 
 			g_free (name);
 			g_free (address);
@@ -722,8 +744,8 @@ ebb_o365_contact_add_file_as (EBookBackendO365 *bbo365,
 			      EContact *new_contact,
 			      EContact *old_contact,
 			      EContactField field_id,
+			      const gchar *o365_id,
 			      JsonBuilder *builder,
-			      EO365Connection *cnc,
 			      GCancellable *cancellable,
 			      GError **error)
 {
@@ -754,13 +776,13 @@ ebb_o365_contact_get_im_addresses (EBookBackendO365 *bbo365,
 
 	if (values) {
 		EVCard *vcard = E_VCARD (inout_contact);
-		const gchar *field_name = e_contact_field_name (field_id);
+		const gchar *field_name = e_contact_vcard_attribute (field_id);
 		guint ii, len;
 
 		len = json_array_get_length (values);
 
 		for (ii = 0; ii < len; ii++) {
-			const gchar *str = json_array_get_string_element (values, ii);
+			const gchar *str = json_array_get_string_element (values, len - ii - 1);
 
 			if (str && *str) {
 				EVCardAttribute *attr;
@@ -818,8 +840,8 @@ ebb_o365_contact_add_im_addresses (EBookBackendO365 *bbo365,
 				   EContact *new_contact,
 				   EContact *old_contact,
 				   EContactField field_id,
+				   const gchar *o365_id,
 				   JsonBuilder *builder,
-				   EO365Connection *cnc,
 				   GCancellable *cancellable,
 				   GError **error)
 {
@@ -886,8 +908,8 @@ ebb_o365_contact_add_middle_name (EBookBackendO365 *bbo365,
 				  EContact *new_contact,
 				  EContact *old_contact,
 				  EContactField field_id,
+				  const gchar *o365_id,
 				  JsonBuilder *builder,
-				  EO365Connection *cnc,
 				  GCancellable *cancellable,
 				  GError **error)
 {
@@ -942,8 +964,8 @@ ebb_o365_contact_add_title (EBookBackendO365 *bbo365,
 			    EContact *new_contact,
 			    EContact *old_contact,
 			    EContactField field_id,
+			    const gchar *o365_id,
 			    JsonBuilder *builder,
-			    EO365Connection *cnc,
 			    GCancellable *cancellable,
 			    GError **error)
 {
@@ -953,7 +975,7 @@ ebb_o365_contact_add_title (EBookBackendO365 *bbo365,
 	old_value = old_contact ? e_contact_get (old_contact, field_id) : NULL;
 
 	if (!(new_value && old_value && g_strcmp0 (new_value->prefixes, old_value->prefixes) == 0))
-		e_o365_contact_add_middle_name (builder, new_value ? new_value->prefixes : NULL);
+		e_o365_contact_add_title (builder, new_value ? new_value->prefixes : NULL);
 
 	e_contact_name_free (new_value);
 	e_contact_name_free (old_value);
@@ -1025,8 +1047,8 @@ ebb_o365_contact_add_photo (EBookBackendO365 *bbo365,
 			    EContact *new_contact,
 			    EContact *old_contact,
 			    EContactField field_id,
+			    const gchar *o365_id,
 			    JsonBuilder *builder,
-			    EO365Connection *cnc,
 			    GCancellable *cancellable,
 			    GError **error)
 {
@@ -1052,8 +1074,8 @@ ebb_o365_contact_add_photo (EBookBackendO365 *bbo365,
 
 		LOCK (bbo365);
 
-		if (!e_o365_connection_update_contact_photo_sync (cnc, NULL, bbo365->priv->folder_id,
-			e_contact_get_const (new_contact, E_CONTACT_UID), jpeg_photo, cancellable, &local_error)) {
+		if (!e_o365_connection_update_contact_photo_sync (bbo365->priv->cnc, NULL, bbo365->priv->folder_id,
+			o365_id ? o365_id : e_contact_get_const (new_contact, E_CONTACT_UID), jpeg_photo, cancellable, &local_error)) {
 			g_warning ("%s: Failed to store photo for '%s': %s", G_STRFUNC, (const gchar *) e_contact_get_const (new_contact, E_CONTACT_UID),
 				local_error ? local_error->message : "Unknown error");
 		}
@@ -1091,8 +1113,8 @@ struct _mappings {
 						 EContact *new_contact,
 						 EContact *old_contact, /* nullable */
 						 EContactField field_id,
+						 const gchar *o365_id,
 						 JsonBuilder *builder,
-						 EO365Connection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 } mappings[] = {
@@ -1132,24 +1154,27 @@ struct _mappings {
 	COMPLEX_FIELD_2	(E_CONTACT_PHOTO,		ebb_o365_contact_get_photo,		ebb_o365_contact_add_photo)
 };
 
-static gchar *
-ebb_o365_json_contact_to_vcard_string (EBookBackendO365 *bbo365,
-				       EO365Contact *o365_contact,
-				       EO365Connection *cnc,
-				       GCancellable *cancellable,
-				       GError **error)
+static EContact *
+ebb_o365_json_contact_to_vcard (EBookBackendO365 *bbo365,
+				EO365Contact *o365_contact,
+				EO365Connection *cnc,
+				gchar **out_object,
+				GCancellable *cancellable,
+				GError **error)
 {
 	EContact *contact;
-	gchar *object = NULL;
 	gint ii;
 	gboolean success = TRUE;
 
 	g_return_val_if_fail (o365_contact != NULL, NULL);
+	g_return_val_if_fail (out_object != NULL, NULL);
+
+	*out_object = NULL;
 
 	contact = e_contact_new ();
 
 	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
-		if (mappings[ii].o365_add_func) {
+		if (mappings[ii].o365_get_func) {
 			ebb_o365_contact_get_string_attribute (o365_contact, contact, mappings[ii].field_id, mappings[ii].o365_get_func);
 		} else if (mappings[ii].get_func) {
 			success = mappings[ii].get_func (bbo365, o365_contact, contact, mappings[ii].field_id, cnc, cancellable, error);
@@ -1157,20 +1182,19 @@ ebb_o365_json_contact_to_vcard_string (EBookBackendO365 *bbo365,
 	}
 
 	if (success)
-		object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+		*out_object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+	else
+		g_clear_object (&contact);
 
-	g_clear_object (&contact);
-
-	return object;
+	return contact;
 }
 
 static JsonBuilder *
-ebb_o365_contact_to_json (EBookBackendO365 *bbo365,
-			  EContact *new_contact,
-			  EContact *old_contact, /* nullable */
-			  EO365Connection *cnc,
-			  GCancellable *cancellable,
-			  GError **error)
+ebb_o365_contact_to_json_locked (EBookBackendO365 *bbo365,
+				 EContact *new_contact,
+				 EContact *old_contact, /* nullable */
+				 GCancellable *cancellable,
+				 GError **error)
 {
 	JsonBuilder *builder;
 	gint ii;
@@ -1185,7 +1209,7 @@ ebb_o365_contact_to_json (EBookBackendO365 *bbo365,
 		if (mappings[ii].o365_add_func) {
 			ebb_o365_contact_add_string_attribute (new_contact, old_contact, mappings[ii].field_id, builder, mappings[ii].o365_add_func);
 		} else if (!mappings[ii].add_in_second_go && mappings[ii].add_func) {
-			success = mappings[ii].add_func (bbo365, new_contact, old_contact, mappings[ii].field_id, builder, cnc, cancellable, error);
+			success = mappings[ii].add_func (bbo365, new_contact, old_contact, mappings[ii].field_id, NULL, builder, cancellable, error);
 		}
 	}
 
@@ -1195,6 +1219,28 @@ ebb_o365_contact_to_json (EBookBackendO365 *bbo365,
 		g_clear_object (&builder);
 
 	return builder;
+}
+
+static gboolean
+ebb_o365_contact_to_json_2nd_go_locked (EBookBackendO365 *bbo365,
+					EContact *new_contact,
+					EContact *old_contact, /* nullable */
+					const gchar *o365_id,
+					GCancellable *cancellable,
+					GError **error)
+{
+	gint ii;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (new_contact != NULL, FALSE);
+
+	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+		if (mappings[ii].add_in_second_go && mappings[ii].add_func) {
+			success = mappings[ii].add_func (bbo365, new_contact, old_contact, mappings[ii].field_id, o365_id, NULL, cancellable, error);
+		}
+	}
+
+	return success;
 }
 
 static void
@@ -1398,6 +1444,7 @@ ebb_o365_get_objects_delta_cb (EO365Connection *cnc,
 				e_book_meta_backend_info_new (id, NULL, NULL, NULL));
 		} else {
 			GSList **out_slist;
+			EContact *vcard;
 			gchar *object;
 
 			if (e_cache_contains (odd->cache, id, E_CACHE_INCLUDE_DELETED))
@@ -1405,7 +1452,9 @@ ebb_o365_get_objects_delta_cb (EO365Connection *cnc,
 			else
 				out_slist = odd->out_created_objects;
 
-			object = ebb_o365_json_contact_to_vcard_string (odd->bbo365, contact, cnc, cancellable, error);
+			vcard = ebb_o365_json_contact_to_vcard (odd->bbo365, contact, cnc, &object, cancellable, error);
+
+			g_clear_object (&vcard);
 
 			if (!g_cancellable_is_cancelled (cancellable))
 				g_warn_if_fail (object != NULL);
@@ -1522,15 +1571,27 @@ ebb_o365_load_contact_sync (EBookMetaBackend *meta_backend,
 			    GError **error)
 {
 	EBookBackendO365 *bbo365;
-	gboolean success = FALSE;
+	EO365Contact *contact = NULL;
+	gboolean success;
 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_O365 (meta_backend), FALSE);
 	g_return_val_if_fail (uid != NULL, FALSE);
 	g_return_val_if_fail (out_contact, FALSE);
+	g_return_val_if_fail (out_extra != NULL, FALSE);
 
 	bbo365 = E_BOOK_BACKEND_O365 (meta_backend);
 
 	LOCK (bbo365);
+
+	success = e_o365_connection_get_contact_sync (bbo365->priv->cnc, NULL,
+		bbo365->priv->folder_id, uid, &contact, cancellable, error);
+
+	if (success) {
+		*out_contact = ebb_o365_json_contact_to_vcard (bbo365, contact, bbo365->priv->cnc, out_extra, cancellable, error);
+
+		if (contact)
+			json_object_unref (contact);
+	}
 
 	UNLOCK (bbo365);
 
@@ -1553,7 +1614,8 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 			    GError **error)
 {
 	EBookBackendO365 *bbo365;
-	EContact *tmp_contact = NULL;
+	EContact *tmp_contact = NULL, *old_contact = NULL;
+	JsonBuilder *builder;
 	gboolean success = FALSE;
 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_O365 (meta_backend), FALSE);
@@ -1572,11 +1634,54 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 		e_contact_inline_local_photos (contact, NULL);
 	}
 
+	if (extra && *extra)
+		old_contact = e_contact_new_from_vcard (extra);
+
+	builder = ebb_o365_contact_to_json_locked (bbo365, contact, old_contact, cancellable, error);
+
+	if (builder) {
+		if (overwrite_existing) {
+			const gchar *uid = e_contact_get_const (contact, E_CONTACT_UID);
+
+			success = e_o365_connection_update_contact_sync (bbo365->priv->cnc, NULL, bbo365->priv->folder_id,
+				uid, builder, cancellable, error);
+
+			if (success)
+				success = ebb_o365_contact_to_json_2nd_go_locked (bbo365, contact, old_contact, uid, cancellable, error);
+
+			if (success)
+				*out_new_extra = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+		} else {
+			EO365Contact *created_contact = NULL;
+
+			success = e_o365_connection_create_contact_sync (bbo365->priv->cnc, NULL, bbo365->priv->folder_id,
+				builder,  &created_contact, cancellable, error);
+
+			if (success && created_contact) {
+				const gchar *o365_id = e_o365_contact_get_id (created_contact);
+
+				success = ebb_o365_contact_to_json_2nd_go_locked (bbo365, contact, old_contact, o365_id, cancellable, error);
+			}
+
+			if (success && created_contact) {
+				EContact *vcard;
+
+				*out_new_uid = g_strdup (e_o365_contact_get_id (created_contact));
+
+				vcard = ebb_o365_json_contact_to_vcard (bbo365, created_contact, bbo365->priv->cnc, out_new_extra, cancellable, error);
+				g_clear_object (&vcard);
+			}
+		}
+
+		g_clear_object (&builder);
+	}
+
 	UNLOCK (bbo365);
 
 	ebb_o365_convert_error_to_client_error (error);
 	ebb_o365_maybe_disconnect_sync (bbo365, error, cancellable);
 
+	g_clear_object (&old_contact);
 	g_clear_object (&tmp_contact);
 
 	return success;
@@ -1593,13 +1698,16 @@ ebb_o365_remove_contact_sync (EBookMetaBackend *meta_backend,
 			      GError **error)
 {
 	EBookBackendO365 *bbo365;
-	gboolean success = FALSE;
+	gboolean success;
 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_O365 (meta_backend), FALSE);
 
 	bbo365 = E_BOOK_BACKEND_O365 (meta_backend);
 
 	LOCK (bbo365);
+
+	success = e_o365_connection_delete_contact_sync (bbo365->priv->cnc, NULL,
+		bbo365->priv->folder_id, uid, cancellable, error);
 
 	UNLOCK (bbo365);
 
@@ -1680,6 +1788,7 @@ ebb_o365_get_backend_property (EBookBackend *book_backend,
 		fields = g_strjoin (
 			",",
 			buffer->str,
+			e_contact_field_name (E_CONTACT_FULL_NAME),
 			e_contact_field_name (E_CONTACT_EMAIL_1),
 			e_contact_field_name (E_CONTACT_EMAIL_2),
 			e_contact_field_name (E_CONTACT_EMAIL_3),

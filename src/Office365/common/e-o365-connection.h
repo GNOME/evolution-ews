@@ -251,7 +251,7 @@ gboolean	e_o365_connection_create_mail_message_sync
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
 						 JsonBuilder *mail_message, /* filled mailMessage object */
-						 EO365MailMessage **out_appended_message, /* free with json_object_unref() */
+						 EO365MailMessage **out_created_message, /* free with json_object_unref() */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_add_mail_message_attachment_sync
@@ -323,6 +323,37 @@ gboolean	e_o365_connection_update_contact_photo_sync
 						 const gchar *folder_id,
 						 const gchar *contact_id,
 						 const GByteArray *jpeg_photo, /* nullable, to remove the photo */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_contact_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *contact_id,
+						 EO365Contact **out_contact,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_create_contact_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
+						 JsonBuilder *contact, /* filled contact object */
+						 EO365Contact **out_created_contact, /* free with json_object_unref() */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_update_contact_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *contact_id,
+						 JsonBuilder *contact, /* values to update, as a contact object */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_delete_contact_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *contact_id,
 						 GCancellable *cancellable,
 						 GError **error);
 

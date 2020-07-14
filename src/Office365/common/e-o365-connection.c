@@ -2722,7 +2722,7 @@ e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
 					    const gchar *user_override, /* for which user, NULL to use the account user */
 					    const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
 					    JsonBuilder *mail_message, /* filled mailMessage object */
-					    EO365MailMessage **out_appended_message, /* free with json_object_unref() */
+					    EO365MailMessage **out_created_message, /* free with json_object_unref() */
 					    GCancellable *cancellable,
 					    GError **error)
 {
@@ -2732,7 +2732,7 @@ e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
 
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (mail_message != NULL, FALSE);
-	g_return_val_if_fail (out_appended_message != NULL, FALSE);
+	g_return_val_if_fail (out_created_message != NULL, FALSE);
 
 	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 		folder_id ? "mailFolders" : "messages",
@@ -2752,7 +2752,7 @@ e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
 
 	e_o365_connection_set_json_body (message, mail_message);
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_appended_message, cancellable, error);
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_created_message, cancellable, error);
 
 	g_clear_object (&message);
 
@@ -3368,6 +3368,181 @@ e_o365_connection_update_contact_photo_sync (EO365Connection *cnc,
 
 	if (jpeg_photo)
 		soup_message_body_append (message->request_body, SOUP_MEMORY_STATIC, jpeg_photo->data, jpeg_photo->len);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/contact-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_contact_sync (EO365Connection *cnc,
+				    const gchar *user_override, /* for which user, NULL to use the account user */
+				    const gchar *folder_id,
+				    const gchar *contact_id,
+				    EO365Contact **out_contact,
+				    GCancellable *cancellable,
+				    GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (contact_id != NULL, FALSE);
+	g_return_val_if_fail (out_contact != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"contactFolders",
+		folder_id,
+		"contacts",
+		"", contact_id,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_contact, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/user-post-contacts?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_create_contact_sync (EO365Connection *cnc,
+				       const gchar *user_override, /* for which user, NULL to use the account user */
+				       const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
+				       JsonBuilder *contact, /* filled contact object */
+				       EO365Contact **out_created_contact, /* free with json_object_unref() */
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (contact != NULL, FALSE);
+	g_return_val_if_fail (out_created_contact != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		folder_id ? "contactFolders" : "contacts",
+		folder_id,
+		folder_id ? "contacts" : NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, contact);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_created_contact, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/contact-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_update_contact_sync (EO365Connection *cnc,
+				       const gchar *user_override, /* for which user, NULL to use the account user */
+				       const gchar *folder_id,
+				       const gchar *contact_id,
+				       JsonBuilder *contact, /* values to update, as a contact object */
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (contact_id != NULL, FALSE);
+	g_return_val_if_fail (contact != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		folder_id ? "contactFolders" : "contacts",
+		folder_id,
+		folder_id ? "contacts" : contact_id,
+		"", folder_id ? contact_id : NULL,
+		NULL);
+
+	/* The server returns the contact object back, but it can be ignored here */
+	message = o365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, contact);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/contact-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_delete_contact_sync (EO365Connection *cnc,
+				       const gchar *user_override, /* for which user, NULL to use the account user */
+				       const gchar *folder_id,
+				       const gchar *contact_id,
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (contact_id != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		folder_id ? "contactFolders" : "contacts",
+		folder_id,
+		folder_id ? "contacts" : contact_id,
+		"", folder_id ? contact_id : NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
 
 	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
 
