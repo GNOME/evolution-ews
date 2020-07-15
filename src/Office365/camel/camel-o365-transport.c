@@ -265,9 +265,9 @@ o365_transport_get_name (CamelService *service,
 	gchar *name;
 
 	if (brief)
-		name = g_strdup (_("Office 365 server"));
+		name = g_strdup (_("Microsoft 365 server"));
 	else
-		name = g_strdup (_("Mail delivery via Microsoft Office 365"));
+		name = g_strdup (_("Mail delivery via Microsoft 365"));
 
 	return name;
 }
@@ -305,7 +305,7 @@ o365_send_to_sync (CamelTransport *transport,
 	} else if (camel_address_length (CAMEL_ADDRESS (use_from)) > 1) {
 		g_set_error_literal (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Office 365 server cannot send message with multiple From addresses"));
+			_("Microsoft 365 server cannot send message with multiple From addresses"));
 		return FALSE;
 
 	} else {

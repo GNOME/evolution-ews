@@ -64,9 +64,9 @@ static CamelProviderConfEntry o365_conf_entries[] = {
 
 static CamelProvider o365_provider = {
 	"office365",
-	N_("Office 365"),
+	N_("Microsoft 365"),
 
-	N_("For accessing Microsoft Office 365 server"),
+	N_("For accessing Microsoft 365 server"),
 
 	"mail",
 

@@ -1181,14 +1181,14 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 				if (left_minutes > 0) {
 					camel_operation_push_message (cancellable,
 						g_dngettext (GETTEXT_PACKAGE,
-							"Office 365 server is busy, waiting to retry (%d:%02d minute)",
-							"Office 365 server is busy, waiting to retry (%d:%02d minutes)", left_minutes),
+							"Microsoft 365 server is busy, waiting to retry (%d:%02d minute)",
+							"Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)", left_minutes),
 						left_minutes, left_seconds);
 				} else {
 					camel_operation_push_message (cancellable,
 						g_dngettext (GETTEXT_PACKAGE,
-							"Office 365 server is busy, waiting to retry (%d second)",
-							"Office 365 server is busy, waiting to retry (%d seconds)", left_seconds),
+							"Microsoft 365 server is busy, waiting to retry (%d second)",
+							"Microsoft 365 server is busy, waiting to retry (%d seconds)", left_seconds),
 						left_seconds);
 				}
 

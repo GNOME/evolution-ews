@@ -213,7 +213,7 @@ mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
 	g_free (markup);
 
-	/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+	/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 	   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 	widget = gtk_label_new_with_mnemonic (_("_Tenant:"));
 	gtk_widget_set_margin_left (widget, 12);
@@ -238,10 +238,10 @@ mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_SYNC_CREATE);
 
 	mail_config_o365_backend_set_oauth2_tooltip (widget, OFFICE365_TENANT,
-		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
 		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		_("Default tenant is “common“"),
-		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		g_strdup_printf (_("Default tenant is “%s”"), OFFICE365_TENANT));
 

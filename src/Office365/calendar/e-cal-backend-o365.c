@@ -335,7 +335,7 @@ ecb_o365_get_backend_property (ECalBackend *cal_backend,
 
 		return camel_o365_settings_dup_email (o365_settings);
 	} else if (g_str_equal (prop_name, E_CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
-		/* Office 365 does not support email based alarms */
+		/* Microsoft 365 does not support email based alarms */
 		return NULL;
 	}
 

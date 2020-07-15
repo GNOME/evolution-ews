@@ -641,7 +641,7 @@ o365_folder_append_message_sync (CamelFolder *folder,
 	return success;
 #else
 	g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
-		_("Cannot add messages into an Office 365 account from another account. Only messages from the same account can be moved/copied between the Office 365 folders."));
+		_("Cannot add messages into an Microsoft 365 account from another account. Only messages from the same account can be moved/copied between the Microsoft 365 folders."));
 	return FALSE;
 #endif
 }

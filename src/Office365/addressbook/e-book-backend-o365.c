@@ -1682,7 +1682,7 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 	g_return_val_if_fail (out_new_extra != NULL, FALSE);
 
 	if (GPOINTER_TO_INT (e_contact_get (contact, E_CONTACT_IS_LIST))) {
-		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED, _("Cannot save contact list into an Office 365 address book")));
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED, _("Cannot save contact list into a Microsoft 365 address book")));
 		return FALSE;
 	}
 

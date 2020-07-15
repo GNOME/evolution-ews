@@ -151,9 +151,9 @@ o365_store_get_name (CamelService *service,
 	gchar *name;
 
 	if (brief)
-		name = g_strdup (_("Office 365 server"));
+		name = g_strdup (_("Microsoft 365 server"));
 	else
-		name = g_strdup (_("Mail receive via Microsoft Office 365"));
+		name = g_strdup (_("Mail receive via Microsoft 365"));
 
 	return name;
 }
@@ -541,7 +541,7 @@ o365_store_connect_sync (CamelService *service,
 
 		if (success) {
 			camel_session_submit_job (
-				session, _("Look up Office 365 categories"),
+				session, _("Look up Microsoft 365 categories"),
 				o365_store_get_categories_cb,
 				g_object_ref (o365_store),
 				g_object_unref);
