@@ -21,13 +21,15 @@
 
 struct _ESourceO365FolderPrivate {
 	gchar *id;
+	gchar *group_id;
 	gboolean is_default;
 };
 
 enum {
 	PROP_0,
 	PROP_ID,
-	PROP_IS_DEFAULT
+	PROP_IS_DEFAULT,
+	PROP_GROUP_ID
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ESourceO365Folder, e_source_o365_folder, E_TYPE_SOURCE_EXTENSION)
@@ -47,6 +49,12 @@ source_o365_folder_set_property (GObject *object,
 
 		case PROP_ID:
 			e_source_o365_folder_set_id (
+				E_SOURCE_O365_FOLDER (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_GROUP_ID:
+			e_source_o365_folder_set_group_id (
 				E_SOURCE_O365_FOLDER (object),
 				g_value_get_string (value));
 			return;
@@ -75,6 +83,13 @@ source_o365_folder_get_property (GObject *object,
 				e_source_o365_folder_dup_id (
 				E_SOURCE_O365_FOLDER (object)));
 			return;
+
+		case PROP_GROUP_ID:
+			g_value_take_string (
+				value,
+				e_source_o365_folder_dup_group_id (
+				E_SOURCE_O365_FOLDER (object)));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -86,6 +101,7 @@ source_o365_folder_finalize (GObject *object)
 	ESourceO365Folder *o365_folder = E_SOURCE_O365_FOLDER (object);
 
 	g_free (o365_folder->priv->id);
+	g_free (o365_folder->priv->group_id);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_source_o365_folder_parent_class)->finalize (object);
@@ -126,6 +142,19 @@ e_source_o365_folder_class_init (ESourceO365FolderClass *class)
 			"Is Default",
 			"Whether it's user's default folder (like 'contacts', which are not part of the contactFolders)",
 			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_GROUP_ID,
+		g_param_spec_string (
+			"group-id",
+			"Group ID",
+			"Optional group ID, into which the folder ID belongs",
+			NULL,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS |
@@ -219,4 +248,51 @@ e_source_o365_folder_set_is_default (ESourceO365Folder *extension,
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
 	g_object_notify (G_OBJECT (extension), "is-default");
+}
+
+const gchar *
+e_source_o365_folder_get_group_id (ESourceO365Folder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_O365_FOLDER (extension), NULL);
+
+	return extension->priv->group_id;
+}
+
+gchar *
+e_source_o365_folder_dup_group_id (ESourceO365Folder *extension)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (E_IS_SOURCE_O365_FOLDER (extension), NULL);
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	protected = e_source_o365_folder_get_group_id (extension);
+	duplicate = g_strdup (protected);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	return duplicate;
+}
+
+void
+e_source_o365_folder_set_group_id (ESourceO365Folder *extension,
+				   const gchar *group_id)
+{
+	g_return_if_fail (E_IS_SOURCE_O365_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if (g_strcmp0 (extension->priv->group_id, group_id) == 0) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	g_free (extension->priv->group_id);
+	extension->priv->group_id = g_strdup (group_id);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "group-id");
 }

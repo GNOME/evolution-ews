@@ -25,6 +25,8 @@ G_BEGIN_DECLS
 
 /* Just for better readability */
 #define EO365Attachment			JsonObject
+#define EO365Calendar			JsonObject
+#define EO365CalendarGroup		JsonObject
 #define EO365Category			JsonObject
 #define EO365Contact			JsonObject
 #define EO365DateTimeWithZone		JsonObject
@@ -75,6 +77,34 @@ typedef enum _EO365ItemBodyContentTypeType {
 	E_O365_ITEM_BODY_CONTENT_TYPE_TEXT,
 	E_O365_ITEM_BODY_CONTENT_TYPE_HTML
 } EO365ItemBodyContentTypeType;
+
+typedef enum _EO365OnlineMeetingProviderType {
+	E_O365_ONLINE_MEETING_PROVIDER_NOT_SET			= -1,
+	E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN			= 0,
+	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_BUSINESS	= 1 << 0,
+	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_CONSUMER	= 1 << 1,
+	E_O365_ONLINE_MEETING_PROVIDER_TEAMS_FOR_BUSINESS	= 1 << 2
+} EO365OnlineMeetingProviderType;
+
+typedef enum _EO365CalendarColorType {
+	E_O365_CALENDAR_COLOR_NOT_SET		= -3,
+	E_O365_CALENDAR_COLOR_UNKNOWN		= -2,
+	E_O365_CALENDAR_COLOR_AUTO		= -1,
+	E_O365_CALENDAR_COLOR_LIGHT_BLUE	= 0,
+	E_O365_CALENDAR_COLOR_LIGHT_GREEN	= 1,
+	E_O365_CALENDAR_COLOR_LIGHT_ORANGE	= 2,
+	E_O365_CALENDAR_COLOR_LIGHT_GRAY	= 3,
+	E_O365_CALENDAR_COLOR_LIGHT_YELLOW	= 4,
+	E_O365_CALENDAR_COLOR_LIGHT_TEAL	= 5,
+	E_O365_CALENDAR_COLOR_LIGHT_PINK	= 6,
+	E_O365_CALENDAR_COLOR_LIGHT_BROWN	= 7,
+	E_O365_CALENDAR_COLOR_LIGHT_RED		= 8,
+	E_O365_CALENDAR_COLOR_MAX_COLOR		= 9
+} EO365CalendarColorType;
+
+const gchar *	e_o365_calendar_color_to_rgb		(EO365CalendarColorType color);
+EO365CalendarColorType
+		e_o365_rgb_to_calendar_color		(const gchar *rgb);
 
 JsonArray *	e_o365_json_get_array_member		(JsonObject *object,
 							 const gchar *member_name);
@@ -465,6 +495,41 @@ void		e_o365_contact_add_yomi_given_name	(JsonBuilder *builder,
 const gchar *	e_o365_contact_get_yomi_surname		(EO365Contact *contact);
 void		e_o365_contact_add_yomi_surname		(JsonBuilder *builder,
 							 const gchar *value);
+
+const gchar *	e_o365_calendar_group_get_id		(EO365CalendarGroup *group);
+const gchar *	e_o365_calendar_group_get_change_key	(EO365CalendarGroup *group);
+const gchar *	e_o365_calendar_group_get_class_id	(EO365CalendarGroup *group);
+const gchar *	e_o365_calendar_group_get_name		(EO365CalendarGroup *group);
+
+const gchar *	e_o365_calendar_get_id			(EO365Calendar *calendar);
+const gchar *	e_o365_calendar_get_change_key		(EO365Calendar *calendar);
+gboolean	e_o365_calendar_get_can_edit		(EO365Calendar *calendar);
+gboolean	e_o365_calendar_get_can_share		(EO365Calendar *calendar);
+gboolean	e_o365_calendar_get_can_view_private_items
+							(EO365Calendar *calendar);
+gboolean	e_o365_calendar_get_is_removable	(EO365Calendar *calendar);
+gboolean	e_o365_calendar_get_is_tallying_responses
+							(EO365Calendar *calendar);
+EO365EmailAddress *
+		e_o365_calendar_get_owner		(EO365Calendar *calendar);
+const gchar *	e_o365_calendar_get_name		(EO365Calendar *calendar);
+void		e_o365_calendar_add_name		(JsonBuilder *builder,
+							 const gchar *name);
+guint32		e_o365_calendar_get_allowed_online_meeting_providers /* bit-or of EO365OnlineMeetingProviderType */
+							(EO365Calendar *calendar);
+void		e_o365_calendar_add_allowed_online_meeting_providers
+							(JsonBuilder *builder,
+							 guint providers); /* bit-or of EO365OnlineMeetingProviderType */
+EO365CalendarColorType
+		e_o365_calendar_get_color		(EO365Calendar *calendar);
+void		e_o365_calendar_add_color		(JsonBuilder *builder,
+							 EO365CalendarColorType color);
+EO365OnlineMeetingProviderType
+		e_o365_calendar_get_default_online_meeting_provider
+							(EO365Calendar *calendar);
+void		e_o365_calendar_add_default_online_meeting_provider
+							(JsonBuilder *builder,
+							 EO365OnlineMeetingProviderType provider);
 
 G_END_DECLS
 

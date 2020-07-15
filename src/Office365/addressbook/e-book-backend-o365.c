@@ -1423,7 +1423,7 @@ ebb_o365_connect_sync (EBookMetaBackend *meta_backend,
 		if (folder_id) {
 			cnc = e_o365_connection_new_for_backend (backend, registry, source, o365_settings);
 
-			*out_auth_result = e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_CONTACTS, folder_id,
+			*out_auth_result = e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_CONTACTS, NULL, folder_id,
 				out_certificate_pem, out_certificate_errors, cancellable, error);
 
 			if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {

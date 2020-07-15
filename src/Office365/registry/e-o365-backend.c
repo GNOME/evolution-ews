@@ -110,6 +110,7 @@ static void
 o365_backend_update_resource (EO365Backend *o365_backend,
 			      const gchar *extension_name,
 			      const gchar *id,
+			      const gchar *group_id,
 			      const gchar *display_name,
 			      gboolean is_default,
 			      const gchar *calendar_color)
@@ -171,6 +172,7 @@ o365_backend_update_resource (EO365Backend *o365_backend,
 
 			extension = e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER);
 			e_source_o365_folder_set_id (extension, id);
+			e_source_o365_folder_set_group_id (extension, group_id);
 			e_source_o365_folder_set_is_default (extension, is_default);
 
 			server = e_collection_backend_ref_server (E_COLLECTION_BACKEND (o365_backend));
@@ -222,34 +224,69 @@ o365_backend_remove_resource (EO365Backend *o365_backend,
 	g_clear_object (&existing_source);
 }
 
-static void
-o365_backend_forget_folders (EO365Backend *o365_backend,
-			     const gchar *extension_name)
+static GHashTable * /* gchar *uid ~> NULL */
+o365_backend_get_known_folder_ids (EO365Backend *o365_backend,
+				   const gchar *extension_name,
+				   gboolean with_the_default)
 {
+	GHashTable *ids;
 	GHashTableIter iter;
-	GSList *ids = NULL, *link;
 	gpointer value;
+
+	ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	LOCK (o365_backend);
 
 	g_hash_table_iter_init (&iter, o365_backend->priv->folder_sources);
+
 	while (g_hash_table_iter_next (&iter, NULL, &value)) {
 		ESource *source = value;
 
-		if (source && e_source_has_extension (source, extension_name))
-			ids = g_slist_prepend (ids, e_source_o365_folder_dup_id (e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER)));
+		if (source && e_source_has_extension (source, extension_name)) {
+			ESourceO365Folder *o365_folder;
+
+			o365_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER);
+
+			if (with_the_default || !e_source_o365_folder_get_is_default (o365_folder))
+				g_hash_table_insert (ids, e_source_o365_folder_dup_id (o365_folder), NULL);
+		}
 	}
 
 	UNLOCK (o365_backend);
 
-	for (link = ids; link; link = g_slist_next (link)) {
-		const gchar *id = link->data;
+	return ids;
+}
+
+static void
+o365_backend_forget_folders_hash (EO365Backend *o365_backend,
+				  const gchar *extension_name,
+				  GHashTable *ids) /* gchar *id ~> NULL */
+{
+	GHashTableIter iter;
+	gpointer key;
+
+	g_hash_table_iter_init (&iter, ids);
+
+	while (g_hash_table_iter_next (&iter, &key, NULL)) {
+		const gchar *id = key;
 
 		if (id)
 			o365_backend_remove_resource (o365_backend, extension_name, id);
 	}
+}
 
-	g_slist_free_full (ids, g_free);
+static void
+o365_backend_forget_folders (EO365Backend *o365_backend,
+			     const gchar *extension_name,
+			     gboolean with_the_default)
+{
+	GHashTable *ids;
+
+	ids = o365_backend_get_known_folder_ids (o365_backend, extension_name, with_the_default);
+
+	o365_backend_forget_folders_hash (o365_backend, extension_name, ids);
+
+	g_hash_table_destroy (ids);
 }
 
 static gboolean
@@ -275,7 +312,7 @@ o365_backend_got_contact_folders_delta_cb (EO365Connection *cnc,
 			o365_backend_remove_resource (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, id);
 		} else {
 			o365_backend_update_resource (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK,
-			      id, e_o365_folder_get_display_name (object),
+			      id, NULL, e_o365_folder_get_display_name (object),
 			      FALSE, NULL);
 		}
 	}
@@ -284,25 +321,19 @@ o365_backend_got_contact_folders_delta_cb (EO365Connection *cnc,
 }
 
 static void
-o365_backend_sync_folders_thread (GTask *task,
-				  gpointer source_object,
-				  gpointer task_data,
-				  GCancellable *cancellable)
+o365_backend_sync_contact_folders_sync (EO365Backend *o365_backend,
+					EO365Connection *cnc,
+					GCancellable *cancellable)
 {
-	EO365Backend *o365_backend = source_object;
-	EO365Connection *cnc = task_data;
-	ESourceO365Deltas *o365_deltas;
 	EO365Folder *user_contacts = NULL;
+	ESourceO365Deltas *o365_deltas;
 	gchar *old_delta_link, *new_delta_link;
 	gboolean success;
 	GError *error = NULL;
 
-	g_return_if_fail (E_IS_O365_BACKEND (o365_backend));
-	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
-
 	o365_deltas = e_source_get_extension (e_backend_get_source (E_BACKEND (o365_backend)), E_SOURCE_EXTENSION_O365_DELTAS);
 
-	if (e_o365_connection_get_contacts_folder_sync (cnc, NULL, &user_contacts, cancellable, &error)) {
+	if (e_o365_connection_get_contacts_folder_sync (cnc, NULL, NULL, NULL, &user_contacts, cancellable, &error)) {
 		const gchar *id, *display_name;
 
 		id = e_o365_folder_get_id (user_contacts);
@@ -313,7 +344,7 @@ o365_backend_sync_folders_thread (GTask *task,
 
 		o365_backend_update_resource (o365_backend,
 			E_SOURCE_EXTENSION_ADDRESS_BOOK,
-			id, display_name, TRUE, NULL);
+			id, NULL, display_name, TRUE, NULL);
 
 		json_object_unref (user_contacts);
 	} else if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_NOT_FOUND) ||
@@ -333,7 +364,7 @@ o365_backend_sync_folders_thread (GTask *task,
 		g_clear_pointer (&old_delta_link, g_free);
 		g_clear_error (&error);
 
-		o365_backend_forget_folders (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK);
+		o365_backend_forget_folders (o365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, FALSE);
 
 		success = e_o365_connection_get_folders_delta_sync (cnc, NULL, E_O365_FOLDER_KIND_CONTACTS, NULL, NULL, 0,
 			o365_backend_got_contact_folders_delta_cb, o365_backend, &new_delta_link, cancellable, &error);
@@ -345,6 +376,88 @@ o365_backend_sync_folders_thread (GTask *task,
 	g_clear_pointer (&old_delta_link, g_free);
 	g_clear_pointer (&new_delta_link, g_free);
 	g_clear_error (&error);
+}
+
+static void
+o365_backend_sync_calendar_folders_sync (EO365Backend *o365_backend,
+					 EO365Connection *cnc,
+					 GCancellable *cancellable)
+{
+	const gchar *extension_name = E_SOURCE_EXTENSION_CALENDAR;
+	GHashTable *known_ids; /* gchar *id ~> NULL */
+	gboolean success = FALSE;
+	GSList *groups = NULL, *link;
+	GError *error = NULL;
+
+	known_ids = o365_backend_get_known_folder_ids (o365_backend, extension_name, FALSE);
+
+	if (e_o365_connection_list_calendar_groups_sync (cnc, NULL, &groups, cancellable, &error) && groups) {
+		success = TRUE;
+
+		for (link = groups; link && success; link = g_slist_next (link)) {
+			EO365CalendarGroup *group = link->data;
+			GSList *calendars = NULL;
+
+			if (!group)
+				continue;
+
+			if (e_o365_connection_list_calendars_sync (cnc, NULL, e_o365_calendar_group_get_id (group), NULL, &calendars, cancellable, &error)) {
+				GSList *clink;
+
+				for (clink = calendars; clink; clink = g_slist_next (clink)) {
+					EO365Calendar *calendar = clink->data;
+
+					if (!calendar || !e_o365_calendar_get_id (calendar))
+						continue;
+
+					o365_backend_update_resource (o365_backend, extension_name,
+						e_o365_calendar_get_id (calendar),
+						e_o365_calendar_group_get_id (group),
+						e_o365_calendar_get_name (calendar),
+						FALSE,
+						e_o365_calendar_color_to_rgb (e_o365_calendar_get_color (calendar)));
+
+					g_hash_table_remove (known_ids, e_o365_calendar_get_id (calendar));
+				}
+			} else {
+				success = FALSE;
+			}
+		}
+
+		g_slist_free_full (groups, (GDestroyNotify) json_object_unref);
+	}
+
+	if (success)
+		o365_backend_forget_folders_hash (o365_backend, extension_name, known_ids);
+
+	g_hash_table_destroy (known_ids);
+	g_clear_error (&error);
+}
+
+static void
+o365_backend_sync_folders_thread (GTask *task,
+				  gpointer source_object,
+				  gpointer task_data,
+				  GCancellable *cancellable)
+{
+	EO365Backend *o365_backend = source_object;
+	EO365Connection *cnc = task_data;
+	ESourceCollection *collection_extension = NULL;
+	ESource *source;
+
+	g_return_if_fail (E_IS_O365_BACKEND (o365_backend));
+	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
+
+	source = e_backend_get_source (E_BACKEND (o365_backend));
+	collection_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_COLLECTION);
+
+	if (e_source_collection_get_contacts_enabled (collection_extension)) {
+		o365_backend_sync_contact_folders_sync (o365_backend, cnc, cancellable);
+	}
+
+	if (e_source_collection_get_calendar_enabled (collection_extension)) {
+		o365_backend_sync_calendar_folders_sync (o365_backend, cnc, cancellable);
+	}
 }
 
 static void
@@ -663,7 +776,7 @@ o365_backend_authenticate_sync (EBackend *backend,
 
 	cnc = e_o365_connection_new (e_backend_get_source (backend), o365_settings);
 
-	result = e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_UNKNOWN, NULL, out_certificate_pem, out_certificate_errors, cancellable, error);
+	result = e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_UNKNOWN, NULL, NULL, out_certificate_pem, out_certificate_errors, cancellable, error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);

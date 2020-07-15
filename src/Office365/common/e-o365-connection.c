@@ -1557,6 +1557,7 @@ ESourceAuthenticationResult
 e_o365_connection_authenticate_sync (EO365Connection *cnc,
 				     const gchar *user_override,
 				     EO365FolderKind kind,
+				     const gchar *group_id,
 				     const gchar *folder_id,
 				     gchar **out_certificate_pem,
 				     GTlsCertificateFlags *out_certificate_errors,
@@ -1564,56 +1565,36 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 				     GError **error)
 {
 	ESourceAuthenticationResult result = E_SOURCE_AUTHENTICATION_ERROR;
-	SoupMessage *message;
 	JsonObject *object = NULL;
-	gchar *uri;
-	const gchar *resource = NULL;
-	gboolean success;
+	gboolean success = FALSE;
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), result);
 
-	/* Just pick an inexpensive operation */
 	switch (kind) {
-	case E_O365_FOLDER_KIND_UNKNOWN:
-	case E_O365_FOLDER_KIND_MAIL:
-		resource = "mailFolders";
-
-		if (!folder_id || !*folder_id)
-			folder_id = "inbox";
-		break;
-	case E_O365_FOLDER_KIND_CONTACTS:
-		resource = "contactFolders";
-
-		if (!folder_id || !*folder_id)
-			folder_id = "contacts";
-		break;
 	default:
 		g_warn_if_reached ();
+		/* Falls through */
+	case E_O365_FOLDER_KIND_UNKNOWN:
+	case E_O365_FOLDER_KIND_MAIL:
+		if (!folder_id || !*folder_id)
+			folder_id = "inbox";
 
-		resource = "mailFolders";
-		folder_id = "inbox";
+		success = e_o365_connection_get_mail_folder_sync (cnc, user_override, folder_id, "displayName", &object, cancellable, &local_error);
+		break;
+	case E_O365_FOLDER_KIND_CONTACTS:
+		if (!folder_id || !*folder_id)
+			folder_id = "contacts";
+
+		success = e_o365_connection_get_contacts_folder_sync (cnc, user_override, folder_id, "displayName", &object, cancellable, &local_error);
+		break;
+	case E_O365_FOLDER_KIND_CALENDAR:
+		if (folder_id && !*folder_id)
+			folder_id = NULL;
+
+		success = e_o365_connection_get_calendar_folder_sync (cnc, user_override, group_id, folder_id, "name", &object, cancellable, error);
 		break;
 	}
-
-	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
-		resource,
-		folder_id,
-		NULL,
-		"$select", "displayName",
-		NULL);
-
-	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, &object, cancellable, &local_error);
 
 	if (success) {
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
@@ -1659,7 +1640,6 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 	if (object)
 		json_object_unref (object);
 
-	g_clear_object (&message);
 	g_clear_error (&local_error);
 
 	return result;
@@ -2376,6 +2356,48 @@ e_o365_connection_get_folders_delta_sync (EO365Connection *cnc,
 	rd.out_delta_link = out_delta_link;
 
 	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/mailfolder-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_mail_folder_sync (EO365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					const gchar *folder_id, /* nullable - then the 'inbox' is used */
+					const gchar *select, /* nullable - properties to select */
+					EO365MailFolder **out_folder,
+					GCancellable *cancellable,
+					GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_folder != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"mailFolders",
+		folder_id ? folder_id : "inbox",
+		NULL,
+		"$select", select,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_folder, cancellable, error);
 
 	g_clear_object (&message);
 
@@ -3244,9 +3266,13 @@ e_o365_connection_send_mail_sync (EO365Connection *cnc,
 	return success;
 }
 
+/* https://docs.microsoft.com/en-us/graph/api/contactfolder-get?view=graph-rest-1.0&tabs=http */
+
 gboolean
 e_o365_connection_get_contacts_folder_sync (EO365Connection *cnc,
 					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    const gchar *folder_id, /* nullable - then the default 'contacts' folder is returned */
+					    const gchar *select, /* nullable - properties to select */
 					    EO365Folder **out_folder,
 					    GCancellable *cancellable,
 					    GError **error)
@@ -3260,7 +3286,7 @@ e_o365_connection_get_contacts_folder_sync (EO365Connection *cnc,
 
 	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 		"contactFolders",
-		"contacts",
+		folder_id ? folder_id : "contacts",
 		NULL,
 		NULL);
 
@@ -3533,6 +3559,499 @@ e_o365_connection_delete_contact_sync (EO365Connection *cnc,
 		folder_id ? "contacts" : contact_id,
 		"", folder_id ? contact_id : NULL,
 		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/user-list-calendargroups?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_list_calendar_groups_sync (EO365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     GSList **out_groups, /* EO365CalendarGroup * - the returned calendarGroup objects */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	EO365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_groups != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"calendarGroups", NULL, NULL, NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.out_items = out_groups;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/user-post-calendargroups?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_create_calendar_group_sync (EO365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *name,
+					      EO365CalendarGroup **out_created_group,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message;
+	JsonBuilder *builder;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (name != NULL, FALSE);
+	g_return_val_if_fail (out_created_group != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"calendarGroups", NULL, NULL, NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_add_string_member (builder, "name", name);
+	e_o365_json_end_object_member (builder);
+
+	e_o365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_created_group, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendargroup-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_calendar_group_sync (EO365Connection *cnc,
+					   const gchar *user_override, /* for which user, NULL to use the account user */
+					   const gchar *group_id,
+					   EO365CalendarGroup **out_group,
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (group_id != NULL, FALSE);
+	g_return_val_if_fail (out_group != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"calendarGroups",
+		group_id,
+		NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_group, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendargroup-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_update_calendar_group_sync (EO365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *group_id,
+					      const gchar *name,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message;
+	JsonBuilder *builder;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (group_id != NULL, FALSE);
+	g_return_val_if_fail (name != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"calendarGroups",
+		group_id,
+		NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_add_string_member (builder, "name", name);
+	e_o365_json_end_object_member (builder);
+
+	e_o365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendargroup-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_delete_calendar_group_sync (EO365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *group_id,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (group_id != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"calendarGroups", group_id, NULL, NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/calendar?view=graph-rest-1.0 */
+
+gboolean
+e_o365_connection_list_calendars_sync (EO365Connection *cnc,
+				       const gchar *user_override, /* for which user, NULL to use the account user */
+				       const gchar *group_id, /* nullable, calendar group id for group calendars */
+				       const gchar *select, /* properties to select, nullable */
+				       GSList **out_calendars, /* EO365Calendar * - the returned calendar objects */
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	EO365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_calendars != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"$select", select,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.out_items = out_calendars;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendargroup-post-calendars?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_create_calendar_sync (EO365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					const gchar *group_id, /* nullable, then the default group is used */
+					JsonBuilder *calendar,
+					EO365Calendar **out_created_calendar,
+					GCancellable *cancellable,
+					GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar != NULL, FALSE);
+	g_return_val_if_fail (out_created_calendar != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendarGroup",
+		group_id,
+		"calendars",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, calendar);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_created_calendar, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendar-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_calendar_folder_sync (EO365Connection *cnc,
+					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    const gchar *group_id, /* nullable - then the default group is used */
+					    const gchar *calendar_id, /* nullable - then the default calendar is used */
+					    const gchar *select, /* nullable - properties to select */
+					    EO365Calendar **out_calendar,
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_calendar != NULL, FALSE);
+
+	if (group_id && calendar_id) {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendarGroups",
+			group_id,
+			"calendars",
+			"", calendar_id,
+			"$select", select,
+			NULL);
+	} else if (group_id) {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, "groups",
+			group_id,
+			"calendar",
+			NULL,
+			"$select", select,
+			NULL);
+	} else if (calendar_id) {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendars",
+			calendar_id,
+			NULL,
+			"$select", select,
+			NULL);
+	} else {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendar",
+			NULL,
+			NULL,
+			"$select", select,
+			NULL);
+	}
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_calendar, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendar-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_update_calendar_sync (EO365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					const gchar *group_id, /* nullable - then the default group is used */
+					const gchar *calendar_id,
+					const gchar *name, /* nullable - to keep the existing name */
+					EO365CalendarColorType color,
+					GCancellable *cancellable,
+					GError **error)
+{
+	SoupMessage *message;
+	JsonBuilder *builder;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+
+	/* Nothing to change */
+	if (!name && (color == E_O365_CALENDAR_COLOR_NOT_SET || color == E_O365_CALENDAR_COLOR_UNKNOWN))
+		return TRUE;
+
+	if (group_id) {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendarGroups",
+			group_id,
+			"calendars",
+			"", calendar_id,
+			NULL);
+	} else {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendars",
+			calendar_id,
+			NULL,
+			NULL);
+	}
+
+	message = o365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_calendar_add_name (builder, name);
+	e_o365_calendar_add_color (builder, color);
+	e_o365_json_end_object_member (builder);
+
+	e_o365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/calendar-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_delete_calendar_sync (EO365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					const gchar *group_id, /* nullable - then the default group is used */
+					const gchar *calendar_id,
+					GCancellable *cancellable,
+					GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+
+	if (group_id) {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendarGroups",
+			group_id,
+			"calendars",
+			"", calendar_id,
+			NULL);
+	} else {
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"calendars",
+			calendar_id,
+			NULL,
+			NULL);
+	}
 
 	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
 

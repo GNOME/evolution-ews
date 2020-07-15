@@ -238,7 +238,7 @@ o365_transport_authenticate_sync (CamelService *service,
 	if (!cnc)
 		return CAMEL_AUTHENTICATION_ERROR;
 
-	switch (e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, NULL, NULL, NULL, cancellable, error)) {
+	switch (e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_MAIL, NULL, NULL, NULL, NULL, cancellable, error)) {
 	case E_SOURCE_AUTHENTICATION_ERROR:
 	case E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED:
 	default:

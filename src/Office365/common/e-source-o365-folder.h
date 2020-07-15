@@ -68,6 +68,13 @@ gboolean	e_source_o365_folder_get_is_default
 void		e_source_o365_folder_set_is_default
 						(ESourceO365Folder *extension,
 						 gboolean value);
+const gchar *	e_source_o365_folder_get_group_id
+						(ESourceO365Folder *extension);
+gchar *		e_source_o365_folder_dup_group_id
+						(ESourceO365Folder *extension);
+void		e_source_o365_folder_set_group_id
+						(ESourceO365Folder *extension,
+						 const gchar *group_id);
 
 G_END_DECLS
 

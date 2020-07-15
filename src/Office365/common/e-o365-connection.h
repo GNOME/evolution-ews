@@ -131,6 +131,7 @@ ESourceAuthenticationResult
 						(EO365Connection *cnc,
 						 const gchar *user_override,
 						 EO365FolderKind kind,
+						 const gchar *group_id,
 						 const gchar *folder_id,
 						 gchar **out_certificate_pem,
 						 GTlsCertificateFlags *out_certificate_errors,
@@ -177,7 +178,7 @@ gboolean	e_o365_connection_list_mail_folders_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *from_path, /* path for the folder to read, NULL for top user folder */
-						 const gchar *select, /* properties to select, nullable */
+						 const gchar *select, /* nullable - properties to select */
 						 GSList **out_folders, /* EO365MailFolder * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
@@ -185,12 +186,20 @@ gboolean	e_o365_connection_get_folders_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 EO365FolderKind kind,
-						 const gchar *select, /* properties to select, nullable */
+						 const gchar *select, /* nullable - properties to select */
 						 const gchar *delta_link, /* previous delta link */
 						 guint max_page_size, /* 0 for default by the server */
 						 EO365ConnectionJsonFunc func, /* function to call with each result set */
 						 gpointer func_user_data, /* user data passed into the 'func' */
 						 gchar **out_delta_link,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_mail_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id, /* nullable - then the 'inbox' is used */
+						 const gchar *select, /* nullable - properties to select */
+						 EO365MailFolder **out_folder,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_create_mail_folder_sync
@@ -229,7 +238,7 @@ gboolean	e_o365_connection_get_objects_delta_sync
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 EO365FolderKind kind,
 						 const gchar *folder_id, /* folder ID to get delta messages in */
-						 const gchar *select, /* properties to select, nullable */
+						 const gchar *select, /* nullable - properties to select */
 						 const gchar *delta_link, /* previous delta link */
 						 guint max_page_size, /* 0 for default by the server */
 						 EO365ConnectionJsonFunc func, /* function to call with each result set */
@@ -306,6 +315,8 @@ gboolean	e_o365_connection_send_mail_sync
 gboolean	e_o365_connection_get_contacts_folder_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id, /* nullable - then the default 'contacts' folder is returned */
+						 const gchar *select, /* nullable - properties to select */
 						 EO365Folder **out_folder,
 						 GCancellable *cancellable,
 						 GError **error);
@@ -322,7 +333,7 @@ gboolean	e_o365_connection_update_contact_photo_sync
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *folder_id,
 						 const gchar *contact_id,
-						 const GByteArray *jpeg_photo, /* nullable, to remove the photo */
+						 const GByteArray *jpeg_photo, /* nullable - to remove the photo */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_get_contact_sync
@@ -354,6 +365,80 @@ gboolean	e_o365_connection_delete_contact_sync
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *folder_id,
 						 const gchar *contact_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_list_calendar_groups_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 GSList **out_groups, /* EO365CalendarGroup * - the returned calendarGroup objects */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_create_calendar_group_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *name,
+						 EO365CalendarGroup **out_created_group,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_calendar_group_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id,
+						 EO365CalendarGroup **out_group,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_update_calendar_group_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id,
+						 const gchar *name,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_delete_calendar_group_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_list_calendars_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - calendar group for group calendars */
+						 const gchar *select, /* nullable - properties to select */
+						 GSList **out_calendars, /* EO365Calendar * - the returned calendar objects */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_create_calendar_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 JsonBuilder *calendar,
+						 EO365Calendar **out_created_calendar,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_calendar_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id, /* nullable - then the default calendar is used */
+						 const gchar *select, /* nullable - properties to select */
+						 EO365Calendar **out_calendar,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_update_calendar_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *name, /* nullable - to keep the existing name */
+						 EO365CalendarColorType color,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_delete_calendar_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
 						 GCancellable *cancellable,
 						 GError **error);
 

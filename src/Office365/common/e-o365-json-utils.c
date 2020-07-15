@@ -17,9 +17,83 @@
 
 #include "evolution-ews-config.h"
 
+#include <stdio.h>
 #include <json-glib/json-glib.h>
 
 #include "e-o365-json-utils.h"
+
+static struct _color_map {
+	const gchar *name;
+	const gchar *rgb;
+	EO365CalendarColorType value;
+} color_map[] = {
+	{ "auto",	NULL,		E_O365_CALENDAR_COLOR_AUTO },
+	{ "lightBlue",	"#0078d4",	E_O365_CALENDAR_COLOR_LIGHT_BLUE },
+	{ "lightGreen",	"#b67dfa",	E_O365_CALENDAR_COLOR_LIGHT_GREEN },
+	{ "lightOrange","#25c4fe",	E_O365_CALENDAR_COLOR_LIGHT_ORANGE },
+	{ "lightGray",	"#968681",	E_O365_CALENDAR_COLOR_LIGHT_GRAY },
+	{ "lightYellow","#ffc699",	E_O365_CALENDAR_COLOR_LIGHT_YELLOW }, /* Navy in web UI */
+	{ "lightTeal",	"#fc7c78",	E_O365_CALENDAR_COLOR_LIGHT_TEAL },
+	{ "lightPink",	"#1cff73",	E_O365_CALENDAR_COLOR_LIGHT_PINK },
+	{ "lightBrown",	"#8bb256",	E_O365_CALENDAR_COLOR_LIGHT_BROWN }, /* Purple in web UI */
+	{ "lightRed",	"#3af0e0",	E_O365_CALENDAR_COLOR_LIGHT_RED },
+	{ "maxColor",	NULL,		E_O365_CALENDAR_COLOR_MAX_COLOR }
+};
+
+const gchar *
+e_o365_calendar_color_to_rgb (EO365CalendarColorType color)
+{
+	gint ii;
+
+	for (ii = 0; ii < G_N_ELEMENTS (color_map); ii++) {
+		if (color == color_map[ii].value)
+			return color_map[ii].rgb;
+	}
+
+	return NULL;
+}
+
+EO365CalendarColorType
+e_o365_rgb_to_calendar_color (const gchar *rgb)
+{
+	EO365CalendarColorType res;
+	gint ii, rr, gg, bb;
+	gdouble distance, res_distance = -1.0;
+
+	if (!rgb || !*rgb)
+		return E_O365_CALENDAR_COLOR_NOT_SET;
+
+	for (ii = 0; ii < G_N_ELEMENTS (color_map); ii++) {
+		if (color_map[ii].rgb && g_ascii_strcasecmp (color_map[ii].rgb, rgb) == 0)
+			return color_map[ii].value;
+	}
+
+	/* When exact match did not work, approximate to the closest */
+
+	if (sscanf (rgb, "#%02x%02x%02x", &rr, &gg, &bb) != 3)
+		return E_O365_CALENDAR_COLOR_UNKNOWN;
+
+	distance = (rr * rr) + (gg * gg) + (bb * bb);
+	res = E_O365_CALENDAR_COLOR_UNKNOWN;
+
+	for (ii = 0; ii < G_N_ELEMENTS (color_map); ii++) {
+		if (color_map[ii].rgb && sscanf (color_map[ii].rgb, "#%02x%02x%02x", &rr, &gg, &bb) == 3) {
+			gdouble candidate_distance;
+
+			candidate_distance = (rr * rr) + (gg * gg) + (bb * bb) - distance;
+
+			if (candidate_distance < 0.0)
+				candidate_distance *= -1.0;
+
+			if (!ii || candidate_distance < res_distance) {
+				res_distance = candidate_distance;
+				res = color_map[ii].value;
+			}
+		}
+	}
+
+	return res;
+}
 
 JsonArray *
 e_o365_json_get_array_member (JsonObject *object,
@@ -1865,4 +1939,232 @@ e_o365_contact_add_yomi_surname (JsonBuilder *builder,
 				 const gchar *value)
 {
 	e_o365_json_add_nonempty_or_null_string_member (builder, "yomiSurname", value);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/calendargroup?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_calendar_group_get_id (EO365CalendarGroup *group)
+{
+	return e_o365_json_get_string_member (group, "id", NULL);
+}
+
+const gchar *
+e_o365_calendar_group_get_change_key (EO365CalendarGroup *group)
+{
+	return e_o365_json_get_string_member (group, "changeKey", NULL);
+}
+
+const gchar *
+e_o365_calendar_group_get_class_id (EO365CalendarGroup *group)
+{
+	return e_o365_json_get_string_member (group, "classId", NULL);
+}
+
+const gchar *
+e_o365_calendar_group_get_name (EO365CalendarGroup *group)
+{
+	return e_o365_json_get_string_member (group, "name", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/calendar?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_calendar_get_id (EO365Calendar *calendar)
+{
+	return e_o365_json_get_string_member (calendar, "id", NULL);
+}
+
+const gchar *
+e_o365_calendar_get_change_key (EO365Calendar *calendar)
+{
+	return e_o365_json_get_string_member (calendar, "changeKey", NULL);
+}
+
+gboolean
+e_o365_calendar_get_can_edit (EO365Calendar *calendar)
+{
+	return e_o365_json_get_boolean_member (calendar, "canEdit", FALSE);
+}
+
+gboolean
+e_o365_calendar_get_can_share (EO365Calendar *calendar)
+{
+	return e_o365_json_get_boolean_member (calendar, "canShare", FALSE);
+}
+
+gboolean
+e_o365_calendar_get_can_view_private_items (EO365Calendar *calendar)
+{
+	return e_o365_json_get_boolean_member (calendar, "canViewPrivateItems", FALSE);
+}
+
+gboolean
+e_o365_calendar_get_is_removable (EO365Calendar *calendar)
+{
+	return e_o365_json_get_boolean_member (calendar, "isRemovable", FALSE);
+}
+
+gboolean
+e_o365_calendar_get_is_tallying_responses (EO365Calendar *calendar)
+{
+	return e_o365_json_get_boolean_member (calendar, "isTallyingResponses", FALSE);
+}
+
+EO365EmailAddress *
+e_o365_calendar_get_owner (EO365Calendar *calendar)
+{
+	return e_o365_json_get_object_member (calendar, "owner");
+}
+
+const gchar *
+e_o365_calendar_get_name (EO365Calendar *calendar)
+{
+	return e_o365_json_get_string_member (calendar, "name", NULL);
+}
+
+void
+e_o365_calendar_add_name (JsonBuilder *builder,
+			  const gchar *name)
+{
+	e_o365_json_add_nonempty_string_member (builder, "name", name);
+}
+
+static struct _meeting_provider_map {
+	const gchar *name;
+	EO365OnlineMeetingProviderType value;
+} meeting_provider_map[] = {
+	{ "unknown",		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN },
+	{ "skypeForBusiness",	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_BUSINESS },
+	{ "skypeForConsumer",	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_CONSUMER },
+	{ "teamsForBusiness",	E_O365_ONLINE_MEETING_PROVIDER_TEAMS_FOR_BUSINESS }
+};
+
+guint32 /* bit-or of EO365OnlineMeetingProviderType */
+e_o365_calendar_get_allowed_online_meeting_providers (EO365Calendar *calendar)
+{
+	guint32 providers = E_O365_ONLINE_MEETING_PROVIDER_NOT_SET;
+	JsonArray *array;
+
+	array = e_o365_json_get_array_member (calendar, "allowedOnlineMeetingProviders");
+
+	if (array) {
+		guint ii, jj, len;
+
+		providers = E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN;
+
+		len = json_array_get_length (array);
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *str = json_array_get_string_element (array, ii);
+
+			if (!str)
+				continue;
+
+			for (jj = 0; jj < G_N_ELEMENTS (meeting_provider_map); jj++) {
+				if (g_ascii_strcasecmp (str, meeting_provider_map[jj].name) == 0) {
+					providers |= meeting_provider_map[jj].value;
+					break;
+				}
+			}
+		}
+	}
+
+	return providers;
+}
+
+void
+e_o365_calendar_add_allowed_online_meeting_providers (JsonBuilder *builder,
+						      guint providers) /* bit-or of EO365OnlineMeetingProviderType */
+{
+	gint ii;
+
+	if (providers == E_O365_ONLINE_MEETING_PROVIDER_NOT_SET)
+		return;
+
+	e_o365_json_begin_array_member (builder, "allowedOnlineMeetingProviders");
+
+	if (providers == E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN)
+		json_builder_add_string_value (builder, "unknown");
+
+	for (ii = 0; ii < G_N_ELEMENTS (meeting_provider_map); ii++) {
+		if ((providers & meeting_provider_map[ii].value) != 0)
+			json_builder_add_string_value (builder, meeting_provider_map[ii].name);
+	}
+
+	e_o365_json_end_array_member (builder);
+}
+
+EO365CalendarColorType
+e_o365_calendar_get_color (EO365Calendar *calendar)
+{
+	const gchar *color;
+	gint ii;
+
+	color = e_o365_json_get_string_member (calendar, "color", NULL);
+
+	if (!color)
+		return E_O365_CALENDAR_COLOR_NOT_SET;
+
+	for (ii = 0; ii < G_N_ELEMENTS (color_map); ii++) {
+		if (g_ascii_strcasecmp (color_map[ii].name, color) == 0)
+			return color_map[ii].value;
+	}
+
+	return E_O365_CALENDAR_COLOR_UNKNOWN;
+}
+
+void
+e_o365_calendar_add_color (JsonBuilder *builder,
+			   EO365CalendarColorType color)
+{
+	const gchar *name = NULL;
+	gint ii;
+
+	for (ii = 0; ii < G_N_ELEMENTS (color_map); ii++) {
+		if (color_map[ii].value == color) {
+			name = color_map[ii].name;
+			break;
+		}
+	}
+
+	if (name && g_ascii_strcasecmp (name, "maxColor") != 0)
+		e_o365_json_add_string_member (builder, "color", name);
+}
+
+EO365OnlineMeetingProviderType
+e_o365_calendar_get_default_online_meeting_provider (EO365Calendar *calendar)
+{
+	const gchar *name;
+	gint ii;
+
+	name = e_o365_json_get_string_member (calendar, "defaultOnlineMeetingProvider", NULL);
+
+	if (!name)
+		return E_O365_ONLINE_MEETING_PROVIDER_NOT_SET;
+
+	for (ii = 0; ii < G_N_ELEMENTS (meeting_provider_map); ii++) {
+		if (g_ascii_strcasecmp (name, meeting_provider_map[ii].name) == 0)
+			return meeting_provider_map[ii].value;
+	}
+
+	return E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN;
+}
+
+void
+e_o365_calendar_add_default_online_meeting_provider (JsonBuilder *builder,
+						     EO365OnlineMeetingProviderType provider)
+{
+	const gchar *name = NULL;
+	gint ii;
+
+	for (ii = 0; ii < G_N_ELEMENTS (meeting_provider_map); ii++) {
+		if (meeting_provider_map[ii].value == provider) {
+			name = meeting_provider_map[ii].name;
+			break;
+		}
+	}
+
+	if (name)
+		e_o365_json_add_string_member (builder, "defaultOnlineMeetingProvider", name);
 }
