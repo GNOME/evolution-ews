@@ -441,6 +441,16 @@ gboolean	e_o365_connection_delete_calendar_sync
 						 const gchar *calendar_id,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_list_events_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - calendar group for group calendars */
+						 const gchar *calendar_id,
+						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
+						 const gchar *select, /* nullable - properties to select */
+						 GSList **out_events, /* EO365Event * - the returned event objects */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

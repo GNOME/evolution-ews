@@ -722,9 +722,9 @@ ebb_o365_contact_add_emails (EBookBackendO365 *bbo365,
 			gchar *name = NULL, *address = NULL;
 
 			if (ebb_o365_parse_qp_email (value, &name, &address))
-				e_o365_add_email_address (builder, name, address);
+				e_o365_add_email_address (builder, NULL, name, address);
 			else
-				e_o365_add_email_address (builder, NULL, value);
+				e_o365_add_email_address (builder, NULL, NULL, value);
 
 			g_free (name);
 			g_free (address);

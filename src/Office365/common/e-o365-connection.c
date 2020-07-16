@@ -4069,3 +4069,67 @@ e_o365_connection_delete_calendar_sync (EO365Connection *cnc,
 
 	return success;
 }
+
+/* https://docs.microsoft.com/en-us/graph/api/user-list-events?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_list_events_sync (EO365Connection *cnc,
+				    const gchar *user_override, /* for which user, NULL to use the account user */
+				    const gchar *group_id, /* nullable, calendar group id for group calendars */
+				    const gchar *calendar_id,
+				    const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
+				    const gchar *select, /* nullable - properties to select */
+				    GSList **out_events, /* EO365Event * - the returned event objects */
+				    GCancellable *cancellable,
+				    GError **error)
+{
+	EO365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (out_events != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "events",
+		"$select", select,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	if (prefer_outlook_timezone && *prefer_outlook_timezone) {
+		gchar *prefer_value;
+
+		prefer_value = g_strdup_printf ("outlook.timezone=\"%s\"", prefer_outlook_timezone);
+
+		soup_message_headers_append (message->request_headers, "Prefer", prefer_value);
+
+		g_free (prefer_value);
+	}
+
+	soup_message_headers_append (message->request_headers, "Prefer", "outlook.body-content-type=\"text\"");
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.out_items = out_events;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}

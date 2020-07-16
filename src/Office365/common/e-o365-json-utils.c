@@ -22,6 +22,99 @@
 
 #include "e-o365-json-utils.h"
 
+typedef struct _MapData {
+	const gchar *json_value;
+	gint enum_value;
+} MapData;
+
+static gint
+o365_json_utils_json_value_as_enum (const gchar *json_value,
+				    const MapData *items,
+				    guint n_items,
+				    gint not_set_value,
+				    gint unknown_value)
+{
+	guint ii;
+
+	if (!json_value)
+		return not_set_value;
+
+	for (ii = 0; ii < n_items; ii++) {
+		if (items[ii].json_value && g_ascii_strcasecmp (items[ii].json_value, json_value) == 0)
+			return items[ii].enum_value;
+	}
+
+	return unknown_value;
+}
+
+static gint
+o365_json_utils_get_json_as_enum (JsonObject *object,
+				  const gchar *string_member_name,
+				  const MapData *items,
+				  guint n_items,
+				  gint not_set_value,
+				  gint unknown_value)
+{
+	return o365_json_utils_json_value_as_enum (e_o365_json_get_string_member (object, string_member_name, NULL),
+		items, n_items, not_set_value, unknown_value);
+}
+
+static void
+o365_json_utils_add_enum_as_json (JsonBuilder *builder,
+				  const gchar *string_member_name,
+				  gint enum_value,
+				  const MapData *items,
+				  guint n_items,
+				  gint not_set_value,
+				  gint default_value)
+{
+	const gchar *json_value = NULL, *default_value_str = NULL;
+	guint ii;
+
+	if (enum_value == not_set_value)
+		return;
+
+	for (ii = 0; ii < n_items; ii++) {
+		if (items[ii].enum_value == default_value) {
+			default_value_str = items[ii].json_value;
+
+			if (json_value)
+				break;
+		}
+
+		if (items[ii].enum_value == enum_value) {
+			json_value = items[ii].json_value;
+
+			if (default_value_str)
+				break;
+		}
+	}
+
+	if (!json_value) {
+		g_warning ("%s: Failed to find enum value %d for member '%s'", G_STRFUNC, enum_value, string_member_name);
+		json_value = default_value_str;
+	}
+
+	if (json_value) {
+		if (string_member_name)
+			e_o365_json_add_string_member (builder, string_member_name, json_value);
+		else
+			json_builder_add_string_value (builder, json_value ? json_value : "");
+	}
+}
+
+static MapData attachment_data_type_map[] = {
+	{ "#microsoft.graph.fileAttachment",		E_O365_ATTACHMENT_DATA_TYPE_FILE },
+	{ "#microsoft.graph.itemAttachment",		E_O365_ATTACHMENT_DATA_TYPE_ITEM },
+	{ "#microsoft.graph.referenceAttachment",	E_O365_ATTACHMENT_DATA_TYPE_REFERENCE }
+};
+
+static MapData attendee_map[] = {
+	{ "required", E_O365_ATTENDEE_REQUIRED },
+	{ "optional", E_O365_ATTENDEE_OPTIONAL },
+	{ "resource", E_O365_ATTENDEE_RESOURCE }
+};
+
 static struct _color_map {
 	const gchar *name;
 	const gchar *rgb;
@@ -38,6 +131,127 @@ static struct _color_map {
 	{ "lightBrown",	"#8bb256",	E_O365_CALENDAR_COLOR_LIGHT_BROWN }, /* Purple in web UI */
 	{ "lightRed",	"#3af0e0",	E_O365_CALENDAR_COLOR_LIGHT_RED },
 	{ "maxColor",	NULL,		E_O365_CALENDAR_COLOR_MAX_COLOR }
+};
+
+static MapData content_type_map[] = {
+	{ "text", E_O365_ITEM_BODY_CONTENT_TYPE_TEXT },
+	{ "html", E_O365_ITEM_BODY_CONTENT_TYPE_HTML }
+};
+
+static MapData day_of_week_map[] = {
+	{ "sunday",	E_O365_DAY_OF_WEEK_SUNDAY },
+	{ "monday",	E_O365_DAY_OF_WEEK_MONDAY },
+	{ "tuesday",	E_O365_DAY_OF_WEEK_TUESDAY },
+	{ "wednesday",	E_O365_DAY_OF_WEEK_WEDNESDAY },
+	{ "thursday",	E_O365_DAY_OF_WEEK_THURSDAY },
+	{ "friday",	E_O365_DAY_OF_WEEK_FRIDAY },
+	{ "saturday",	E_O365_DAY_OF_WEEK_SATURDAY }
+};
+
+static MapData event_type_map[] = {
+	{ "singleInstance",	E_O365_EVENT_TYPE_SINGLE_INSTANCE },
+	{ "occurrence",		E_O365_EVENT_TYPE_OCCURRENCE },
+	{ "exception",		E_O365_EVENT_TYPE_EXCEPTION },
+	{ "seriesMaster",	E_O365_EVENT_TYPE_SERIES_MASTER }
+};
+
+static MapData flag_status_map[] = {
+	{ "notFlagged",	E_O365_FOLLOWUP_FLAG_STATUS_NOT_FLAGGED },
+	{ "complete",	E_O365_FOLLOWUP_FLAG_STATUS_COMPLETE },
+	{ "flagged",	E_O365_FOLLOWUP_FLAG_STATUS_FLAGGED }
+};
+
+static MapData free_busy_status_map[] = {
+	{ "unknown",		E_O365_FREE_BUSY_STATUS_UNKNOWN },
+	{ "free",		E_O365_FREE_BUSY_STATUS_FREE },
+	{ "tentative",		E_O365_FREE_BUSY_STATUS_TENTATIVE },
+	{ "busy",		E_O365_FREE_BUSY_STATUS_BUSY },
+	{ "oof",		E_O365_FREE_BUSY_STATUS_OOF },
+	{ "workingElsewhere",	E_O365_FREE_BUSY_STATUS_WORKING_ELSEWHERE }
+};
+
+static MapData importance_map[] = {
+	{ "low",	E_O365_IMPORTANCE_LOW },
+	{ "normal",	E_O365_IMPORTANCE_NORMAL },
+	{ "high",	E_O365_IMPORTANCE_HIGH }
+};
+
+static MapData inference_classification_map[] = {
+	{ "focused",	E_O365_INFERENCE_CLASSIFICATION_FOCUSED },
+	{ "other",	E_O365_INFERENCE_CLASSIFICATION_OTHER }
+};
+
+static MapData location_type_map[] = {
+	{ "default",		E_O365_LOCATION_DEFAULT },
+	{ "conferenceRoom",	E_O365_LOCATION_CONFERENCE_ROOM },
+	{ "homeAddress",	E_O365_LOCATION_HOME_ADDRESS },
+	{ "businessAddress",	E_O365_LOCATION_BUSINESS_ADDRESS },
+	{ "geoCoordinates",	E_O365_LOCATION_GEO_COORDINATES },
+	{ "streetAddress",	E_O365_LOCATION_STREET_ADDRESS },
+	{ "hotel",		E_O365_LOCATION_HOTEL },
+	{ "restaurant",		E_O365_LOCATION_RESTAURANT },
+	{ "localBusiness",	E_O365_LOCATION_LOCAL_BUSINESS },
+	{ "postalAddress",	E_O365_LOCATION_POSTAL_ADDRESS }
+};
+
+static MapData meeting_provider_map[] = {
+	{ "unknown",		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN },
+	{ "skypeForBusiness",	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_BUSINESS },
+	{ "skypeForConsumer",	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_CONSUMER },
+	{ "teamsForBusiness",	E_O365_ONLINE_MEETING_PROVIDER_TEAMS_FOR_BUSINESS }
+};
+
+static MapData phone_map[] = {
+	{ "home",	E_O365_PHONE_HOME },
+	{ "business",	E_O365_PHONE_BUSINESS },
+	{ "mobile",	E_O365_PHONE_MOBILE },
+	{ "other",	E_O365_PHONE_OTHER },
+	{ "assistant",	E_O365_PHONE_ASSISTANT },
+	{ "homeFax",	E_O365_PHONE_HOMEFAX },
+	{ "businessFax",E_O365_PHONE_BUSINESSFAX },
+	{ "otherFax",	E_O365_PHONE_OTHERFAX },
+	{ "pager",	E_O365_PHONE_PAGER },
+	{ "radio",	E_O365_PHONE_RADIO }
+};
+
+static MapData recurrence_pattern_map[] = {
+	{ "daily",		E_O365_RECURRENCE_PATTERN_DAILY },
+	{ "weekly",		E_O365_RECURRENCE_PATTERN_WEEKLY },
+	{ "absoluteMonthly",	E_O365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY },
+	{ "relativeMonthly",	E_O365_RECURRENCE_PATTERN_RELATIVE_MONTHLY },
+	{ "absoluteYearly",	E_O365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY },
+	{ "relativeYearly",	E_O365_RECURRENCE_PATTERN_RELATIVE_YEARLY }
+};
+
+static MapData recurrence_range_map[] = {
+	{ "endDate",	E_O365_RECURRENCE_RANGE_ENDDATE },
+	{ "noEnd",	E_O365_RECURRENCE_RANGE_NOEND },
+	{ "numbered",	E_O365_RECURRENCE_RANGE_NUMBERED }
+};
+
+static MapData response_map[] = {
+	{ "None",		E_O365_RESPONSE_NONE },
+	{ "Organizer",		E_O365_RESPONSE_ORGANIZER },
+	{ "TentativelyAccepted",E_O365_RESPONSE_TENTATIVELY_ACCEPTED },
+	{ "Accepted",		E_O365_RESPONSE_ACCEPTED },
+	{ "Declined",		E_O365_RESPONSE_DECLINED },
+	{ "NotResponded",	E_O365_RESPONSE_NOT_RESPONDED }
+};
+
+static MapData sensitivity_map[] = {
+	{ "normal",		E_O365_SENSITIVITY_NORMAL },
+	{ "personal",		E_O365_SENSITIVITY_PERSONAL },
+	{ "private",		E_O365_SENSITIVITY_PRIVATE },
+	{ "confidential",	E_O365_SENSITIVITY_CONFIDENTIAL }
+
+};
+
+static MapData week_index_map[] = {
+	{ "first",	E_O365_WEEK_INDEX_FIRST },
+	{ "second",	E_O365_WEEK_INDEX_SECOND },
+	{ "third",	E_O365_WEEK_INDEX_THIRD },
+	{ "fourth",	E_O365_WEEK_INDEX_FOURTH },
+	{ "last",	E_O365_WEEK_INDEX_LAST }
 };
 
 const gchar *
@@ -343,6 +557,75 @@ e_o365_json_add_nonempty_or_null_string_member (JsonBuilder *builder,
 		e_o365_json_add_null_member (builder, member_name);
 }
 
+EO365Date
+e_o365_date_get (JsonObject *object,
+		 const gchar *member_name)
+{
+	const gchar *value;
+	guint year = 0, month = 0, day = 0;
+
+	value = e_o365_json_get_string_member (object, member_name, NULL);
+
+	if (!value || !*value)
+		return -1;
+
+	if (sscanf (value, "%04u-%02u-%02u", &year, &month, &day) != 3) {
+		g_warning ("%s: Failed to decode date '%s' of member '%s'", G_STRFUNC, value, member_name);
+		return -1;
+	}
+
+	return e_o365_date_encode (year, month, day);
+}
+
+void
+e_o365_add_date (JsonBuilder *builder,
+		 const gchar *member_name,
+		 EO365Date value)
+{
+	guint year, month, day;
+
+	if (e_o365_date_decode (value, &year, &month, &day)) {
+		gchar buff[128];
+
+		g_snprintf (buff, sizeof (buff), "%04u-%02u-%02u", year, month, day);
+		e_o365_json_add_string_member (builder, member_name, buff);
+	}
+}
+
+gboolean
+e_o365_date_decode (EO365Date dt,
+		    guint *out_year,
+		    guint *out_month,
+		    guint *out_day)
+{
+	g_return_val_if_fail (out_year != NULL, FALSE);
+	g_return_val_if_fail (out_month != NULL, FALSE);
+	g_return_val_if_fail (out_day != NULL, FALSE);
+
+	if (dt <= 0)
+		return FALSE;
+
+	*out_year = dt % 10000;
+	*out_month = (dt / 10000) % 100;
+	*out_day = (dt / 1000000) % 100;
+
+	return *out_year > 1000 &&
+		*out_month >= 1 && *out_month <= 12 &&
+		*out_day >= 1 && *out_day <= 31;
+}
+
+EO365Date
+e_o365_date_encode (guint year,
+		    guint month,
+		    guint day)
+{
+	g_return_val_if_fail (year > 0 && year < 10000, -1);
+	g_return_val_if_fail (month >= 1 && month <= 12, -1);
+	g_return_val_if_fail (day >= 1 && day <= 31, -1);
+
+	return year + (10000 * month) + (1000000 * day);
+}
+
 time_t
 e_o365_get_date_time_offset_member (JsonObject *object,
 				    const gchar *member_name)
@@ -388,6 +671,41 @@ e_o365_add_date_time_offset_member (JsonBuilder *builder,
 
 	g_date_time_unref (dt);
 	g_free (value_str);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0 */
+
+time_t
+e_o365_date_time_get_date_time (EO365DateTimeWithZone *datetime)
+{
+	return e_o365_get_date_time_offset_member (datetime, "dateTime");
+}
+
+const gchar *
+e_o365_date_time_get_time_zone (EO365DateTimeWithZone *datetime)
+{
+	return e_o365_json_get_string_member (datetime, "timeZone", NULL);
+}
+
+void
+e_o365_add_date_time (JsonBuilder *builder,
+		      const gchar *member_name,
+		      time_t date_time,
+		      const gchar *zone)
+{
+	g_return_if_fail (member_name != NULL);
+
+	if (date_time <= (time_t) 0) {
+		e_o365_json_add_null_member (builder, member_name);
+		return;
+	}
+
+	e_o365_json_begin_object_member (builder, member_name);
+
+	e_o365_add_date_time_offset_member (builder, "dateTime", date_time);
+	e_o365_json_add_nonempty_string_member (builder, "timeZone", zone);
+
+	e_o365_json_end_object_member (builder);
 }
 
 /* https://docs.microsoft.com/en-us/graph/delta-query-overview */
@@ -548,41 +866,6 @@ e_o365_add_recipient (JsonBuilder *builder,
 	e_o365_json_end_object_member (builder); /* member_name */
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0 */
-
-time_t
-e_o365_date_time_get_date_time (EO365DateTimeWithZone *datetime)
-{
-	return e_o365_get_date_time_offset_member (datetime, "dateTime");
-}
-
-const gchar *
-e_o365_date_time_get_time_zone (EO365DateTimeWithZone *datetime)
-{
-	return e_o365_json_get_string_member (datetime, "timeZone", NULL);
-}
-
-void
-e_o365_add_date_time (JsonBuilder *builder,
-		      const gchar *member_name,
-		      time_t date_time,
-		      const gchar *zone)
-{
-	g_return_if_fail (member_name != NULL);
-
-	if (date_time <= (time_t) 0) {
-		e_o365_json_add_null_member (builder, member_name);
-		return;
-	}
-
-	e_o365_json_begin_object_member (builder, member_name);
-
-	e_o365_add_date_time_offset_member (builder, "dateTime", date_time);
-	e_o365_json_add_nonempty_string_member (builder, "timeZone", zone);
-
-	e_o365_json_end_object_member (builder);
-}
-
 /* https://docs.microsoft.com/en-us/graph/api/resources/internetmessageheader?view=graph-rest-1.0 */
 
 const gchar *
@@ -649,39 +932,20 @@ e_o365_followup_flag_add_due_date_time (JsonBuilder *builder,
 EO365FollowupFlagStatusType
 e_o365_followup_flag_get_flag_status (EO365FollowupFlag *flag)
 {
-	const gchar *status;
-
-	status = e_o365_json_get_string_member (flag, "flagStatus", NULL);
-
-	if (!status)
-		return E_O365_FOLLOWUP_FLAG_STATUS_NOT_SET;
-
-	if (g_ascii_strcasecmp (status, "notFlagged") == 0)
-		return E_O365_FOLLOWUP_FLAG_STATUS_NOT_FLAGGED;
-
-	if (g_ascii_strcasecmp (status, "complete") == 0)
-		return E_O365_FOLLOWUP_FLAG_STATUS_COMPLETE;
-
-	if (g_ascii_strcasecmp (status, "flagged") == 0)
-		return E_O365_FOLLOWUP_FLAG_STATUS_FLAGGED;
-
-	return E_O365_FOLLOWUP_FLAG_STATUS_UNKNOWN;
+	return o365_json_utils_get_json_as_enum (flag, "flagStatus",
+		flag_status_map, G_N_ELEMENTS (flag_status_map),
+		E_O365_FOLLOWUP_FLAG_STATUS_NOT_SET,
+		E_O365_FOLLOWUP_FLAG_STATUS_UNKNOWN);
 }
 
 void
 e_o365_followup_flag_add_flag_status (JsonBuilder *builder,
 				      EO365FollowupFlagStatusType status)
 {
-	const gchar *value;
-
-	if (status == E_O365_FOLLOWUP_FLAG_STATUS_COMPLETE)
-		value = "complete";
-	else if (status == E_O365_FOLLOWUP_FLAG_STATUS_FLAGGED)
-		value = "flagged";
-	else
-		value = "notFlagged";
-
-	e_o365_json_add_string_member (builder, "flagStatus", value);
+	o365_json_utils_add_enum_as_json (builder, "flagStatus", status,
+		flag_status_map, G_N_ELEMENTS (flag_status_map),
+		E_O365_FOLLOWUP_FLAG_STATUS_NOT_SET,
+		E_O365_FOLLOWUP_FLAG_STATUS_NOT_FLAGGED);
 }
 
 EO365DateTimeWithZone *
@@ -709,20 +973,10 @@ e_o365_item_body_get_content (EO365ItemBody *item_body)
 EO365ItemBodyContentTypeType
 e_o365_item_body_get_content_type (EO365ItemBody *item_body)
 {
-	const gchar *content_type;
-
-	content_type = e_o365_json_get_string_member (item_body, "contentType", NULL);
-
-	if (!content_type)
-		return E_O365_ITEM_BODY_CONTENT_TYPE_NOT_SET;
-
-	if (g_ascii_strcasecmp (content_type, "text") == 0)
-		return E_O365_ITEM_BODY_CONTENT_TYPE_TEXT;
-
-	if (g_ascii_strcasecmp (content_type, "html") == 0)
-		return E_O365_ITEM_BODY_CONTENT_TYPE_HTML;
-
-	return E_O365_ITEM_BODY_CONTENT_TYPE_UNKNOWN;
+	return o365_json_utils_get_json_as_enum (item_body, "contentType",
+		content_type_map, G_N_ELEMENTS (content_type_map),
+		E_O365_ITEM_BODY_CONTENT_TYPE_NOT_SET,
+		E_O365_ITEM_BODY_CONTENT_TYPE_UNKNOWN);
 }
 
 void
@@ -731,28 +985,16 @@ e_o365_add_item_body (JsonBuilder *builder,
 		      EO365ItemBodyContentTypeType content_type,
 		      const gchar *content)
 {
-	const gchar *content_type_str;
-
 	g_return_if_fail (member_name != NULL);
 	g_return_if_fail (content != NULL);
 
-	switch (content_type) {
-	case E_O365_ITEM_BODY_CONTENT_TYPE_TEXT:
-		content_type_str = "text";
-		break;
-	case E_O365_ITEM_BODY_CONTENT_TYPE_HTML:
-		content_type_str = "html";
-		break;
-	default:
-		g_warn_if_reached ();
-
-		content_type_str = "text";
-		break;
-	}
-
 	e_o365_json_begin_object_member (builder, member_name);
 
-	e_o365_json_add_string_member (builder, "contentType", content_type_str);
+	o365_json_utils_add_enum_as_json (builder, "contentType", content_type,
+		content_type_map, G_N_ELEMENTS (content_type_map),
+		E_O365_ITEM_BODY_CONTENT_TYPE_NOT_SET,
+		E_O365_ITEM_BODY_CONTENT_TYPE_TEXT);
+
 	e_o365_json_add_string_member (builder, "content", content);
 
 	e_o365_json_end_object_member (builder);
@@ -914,61 +1156,29 @@ e_o365_mail_message_get_id (EO365MailMessage *mail)
 EO365ImportanceType
 e_o365_mail_message_get_importance (EO365MailMessage *mail)
 {
-	const gchar *value = e_o365_json_get_string_member (mail, "importance", NULL);
-
-	if (!value)
-		return E_O365_IMPORTANCE_NOT_SET;
-
-	if (g_ascii_strcasecmp (value, "low") == 0)
-		return E_O365_IMPORTANCE_LOW;
-
-	if (g_ascii_strcasecmp (value, "normal") == 0)
-		return E_O365_IMPORTANCE_NORMAL;
-
-	if (g_ascii_strcasecmp (value, "high") == 0)
-		return E_O365_IMPORTANCE_HIGH;
-
-	return E_O365_IMPORTANCE_UNKNOWN;
+	return o365_json_utils_get_json_as_enum (mail, "importance",
+		importance_map, G_N_ELEMENTS (importance_map),
+		E_O365_IMPORTANCE_NOT_SET,
+		E_O365_IMPORTANCE_UNKNOWN);
 }
 
 void
 e_o365_mail_message_add_importance (JsonBuilder *builder,
 				    EO365ImportanceType importance)
 {
-	const gchar *value = NULL;
-
-	switch (importance) {
-	case E_O365_IMPORTANCE_LOW:
-		value = "low";
-		break;
-	case E_O365_IMPORTANCE_NORMAL:
-		value = "normal";
-		break;
-	case E_O365_IMPORTANCE_HIGH:
-		value = "high";
-		break;
-	default:
-		return;
-	}
-
-	e_o365_json_add_string_member (builder, "importance", value);
+	o365_json_utils_add_enum_as_json (builder, "importance", importance,
+		importance_map, G_N_ELEMENTS (importance_map),
+		E_O365_IMPORTANCE_NOT_SET,
+		E_O365_IMPORTANCE_NOT_SET);
 }
 
 EO365InferenceClassificationType
 e_o365_mail_message_get_inference_classification (EO365MailMessage *mail)
 {
-	const gchar *value = e_o365_json_get_string_member (mail, "inferenceClassification", NULL);
-
-	if (!value)
-		return E_O365_INFERENCE_CLASSIFICATION_NOT_SET;
-
-	if (g_ascii_strcasecmp (value, "focused") == 0)
-		return E_O365_INFERENCE_CLASSIFICATION_FOCUSED;
-
-	if (g_ascii_strcasecmp (value, "other") == 0)
-		return E_O365_INFERENCE_CLASSIFICATION_OTHER;
-
-	return E_O365_INFERENCE_CLASSIFICATION_UNKNOWN;
+	return o365_json_utils_get_json_as_enum (mail, "inferenceClassification",
+		inference_classification_map, G_N_ELEMENTS (inference_classification_map),
+		E_O365_INFERENCE_CLASSIFICATION_NOT_SET,
+		E_O365_INFERENCE_CLASSIFICATION_UNKNOWN);
 }
 
 JsonArray * /* EO365InternetMessageHeader * */
@@ -1167,23 +1377,10 @@ e_o365_mail_message_get_web_link (EO365MailMessage *mail)
 EO365AttachmentDataType
 e_o365_attachment_get_data_type (EO365Attachment *attachment)
 {
-	const gchar *data_type;
-
-	data_type = e_o365_json_get_string_member (attachment, "@odata.type", NULL);
-
-	if (!data_type)
-		return E_O365_ATTACHMENT_DATA_TYPE_NOT_SET;
-
-	if (g_ascii_strcasecmp (data_type, "#microsoft.graph.fileAttachment") == 0)
-		return E_O365_ATTACHMENT_DATA_TYPE_FILE;
-
-	if (g_ascii_strcasecmp (data_type, "#microsoft.graph.itemAttachment") == 0)
-		return E_O365_ATTACHMENT_DATA_TYPE_ITEM;
-
-	if (g_ascii_strcasecmp (data_type, "#microsoft.graph.referenceAttachment") == 0)
-		return E_O365_ATTACHMENT_DATA_TYPE_REFERENCE;
-
-	return E_O365_ATTACHMENT_DATA_TYPE_UNKNOWN;
+	return o365_json_utils_get_json_as_enum (attachment, "@odata.type",
+		attachment_data_type_map, G_N_ELEMENTS (attachment_data_type_map),
+		E_O365_ATTACHMENT_DATA_TYPE_NOT_SET,
+		E_O365_ATTACHMENT_DATA_TYPE_UNKNOWN);
 }
 
 void
@@ -1192,12 +1389,10 @@ e_o365_attachment_begin_attachment (JsonBuilder *builder,
 {
 	e_o365_json_begin_object_member (builder, NULL);
 
-	if (data_type == E_O365_ATTACHMENT_DATA_TYPE_FILE)
-		e_o365_json_add_string_member (builder, "@odata.type", "#microsoft.graph.fileAttachment");
-	else if (data_type == E_O365_ATTACHMENT_DATA_TYPE_ITEM)
-		e_o365_json_add_string_member (builder, "@odata.type", "#microsoft.graph.itemAttachment");
-	else if (data_type == E_O365_ATTACHMENT_DATA_TYPE_REFERENCE)
-		e_o365_json_add_string_member (builder, "@odata.type", "#microsoft.graph.referenceAttachment");
+	o365_json_utils_add_enum_as_json (builder, "@odata.type", data_type,
+		attachment_data_type_map, G_N_ELEMENTS (attachment_data_type_map),
+		E_O365_ATTACHMENT_DATA_TYPE_NOT_SET,
+		E_O365_ATTACHMENT_DATA_TYPE_FILE);
 }
 
 void
@@ -1321,17 +1516,18 @@ e_o365_email_address_get_address (EO365EmailAddress *email)
 
 void
 e_o365_add_email_address (JsonBuilder *builder,
+			  const gchar *member_name,
 			  const gchar *name,
 			  const gchar *address)
 {
 	g_return_if_fail ((name && *name) || (address && *address));
 
-	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_begin_object_member (builder, member_name);
 
 	e_o365_json_add_nonempty_string_member (builder, "name", name);
 	e_o365_json_add_nonempty_string_member (builder, "address", address);
 
-	e_o365_json_end_object_member (builder); /* unnamed object */
+	e_o365_json_end_object_member (builder); /* member_name */
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/physicaladdress?view=graph-rest-1.0 */
@@ -2030,16 +2226,6 @@ e_o365_calendar_add_name (JsonBuilder *builder,
 	e_o365_json_add_nonempty_string_member (builder, "name", name);
 }
 
-static struct _meeting_provider_map {
-	const gchar *name;
-	EO365OnlineMeetingProviderType value;
-} meeting_provider_map[] = {
-	{ "unknown",		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN },
-	{ "skypeForBusiness",	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_BUSINESS },
-	{ "skypeForConsumer",	E_O365_ONLINE_MEETING_PROVIDER_SKYPE_FOR_CONSUMER },
-	{ "teamsForBusiness",	E_O365_ONLINE_MEETING_PROVIDER_TEAMS_FOR_BUSINESS }
-};
-
 guint32 /* bit-or of EO365OnlineMeetingProviderType */
 e_o365_calendar_get_allowed_online_meeting_providers (EO365Calendar *calendar)
 {
@@ -2049,7 +2235,7 @@ e_o365_calendar_get_allowed_online_meeting_providers (EO365Calendar *calendar)
 	array = e_o365_json_get_array_member (calendar, "allowedOnlineMeetingProviders");
 
 	if (array) {
-		guint ii, jj, len;
+		guint ii, len;
 
 		providers = E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN;
 
@@ -2057,16 +2243,18 @@ e_o365_calendar_get_allowed_online_meeting_providers (EO365Calendar *calendar)
 
 		for (ii = 0; ii < len; ii++) {
 			const gchar *str = json_array_get_string_element (array, ii);
+			gint enum_value;
 
 			if (!str)
 				continue;
 
-			for (jj = 0; jj < G_N_ELEMENTS (meeting_provider_map); jj++) {
-				if (g_ascii_strcasecmp (str, meeting_provider_map[jj].name) == 0) {
-					providers |= meeting_provider_map[jj].value;
-					break;
-				}
-			}
+			enum_value = o365_json_utils_json_value_as_enum (str,
+				meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
+				E_O365_ONLINE_MEETING_PROVIDER_NOT_SET,
+				E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN);
+
+			if (enum_value != E_O365_ONLINE_MEETING_PROVIDER_NOT_SET)
+				providers |= enum_value;
 		}
 	}
 
@@ -2088,8 +2276,8 @@ e_o365_calendar_add_allowed_online_meeting_providers (JsonBuilder *builder,
 		json_builder_add_string_value (builder, "unknown");
 
 	for (ii = 0; ii < G_N_ELEMENTS (meeting_provider_map); ii++) {
-		if ((providers & meeting_provider_map[ii].value) != 0)
-			json_builder_add_string_value (builder, meeting_provider_map[ii].name);
+		if ((providers & meeting_provider_map[ii].enum_value) != 0)
+			json_builder_add_string_value (builder, meeting_provider_map[ii].json_value);
 	}
 
 	e_o365_json_end_array_member (builder);
@@ -2135,36 +2323,950 @@ e_o365_calendar_add_color (JsonBuilder *builder,
 EO365OnlineMeetingProviderType
 e_o365_calendar_get_default_online_meeting_provider (EO365Calendar *calendar)
 {
-	const gchar *name;
-	gint ii;
-
-	name = e_o365_json_get_string_member (calendar, "defaultOnlineMeetingProvider", NULL);
-
-	if (!name)
-		return E_O365_ONLINE_MEETING_PROVIDER_NOT_SET;
-
-	for (ii = 0; ii < G_N_ELEMENTS (meeting_provider_map); ii++) {
-		if (g_ascii_strcasecmp (name, meeting_provider_map[ii].name) == 0)
-			return meeting_provider_map[ii].value;
-	}
-
-	return E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN;
+	return o365_json_utils_get_json_as_enum (calendar, "defaultOnlineMeetingProvider",
+		meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
+		E_O365_ONLINE_MEETING_PROVIDER_NOT_SET,
+		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN);
 }
 
 void
 e_o365_calendar_add_default_online_meeting_provider (JsonBuilder *builder,
 						     EO365OnlineMeetingProviderType provider)
 {
-	const gchar *name = NULL;
-	gint ii;
+	o365_json_utils_add_enum_as_json (builder, "defaultOnlineMeetingProvider", provider,
+		meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
+		E_O365_ONLINE_MEETING_PROVIDER_NOT_SET,
+		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN);
+}
 
-	for (ii = 0; ii < G_N_ELEMENTS (meeting_provider_map); ii++) {
-		if (meeting_provider_map[ii].value == provider) {
-			name = meeting_provider_map[ii].name;
-			break;
-		}
-	}
+/* https://docs.microsoft.com/en-us/graph/api/resources/responsestatus?view=graph-rest-1.0 */
 
-	if (name)
-		e_o365_json_add_string_member (builder, "defaultOnlineMeetingProvider", name);
+EO365ResponseType
+e_o365_response_status_get_response (EO365ResponseStatus *response_status)
+{
+	return o365_json_utils_get_json_as_enum (response_status, "response",
+		response_map, G_N_ELEMENTS (response_map),
+		E_O365_RESPONSE_NOT_SET,
+		E_O365_RESPONSE_UNKNOWN);
+}
+
+time_t
+e_o365_response_status_get_time (EO365ResponseStatus *response_status)
+{
+	return e_o365_get_date_time_offset_member (response_status, "time");
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/attendee?view=graph-rest-1.0 */
+
+EO365ResponseStatus *
+e_o365_attendee_get_status (EO365Attendee *attendee)
+{
+	return e_o365_json_get_object_member (attendee, "status");
+}
+
+EO365AttendeeType
+e_o365_attendee_get_type (EO365Attendee *attendee)
+{
+	return o365_json_utils_get_json_as_enum (attendee, "type",
+		attendee_map, G_N_ELEMENTS (attendee_map),
+		E_O365_ATTENDEE_NOT_SET,
+		E_O365_ATTENDEE_UNKNOWN);
+}
+
+EO365EmailAddress *
+e_o365_attendee_get_email_address (EO365Attendee *attendee)
+{
+	return e_o365_json_get_object_member (attendee, "emailAddress");
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/outlookgeocoordinates?view=graph-rest-1.0 */
+
+gdouble
+e_o365_outlook_geo_coordinates_get_accuracy (EO365OutlookGeoCoordinates *coords)
+{
+	return e_o365_json_get_double_member (coords, "accuracy", 0.0);
+}
+
+void
+e_o365_outlook_geo_coordinates_add_accuracy (JsonBuilder *builder,
+					     gdouble value)
+{
+	e_o365_json_add_double_member (builder, "accuracy", value);
+}
+
+gdouble
+e_o365_outlook_geo_coordinates_get_altitude (EO365OutlookGeoCoordinates *coords)
+{
+	return e_o365_json_get_double_member (coords, "altitude", 0.0);
+}
+
+void
+e_o365_outlook_geo_coordinates_add_altitude (JsonBuilder *builder,
+					     gdouble value)
+{
+	e_o365_json_add_double_member (builder, "altitude", value);
+}
+
+gdouble
+e_o365_outlook_geo_coordinates_get_altitude_accuracy (EO365OutlookGeoCoordinates *coords)
+{
+	return e_o365_json_get_double_member (coords, "altitudeAccuracy", 0.0);
+}
+
+void
+e_o365_outlook_geo_coordinates_add_altitude_accuracy (JsonBuilder *builder,
+						      gdouble value)
+{
+	e_o365_json_add_double_member (builder, "altitudeAccuracy", value);
+}
+
+gdouble
+e_o365_outlook_geo_coordinates_get_latitude (EO365OutlookGeoCoordinates *coords)
+{
+	return e_o365_json_get_double_member (coords, "latitude", 0.0);
+}
+
+void
+e_o365_outlook_geo_coordinates_add_latitude (JsonBuilder *builder,
+					     gdouble value)
+{
+	e_o365_json_add_double_member (builder, "latitude", value);
+}
+
+gdouble
+e_o365_outlook_geo_coordinates_get_longitude (EO365OutlookGeoCoordinates *coords)
+{
+	return e_o365_json_get_double_member (coords, "longitude", 0.0);
+}
+
+void
+e_o365_outlook_geo_coordinates_add_longitude (JsonBuilder *builder,
+					      gdouble value)
+{
+	e_o365_json_add_double_member (builder, "longitude", value);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/location?view=graph-rest-1.0 */
+
+EO365PhysicalAddress *
+e_o365_location_get_address (EO365Location *location)
+{
+	return e_o365_json_get_object_member (location, "address");
+}
+
+void
+e_o365_location_add_address (JsonBuilder *builder,
+			     const gchar *city,
+			     const gchar *country_or_region,
+			     const gchar *postal_code,
+			     const gchar *state,
+			     const gchar *street)
+{
+	e_o365_add_physical_address (builder, "address", city, country_or_region, postal_code, state, street);
+}
+
+EO365OutlookGeoCoordinates *
+e_o365_location_get_coordinates (EO365Location *location)
+{
+	return e_o365_json_get_object_member (location, "coordinates");
+}
+
+void
+e_o365_location_begin_coordinates (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, "coordinates");
+}
+
+void
+e_o365_location_end_coordinates (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
+const gchar *
+e_o365_location_get_display_name (EO365Location *location)
+{
+	return e_o365_json_get_string_member (location, "displayName", NULL);
+}
+
+void
+e_o365_location_add_display_name (JsonBuilder *builder,
+				  const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "displayName", value);
+}
+
+const gchar *
+e_o365_location_get_email_address (EO365Location *location)
+{
+	return e_o365_json_get_string_member (location, "locationEmailAddress", NULL);
+}
+
+void
+e_o365_location_add_email_address (JsonBuilder *builder,
+				   const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "locationEmailAddress", value);
+}
+
+const gchar *
+e_o365_location_get_uri (EO365Location *location)
+{
+	return e_o365_json_get_string_member (location, "locationUri", NULL);
+}
+
+void
+e_o365_location_add_uri (JsonBuilder *builder,
+			 const gchar *value)
+{
+	e_o365_json_add_nonempty_or_null_string_member (builder, "locationUri", value);
+}
+
+EO365LocationType
+e_o365_location_get_type (EO365Location *location)
+{
+	return o365_json_utils_get_json_as_enum (location, "locationType",
+		location_type_map, G_N_ELEMENTS (location_type_map),
+		E_O365_LOCATION_NOT_SET,
+		E_O365_LOCATION_UNKNOWN);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/phone?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_phone_get_number (EO365Phone *phone)
+{
+	return e_o365_json_get_string_member (phone, "number", NULL);
+}
+
+EO365PhoneType
+e_o365_phone_get_type (EO365Phone *phone)
+{
+	return o365_json_utils_get_json_as_enum (phone, "type",
+		phone_map, G_N_ELEMENTS (phone_map),
+		E_O365_PHONE_NOT_SET,
+		E_O365_PHONE_UNKNOWN);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/onlinemeetinginfo?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_online_meeting_info_get_conference_id (EO365OnlineMeetingInfo *meeting_info)
+{
+	return e_o365_json_get_string_member (meeting_info, "conferenceId", NULL);
+}
+
+const gchar *
+e_o365_online_meeting_info_get_join_url (EO365OnlineMeetingInfo *meeting_info)
+{
+	return e_o365_json_get_string_member (meeting_info, "joinUrl", NULL);
+}
+
+JsonArray * /* EO365Phone * */
+e_o365_online_meeting_info_get_phones (EO365OnlineMeetingInfo *meeting_info)
+{
+	return e_o365_json_get_array_member (meeting_info, "phones");
+}
+
+const gchar *
+e_o365_online_meeting_info_get_quick_dial (EO365OnlineMeetingInfo *meeting_info)
+{
+	return e_o365_json_get_string_member (meeting_info, "quickDial", NULL);
+}
+
+JsonArray * /* gchar * */
+e_o365_online_meeting_info_get_toll_free_numbers (EO365OnlineMeetingInfo *meeting_info)
+{
+	return e_o365_json_get_array_member (meeting_info, "tollFreeNumbers");
+}
+
+const gchar *
+e_o365_online_meeting_info_get_toll_number (EO365OnlineMeetingInfo *meeting_info)
+{
+	return e_o365_json_get_string_member (meeting_info, "tollNumber", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/patternedrecurrence?view=graph-rest-1.0 */
+
+EO365RecurrencePattern *
+e_o365_patterned_recurrence_get_pattern (EO365PatternedRecurrence *patterned_recurrence)
+{
+	return e_o365_json_get_object_member (patterned_recurrence, "pattern");
+}
+
+void
+e_o365_patterned_recurrence_begin_pattern (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, "pattern");
+}
+
+void
+e_o365_patterned_recurrence_end_pattern (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
+EO365RecurrenceRange *
+e_o365_patterned_recurrence_get_range (EO365PatternedRecurrence *patterned_recurrence)
+{
+	return e_o365_json_get_object_member (patterned_recurrence, "range");
+}
+
+void
+e_o365_patterned_recurrence_begin_range (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, "range");
+}
+
+void
+e_o365_patterned_recurrence_end_range (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/recurrencepattern?view=graph-rest-1.0 */
+
+EO365DayOfWeekType
+e_o365_array_get_day_of_week_element (JsonArray *array, /* const gchar * representing EO365DayOfWeekType */
+				      guint index)
+{
+	return o365_json_utils_json_value_as_enum (json_array_get_string_element (array, index),
+		day_of_week_map, G_N_ELEMENTS (day_of_week_map),
+		E_O365_DAY_OF_WEEK_NOT_SET,
+		E_O365_DAY_OF_WEEK_UNKNOWN);
+}
+
+gint
+e_o365_recurrence_pattern_get_day_of_month (EO365RecurrencePattern *pattern)
+{
+	return e_o365_json_get_int_member (pattern, "dayOfMonth", 0);
+}
+
+void
+e_o365_recurrence_pattern_add_day_of_month (JsonBuilder *builder,
+					    gint value)
+{
+	e_o365_json_add_int_member (builder, "dayOfMonth", value);
+}
+
+JsonArray * /* const gchar * representing EO365DayOfWeekType, use e_o365_array_get_day_of_week_element() */
+e_o365_recurrence_pattern_get_days_of_week (EO365RecurrencePattern *pattern)
+{
+	return e_o365_json_get_array_member (pattern, "daysOfWeek");
+}
+
+void
+e_o365_recurrence_pattern_begin_days_of_week (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "daysOfWeek");
+}
+
+void
+e_o365_recurrence_pattern_end_days_of_week (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_recurrence_pattern_add_day_of_week (JsonBuilder *builder,
+					   EO365DayOfWeekType value)
+{
+	o365_json_utils_add_enum_as_json (builder, NULL, value,
+		day_of_week_map, G_N_ELEMENTS (day_of_week_map),
+		E_O365_DAY_OF_WEEK_NOT_SET,
+		E_O365_DAY_OF_WEEK_NOT_SET);
+}
+
+EO365DayOfWeekType
+e_o365_recurrence_pattern_get_first_day_of_week (EO365RecurrencePattern *pattern)
+{
+	return o365_json_utils_get_json_as_enum (pattern, "firstDayOfWeek",
+		day_of_week_map, G_N_ELEMENTS (day_of_week_map),
+		E_O365_DAY_OF_WEEK_NOT_SET,
+		E_O365_DAY_OF_WEEK_UNKNOWN);
+}
+
+void
+e_o365_recurrence_pattern_add_first_day_of_week (JsonBuilder *builder,
+						 EO365DayOfWeekType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "firstDayOfWeek", value,
+		day_of_week_map, G_N_ELEMENTS (day_of_week_map),
+		E_O365_DAY_OF_WEEK_NOT_SET,
+		E_O365_DAY_OF_WEEK_NOT_SET);
+}
+
+EO365WeekIndexType
+e_o365_recurrence_pattern_get_index (EO365RecurrencePattern *pattern)
+{
+	return o365_json_utils_get_json_as_enum (pattern, "index",
+		week_index_map, G_N_ELEMENTS (week_index_map),
+		E_O365_WEEK_INDEX_NOT_SET,
+		E_O365_WEEK_INDEX_UNKNOWN);
+}
+
+void
+e_o365_recurrence_pattern_add_index (JsonBuilder *builder,
+				     EO365WeekIndexType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "index", value,
+		week_index_map, G_N_ELEMENTS (week_index_map),
+		E_O365_WEEK_INDEX_NOT_SET,
+		E_O365_WEEK_INDEX_NOT_SET);
+}
+
+gint
+e_o365_recurrence_pattern_get_interval (EO365RecurrencePattern *pattern)
+{
+	return e_o365_json_get_int_member (pattern, "interval", -1);
+}
+
+void
+e_o365_recurrence_pattern_add_interval (JsonBuilder *builder,
+					gint value)
+{
+	e_o365_json_add_int_member (builder, "interval", value);
+}
+
+gint
+e_o365_recurrence_pattern_get_month (EO365RecurrencePattern *pattern)
+{
+	return e_o365_json_get_int_member (pattern, "month", -1);
+}
+
+void
+e_o365_recurrence_pattern_add_month (JsonBuilder *builder,
+				     gint value)
+{
+	e_o365_json_add_int_member (builder, "month", value);
+}
+
+EO365RecurrencePatternType
+e_o365_recurrence_pattern_get_type (EO365RecurrencePattern *pattern)
+{
+	return o365_json_utils_get_json_as_enum (pattern, "type",
+		recurrence_pattern_map, G_N_ELEMENTS (recurrence_pattern_map),
+		E_O365_RECURRENCE_PATTERN_NOT_SET,
+		E_O365_RECURRENCE_PATTERN_UNKNOWN);
+}
+
+void
+e_o365_recurrence_pattern_add_type (JsonBuilder *builder,
+				    EO365RecurrencePatternType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "type", value,
+		recurrence_pattern_map, G_N_ELEMENTS (recurrence_pattern_map),
+		E_O365_RECURRENCE_PATTERN_NOT_SET,
+		E_O365_RECURRENCE_PATTERN_UNKNOWN);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/recurrencerange?view=graph-rest-1.0 */
+
+EO365Date
+e_o365_recurrence_range_get_end_date (EO365RecurrenceRange *range)
+{
+	return e_o365_date_get (range, "endDate");
+}
+
+void
+e_o365_recurrence_range_add_end_date (JsonBuilder *builder,
+				      EO365Date value)
+{
+	e_o365_add_date (builder, "endDate", value);
+}
+
+gint
+e_o365_recurrence_range_get_number_of_occurrences (EO365RecurrenceRange *range)
+{
+	return e_o365_json_get_int_member (range, "numberOfOccurrences", -1);
+}
+
+void
+e_o365_recurrence_range_add_number_of_occurrences (JsonBuilder *builder,
+						   gint value)
+{
+	e_o365_json_add_int_member (builder, "numberOfOccurrences", value);
+}
+
+const gchar *
+e_o365_recurrence_range_get_recurrence_time_zone (EO365RecurrenceRange *range)
+{
+	return e_o365_json_get_string_member (range, "recurrenceTimeZone", NULL);
+}
+
+void
+e_o365_recurrence_range_add_recurrence_time_zone (JsonBuilder *builder,
+						  const gchar *value)
+{
+	e_o365_json_add_string_member (builder, "recurrenceTimeZone", value);
+}
+
+EO365Date
+e_o365_recurrence_range_get_start_date (EO365RecurrenceRange *range)
+{
+	return e_o365_date_get (range, "startDate");
+}
+
+void
+e_o365_recurrence_range_add_start_date (JsonBuilder *builder,
+					EO365Date value)
+{
+	e_o365_add_date (builder, "startDate", value);
+}
+
+EO365RecurrenceRangeType
+e_o365_recurrence_range_get_type (EO365RecurrenceRange *range)
+{
+	return o365_json_utils_get_json_as_enum (range, "type",
+		recurrence_range_map, G_N_ELEMENTS (recurrence_range_map),
+		E_O365_RECURRENCE_RANGE_NOT_SET,
+		E_O365_RECURRENCE_RANGE_UNKNOWN);
+}
+
+void
+e_o365_recurrence_range_add_type (JsonBuilder *builder,
+				  EO365RecurrenceRangeType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "type", value,
+		recurrence_range_map, G_N_ELEMENTS (recurrence_range_map),
+		E_O365_RECURRENCE_RANGE_NOT_SET,
+		E_O365_RECURRENCE_RANGE_UNKNOWN);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/event?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_event_get_id (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "id", NULL);
+}
+
+const gchar *
+e_o365_event_get_change_key (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "changeKey", NULL);
+}
+
+JsonArray * /* EO365Attendee * */
+e_o365_event_get_attendees (EO365Event *event)
+{
+	return e_o365_json_get_array_member (event, "attendees");
+}
+
+void
+e_o365_event_begin_attendees (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "attendees");
+}
+
+void
+e_o365_event_end_attendees (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_event_add_attendee (JsonBuilder *builder,
+			   EO365AttendeeType type,
+			   EO365ResponseType response,
+			   const gchar *name,
+			   const gchar *address)
+{
+	e_o365_json_begin_object_member (builder, NULL);
+
+	o365_json_utils_add_enum_as_json (builder, "type", type,
+		attendee_map, G_N_ELEMENTS (attendee_map),
+		E_O365_ATTENDEE_NOT_SET,
+		E_O365_ATTENDEE_NOT_SET);
+
+	e_o365_json_begin_object_member (builder, "status");
+
+	o365_json_utils_add_enum_as_json (builder, "response", response,
+		response_map, G_N_ELEMENTS (response_map),
+		E_O365_RESPONSE_NOT_SET,
+		E_O365_RESPONSE_UNKNOWN);
+
+	e_o365_add_date_time_offset_member (builder, "time", time (NULL));
+
+	e_o365_json_end_object_member (builder); /* status */
+
+	if ((name && *name) || (address && *address))
+		e_o365_add_email_address (builder, "emailAddress", name, address);
+
+	e_o365_json_end_object_member (builder);
+}
+
+EO365ItemBody *
+e_o365_event_get_body (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "body");
+}
+
+void
+e_o365_event_add_body (JsonBuilder *builder,
+		       EO365ItemBodyContentTypeType content_type,
+		       const gchar *content)
+{
+	e_o365_add_item_body (builder, "body", content_type, content);
+}
+
+const gchar *
+e_o365_event_get_body_preview (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "bodyPreview", NULL);
+}
+
+JsonArray * /* const gchar * */
+e_o365_event_get_categories (EO365Event *event)
+{
+	return e_o365_json_get_array_member (event, "categories");
+}
+
+void
+e_o365_event_begin_categories (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "categories");
+}
+
+void
+e_o365_event_end_categories (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_event_add_category (JsonBuilder *builder,
+			   const gchar *category)
+{
+	g_return_if_fail (category && *category);
+
+	json_builder_add_string_value (builder, category);
+}
+
+time_t
+e_o365_event_get_created_date_time (EO365Event *event)
+{
+	return e_o365_get_date_time_offset_member (event, "createdDateTime");
+}
+
+EO365DateTimeWithZone *
+e_o365_event_get_end (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "end");
+}
+
+void
+e_o365_event_add_end (JsonBuilder *builder,
+		      time_t date_time,
+		      const gchar *zone)
+{
+	e_o365_add_date_time (builder, "end", date_time, zone);
+}
+
+gboolean
+e_o365_event_get_has_attachments (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "hasAttachments", FALSE);
+}
+
+const gchar *
+e_o365_event_get_ical_uid (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "iCalUId", NULL);
+}
+
+EO365ImportanceType
+e_o365_event_get_importance (EO365Event *event)
+{
+	return o365_json_utils_get_json_as_enum (event, "importance",
+		importance_map, G_N_ELEMENTS (importance_map),
+		E_O365_IMPORTANCE_NOT_SET,
+		E_O365_IMPORTANCE_UNKNOWN);
+}
+
+void
+e_o365_event_add_importance (JsonBuilder *builder,
+			     EO365ImportanceType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "importance", value,
+		importance_map, G_N_ELEMENTS (importance_map),
+		E_O365_IMPORTANCE_NOT_SET,
+		E_O365_IMPORTANCE_UNKNOWN);
+}
+
+gboolean
+e_o365_event_get_is_all_day (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "isAllDay", FALSE);
+}
+
+void
+e_o365_event_add_is_all_day (JsonBuilder *builder,
+			     gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isAllDay", value);
+}
+
+gboolean
+e_o365_event_get_is_cancelled (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "isCancelled", FALSE);
+}
+
+void
+e_o365_event_add_is_cancelled (JsonBuilder *builder,
+			       gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isCancelled", value);
+}
+
+gboolean
+e_o365_event_get_is_online_meeting (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "isOnlineMeeting", FALSE);
+}
+
+gboolean
+e_o365_event_get_is_organizer (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "isOrganizer", FALSE);
+}
+
+gboolean
+e_o365_event_get_is_reminder_on (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "isReminderOn", FALSE);
+}
+
+void
+e_o365_event_add_is_reminder_on (JsonBuilder *builder,
+				 gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isReminderOn", value);
+}
+
+time_t
+e_o365_event_get_last_modified_date_time (EO365Event *event)
+{
+	return e_o365_get_date_time_offset_member (event, "lastModifiedDateTime");
+}
+
+EO365Location *
+e_o365_event_get_location (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "location");
+}
+
+void
+e_o365_event_begin_location (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, "location");
+}
+
+void
+e_o365_event_end_location (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
+JsonArray * /* EO365Location * */
+e_o365_event_get_locations (EO365Event *event)
+{
+	return e_o365_json_get_array_member (event, "locations");
+}
+
+EO365OnlineMeetingInfo *
+e_o365_event_get_online_meeting_info (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "onlineMeeting");
+}
+
+EO365OnlineMeetingProviderType
+e_o365_event_get_online_meeting_provider (EO365Event *event)
+{
+	return o365_json_utils_get_json_as_enum (event, "onlineMeetingProvider",
+		meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
+		E_O365_ONLINE_MEETING_PROVIDER_NOT_SET,
+		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN);
+}
+
+const gchar *
+e_o365_event_get_online_meeting_url (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "onlineMeetingUrl", NULL);
+}
+
+EO365Recipient *
+e_o365_event_get_organizer (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "organizer");
+}
+
+void
+e_o365_event_add_organizer (JsonBuilder *builder,
+			    const gchar *name,
+			    const gchar *address)
+{
+	e_o365_add_recipient (builder, "organizer", name, address);
+}
+
+const gchar *
+e_o365_event_get_original_end_timezone (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "originalEndTimeZone", NULL);
+}
+
+time_t
+e_o365_event_get_original_start (EO365Event *event)
+{
+	return e_o365_get_date_time_offset_member (event, "originalStart");
+}
+
+const gchar *
+e_o365_event_get_original_start_timezone (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "originalStartTimeZone", NULL);
+}
+
+EO365PatternedRecurrence *
+e_o365_event_get_recurrence (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "recurrence");
+}
+
+void
+e_o365_event_begin_recurrence (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, "recurrence");
+}
+
+void
+e_o365_event_end_recurrence (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
+void
+e_o365_event_add_null_recurrence (JsonBuilder *builder)
+{
+	e_o365_json_add_null_member (builder, "recurrence");
+}
+
+gint
+e_o365_event_get_reminder_minutes_before_start (EO365Event *event)
+{
+	return e_o365_json_get_int_member (event, "reminderMinutesBeforeStart", -1);
+}
+
+void
+e_o365_event_add_reminder_minutes_before_start (JsonBuilder *builder,
+						gint value)
+{
+	e_o365_json_add_int_member (builder, "reminderMinutesBeforeStart", value);
+}
+
+gboolean
+e_o365_event_get_response_requested (EO365Event *event)
+{
+	return e_o365_json_get_boolean_member (event, "responseRequested", FALSE);
+}
+
+void
+e_o365_event_add_response_requested (JsonBuilder *builder,
+				     gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "responseRequested", value);
+}
+
+
+EO365ResponseStatus *
+e_o365_event_get_response_status (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "responseStatus");
+}
+
+EO365SensitivityType
+e_o365_event_get_sensitivity (EO365Event *event)
+{
+	return o365_json_utils_get_json_as_enum (event, "sensitivity",
+		sensitivity_map, G_N_ELEMENTS (sensitivity_map),
+		E_O365_SENSITIVITY_NOT_SET,
+		E_O365_SENSITIVITY_UNKNOWN);
+}
+
+void
+e_o365_event_add_sensitivity (JsonBuilder *builder,
+			      EO365SensitivityType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "sensitivity", value,
+		sensitivity_map, G_N_ELEMENTS (sensitivity_map),
+		E_O365_SENSITIVITY_NOT_SET,
+		E_O365_SENSITIVITY_UNKNOWN);
+}
+
+const gchar *
+e_o365_event_get_series_master_id (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "seriesMasterId", NULL);
+}
+
+EO365FreeBusyStatusType
+e_o365_event_get_show_as (EO365Event *event)
+{
+	return o365_json_utils_get_json_as_enum (event, "showAs",
+		free_busy_status_map, G_N_ELEMENTS (free_busy_status_map),
+		E_O365_FREE_BUSY_STATUS_NOT_SET,
+		E_O365_FREE_BUSY_STATUS_UNKNOWN);
+}
+
+void
+e_o365_event_add_show_as (JsonBuilder *builder,
+			  EO365FreeBusyStatusType value)
+{
+	o365_json_utils_add_enum_as_json (builder, "showAs", value,
+		free_busy_status_map, G_N_ELEMENTS (free_busy_status_map),
+		E_O365_FREE_BUSY_STATUS_NOT_SET,
+		E_O365_FREE_BUSY_STATUS_UNKNOWN);
+}
+
+EO365DateTimeWithZone *
+e_o365_event_get_start (EO365Event *event)
+{
+	return e_o365_json_get_object_member (event, "start");
+}
+
+void
+e_o365_event_add_start (JsonBuilder *builder,
+			time_t date_time,
+			const gchar *zone)
+{
+	e_o365_add_date_time (builder, "start", date_time, zone);
+}
+
+const gchar *
+e_o365_event_get_subject (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "subject", NULL);
+}
+
+void
+e_o365_event_add_subject (JsonBuilder *builder,
+			  const gchar *value)
+{
+	e_o365_json_add_string_member (builder, "subject", value ? value : "");
+}
+
+EO365EventTypeType
+e_o365_event_get_type (EO365Event *event)
+{
+	return o365_json_utils_get_json_as_enum (event, "type",
+		event_type_map, G_N_ELEMENTS (event_type_map),
+		E_O365_EVENT_TYPE_NOT_SET,
+		E_O365_EVENT_TYPE_UNKNOWN);
+}
+
+const gchar *
+e_o365_event_get_web_link (EO365Event *event)
+{
+	return e_o365_json_get_string_member (event, "webLink", NULL);
 }
