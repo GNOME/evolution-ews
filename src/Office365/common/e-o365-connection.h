@@ -451,6 +451,100 @@ gboolean	e_o365_connection_list_events_sync
 						 GSList **out_events, /* EO365Event * - the returned event objects */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_create_event_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 JsonBuilder *event,
+						 EO365Calendar **out_created_event,
+						 GCancellable *cancellable,
+						 GError **error);
+SoupMessage *	e_o365_connection_prepare_get_event
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
+						 const gchar *select, /* nullable - properties to select */
+						 GError **error);
+gboolean	e_o365_connection_get_event_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
+						 const gchar *select, /* nullable - properties to select */
+						 EO365Event **out_event,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_events_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const GSList *event_ids, /* const gchar * */
+						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
+						 const gchar *select, /* nullable - properties to select */
+						 GSList **out_events, /* EO365Event *, in the same order as event_ids; can return partial list */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_update_event_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 JsonBuilder *event,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_delete_event_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_response_event_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 EO365ResponseType response, /* uses only accepted/tentatively accepted/declined values */
+						 const gchar *comment, /* nullable */
+						 gboolean send_response,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_dismiss_reminder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_list_event_attachments_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 GSList **out_attachments, /* EO365Attachment * */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_delete_event_attachment_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 const gchar *attachment_id,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

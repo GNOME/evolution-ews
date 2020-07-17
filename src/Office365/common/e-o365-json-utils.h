@@ -855,9 +855,9 @@ gboolean	e_o365_event_get_is_all_day		(EO365Event *event);
 void		e_o365_event_add_is_all_day		(JsonBuilder *builder,
 							 gboolean value);
 gboolean	e_o365_event_get_is_cancelled		(EO365Event *event);
-void		e_o365_event_add_is_cancelled		(JsonBuilder *builder,
-							 gboolean value);
 gboolean	e_o365_event_get_is_online_meeting	(EO365Event *event);
+void		e_o365_event_add_is_online_meeting	(JsonBuilder *builder,
+							 gboolean value);
 gboolean	e_o365_event_get_is_organizer		(EO365Event *event);
 gboolean	e_o365_event_get_is_reminder_on		(EO365Event *event);
 void		e_o365_event_add_is_reminder_on		(JsonBuilder *builder,
@@ -867,10 +867,16 @@ EO365Location *	e_o365_event_get_location		(EO365Event *event);
 void		e_o365_event_begin_location		(JsonBuilder *builder);
 void		e_o365_event_end_location		(JsonBuilder *builder);
 JsonArray *	e_o365_event_get_locations		(EO365Event *event); /* EO365Location * */
+void		e_o365_event_begin_locations		(JsonBuilder *builder);
+void		e_o365_event_end_locations		(JsonBuilder *builder);
+void		e_o365_event_begin_locations_location	(JsonBuilder *builder);
+void		e_o365_event_end_locations_location	(JsonBuilder *builder);
 EO365OnlineMeetingInfo *
 		e_o365_event_get_online_meeting_info	(EO365Event *event);
 EO365OnlineMeetingProviderType
 		e_o365_event_get_online_meeting_provider(EO365Event *event);
+void		e_o365_event_add_online_meeting_provider(JsonBuilder *builder,
+							 EO365OnlineMeetingProviderType value);
 const gchar *	e_o365_event_get_online_meeting_url	(EO365Event *event);
 EO365Recipient *e_o365_event_get_organizer		(EO365Event *event);
 void		e_o365_event_add_organizer		(JsonBuilder *builder,

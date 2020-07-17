@@ -24,6 +24,7 @@
 #include <libecal/libecal.h>
 
 #include "common/camel-o365-settings.h"
+#include "common/e-o365-connection.h"
 #include "common/e-source-o365-folder.h"
 
 #include "e-cal-backend-o365.h"
@@ -42,17 +43,21 @@
 #define ECC_ERROR(_code) e_cal_client_error_create (_code, NULL)
 #define ECC_ERROR_EX(_code, _msg) e_cal_client_error_create (_code, _msg)
 
-/* Private part of the CalBackendO365 structure */
+#define LOCK(_cb) g_rec_mutex_lock (&_cb->priv->property_lock)
+#define UNLOCK(_cb) g_rec_mutex_unlock (&_cb->priv->property_lock)
+
 struct _ECalBackendO365Private {
 	GRecMutex property_lock;
-
+	EO365Connection *cnc;
+	gchar *group_id;
+	gchar *calendar_id;
 	gchar *attachments_dir;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ECalBackendO365, e_cal_backend_o365, E_TYPE_CAL_META_BACKEND)
 
 static void
-ecb_o365_convert_error_to_edc_error (GError **perror)
+ecb_o365_convert_error_to_client_error (GError **perror)
 {
 	GError *error = NULL;
 
@@ -91,6 +96,82 @@ ecb_o365_convert_error_to_edc_error (GError **perror)
 	}
 }
 
+static gchar *
+ecb_o365_join_to_extra (const gchar *change_key,
+			const gchar *ical_comp)
+{
+	if (!change_key && !ical_comp)
+		return NULL;
+
+	return g_strconcat (change_key ? change_key : "", "\n", ical_comp, NULL);
+}
+
+/* Modifies inout_extra, cannot be called multiple times with the same arguments */
+static void
+ecb_o365_split_extra (gchar *inout_extra,
+		      const gchar **out_change_key,
+		      const gchar **out_ical_comp)
+{
+	gchar *enter;
+
+	if (!inout_extra)
+		return;
+
+	enter = strchr (inout_extra, '\n');
+	g_return_if_fail (enter != NULL);
+
+	*enter = '\0';
+	enter++;
+
+	if (out_change_key)
+		*out_change_key = inout_extra;
+
+	if (out_ical_comp)
+		*out_ical_comp = enter;
+}
+
+static ECalMetaBackendInfo *
+ecb_o365_json_to_ical_nfo (ECalBackendO365 *cbo365,
+			   EO365Event *event,
+			   GCancellable *cancellable,
+			   GError **error)
+{
+	return NULL;
+}
+
+static gboolean
+ecb_o365_download_event_changes_locked (ECalBackendO365 *cbo365,
+					const GSList *ids,
+					GSList **out_info_objects,
+					GCancellable *cancellable,
+					GError **error)
+{
+	GSList *events = NULL, *link;
+
+	if (!ids)
+		return TRUE;
+
+	if (!e_o365_connection_get_events_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id, cbo365->priv->calendar_id, ids, NULL, NULL, &events, cancellable, error))
+		return FALSE;
+
+	for (link = events; link; link = g_slist_next (link)) {
+		EO365Event *event = link->data;
+		ECalMetaBackendInfo *nfo;
+
+		if (!event)
+			continue;
+
+		nfo = ecb_o365_json_to_ical_nfo (cbo365, event, cancellable, error);
+
+		if (nfo)
+			*out_info_objects = g_slist_prepend (*out_info_objects, nfo);
+	}
+
+	g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+
+	return TRUE;
+}
+
 static void
 ecb_o365_maybe_disconnect_sync (ECalBackendO365 *cbo365,
 				GError **in_perror,
@@ -104,22 +185,30 @@ ecb_o365_maybe_disconnect_sync (ECalBackendO365 *cbo365,
 	}
 }
 
-static void
-ecb_o365_unset_connection (ECalBackendO365 *cbo365,
-			   gboolean is_disconnect)
+static gboolean
+ecb_o365_unset_connection_sync (ECalBackendO365 *cbo365,
+				gboolean is_disconnect,
+				GCancellable *cancellable,
+				GError **error)
 {
-	g_return_if_fail (E_IS_CAL_BACKEND_O365 (cbo365));
+	gboolean success = TRUE;
 
-	g_rec_mutex_lock (&cbo365->priv->property_lock);
+	g_return_val_if_fail (E_IS_CAL_BACKEND_O365 (cbo365), FALSE);
 
-	/*if (cbo365->priv->cnc) {
+	LOCK (cbo365);
+
+	if (cbo365->priv->cnc) {
 		if (is_disconnect)
-			e_o365_connection_set_disconnected_flag (cbo365->priv->cnc, TRUE);
+			success = e_o365_connection_disconnect_sync (cbo365->priv->cnc, cancellable, error);
 	}
 
-	g_clear_object (&cbo365->priv->cnc);*/
+	g_clear_object (&cbo365->priv->cnc);
+	g_clear_pointer (&cbo365->priv->group_id, g_free);
+	g_clear_pointer (&cbo365->priv->calendar_id, g_free);
 
-	g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	UNLOCK (cbo365);
+
+	return success;
 }
 
 static gboolean
@@ -139,17 +228,71 @@ ecb_o365_connect_sync (ECalMetaBackend *meta_backend,
 
 	cbo365 = E_CAL_BACKEND_O365 (meta_backend);
 
-	g_rec_mutex_lock (&cbo365->priv->property_lock);
+	LOCK (cbo365);
 
-	/*if (cbo365->priv->cnc)*/ {
-		g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	if (cbo365->priv->cnc) {
+		UNLOCK (cbo365);
 
 		*out_auth_result = E_SOURCE_AUTHENTICATION_ACCEPTED;
 
 		return TRUE;
+	} else {
+		EBackend *backend;
+		ESourceRegistry *registry;
+		ESource *source;
+		EO365Connection *cnc;
+		ESourceO365Folder *o365_folder_extension;
+		CamelO365Settings *o365_settings;
+		gchar *group_id;
+		gchar *calendar_id;
+
+		backend = E_BACKEND (cbo365);
+		source = e_backend_get_source (backend);
+		registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbo365));
+		o365_settings = camel_o365_settings_get_from_backend (backend, registry);
+		g_warn_if_fail (o365_settings != NULL);
+
+		o365_folder_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_O365_FOLDER);
+		group_id = e_source_o365_folder_dup_group_id (o365_folder_extension);
+		calendar_id = e_source_o365_folder_dup_id (o365_folder_extension);
+
+		if (calendar_id) {
+			cnc = e_o365_connection_new_for_backend (backend, registry, source, o365_settings);
+
+			*out_auth_result = e_o365_connection_authenticate_sync (cnc, NULL, E_O365_FOLDER_KIND_CALENDAR, group_id, calendar_id,
+				out_certificate_pem, out_certificate_errors, cancellable, error);
+
+			if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
+				cbo365->priv->cnc = g_object_ref (cnc);
+
+				g_warn_if_fail (cbo365->priv->group_id == NULL);
+				g_warn_if_fail (cbo365->priv->calendar_id == NULL);
+
+				g_free (cbo365->priv->group_id);
+				cbo365->priv->group_id = group_id;
+
+				g_free (cbo365->priv->calendar_id);
+				cbo365->priv->calendar_id = calendar_id;
+
+				group_id = NULL;
+				calendar_id = NULL;
+				success = TRUE;
+
+				e_cal_backend_set_writable (E_CAL_BACKEND (cbo365), TRUE);
+			}
+		} else {
+			*out_auth_result = E_SOURCE_AUTHENTICATION_ERROR;
+			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_OTHER_ERROR, _("Folder ID is not set")));
+		}
+
+		g_clear_object (&cnc);
+		g_free (group_id);
+		g_free (calendar_id);
 	}
 
-	g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	UNLOCK (cbo365);
+
+	ecb_o365_convert_error_to_client_error (error);
 
 	return success;
 }
@@ -161,9 +304,7 @@ ecb_o365_disconnect_sync (ECalMetaBackend *meta_backend,
 {
 	g_return_val_if_fail (E_IS_CAL_BACKEND_O365 (meta_backend), FALSE);
 
-	ecb_o365_unset_connection (E_CAL_BACKEND_O365 (meta_backend), TRUE);
-
-	return TRUE;
+	return ecb_o365_unset_connection_sync (E_CAL_BACKEND_O365 (meta_backend), TRUE, cancellable, error);
 }
 
 static gboolean
@@ -180,7 +321,9 @@ ecb_o365_get_changes_sync (ECalMetaBackend *meta_backend,
 {
 	ECalBackendO365 *cbo365;
 	ECalCache *cal_cache;
-	gboolean success = FALSE;
+	EO365Calendar *o365_calendar = NULL;
+	gboolean changed = FALSE;
+	gboolean success = TRUE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_O365 (meta_backend), FALSE);
 	g_return_val_if_fail (out_new_sync_tag != NULL, FALSE);
@@ -198,12 +341,99 @@ ecb_o365_get_changes_sync (ECalMetaBackend *meta_backend,
 	cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
 	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
 
-	g_rec_mutex_lock (&cbo365->priv->property_lock);
+	LOCK (cbo365);
 
-	g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	if (e_o365_connection_get_calendar_folder_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id, cbo365->priv->calendar_id, "id,changeKey",
+		&o365_calendar, cancellable, error) && o365_calendar) {
+		changed = g_strcmp0 (last_sync_tag, e_o365_calendar_get_change_key (o365_calendar)) != 0;
 
-	ecb_o365_convert_error_to_edc_error (error);
+		if (changed)
+			*out_new_sync_tag = g_strdup (e_o365_calendar_get_change_key (o365_calendar));
+
+		json_object_unref (o365_calendar);
+	} else {
+		success = FALSE;
+	}
+
+	if (changed) {
+		GSList *events = NULL, *link;
+		gboolean full_read;
+
+		full_read = !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
+
+		success = e_o365_connection_list_events_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id, cbo365->priv->calendar_id, NULL,
+			full_read ? NULL : "id,changeKey", &events, cancellable, error);
+
+		if (success) {
+			GSList *new_ids = NULL; /* const gchar *, borrowed from 'events' objects */
+			GSList *changed_ids = NULL; /* const gchar *, borrowed from 'events' objects */
+
+			for (link = events; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+				EO365Event *event = link->data;
+				const gchar *id, *change_key;
+				gchar *extra = NULL;
+
+				if (!event)
+					continue;
+
+				id = e_o365_event_get_id (event);
+				change_key = e_o365_event_get_change_key (event);
+
+				if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
+					const gchar *saved_change_key = NULL;
+
+					ecb_o365_split_extra (extra, &saved_change_key, NULL);
+
+					if (g_strcmp0 (saved_change_key, change_key) == 0) {
+						g_free (extra);
+						continue;
+					} else if (full_read) {
+						ECalMetaBackendInfo *nfo;
+
+						nfo = ecb_o365_json_to_ical_nfo (cbo365, event, cancellable, NULL);
+
+						if (nfo)
+							*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
+					} else {
+						changed_ids = g_slist_prepend (changed_ids, (gpointer) id);
+					}
+
+					g_free (extra);
+				} else if (full_read) {
+					ECalMetaBackendInfo *nfo;
+
+					nfo = ecb_o365_json_to_ical_nfo (cbo365, event, cancellable, NULL);
+
+					if (nfo)
+						*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
+				} else {
+					new_ids = g_slist_prepend (new_ids, (gpointer) id);
+				}
+			}
+
+			if (new_ids) {
+				new_ids = g_slist_reverse (new_ids);
+				success = ecb_o365_download_event_changes_locked (cbo365, new_ids, out_created_objects, cancellable, error);
+			}
+
+			if (success && changed_ids) {
+				changed_ids = g_slist_reverse (changed_ids);
+				success = ecb_o365_download_event_changes_locked (cbo365, changed_ids, out_modified_objects, cancellable, error);
+			}
+
+			g_slist_free (new_ids);
+			g_slist_free (changed_ids);
+		}
+
+		g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+	}
+
+	UNLOCK (cbo365);
+
+	ecb_o365_convert_error_to_client_error (error);
 	ecb_o365_maybe_disconnect_sync (cbo365, error, cancellable);
+
+	g_clear_object (&cal_cache);
 
 	return success;
 }
@@ -227,11 +457,11 @@ ecb_o365_load_component_sync (ECalMetaBackend *meta_backend,
 
 	cbo365 = E_CAL_BACKEND_O365 (meta_backend);
 
-	g_rec_mutex_lock (&cbo365->priv->property_lock);
+	LOCK (cbo365);
 
-	g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	UNLOCK (cbo365);
 
-	ecb_o365_convert_error_to_edc_error (error);
+	ecb_o365_convert_error_to_client_error (error);
 	ecb_o365_maybe_disconnect_sync (cbo365, error, cancellable);
 
 	return success;
@@ -256,11 +486,11 @@ ecb_o365_save_component_sync (ECalMetaBackend *meta_backend,
 
 	cbo365 = E_CAL_BACKEND_O365 (meta_backend);
 
-	g_rec_mutex_lock (&cbo365->priv->property_lock);
+	LOCK (cbo365);
 
-	g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	UNLOCK (cbo365);
 
-	ecb_o365_convert_error_to_edc_error (error);
+	ecb_o365_convert_error_to_client_error (error);
 	ecb_o365_maybe_disconnect_sync (cbo365, error, cancellable);
 
 	return success;
@@ -284,11 +514,11 @@ ecb_o365_remove_component_sync (ECalMetaBackend *meta_backend,
 
 	cbo365 = E_CAL_BACKEND_O365 (meta_backend);
 
-	g_rec_mutex_lock (&cbo365->priv->property_lock);
+	LOCK (cbo365);
 
-	g_rec_mutex_unlock (&cbo365->priv->property_lock);
+	UNLOCK (cbo365);
 
-	ecb_o365_convert_error_to_edc_error (error);
+	ecb_o365_convert_error_to_client_error (error);
 	ecb_o365_maybe_disconnect_sync (cbo365, error, cancellable);
 
 	return success;
@@ -405,7 +635,7 @@ ecb_o365_dispose (GObject *object)
 {
 	ECalBackendO365 *cbo365 = E_CAL_BACKEND_O365 (object);
 
-	ecb_o365_unset_connection (cbo365, FALSE);
+	ecb_o365_unset_connection_sync (cbo365, FALSE, NULL, NULL);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_o365_parent_class)->dispose (object);

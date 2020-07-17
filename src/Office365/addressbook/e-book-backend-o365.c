@@ -23,10 +23,6 @@
 #include <glib.h>
 #include <glib/gi18n-lib.h>
 
-#define LIBICAL_GLIB_UNSTABLE_API
-#include <libical-glib/libical-glib.h>
-#undef LIBICAL_GLIB_UNSTABLE_API
-
 #include <libedata-book/libedata-book.h>
 
 #include "common/camel-o365-settings.h"
@@ -46,9 +42,6 @@
 
 #define EC_ERROR_EX(_code,_msg) e_client_error_create (_code, _msg)
 #define EBC_ERROR_EX(_code,_msg) e_book_client_error_create (_code, _msg)
-
-#define EBB_O365_DATA_VERSION 1
-#define EBB_O365_DATA_VERSION_KEY "o365-data-version"
 
 #define LOCK(_bb) g_rec_mutex_lock (&_bb->priv->property_lock)
 #define UNLOCK(_bb) g_rec_mutex_unlock (&_bb->priv->property_lock)
@@ -1797,11 +1790,7 @@ ebb_o365_search_sync (EBookMetaBackend *meta_backend,
 	/*ebb_o365_update_cache_for_expression (E_BOOK_BACKEND_O365 (meta_backend), expr, cancellable, NULL);*/
 
 	/* Chain up to parent's method */
-	if (!E_BOOK_META_BACKEND_CLASS (e_book_backend_o365_parent_class)->search_sync (meta_backend, expr, meta_contact,
-		out_contacts, cancellable, error))
-		return FALSE;
-
-	return TRUE;
+	return E_BOOK_META_BACKEND_CLASS (e_book_backend_o365_parent_class)->search_sync (meta_backend, expr, meta_contact, out_contacts, cancellable, error);
 }
 
 static gboolean

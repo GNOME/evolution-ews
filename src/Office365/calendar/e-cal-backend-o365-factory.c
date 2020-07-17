@@ -49,20 +49,9 @@ GType e_cal_backend_o365_events_factory_get_type (void);
 GType e_cal_backend_o365_journal_factory_get_type (void);
 GType e_cal_backend_o365_todos_factory_get_type (void);
 
-G_DEFINE_DYNAMIC_TYPE (
-	ECalBackendO365EventsFactory,
-	e_cal_backend_o365_events_factory,
-	E_TYPE_CAL_BACKEND_FACTORY)
-
-G_DEFINE_DYNAMIC_TYPE (
-	ECalBackendO365JournalFactory,
-	e_cal_backend_o365_journal_factory,
-	E_TYPE_CAL_BACKEND_FACTORY)
-
-G_DEFINE_DYNAMIC_TYPE (
-	ECalBackendO365TodosFactory,
-	e_cal_backend_o365_todos_factory,
-	E_TYPE_CAL_BACKEND_FACTORY)
+G_DEFINE_DYNAMIC_TYPE (ECalBackendO365EventsFactory, e_cal_backend_o365_events_factory, E_TYPE_CAL_BACKEND_FACTORY)
+G_DEFINE_DYNAMIC_TYPE (ECalBackendO365JournalFactory, e_cal_backend_o365_journal_factory, E_TYPE_CAL_BACKEND_FACTORY)
+G_DEFINE_DYNAMIC_TYPE (ECalBackendO365TodosFactory, e_cal_backend_o365_todos_factory, E_TYPE_CAL_BACKEND_FACTORY)
 
 static void
 e_cal_backend_o365_events_factory_class_init (ECalBackendFactoryClass *class)

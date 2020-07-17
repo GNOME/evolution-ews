@@ -3013,17 +3013,17 @@ e_o365_event_get_is_cancelled (EO365Event *event)
 	return e_o365_json_get_boolean_member (event, "isCancelled", FALSE);
 }
 
-void
-e_o365_event_add_is_cancelled (JsonBuilder *builder,
-			       gboolean value)
-{
-	e_o365_json_add_boolean_member (builder, "isCancelled", value);
-}
-
 gboolean
 e_o365_event_get_is_online_meeting (EO365Event *event)
 {
 	return e_o365_json_get_boolean_member (event, "isOnlineMeeting", FALSE);
+}
+
+void
+e_o365_event_add_is_online_meeting (JsonBuilder *builder,
+				    gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isOnlineMeeting", value);
 }
 
 gboolean
@@ -3075,6 +3075,30 @@ e_o365_event_get_locations (EO365Event *event)
 	return e_o365_json_get_array_member (event, "locations");
 }
 
+void
+e_o365_event_begin_locations (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "locations");
+}
+
+void
+e_o365_event_end_locations (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_event_begin_locations_location (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, NULL);
+}
+
+void
+e_o365_event_end_locations_location (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
 EO365OnlineMeetingInfo *
 e_o365_event_get_online_meeting_info (EO365Event *event)
 {
@@ -3088,6 +3112,20 @@ e_o365_event_get_online_meeting_provider (EO365Event *event)
 		meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
 		E_O365_ONLINE_MEETING_PROVIDER_NOT_SET,
 		E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN);
+}
+
+void
+e_o365_event_add_online_meeting_provider (JsonBuilder *builder,
+					  EO365OnlineMeetingProviderType value)
+{
+	if (value == E_O365_ONLINE_MEETING_PROVIDER_NOT_SET) {
+		e_o365_json_add_null_member (builder, "onlineMeetingProvider");
+	} else {
+		o365_json_utils_add_enum_as_json (builder, "onlineMeetingProvider", value,
+			meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
+			E_O365_ONLINE_MEETING_PROVIDER_NOT_SET,
+			E_O365_ONLINE_MEETING_PROVIDER_UNKNOWN);
+	}
 }
 
 const gchar *
