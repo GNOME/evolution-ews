@@ -71,8 +71,11 @@ o365_json_utils_add_enum_as_json (JsonBuilder *builder,
 	const gchar *json_value = NULL, *default_value_str = NULL;
 	guint ii;
 
-	if (enum_value == not_set_value)
+	if (enum_value == not_set_value) {
+		if (string_member_name)
+			e_o365_json_add_null_member (builder, string_member_name);
 		return;
+	}
 
 	for (ii = 0; ii < n_items; ii++) {
 		if (items[ii].enum_value == default_value) {
@@ -986,7 +989,11 @@ e_o365_add_item_body (JsonBuilder *builder,
 		      const gchar *content)
 {
 	g_return_if_fail (member_name != NULL);
-	g_return_if_fail (content != NULL);
+
+	if (content_type == E_O365_ITEM_BODY_CONTENT_TYPE_NOT_SET || !content) {
+		e_o365_json_add_null_member (builder, member_name);
+		return;
+	}
 
 	e_o365_json_begin_object_member (builder, member_name);
 
@@ -2869,9 +2876,13 @@ void
 e_o365_event_add_attendee (JsonBuilder *builder,
 			   EO365AttendeeType type,
 			   EO365ResponseType response,
+			   time_t response_time,
 			   const gchar *name,
 			   const gchar *address)
 {
+	if (response_time <= (time_t) 0)
+		response_time = time (NULL);
+
 	e_o365_json_begin_object_member (builder, NULL);
 
 	o365_json_utils_add_enum_as_json (builder, "type", type,
@@ -2886,7 +2897,7 @@ e_o365_event_add_attendee (JsonBuilder *builder,
 		E_O365_RESPONSE_NOT_SET,
 		E_O365_RESPONSE_UNKNOWN);
 
-	e_o365_add_date_time_offset_member (builder, "time", time (NULL));
+	e_o365_add_date_time_offset_member (builder, "time", response_time);
 
 	e_o365_json_end_object_member (builder); /* status */
 
@@ -2894,6 +2905,12 @@ e_o365_event_add_attendee (JsonBuilder *builder,
 		e_o365_add_email_address (builder, "emailAddress", name, address);
 
 	e_o365_json_end_object_member (builder);
+}
+
+void
+e_o365_event_add_null_attendees (JsonBuilder *builder)
+{
+	e_o365_json_add_null_member (builder, "attendees");
 }
 
 EO365ItemBody *
@@ -3069,6 +3086,12 @@ e_o365_event_end_location (JsonBuilder *builder)
 	e_o365_json_end_object_member (builder);
 }
 
+void
+e_o365_event_add_null_location (JsonBuilder *builder)
+{
+	e_o365_json_add_null_member (builder, "location");
+}
+
 JsonArray * /* EO365Location * */
 e_o365_event_get_locations (EO365Event *event)
 {
@@ -3146,6 +3169,12 @@ e_o365_event_add_organizer (JsonBuilder *builder,
 			    const gchar *address)
 {
 	e_o365_add_recipient (builder, "organizer", name, address);
+}
+
+void
+e_o365_event_add_null_organizer (JsonBuilder *builder)
+{
+	e_o365_json_add_null_member (builder, "organizer");
 }
 
 const gchar *

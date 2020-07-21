@@ -1711,7 +1711,7 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 			EO365Contact *created_contact = NULL;
 
 			success = e_o365_connection_create_contact_sync (bbo365->priv->cnc, NULL, bbo365->priv->folder_id,
-				builder,  &created_contact, cancellable, error);
+				builder, &created_contact, cancellable, error);
 
 			if (success && created_contact) {
 				const gchar *o365_id = e_o365_contact_get_id (created_contact);
@@ -1725,6 +1725,10 @@ ebb_o365_save_contact_sync (EBookMetaBackend *meta_backend,
 				*out_new_uid = g_strdup (e_o365_contact_get_id (created_contact));
 
 				vcard = ebb_o365_json_contact_to_vcard (bbo365, created_contact, bbo365->priv->cnc, out_new_extra, cancellable, error);
+
+				if (!vcard)
+					success = FALSE;
+
 				g_clear_object (&vcard);
 			}
 

@@ -827,8 +827,10 @@ void		e_o365_event_end_attendees		(JsonBuilder *builder);
 void		e_o365_event_add_attendee		(JsonBuilder *builder,
 							 EO365AttendeeType type,
 							 EO365ResponseType response,
+							 time_t response_time,
 							 const gchar *name,
 							 const gchar *address);
+void		e_o365_event_add_null_attendees		(JsonBuilder *builder);
 EO365ItemBody *	e_o365_event_get_body			(EO365Event *event);
 void		e_o365_event_add_body			(JsonBuilder *builder,
 							 EO365ItemBodyContentTypeType content_type,
@@ -866,6 +868,7 @@ time_t		e_o365_event_get_last_modified_date_time(EO365Event *event);
 EO365Location *	e_o365_event_get_location		(EO365Event *event);
 void		e_o365_event_begin_location		(JsonBuilder *builder);
 void		e_o365_event_end_location		(JsonBuilder *builder);
+void		e_o365_event_add_null_location		(JsonBuilder *builder);
 JsonArray *	e_o365_event_get_locations		(EO365Event *event); /* EO365Location * */
 void		e_o365_event_begin_locations		(JsonBuilder *builder);
 void		e_o365_event_end_locations		(JsonBuilder *builder);
@@ -882,6 +885,7 @@ EO365Recipient *e_o365_event_get_organizer		(EO365Event *event);
 void		e_o365_event_add_organizer		(JsonBuilder *builder,
 							 const gchar *name,
 							 const gchar *address);
+void		e_o365_event_add_null_organizer		(JsonBuilder *builder);
 const gchar *	e_o365_event_get_original_end_timezone	(EO365Event *event);
 time_t		e_o365_event_get_original_start		(EO365Event *event);
 const gchar *	e_o365_event_get_original_start_timezone(EO365Event *event);

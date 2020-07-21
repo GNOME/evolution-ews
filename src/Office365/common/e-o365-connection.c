@@ -4595,6 +4595,7 @@ e_o365_connection_list_event_attachments_sync (EO365Connection *cnc,
 					       const gchar *group_id, /* nullable, then the default group is used */
 					       const gchar *calendar_id,
 					       const gchar *event_id,
+					       const gchar *select, /* nullable - properties to select */
 					       GSList **out_attachments, /* EO365Attachment * */
 					       GCancellable *cancellable,
 					       GError **error)
@@ -4617,6 +4618,7 @@ e_o365_connection_list_event_attachments_sync (EO365Connection *cnc,
 		"", "events",
 		"", event_id,
 		"", "attachments",
+		"$select", select,
 		NULL);
 
 	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
@@ -4634,6 +4636,111 @@ e_o365_connection_list_event_attachments_sync (EO365Connection *cnc,
 	rd.out_items = out_attachments;
 
 	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/attachment-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_event_attachment_sync (EO365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     const gchar *group_id, /* nullable, then the default group is used */
+					     const gchar *calendar_id,
+					     const gchar *event_id,
+					     const gchar *attachment_id,
+					     EO365ConnectionRawDataFunc func,
+					     gpointer func_user_data,
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (event_id != NULL, FALSE);
+	g_return_val_if_fail (attachment_id != NULL, FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "events",
+		"", event_id,
+		"", "attachments",
+		"", attachment_id,
+		"", "$value",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, func, func_user_data, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/event-post-attachments?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_add_event_attachment_sync (EO365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     const gchar *group_id, /* nullable, then the default group is used */
+					     const gchar *calendar_id,
+					     const gchar *event_id,
+					     JsonBuilder *in_attachment,
+					     EO365Attachment **out_attachment, /* nullable */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (event_id != NULL, FALSE);
+	g_return_val_if_fail (in_attachment != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "events",
+		"", event_id,
+		"", "attachments",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, out_attachment ? CSM_DEFAULT : CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, in_attachment);
+
+	success = o365_connection_send_request_sync (cnc, message, out_attachment ? e_o365_read_json_object_response_cb : NULL,
+		out_attachment ? NULL : e_o365_read_no_response_cb, out_attachment, cancellable, error);
 
 	g_clear_object (&message);
 

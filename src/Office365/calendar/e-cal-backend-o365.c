@@ -96,14 +96,20 @@ ecb_o365_convert_error_to_client_error (GError **perror)
 	}
 }
 
-static gchar *
-ecb_o365_join_to_extra (const gchar *change_key,
-			const gchar *ical_comp)
+static const gchar *
+ecb_o365_get_component_from_extra (const gchar *extra)
 {
-	if (!change_key && !ical_comp)
+	gchar *enter;
+
+	if (!extra)
 		return NULL;
 
-	return g_strconcat (change_key ? change_key : "", "\n", ical_comp, NULL);
+	enter = strchr (extra, '\n');
+
+	if (!enter)
+		return NULL;
+
+	return enter + 1;
 }
 
 /* Modifies inout_extra, cannot be called multiple times with the same arguments */
@@ -117,11 +123,10 @@ ecb_o365_split_extra (gchar *inout_extra,
 	if (!inout_extra)
 		return;
 
-	enter = strchr (inout_extra, '\n');
+	enter = (gchar *) ecb_o365_get_component_from_extra (inout_extra);
 	g_return_if_fail (enter != NULL);
 
-	*enter = '\0';
-	enter++;
+	enter[-1] = '\0';
 
 	if (out_change_key)
 		*out_change_key = inout_extra;
@@ -130,13 +135,1688 @@ ecb_o365_split_extra (gchar *inout_extra,
 		*out_ical_comp = enter;
 }
 
+static void
+ecb_o365_get_uid (ECalBackendO365 *cbo365,
+		  EO365Event *o365_event,
+		  ICalComponent *inout_comp,
+		  ICalPropertyKind prop_kind)
+{
+	i_cal_component_set_uid (inout_comp, e_o365_event_get_id (o365_event));
+}
+
+static void
+ecb_o365_get_date_time (ECalBackendO365 *cbo365,
+			EO365Event *o365_event,
+			ICalComponent *inout_comp,
+			ICalPropertyKind prop_kind)
+{
+	time_t tt = (time_t) 0;
+
+	if (prop_kind == I_CAL_CREATED_PROPERTY)
+		tt = e_o365_event_get_created_date_time (o365_event);
+	else if (prop_kind == I_CAL_LASTMODIFIED_PROPERTY)
+		tt = e_o365_event_get_last_modified_date_time (o365_event);
+	else
+		g_warn_if_reached ();
+
+	if (tt > (time_t) 0) {
+		ICalProperty *prop;
+		ICalTime *itt;
+
+		itt = i_cal_time_new_from_timet_with_zone (tt, FALSE, i_cal_timezone_get_utc_timezone ());
+
+		if (prop_kind == I_CAL_CREATED_PROPERTY)
+			prop = i_cal_property_new_created (itt);
+		else /* I_CAL_LASTMODIFIED_PROPERTY */
+			prop = i_cal_property_new_lastmodified (itt);
+
+		i_cal_component_take_property (inout_comp, prop);
+
+		g_clear_object (&itt);
+	}
+}
+
+static ICalTimezone *
+ecb_o365_get_timezone_sync (ECalBackendO365 *cbo365,
+			    const gchar *tzid)
+{
+	ICalTimezone *zone;
+	ECalCache *cal_cache;
+
+	if (!tzid)
+		return NULL;
+
+	cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbo365));
+
+	if (!cal_cache)
+		return NULL;
+
+	zone = e_cal_cache_resolve_timezone_cb (tzid, cal_cache, NULL, NULL);
+
+	g_object_unref (cal_cache);
+
+	return zone;
+}
+
+static void
+ecb_o365_get_date_time_zone (ECalBackendO365 *cbo365,
+			     EO365Event *o365_event,
+			     ICalComponent *inout_comp,
+			     ICalPropertyKind prop_kind)
+{
+	EO365DateTimeWithZone *value = NULL;
+	ICalTimezone *tz;
+	ICalTime *itt;
+	time_t tt;
+	const gchar *tzid, *zone;
+
+	if (prop_kind == I_CAL_DTSTART_PROPERTY) {
+		value = e_o365_event_get_start (o365_event);
+		tzid = e_o365_event_get_original_start_timezone (o365_event);
+	} else if (prop_kind == I_CAL_DTEND_PROPERTY) {
+		value = e_o365_event_get_end (o365_event);
+		tzid = e_o365_event_get_original_end_timezone (o365_event);
+	} else {
+		g_warn_if_reached ();
+		return;
+	}
+
+	if (!value)
+		return;
+
+	tt = e_o365_date_time_get_date_time (value);
+	zone = e_o365_date_time_get_time_zone (value);
+
+	/* Reads the time in UTC, just make sure it's still a true expectation */
+	g_warn_if_fail (!zone || !*zone || g_strcmp0 (zone, "UTC") == 0);
+
+	tz = ecb_o365_get_timezone_sync (cbo365, tzid);
+	itt = i_cal_time_new_from_timet_with_zone (tt, e_o365_event_get_is_all_day (o365_event), i_cal_timezone_get_utc_timezone ());
+
+	if (tz && !e_o365_event_get_is_all_day (o365_event))
+		i_cal_time_convert_to_zone_inplace (itt, tz);
+
+	if (prop_kind == I_CAL_DTSTART_PROPERTY)
+		i_cal_component_set_dtstart (inout_comp, itt);
+	else /* I_CAL_DTEND_PROPERTY */
+		i_cal_component_set_dtend (inout_comp, itt);
+
+	g_clear_object (&itt);
+}
+
+static void
+ecb_o365_add_date_time_zone (ECalBackendO365 *cbo365,
+			     ICalComponent *new_comp,
+			     ICalComponent *old_comp,
+			     ICalPropertyKind prop_kind,
+			     JsonBuilder *builder)
+{
+	/* TODO */			
+}
+
+static void
+ecb_o365_get_categories (ECalBackendO365 *cbo365,
+			 EO365Event *o365_event,
+			 ICalComponent *inout_comp,
+			 ICalPropertyKind prop_kind)
+{
+	JsonArray *categories;
+
+	categories = e_o365_event_get_categories (o365_event);
+
+	if (categories) {
+		GString *categories_str = NULL;
+		guint ii, len;
+
+		len = json_array_get_length (categories);
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *category;
+
+			category = json_array_get_string_element (categories, ii);
+
+			if (category && *category) {
+				gchar *ical_str = i_cal_value_encode_ical_string (category);
+
+				if (ical_str && *ical_str) {
+					if (!categories_str) {
+						categories_str = g_string_new (ical_str);
+					} else {
+						g_string_append_c (categories_str, ',');
+						g_string_append (categories_str, ical_str);
+					}
+				}
+
+				g_free (ical_str);
+			}
+		}
+
+		if (categories_str) {
+			i_cal_component_take_property (inout_comp, i_cal_property_new_categories (categories_str->str));
+
+			g_string_free (categories_str, TRUE);
+		}
+	}
+}
+
+static void
+ecb_o365_add_categories (ECalBackendO365 *cbo365,
+			 ICalComponent *new_comp,
+			 ICalComponent *old_comp,
+			 ICalPropertyKind prop_kind,
+			 JsonBuilder *builder)
+{
+}
+
+static void
+ecb_o365_get_subject (ECalBackendO365 *cbo365,
+		      EO365Event *o365_event,
+		      ICalComponent *inout_comp,
+		      ICalPropertyKind prop_kind)
+{
+	const gchar *subject;
+
+	subject = e_o365_event_get_subject (o365_event);
+
+	if (subject)
+		i_cal_component_set_summary (inout_comp, subject);
+}
+
+static void
+ecb_o365_add_subject (ECalBackendO365 *cbo365,
+		      ICalComponent *new_comp,
+		      ICalComponent *old_comp,
+		      ICalPropertyKind prop_kind,
+		      JsonBuilder *builder)
+{
+	const gchar *new_value, *old_value;
+
+	new_value = i_cal_component_get_summary (new_comp);
+	old_value = old_comp ? i_cal_component_get_summary (old_comp) : NULL;
+
+	if (g_strcmp0 (new_value, old_value) != 0)
+		e_o365_event_add_subject (builder, new_value ? new_value : "");
+}
+
+static void
+ecb_o365_get_body (ECalBackendO365 *cbo365,
+		   EO365Event *o365_event,
+		   ICalComponent *inout_comp,
+		   ICalPropertyKind prop_kind)
+{
+	EO365ItemBody *value;
+
+	value = e_o365_event_get_body (o365_event);
+
+	if (value && e_o365_item_body_get_content (value))
+		i_cal_component_set_description (inout_comp, e_o365_item_body_get_content (value));
+}
+
+static void
+ecb_o365_add_body (ECalBackendO365 *cbo365,
+		   ICalComponent *new_comp,
+		   ICalComponent *old_comp,
+		   ICalPropertyKind prop_kind,
+		   JsonBuilder *builder)
+{
+	const gchar *new_value, *old_value;
+
+	new_value = i_cal_component_get_description (new_comp);
+	old_value = old_comp ? i_cal_component_get_description (old_comp) : NULL;
+
+	if (g_strcmp0 (new_value, old_value) != 0)
+		e_o365_event_add_body (builder, E_O365_ITEM_BODY_CONTENT_TYPE_TEXT, new_value);
+}
+
+static void
+ecb_o365_get_sensitivity (ECalBackendO365 *cbo365,
+			  EO365Event *o365_event,
+			  ICalComponent *inout_comp,
+			  ICalPropertyKind prop_kind)
+{
+	EO365SensitivityType value;
+	ICalProperty_Class cls = I_CAL_CLASS_NONE;
+
+	value = e_o365_event_get_sensitivity (o365_event);
+
+	if (value == E_O365_SENSITIVITY_NORMAL)
+		cls = I_CAL_CLASS_PUBLIC;
+	else if (value == E_O365_SENSITIVITY_PERSONAL || value == E_O365_SENSITIVITY_PRIVATE)
+		cls = I_CAL_CLASS_PRIVATE;
+	else if (value == E_O365_SENSITIVITY_CONFIDENTIAL)
+		cls = I_CAL_CLASS_CONFIDENTIAL;
+
+	if (cls != I_CAL_CLASS_NONE)
+		i_cal_component_take_property (inout_comp, i_cal_property_new_class (cls));
+}
+
+static void
+ecb_o365_add_sensitivity (ECalBackendO365 *cbo365,
+			  ICalComponent *new_comp,
+			  ICalComponent *old_comp,
+			  ICalPropertyKind prop_kind,
+			  JsonBuilder *builder)
+{
+	ICalProperty_Class new_value = I_CAL_CLASS_NONE, old_value = I_CAL_CLASS_NONE;
+	ICalProperty *prop;
+
+	prop = i_cal_component_get_first_property (new_comp, prop_kind);
+
+	if (prop) {
+		new_value = i_cal_property_get_class (prop);
+		g_clear_object (&prop);
+	}
+
+	prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+
+	if (prop) {
+		old_value = i_cal_property_get_class (prop);
+		g_clear_object (&prop);
+	}
+
+	if (new_value != old_value) {
+		EO365SensitivityType value = E_O365_SENSITIVITY_NOT_SET;
+
+		if (new_value == I_CAL_CLASS_PUBLIC)
+			value = E_O365_SENSITIVITY_NORMAL;
+		else if (new_value == I_CAL_CLASS_PRIVATE)
+			value = E_O365_SENSITIVITY_PRIVATE;
+		else if (new_value == I_CAL_CLASS_CONFIDENTIAL)
+			value = E_O365_SENSITIVITY_CONFIDENTIAL;
+
+		e_o365_event_add_sensitivity (builder, value);
+	}
+}
+
+static void
+ecb_o365_get_show_as (ECalBackendO365 *cbo365,
+		      EO365Event *o365_event,
+		      ICalComponent *inout_comp,
+		      ICalPropertyKind prop_kind)
+{
+	EO365FreeBusyStatusType value;
+	ICalPropertyTransp transp = I_CAL_TRANSP_NONE;
+
+	value = e_o365_event_get_show_as (o365_event);
+
+	if (value == E_O365_FREE_BUSY_STATUS_FREE)
+		transp = I_CAL_TRANSP_TRANSPARENT;
+	else if (value == E_O365_FREE_BUSY_STATUS_BUSY)
+		transp = I_CAL_TRANSP_OPAQUE;
+
+	if (transp != I_CAL_TRANSP_NONE)
+		i_cal_component_take_property (inout_comp, i_cal_property_new_transp (transp));
+}
+
+static void
+ecb_o365_add_show_as (ECalBackendO365 *cbo365,
+		      ICalComponent *new_comp,
+		      ICalComponent *old_comp,
+		      ICalPropertyKind prop_kind,
+		      JsonBuilder *builder)
+{
+	ICalPropertyTransp new_value = I_CAL_TRANSP_NONE, old_value = I_CAL_TRANSP_NONE;
+	ICalProperty *prop;
+
+	prop = i_cal_component_get_first_property (new_comp, prop_kind);
+
+	if (prop) {
+		new_value = i_cal_property_get_transp (prop);
+		g_clear_object (&prop);
+	}
+
+	prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+
+	if (prop) {
+		old_value = i_cal_property_get_transp (prop);
+		g_clear_object (&prop);
+	}
+
+	if (new_value != old_value) {
+		EO365FreeBusyStatusType value = E_O365_FREE_BUSY_STATUS_NOT_SET;
+
+		if (new_value == I_CAL_TRANSP_TRANSPARENT)
+			value = E_O365_FREE_BUSY_STATUS_FREE;
+		else if (new_value == I_CAL_TRANSP_OPAQUE)
+			value = E_O365_FREE_BUSY_STATUS_BUSY;
+
+		e_o365_event_add_show_as (builder, value);
+	}
+}
+
+static void
+ecb_o365_get_location (ECalBackendO365 *cbo365,
+		       EO365Event *o365_event,
+		       ICalComponent *inout_comp,
+		       ICalPropertyKind prop_kind)
+{
+	EO365Location *value;
+	const gchar *tmp;
+
+	value = e_o365_event_get_location (o365_event);
+
+	if (!value)
+		return;
+
+	tmp = e_o365_location_get_display_name (value);
+
+	if (tmp)
+		i_cal_component_set_location (inout_comp, tmp);
+}
+
+static void
+ecb_o365_add_location (ECalBackendO365 *cbo365,
+		       ICalComponent *new_comp,
+		       ICalComponent *old_comp,
+		       ICalPropertyKind prop_kind,
+		       JsonBuilder *builder)
+{
+	const gchar *new_value, *old_value;
+
+	new_value = i_cal_component_get_location (new_comp);
+	old_value = old_comp ? i_cal_component_get_location (old_comp) : NULL;
+
+	if (g_strcmp0 (new_value, old_value) != 0) {
+		if (new_value && *new_value) {
+			e_o365_event_begin_location (builder);
+			e_o365_location_add_display_name (builder, new_value);
+			e_o365_event_end_location (builder);
+		} else {
+			e_o365_event_add_null_location (builder);
+		}
+	}
+}
+
+static void
+ecb_o365_get_organizer (ECalBackendO365 *cbo365,
+			EO365Event *o365_event,
+			ICalComponent *inout_comp,
+			ICalPropertyKind prop_kind)
+{
+	EO365Recipient *value;
+	const gchar *name;
+	const gchar *address;
+
+	value = e_o365_event_get_organizer (o365_event);
+
+	if (!value)
+		return;
+
+	name = e_o365_recipient_get_name (value);
+	address = e_o365_recipient_get_address (value);
+
+	if (address && *address) {
+		ECalComponentOrganizer *organizer;
+		gchar *mailto_addr;
+
+		mailto_addr = g_strconcat ("mailto:", address, NULL);
+		organizer = e_cal_component_organizer_new ();
+		e_cal_component_organizer_set_value (organizer, mailto_addr);
+		g_free (mailto_addr);
+
+		if (name && *name)
+			e_cal_component_organizer_set_cn (organizer, name);
+
+		i_cal_component_take_property (inout_comp, e_cal_component_organizer_get_as_property (organizer));
+		e_cal_component_organizer_free (organizer);
+	}
+}
+
+static const gchar *
+ecb_o365_strip_mailto (const gchar *value)
+{
+	if (value && g_ascii_strncasecmp (value, "mailto:", 7) == 0)
+		return value + 7;
+
+	return value;
+}
+
+static void
+ecb_o365_add_organizer (ECalBackendO365 *cbo365,
+			ICalComponent *new_comp,
+			ICalComponent *old_comp,
+			ICalPropertyKind prop_kind,
+			JsonBuilder *builder)
+{
+	ECalComponentOrganizer *new_value = NULL, *old_value = NULL;
+	ICalProperty *prop;
+
+	prop = i_cal_component_get_first_property (new_comp, prop_kind);
+
+	if (prop) {
+		new_value = e_cal_component_organizer_new_from_property (prop);
+		g_clear_object (&prop);
+	}
+
+	prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+
+	if (prop) {
+		old_value = e_cal_component_organizer_new_from_property (prop);
+		g_clear_object (&prop);
+	}
+
+	if (new_value != old_value && (
+	    g_strcmp0 (new_value ? e_cal_component_organizer_get_cn (new_value) : NULL,
+		       old_value ? e_cal_component_organizer_get_cn (old_value) : NULL) != 0 ||
+	    g_strcmp0 (new_value ? ecb_o365_strip_mailto (e_cal_component_organizer_get_value (new_value)) : NULL,
+		       old_value ? ecb_o365_strip_mailto (e_cal_component_organizer_get_value (old_value)) : NULL) != 0)) {
+		if (new_value) {
+			e_o365_event_add_organizer (builder,
+						    e_cal_component_organizer_get_cn (new_value),
+						    ecb_o365_strip_mailto (e_cal_component_organizer_get_value (new_value)));
+		} else {
+			e_o365_event_add_null_organizer (builder);
+		}
+	}
+
+	e_cal_component_organizer_free (new_value);
+	e_cal_component_organizer_free (old_value);
+}
+
+static void
+ecb_o365_get_attendees (ECalBackendO365 *cbo365,
+			EO365Event *o365_event,
+			ICalComponent *inout_comp,
+			ICalPropertyKind prop_kind)
+{
+	JsonArray *array;
+	guint ii, sz;
+
+	array = e_o365_event_get_attendees (o365_event);
+
+	if (!array)
+		return;
+
+	sz = json_array_get_length (array);
+
+	for (ii = 0; ii < sz; ii++) {
+		EO365Attendee *o365_attendee;
+		EO365ResponseStatus *o365_status;
+		EO365AttendeeType o365_att_type;
+		EO365EmailAddress *o365_address;
+		ECalComponentAttendee *e_attendee;
+		ICalParameterRole role = I_CAL_ROLE_NONE;
+		gchar *mailto_addr;
+
+		o365_attendee = json_array_get_object_element (array, ii);
+
+		if (!o365_attendee)
+			continue;
+
+		o365_address = e_o365_attendee_get_email_address (o365_attendee);
+
+		if (!o365_address || !e_o365_email_address_get_address (o365_address))
+			continue;
+
+		e_attendee = e_cal_component_attendee_new ();
+
+		mailto_addr = g_strconcat ("mailto:", e_o365_email_address_get_address (o365_address), NULL);
+		e_cal_component_attendee_set_value (e_attendee, mailto_addr);
+		g_free (mailto_addr);
+
+		if (e_o365_email_address_get_name (o365_address))
+			e_cal_component_attendee_set_cn (e_attendee, e_o365_email_address_get_name (o365_address));
+
+		o365_status = e_o365_attendee_get_status (o365_attendee);
+
+		if (o365_status) {
+			EO365ResponseType o365_response;
+			ICalParameterPartstat partstat = I_CAL_PARTSTAT_NONE;
+
+			o365_response = e_o365_response_status_get_response (o365_status);
+
+			if (o365_response == E_O365_RESPONSE_TENTATIVELY_ACCEPTED)
+				partstat = I_CAL_PARTSTAT_TENTATIVE;
+			else if (o365_response == E_O365_RESPONSE_ACCEPTED)
+				partstat = I_CAL_PARTSTAT_ACCEPTED;
+			else if (o365_response == E_O365_RESPONSE_DECLINED)
+				partstat = I_CAL_PARTSTAT_DECLINED;
+			else if (o365_response == E_O365_RESPONSE_NOT_RESPONDED)
+				partstat = I_CAL_PARTSTAT_NEEDSACTION;
+
+			if (partstat != I_CAL_PARTSTAT_NONE) {
+				time_t tt;
+
+				e_cal_component_attendee_set_partstat (e_attendee, partstat);
+
+				tt = e_o365_response_status_get_time (o365_status);
+
+				if (tt > (time_t) 0) {
+					ECalComponentParameterBag *params;
+					ICalParameter *param;
+					gchar *tmp;
+
+					tmp = g_strdup_printf ("%" G_GINT64_FORMAT, (gint64) tt);
+					params = e_cal_component_attendee_get_parameter_bag (e_attendee);
+
+					param = i_cal_parameter_new_x (tmp);
+					i_cal_parameter_set_xname (param, "X-M365-STATUS-TIME");
+
+					e_cal_component_parameter_bag_take (params, param);
+
+					g_free (tmp);
+				}
+			}
+		}
+
+		o365_att_type = e_o365_attendee_get_type (o365_attendee);
+
+		if (o365_att_type == E_O365_ATTENDEE_REQUIRED) {
+			role = I_CAL_ROLE_REQPARTICIPANT;
+			e_cal_component_attendee_set_cutype (e_attendee, I_CAL_CUTYPE_INDIVIDUAL);
+		} else if (o365_att_type == E_O365_ATTENDEE_OPTIONAL) {
+			role = I_CAL_ROLE_OPTPARTICIPANT;
+			e_cal_component_attendee_set_cutype (e_attendee, I_CAL_CUTYPE_INDIVIDUAL);
+		} else if (o365_att_type == E_O365_ATTENDEE_RESOURCE) {
+			e_cal_component_attendee_set_cutype (e_attendee, I_CAL_CUTYPE_RESOURCE);
+		}
+
+		if (role != I_CAL_ROLE_NONE)
+			e_cal_component_attendee_set_role (e_attendee, role);
+
+		i_cal_component_take_property (inout_comp, e_cal_component_attendee_get_as_property (e_attendee));
+
+		e_cal_component_attendee_free (e_attendee);
+	}
+}
+
+static void
+ecb_o365_extract_attendees (ICalComponent *comp,
+			    GHashTable **out_hash, /* const gchar *ECalComponentAttendee::value ~> ECalComponentAttendee * */
+			    GSList **out_slist) /* ECalComponentAttendee * */
+{
+	ICalProperty *prop;
+
+	if (!comp)
+		return;
+
+	for (prop = i_cal_component_get_first_property (comp, I_CAL_ATTENDEE_PROPERTY);
+	     prop;
+	     g_object_unref (prop), prop = i_cal_component_get_next_property (comp, I_CAL_ATTENDEE_PROPERTY)) {
+		ECalComponentAttendee *attendee;
+
+		attendee = e_cal_component_attendee_new_from_property (prop);
+
+		if (attendee && e_cal_component_attendee_get_value (attendee)) {
+			if (out_hash) {
+				if (!*out_hash)
+					*out_hash = g_hash_table_new_full (camel_strcase_hash, camel_strcase_equal, NULL, e_cal_component_attendee_free);
+
+				g_hash_table_insert (*out_hash, (gpointer) e_cal_component_attendee_get_value (attendee), attendee);
+			} else if (out_slist) {
+				*out_slist = g_slist_prepend (*out_slist, attendee);
+			} else {
+				g_warn_if_reached ();
+				e_cal_component_attendee_free (attendee);
+			}
+		} else {
+			e_cal_component_attendee_free (attendee);
+		}
+	}
+
+	g_clear_object (&prop);
+
+	if (out_slist && *out_slist)
+		*out_slist = g_slist_reverse (*out_slist);
+}
+
+static void
+ecb_o365_add_attendees (ECalBackendO365 *cbo365,
+			ICalComponent *new_comp,
+			ICalComponent *old_comp,
+			ICalPropertyKind prop_kind,
+			JsonBuilder *builder)
+{
+	GHashTable *old_value = NULL;
+	GSList *new_value = NULL;
+
+	ecb_o365_extract_attendees (new_comp, NULL, &new_value);
+	ecb_o365_extract_attendees (old_comp, &old_value, NULL);
+
+	if (!new_value && !old_value)
+		return;
+
+	if (new_value) {
+		GSList *link;
+		gboolean same = FALSE;
+
+		if (old_value && g_hash_table_size (old_value) == g_slist_length (new_value)) {
+			same = TRUE;
+
+			for (link = new_value; link && same; link = g_slist_next (link)) {
+				ECalComponentAttendee *new_att = link->data, *old_att;
+
+				old_att = g_hash_table_lookup (old_value, e_cal_component_attendee_get_value (new_att));
+
+				same = old_att && e_cal_component_attendee_get_value (old_att) && e_cal_component_attendee_get_value (new_att) &&
+					g_ascii_strcasecmp (e_cal_component_attendee_get_value (old_att), e_cal_component_attendee_get_value (new_att)) == 0 &&
+					g_strcmp0 (e_cal_component_attendee_get_cn (old_att), e_cal_component_attendee_get_cn (new_att)) == 0 &&
+					e_cal_component_attendee_get_partstat (old_att) == e_cal_component_attendee_get_partstat (new_att) &&
+					e_cal_component_attendee_get_cutype (old_att) == e_cal_component_attendee_get_cutype (new_att) &&
+					e_cal_component_attendee_get_role (old_att) == e_cal_component_attendee_get_role (new_att);
+			}
+		}
+
+		if (!same) {
+			e_o365_event_begin_attendees (builder);
+
+			for (link = new_value; link; link = g_slist_next (link)) {
+				ECalComponentAttendee *attendee = link->data;
+				EO365AttendeeType att_type;
+				EO365ResponseType response = E_O365_RESPONSE_NONE;
+				time_t response_time = (time_t) 0;
+				ICalParameterPartstat partstat;
+				const gchar *address;
+
+				address = ecb_o365_strip_mailto (e_cal_component_attendee_get_value (attendee));
+
+				if (e_cal_component_attendee_get_cutype (attendee) == I_CAL_CUTYPE_RESOURCE)
+					att_type = E_O365_ATTENDEE_RESOURCE;
+				else if (e_cal_component_attendee_get_role (attendee) == I_CAL_ROLE_REQPARTICIPANT ||
+					 e_cal_component_attendee_get_role (attendee) == I_CAL_ROLE_CHAIR)
+					att_type = E_O365_ATTENDEE_REQUIRED;
+				else if (e_cal_component_attendee_get_role (attendee) == I_CAL_ROLE_OPTPARTICIPANT)
+					att_type = E_O365_ATTENDEE_OPTIONAL;
+				else /* Fallback */
+					att_type = E_O365_ATTENDEE_REQUIRED;
+
+				partstat = e_cal_component_attendee_get_partstat (attendee);
+
+				if (partstat == I_CAL_PARTSTAT_TENTATIVE)
+					response = E_O365_RESPONSE_TENTATIVELY_ACCEPTED;
+				else if (partstat == I_CAL_PARTSTAT_ACCEPTED)
+					response = E_O365_RESPONSE_ACCEPTED;
+				else if (partstat == I_CAL_PARTSTAT_DECLINED)
+					response = E_O365_RESPONSE_DECLINED;
+				else if (partstat == I_CAL_PARTSTAT_NEEDSACTION)
+					response = E_O365_RESPONSE_NOT_RESPONDED;
+
+				if (response != E_O365_RESPONSE_NONE) {
+					ECalComponentParameterBag *params;
+					guint ii, sz;
+
+					params = e_cal_component_attendee_get_parameter_bag (attendee);
+					sz = e_cal_component_parameter_bag_get_count (params);
+
+					for (ii = 0; ii < sz; ii++) {
+						ICalParameter *param;
+
+						param = e_cal_component_parameter_bag_get (params, ii);
+
+						if (param && i_cal_parameter_isa (param) == I_CAL_X_PARAMETER &&
+						    i_cal_parameter_get_xname (param) &&
+						    g_ascii_strcasecmp (i_cal_parameter_get_xname (param), "X-M365-STATUS-TIME") == 0) {
+							const gchar *xvalue;
+
+							xvalue = i_cal_parameter_get_xvalue (param);
+
+							if (xvalue && *xvalue) {
+								gint64 value;
+
+								value = g_ascii_strtoll (xvalue, NULL, 10);
+
+								if (value)
+									response_time = (time_t) value;
+							}
+						}
+					}
+				}
+
+				e_o365_event_add_attendee (builder, att_type, response, response_time, e_cal_component_attendee_get_cn (attendee), address);
+			}
+
+			e_o365_event_end_attendees (builder);
+		}
+	} else {
+		e_o365_event_add_null_attendees (builder);
+	}
+
+	if (new_value)
+		g_slist_free_full (new_value, e_cal_component_attendee_free);
+	if (old_value)
+		g_hash_table_destroy (old_value);
+}
+
+static ICalRecurrenceWeekday
+ecb_o365_day_of_week_to_ical (EO365DayOfWeekType dow)
+{
+	switch (dow) {
+	case E_O365_DAY_OF_WEEK_SUNDAY:
+		return I_CAL_SUNDAY_WEEKDAY;
+	case E_O365_DAY_OF_WEEK_MONDAY:
+		return I_CAL_MONDAY_WEEKDAY;
+	case E_O365_DAY_OF_WEEK_TUESDAY:
+		return I_CAL_TUESDAY_WEEKDAY;
+	case E_O365_DAY_OF_WEEK_WEDNESDAY:
+		return I_CAL_WEDNESDAY_WEEKDAY;
+	case E_O365_DAY_OF_WEEK_THURSDAY:
+		return I_CAL_THURSDAY_WEEKDAY;
+	case E_O365_DAY_OF_WEEK_FRIDAY:
+		return I_CAL_FRIDAY_WEEKDAY;
+	case E_O365_DAY_OF_WEEK_SATURDAY:
+		return I_CAL_SATURDAY_WEEKDAY;
+	default:
+		break;
+	}
+
+	return I_CAL_NO_WEEKDAY;
+}
+
+static void
+ecb_o365_set_index_to_ical (ICalRecurrence *recr,
+			    EO365WeekIndexType index)
+{
+	gint by_pos = -2;
+
+	switch (index) {
+	case E_O365_WEEK_INDEX_FIRST:
+		by_pos = 1;
+		break;
+	case E_O365_WEEK_INDEX_SECOND:
+		by_pos = 2;
+		break;
+	case E_O365_WEEK_INDEX_THIRD:
+		by_pos = 3;
+		break;
+	case E_O365_WEEK_INDEX_FOURTH:
+		by_pos = 4;
+		break;
+	case E_O365_WEEK_INDEX_LAST:
+		by_pos = -1;
+		break;
+	default:
+		break;
+	}
+
+	if (by_pos != -2)
+		i_cal_recurrence_set_by_set_pos (recr, 0, by_pos);
+}
+
+static void
+ecb_o365_set_days_of_week_to_ical (ICalRecurrence *recr,
+				   JsonArray *days_of_week)
+{
+	gint ii, jj, sz;
+
+	if (!days_of_week)
+		return;
+
+	ii = 0;
+	sz = json_array_get_length (days_of_week);
+
+	for (jj = 0; jj < sz; jj++) {
+		ICalRecurrenceWeekday week_day;
+
+		week_day = ecb_o365_day_of_week_to_ical (e_o365_array_get_day_of_week_element (days_of_week, jj));
+
+		if (week_day != I_CAL_SUNDAY_WEEKDAY) {
+			i_cal_recurrence_set_by_day (recr, ii, week_day);
+			ii++;
+		}
+	}
+
+	i_cal_recurrence_set_by_day (recr, ii, I_CAL_RECURRENCE_ARRAY_MAX);
+}
+
+static void
+ecb_o365_get_recurrence (ECalBackendO365 *cbo365,
+			 EO365Event *o365_event,
+			 ICalComponent *inout_comp,
+			 ICalPropertyKind prop_kind)
+{
+	EO365PatternedRecurrence *o365_recr;
+	EO365RecurrencePattern *o365_pattern;
+	EO365RecurrenceRange *o365_range;
+	ICalRecurrence *ical_recr;
+	ICalRecurrenceWeekday week_day;
+	gint month;
+
+	o365_recr = e_o365_event_get_recurrence (o365_event);
+	o365_pattern = o365_recr ? e_o365_patterned_recurrence_get_pattern (o365_recr) : NULL;
+	o365_range = o365_recr ? e_o365_patterned_recurrence_get_range (o365_recr) : NULL;
+
+	if (!o365_recr || !o365_pattern || !o365_range)
+		return;
+
+	ical_recr = i_cal_recurrence_new ();
+
+	switch (e_o365_recurrence_pattern_get_type (o365_pattern)) {
+	case E_O365_RECURRENCE_PATTERN_DAILY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_DAILY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_o365_recurrence_pattern_get_interval (o365_pattern));
+		ecb_o365_set_days_of_week_to_ical (ical_recr, e_o365_recurrence_pattern_get_days_of_week (o365_pattern));
+		break;
+	case E_O365_RECURRENCE_PATTERN_WEEKLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_WEEKLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_o365_recurrence_pattern_get_interval (o365_pattern));
+
+		week_day = ecb_o365_day_of_week_to_ical (e_o365_recurrence_pattern_get_first_day_of_week (o365_recr));
+
+		if (week_day != I_CAL_NO_WEEKDAY)
+			i_cal_recurrence_set_week_start (ical_recr, week_day);
+
+		ecb_o365_set_days_of_week_to_ical (ical_recr, e_o365_recurrence_pattern_get_days_of_week (o365_pattern));
+		break;
+	case E_O365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_o365_recurrence_pattern_get_interval (o365_pattern));
+		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_o365_recurrence_pattern_get_day_of_month (o365_pattern));
+		break;
+	case E_O365_RECURRENCE_PATTERN_RELATIVE_MONTHLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_o365_recurrence_pattern_get_interval (o365_pattern));
+		ecb_o365_set_days_of_week_to_ical (ical_recr, e_o365_recurrence_pattern_get_days_of_week (o365_pattern));
+		week_day = ecb_o365_day_of_week_to_ical (e_o365_recurrence_pattern_get_first_day_of_week (o365_recr));
+
+		if (week_day != I_CAL_NO_WEEKDAY)
+			i_cal_recurrence_set_week_start (ical_recr, week_day);
+
+		ecb_o365_set_index_to_ical (ical_recr, e_o365_recurrence_pattern_get_index (o365_recr));
+		break;
+	case E_O365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_o365_recurrence_pattern_get_interval (o365_pattern));
+		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_o365_recurrence_pattern_get_day_of_month (o365_pattern));
+
+		month = e_o365_recurrence_pattern_get_month (o365_recr);
+
+		if (month >= 1 && month <= 12)
+			i_cal_recurrence_set_by_month (ical_recr, 0, month);
+		break;
+	case E_O365_RECURRENCE_PATTERN_RELATIVE_YEARLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_o365_recurrence_pattern_get_interval (o365_pattern));
+		ecb_o365_set_days_of_week_to_ical (ical_recr, e_o365_recurrence_pattern_get_days_of_week (o365_pattern));
+		week_day = ecb_o365_day_of_week_to_ical (e_o365_recurrence_pattern_get_first_day_of_week (o365_recr));
+
+		if (week_day != I_CAL_NO_WEEKDAY)
+			i_cal_recurrence_set_week_start (ical_recr, week_day);
+
+		ecb_o365_set_index_to_ical (ical_recr, e_o365_recurrence_pattern_get_index (o365_recr));
+
+		month = e_o365_recurrence_pattern_get_month (o365_recr);
+
+		if (month >= 1 && month <= 12)
+			i_cal_recurrence_set_by_month (ical_recr, 0, month);
+		break;
+	default:
+		g_object_unref (ical_recr);
+		g_warning ("%s: Unknown pattern type: %d", G_STRFUNC, e_o365_recurrence_pattern_get_type (o365_pattern));
+		return;
+	}
+
+	switch (e_o365_recurrence_range_get_type (o365_range)) {
+	case E_O365_RECURRENCE_RANGE_ENDDATE:
+		if (e_o365_recurrence_range_get_end_date (o365_range) > 0) {
+			guint yy = 0, mm = 0, dd = 0;
+
+			if (e_o365_date_decode (e_o365_recurrence_range_get_end_date (o365_range), &yy, &mm, &dd)) {
+				ICalTime *itt;
+
+				itt = i_cal_time_new ();
+				i_cal_time_set_date (itt, yy, mm, dd);
+				i_cal_time_set_is_date (itt, TRUE);
+
+				i_cal_recurrence_set_until (ical_recr, itt);
+
+				g_clear_object (&itt);
+			}
+		}
+		break;
+	case E_O365_RECURRENCE_RANGE_NOEND:
+		break;
+	case E_O365_RECURRENCE_RANGE_NUMBERED:
+		i_cal_recurrence_set_count (ical_recr, e_o365_recurrence_range_get_number_of_occurrences (o365_range));
+		break;
+	default:
+		g_warning ("%s: Unknown range type: %d", G_STRFUNC, e_o365_recurrence_range_get_type (o365_range));
+		g_object_unref (ical_recr);
+		return;
+	}
+
+	i_cal_component_take_property (inout_comp, i_cal_property_new_rrule (ical_recr));
+
+	g_object_unref (ical_recr);
+}
+
+static void
+ecb_o365_add_recurrence (ECalBackendO365 *cbo365,
+			 ICalComponent *new_comp,
+			 ICalComponent *old_comp,
+			 ICalPropertyKind prop_kind,
+			 JsonBuilder *builder)
+{
+	/* TODO */			
+}
+
+static void
+ecb_o365_get_importance (ECalBackendO365 *cbo365,
+			 EO365Event *o365_event,
+			 ICalComponent *inout_comp,
+			 ICalPropertyKind prop_kind)
+{
+	EO365ImportanceType value;
+	ICalProperty *prop = NULL;
+
+	value = e_o365_event_get_importance (o365_event);
+
+	if (value == E_O365_IMPORTANCE_LOW)
+		prop = i_cal_property_new_priority (9);
+	else if (value == E_O365_IMPORTANCE_NORMAL)
+		prop = i_cal_property_new_priority (5);
+	else if (value == E_O365_IMPORTANCE_HIGH)
+		prop = i_cal_property_new_priority (1);
+
+	if (prop)
+		i_cal_component_take_property (inout_comp, prop);
+}
+
+static void
+ecb_o365_add_importance (ECalBackendO365 *cbo365,
+			 ICalComponent *new_comp,
+			 ICalComponent *old_comp,
+			 ICalPropertyKind prop_kind,
+			 JsonBuilder *builder)
+{
+	gint old_value = -1, new_value = -1;
+	ICalProperty *prop;
+
+	prop = i_cal_component_get_first_property (new_comp, prop_kind);
+
+	if (prop) {
+		new_value = i_cal_property_get_priority (prop);
+		g_clear_object (&prop);
+	}
+
+	prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+
+	if (prop) {
+		old_value = i_cal_property_get_priority (prop);
+		g_clear_object (&prop);
+	}
+
+	if (new_value != old_value) {
+		EO365ImportanceType value = E_O365_IMPORTANCE_NOT_SET;
+
+		if (new_value >= 1 && new_value <= 4) {
+			value = E_O365_IMPORTANCE_HIGH;
+		} else if (new_value == 5) {
+			value = E_O365_IMPORTANCE_NORMAL;
+		} else if (new_value >= 6 && new_value <= 9) {
+			value = E_O365_IMPORTANCE_LOW;
+		}
+
+		e_o365_event_add_importance (builder, value);
+	}
+}
+
+static void
+ecb_o365_get_status (ECalBackendO365 *cbo365,
+		     EO365Event *o365_event,
+		     ICalComponent *inout_comp,
+		     ICalPropertyKind prop_kind)
+{
+	ICalPropertyStatus status = I_CAL_STATUS_NONE;
+
+	if (e_o365_event_get_is_cancelled (o365_event)) {
+		status = I_CAL_STATUS_CANCELLED;
+	} else {
+		EO365ResponseStatus *response_status;
+
+		response_status = e_o365_event_get_response_status (o365_event);
+
+		if (response_status) {
+			EO365ResponseType response;
+
+			response = e_o365_response_status_get_response (response_status);
+
+			if (response == E_O365_RESPONSE_TENTATIVELY_ACCEPTED)
+				status = I_CAL_STATUS_TENTATIVE;
+			else if (response == E_O365_RESPONSE_ACCEPTED)
+				status = I_CAL_STATUS_CONFIRMED;
+			else if (response == E_O365_RESPONSE_DECLINED)
+				status = I_CAL_STATUS_CANCELLED;
+			else if (response == E_O365_RESPONSE_NOT_RESPONDED)
+				status = I_CAL_STATUS_NEEDSACTION;
+		}
+	}
+
+	if (status != I_CAL_STATUS_NONE)
+		i_cal_component_take_property (inout_comp, i_cal_property_new_status (status));
+}
+
+static gboolean
+ecb_o365_get_reminder (ECalBackendO365 *cbo365,
+		       EO365Event *o365_event,
+		       ICalComponent *inout_comp,
+		       ICalPropertyKind prop_kind,
+		       GCancellable *cancellable,
+		       GError **error)
+{
+	if (e_o365_event_get_is_reminder_on (o365_event)) {
+		ECalComponentAlarm *alarm;
+		ECalComponentAlarmTrigger *trigger;
+		ICalDuration *duration;
+
+		duration = i_cal_duration_new_from_int (-e_o365_event_get_reminder_minutes_before_start (o365_event));
+		trigger = e_cal_component_alarm_trigger_new_relative (E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START, duration);
+		g_object_unref (duration);
+
+		alarm = e_cal_component_alarm_new ();
+		e_cal_component_alarm_set_action (alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
+		e_cal_component_alarm_take_summary (alarm, e_cal_component_text_new (e_o365_event_get_subject (o365_event), NULL));
+		e_cal_component_alarm_take_description (alarm, e_cal_component_text_new (e_o365_event_get_subject (o365_event), NULL));
+		e_cal_component_alarm_take_trigger (alarm, trigger);
+
+		i_cal_component_take_component (inout_comp, e_cal_component_alarm_get_as_component (alarm));
+
+		e_cal_component_alarm_free (alarm);
+	}
+
+	return TRUE;
+}
+
+static gboolean
+ecb_o365_add_reminder (ECalBackendO365 *cbo365,
+		       ICalComponent *new_comp,
+		       ICalComponent *old_comp,
+		       ICalPropertyKind prop_kind,
+		       const gchar *o365_id,
+		       JsonBuilder *builder,
+		       GCancellable *cancellable,
+		       GError **error)
+{
+	ICalComponent *new_value, *old_value;
+	gboolean success = TRUE;
+
+	if (i_cal_component_count_components (new_comp, I_CAL_VALARM_COMPONENT) > 1) {
+		g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 calendar cannot store more that one event reminder")));
+		return FALSE;
+	}
+
+	new_value = i_cal_component_get_first_component (new_comp, I_CAL_VALARM_COMPONENT);
+	old_value = old_comp ? i_cal_component_get_first_component (old_comp, I_CAL_VALARM_COMPONENT) : NULL;
+
+	if (!new_value && !old_value)
+		return TRUE;
+
+	if (new_value) {
+		ECalComponentAlarm *new_alarm;
+		ECalComponentAlarmTrigger *new_trigger;
+		ICalDuration *new_duration = NULL;
+		gboolean changed = TRUE;
+
+		new_alarm = e_cal_component_alarm_new_from_component (new_value);
+		new_trigger = new_alarm ? e_cal_component_alarm_get_trigger (new_alarm) : NULL;
+
+		success = new_trigger && e_cal_component_alarm_trigger_get_kind (new_trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START;
+
+		if (success) {
+			new_duration = e_cal_component_alarm_trigger_get_duration (new_trigger);
+
+			success = new_duration && i_cal_duration_as_int (new_duration) <= 0;
+		}
+
+		if (!success) {
+			g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 calendar can store only a reminder before event start")));
+		}
+
+		if (success && old_value && new_trigger) {
+			ECalComponentAlarm *old_alarm;
+			ECalComponentAlarmTrigger *old_trigger;
+
+			old_alarm = e_cal_component_alarm_new_from_component (old_value);
+			old_trigger = old_alarm ? e_cal_component_alarm_get_trigger (old_alarm) : NULL;
+
+			if (old_trigger) {
+				changed = e_cal_component_alarm_trigger_get_kind (new_trigger) != e_cal_component_alarm_trigger_get_kind (old_trigger);
+
+				if (!changed) {
+					ICalDuration *old_duration;
+
+					old_duration = e_cal_component_alarm_trigger_get_duration (old_trigger);
+
+					changed = !old_duration || i_cal_duration_as_int (new_duration) != i_cal_duration_as_int (old_duration);
+				}
+			}
+
+			e_cal_component_alarm_free (old_alarm);
+		}
+
+		if (success && changed) {
+			e_o365_event_add_is_reminder_on (builder, TRUE);
+			e_o365_event_add_reminder_minutes_before_start (builder, i_cal_duration_as_int (new_duration) / -60);
+		}
+
+		e_cal_component_alarm_free (new_alarm);
+	} else {
+		e_o365_event_add_is_reminder_on (builder, FALSE);
+	}
+
+	g_clear_object (&new_value);
+	g_clear_object (&old_value);
+
+	return success;
+}
+
+
+
+static gboolean
+ecb_o365_get_attachments (ECalBackendO365 *cbo365,
+			  EO365Event *o365_event,
+			  ICalComponent *inout_comp,
+			  ICalPropertyKind prop_kind,
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	GSList *attachments = NULL, *link;
+	gboolean success = TRUE;
+
+	if (!e_o365_event_get_has_attachments (o365_event))
+		return TRUE;
+
+	if (!e_o365_connection_list_event_attachments_sync (cbo365->priv->cnc, NULL,
+		cbo365->priv->group_id, cbo365->priv->calendar_id, e_o365_event_get_id (o365_event), "id,name,contentType,contentBytes",
+		&attachments, cancellable, error)) {
+		return FALSE;
+	}
+
+	for (link = attachments; link && success; link = g_slist_next (link)) {
+		CamelStream *content_stream;
+		EO365Attachment *o365_attach = link->data;
+		gchar *filename;
+
+		if (!o365_attach || e_o365_attachment_get_data_type (o365_attach) != E_O365_ATTACHMENT_DATA_TYPE_FILE ||
+		    !e_o365_attachment_get_name (o365_attach))
+			continue;
+
+		filename = g_build_filename (cbo365->priv->attachments_dir, e_o365_event_get_id (o365_event), e_o365_attachment_get_id (o365_attach), NULL);
+
+		content_stream = camel_stream_fs_new_with_name (filename, O_CREAT | O_TRUNC | O_WRONLY, 0666, error);
+
+		if (content_stream) {
+			CamelMimeFilter *filter;
+			CamelStream *filter_stream;
+			const gchar *base64_data;
+
+			filter_stream = camel_stream_filter_new (content_stream);
+
+			filter = camel_mime_filter_basic_new (CAMEL_MIME_FILTER_BASIC_BASE64_DEC);
+			camel_stream_filter_add (CAMEL_STREAM_FILTER (filter_stream), filter);
+			g_object_unref (filter);
+
+			base64_data = e_o365_file_attachment_get_content_bytes (o365_attach);
+
+			if (base64_data && *base64_data)
+				success = camel_stream_write (filter_stream, base64_data, strlen (base64_data), cancellable, error) != -1;
+
+			camel_stream_flush (filter_stream, cancellable, NULL);
+			g_object_unref (filter_stream);
+
+			camel_stream_flush (content_stream, cancellable, NULL);
+			g_object_unref (content_stream);
+
+			if (success) {
+				gchar *uri;
+
+				uri = g_filename_to_uri (filename, NULL, error);
+
+				if (uri) {
+					ICalAttach *ical_attach;
+					ICalParameter *param;
+					ICalProperty *prop;
+					gchar *enc_uri;
+					const gchar *tmp;
+
+					enc_uri = i_cal_value_encode_ical_string (uri);
+					ical_attach = i_cal_attach_new_from_url (enc_uri);
+					prop = i_cal_property_new_attach (ical_attach);
+
+					tmp = e_o365_attachment_get_name (o365_attach);
+
+					if (!tmp || !*tmp)
+						tmp = "attachment.dat";
+
+					param = i_cal_parameter_new_filename (tmp);
+					i_cal_property_take_parameter (prop, param);
+
+					tmp = e_o365_attachment_get_content_type (o365_attach);
+
+					if (tmp && *tmp) {
+						param = i_cal_parameter_new_fmttype (tmp);
+						i_cal_property_take_parameter (prop, param);
+					}
+
+					param = i_cal_parameter_new_x (e_o365_attachment_get_id (o365_attach));
+					i_cal_parameter_set_xname (param, "X-M365-ATTACHMENTID");
+					i_cal_property_take_parameter (prop, param);
+
+					i_cal_component_take_property (inout_comp, prop);
+
+					g_object_unref (ical_attach);
+					g_free (enc_uri);
+					g_free (uri);
+				} else {
+					success = FALSE;
+				}
+			}
+		} else {
+			success = FALSE;
+		}
+
+		g_free (filename);
+	}
+
+	g_slist_free_full (attachments, (GDestroyNotify) json_object_unref);
+
+	return success;
+}
+
+static void
+ecb_o365_extract_attachments (ICalComponent *comp,
+			      GHashTable **out_hash, /* gchar *attachment_id ~> ICalProperty * */
+			      GSList **out_slist) /* ICalProperty * */
+{
+	ICalProperty *prop;
+
+	if (!comp)
+		return;
+
+	for (prop = i_cal_component_get_first_property (comp, I_CAL_ATTACH_PROPERTY);
+	     prop;
+	     g_object_unref (prop), prop = i_cal_component_get_next_property (comp, I_CAL_ATTACH_PROPERTY)) {
+		if (out_slist) {
+			*out_slist = g_slist_prepend (*out_slist, g_object_ref (prop));
+		} else if (out_hash) {
+			gchar *attach_id;
+
+			attach_id = i_cal_property_get_parameter_as_string (prop, "X-M365-ATTACHMENTID");
+			g_warn_if_fail (attach_id != NULL);
+
+			if (attach_id) {
+				if (!*out_hash)
+					*out_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+
+				g_hash_table_insert (*out_hash, attach_id, g_object_ref (prop));
+			}
+		} else {
+			g_warn_if_reached ();
+		}
+	}
+
+	g_clear_object (&prop);
+
+	if (out_slist && *out_slist)
+		*out_slist = g_slist_reverse (*out_slist);
+}
+
+static gboolean
+ecb_o365_add_attachments (ECalBackendO365 *cbo365,
+			  ICalComponent *new_comp,
+			  ICalComponent *old_comp,
+			  ICalPropertyKind prop_kind,
+			  const gchar *o365_id,
+			  JsonBuilder *builder,
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	GSList *new_attachs = NULL;
+	GHashTable *old_attachs = NULL;
+	gboolean success = TRUE;
+
+	if (!i_cal_component_count_properties (new_comp, I_CAL_ATTACH_PROPERTY) &&
+	    !(old_comp ? i_cal_component_count_properties (old_comp, I_CAL_ATTACH_PROPERTY) : 0)) {
+		return TRUE;
+	}
+
+	ecb_o365_extract_attachments (new_comp, NULL, &new_attachs);
+	ecb_o365_extract_attachments (old_comp, &old_attachs, NULL);
+
+	if (new_attachs) {
+		GSList *link, *save_attachs = new_attachs;
+
+		if (old_attachs) {
+			save_attachs = NULL;
+
+			for (link = new_attachs; link; link = g_slist_next (link)) {
+				ICalProperty *prop = link->data;
+				gchar *attach_id;
+
+				attach_id = i_cal_property_get_parameter_as_string (prop, "X-M365-ATTACHMENTID");
+
+				if (!attach_id || !g_hash_table_remove (old_attachs, attach_id)) {
+					save_attachs = g_slist_prepend (save_attachs, g_object_ref (prop));
+				}
+			}
+
+			if (save_attachs)
+				save_attachs = g_slist_reverse (save_attachs);
+		}
+
+		for (link = save_attachs; link && success; link = g_slist_next (link)) {
+			ICalProperty *prop = link->data;
+			ICalAttach *attach;
+			JsonBuilder *builder = NULL;
+
+			attach = i_cal_property_get_attach (prop);
+
+			if (!attach)
+				continue;
+
+			if (i_cal_attach_get_is_url (attach)) {
+				const gchar *data;
+				gchar *uri;
+
+				data = i_cal_attach_get_url (attach);
+				uri = i_cal_value_decode_ical_string (data);
+
+				if (uri && g_ascii_strncasecmp (uri, "file://", 7) == 0) {
+					CamelStream *content_stream;
+					gchar *filename;
+
+					filename = g_filename_from_uri (uri, NULL, error);
+					content_stream = filename ? camel_stream_fs_new_with_name (filename, O_RDONLY, 0, error) : NULL;
+
+					if (content_stream) {
+						CamelMimeFilter *filter;
+						CamelStream *filter_stream;
+						CamelStream *base64_stream;
+
+						base64_stream = camel_stream_mem_new ();
+						filter_stream = camel_stream_filter_new (base64_stream);
+
+						filter = camel_mime_filter_basic_new (CAMEL_MIME_FILTER_BASIC_BASE64_ENC);
+						camel_stream_filter_add (CAMEL_STREAM_FILTER (filter_stream), filter);
+						g_object_unref (filter);
+
+						success = camel_stream_write_to_stream (content_stream, filter_stream, cancellable, error) != -1;
+
+						camel_stream_flush (filter_stream, cancellable, NULL);
+						g_object_unref (filter_stream);
+
+						/* Ensure the stream is NUL-terminated, thus it can be used as a string */
+						camel_stream_write (base64_stream, "\0", 1, cancellable, NULL);
+
+						camel_stream_flush (base64_stream, cancellable, NULL);
+						g_object_unref (content_stream);
+
+						if (success) {
+							GByteArray *bytes;
+
+							bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (base64_stream));
+
+							builder = json_builder_new_immutable ();
+							e_o365_attachment_begin_attachment (builder, E_O365_ATTACHMENT_DATA_TYPE_FILE);
+							e_o365_file_attachment_add_content_bytes (builder, (const gchar *) bytes->data);
+						}
+
+						g_object_unref (base64_stream);
+					} else {
+						success = FALSE;
+					}
+
+					g_free (filename);
+				} else {
+					success = FALSE;
+
+					if (uri)
+						g_set_error (error, E_CLIENT_ERROR, E_CLIENT_ERROR_OTHER_ERROR, _("Cannot store attachment with URI “%s”"), uri);
+					else
+						g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_OTHER_ERROR, _("Failed to read attachment URI")));
+				}
+
+				g_free (uri);
+			} else {
+				const gchar *base64_data;
+
+				base64_data = i_cal_attach_get_data (attach);
+
+				if (base64_data) {
+					builder = json_builder_new_immutable ();
+					e_o365_attachment_begin_attachment (builder, E_O365_ATTACHMENT_DATA_TYPE_FILE);
+					e_o365_file_attachment_add_content_bytes (builder, base64_data);
+				} else {
+					g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_OTHER_ERROR, _("Failed to get inline attachment data")));
+				}
+			}
+
+			if (builder) {
+				ICalParameter *param;
+				const gchar *tmp;
+
+				param = i_cal_property_get_first_parameter (prop, I_CAL_FILENAME_PARAMETER);
+
+				if (param) {
+					tmp = i_cal_parameter_get_filename (param);
+
+					if (tmp && *tmp)
+						e_o365_attachment_add_name (builder, tmp);
+
+					g_clear_object (&param);
+				}
+
+				param = i_cal_property_get_first_parameter (prop, I_CAL_FMTTYPE_PARAMETER);
+
+				if (param) {
+					tmp = i_cal_parameter_get_fmttype (param);
+
+					if (tmp && *tmp)
+						e_o365_attachment_add_content_type (builder, tmp);
+					else
+						e_o365_attachment_add_content_type (builder, "application/octet-stream");
+
+					g_clear_object (&param);
+				} else {
+					e_o365_attachment_add_content_type (builder, "application/octet-stream");
+				}
+
+				e_o365_attachment_end_attachment (builder);
+
+				success = e_o365_connection_add_event_attachment_sync (cbo365->priv->cnc, NULL,
+					cbo365->priv->group_id, cbo365->priv->calendar_id, o365_id,
+					builder, NULL, cancellable, error);
+
+				g_object_unref (builder);
+			}
+
+			g_object_unref (attach);
+		}
+
+		if (save_attachs != new_attachs)
+			g_slist_free_full (save_attachs, g_object_unref);
+	}
+
+	if (old_attachs && success) {
+		GHashTableIter iter;
+		gpointer key;
+
+		g_hash_table_iter_init (&iter, old_attachs);
+
+		while (g_hash_table_iter_next (&iter, &key, NULL) && success) {
+			const gchar *attachment_id = key;
+
+			success = e_o365_connection_delete_event_attachment_sync (cbo365->priv->cnc, NULL,
+				cbo365->priv->group_id, cbo365->priv->calendar_id, i_cal_component_get_uid (new_comp),
+				attachment_id, cancellable, error);
+		}
+	}
+
+	if (old_attachs)
+		g_hash_table_destroy (old_attachs);
+	g_slist_free_full (new_attachs, g_object_unref);
+
+	return success;
+}
+
+#define SIMPLE_FIELD(propknd, getfn, addfn) { propknd, FALSE, getfn, NULL, addfn, NULL }
+#define COMPLEX_FIELD(propknd, getfn, addfn) { propknd, FALSE, NULL, getfn, NULL, addfn }
+#define COMPLEX_FIELD_2(propknd, getfn, addfn) { propknd, TRUE, NULL, getfn, NULL, addfn }
+
+struct _mappings {
+	ICalPropertyKind prop_kind;
+	gboolean add_in_second_go;
+	void		(* get_simple_func)	(ECalBackendO365 *cbo365,
+						 EO365Event *o365_event,
+						 ICalComponent *inout_comp,
+						 ICalPropertyKind prop_kind);
+	gboolean	(* get_func)		(ECalBackendO365 *cbo365,
+						 EO365Event *o365_event,
+						 ICalComponent *inout_comp,
+						 ICalPropertyKind prop_kind,
+						 GCancellable *cancellable,
+						 GError **error);
+	void		(* add_simple_func)	(ECalBackendO365 *cbo365,
+						 ICalComponent *new_comp,
+						 ICalComponent *old_comp, /* nullable */
+						 ICalPropertyKind prop_kind,
+						 JsonBuilder *builder);
+	gboolean	(* add_func)		(ECalBackendO365 *cbo365,
+						 ICalComponent *new_comp,
+						 ICalComponent *old_comp, /* nullable */
+						 ICalPropertyKind prop_kind,
+						 const gchar *o365_id,
+						 JsonBuilder *builder,
+						 GCancellable *cancellable,
+						 GError **error);
+} mappings[] = {
+	SIMPLE_FIELD	(I_CAL_UID_PROPERTY,		ecb_o365_get_uid,		NULL),
+	SIMPLE_FIELD	(I_CAL_CREATED_PROPERTY,	ecb_o365_get_date_time,		NULL),
+	SIMPLE_FIELD	(I_CAL_LASTMODIFIED_PROPERTY,	ecb_o365_get_date_time,		NULL),
+	SIMPLE_FIELD	(I_CAL_DTSTART_PROPERTY,	ecb_o365_get_date_time_zone,	ecb_o365_add_date_time_zone),
+	SIMPLE_FIELD	(I_CAL_DTEND_PROPERTY,		ecb_o365_get_date_time_zone,	ecb_o365_add_date_time_zone),
+	SIMPLE_FIELD	(I_CAL_CATEGORIES_PROPERTY,	ecb_o365_get_categories,	ecb_o365_add_categories),
+	SIMPLE_FIELD	(I_CAL_SUMMARY_PROPERTY,	ecb_o365_get_subject,		ecb_o365_add_subject),
+	SIMPLE_FIELD	(I_CAL_DESCRIPTION_PROPERTY,	ecb_o365_get_body,		ecb_o365_add_body),
+	SIMPLE_FIELD	(I_CAL_CLASS_PROPERTY,		ecb_o365_get_sensitivity,	ecb_o365_add_sensitivity),
+	SIMPLE_FIELD	(I_CAL_TRANSP_PROPERTY,		ecb_o365_get_show_as,		ecb_o365_add_show_as),
+	SIMPLE_FIELD	(I_CAL_LOCATION_PROPERTY,	ecb_o365_get_location,		ecb_o365_add_location),
+	SIMPLE_FIELD	(I_CAL_ORGANIZER_PROPERTY,	ecb_o365_get_organizer,		ecb_o365_add_organizer),
+	SIMPLE_FIELD	(I_CAL_ATTENDEE_PROPERTY,	ecb_o365_get_attendees,		ecb_o365_add_attendees),
+	SIMPLE_FIELD	(I_CAL_RRULE_PROPERTY,		ecb_o365_get_recurrence,	ecb_o365_add_recurrence),
+	SIMPLE_FIELD	(I_CAL_PRIORITY_PROPERTY,	ecb_o365_get_importance,	ecb_o365_add_importance),
+	SIMPLE_FIELD	(I_CAL_STATUS_PROPERTY,		ecb_o365_get_status,		NULL),
+	COMPLEX_FIELD	(I_CAL_X_PROPERTY,		ecb_o365_get_reminder,		ecb_o365_add_reminder),
+	COMPLEX_FIELD_2	(I_CAL_ATTACH_PROPERTY,		ecb_o365_get_attachments,	ecb_o365_add_attachments)
+};
+
+static gchar *
+ecb_o365_join_to_extra (const gchar *change_key,
+			const gchar *ical_comp)
+{
+	if (!change_key && !ical_comp)
+		return NULL;
+
+	return g_strconcat (change_key ? change_key : "", "\n", ical_comp, NULL);
+}
+
+static ICalComponent *
+ecb_o365_json_to_ical (ECalBackendO365 *cbo365,
+		       EO365Event *o365_event,
+		       GCancellable *cancellable,
+		       GError **error)
+{
+	ICalComponent *icomp;
+	gint ii;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (o365_event != NULL, NULL);
+
+	icomp = i_cal_component_new_vevent ();
+
+	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+		if (mappings[ii].get_simple_func) {
+			mappings[ii].get_simple_func (cbo365, o365_event, icomp, mappings[ii].prop_kind);
+		} else if (mappings[ii].get_func) {
+			success = mappings[ii].get_func (cbo365, o365_event, icomp, mappings[ii].prop_kind, cancellable, error);
+		}
+	}
+
+	if (!success)
+		g_clear_object (&icomp);
+
+	return icomp;
+}
+
 static ECalMetaBackendInfo *
 ecb_o365_json_to_ical_nfo (ECalBackendO365 *cbo365,
-			   EO365Event *event,
+			   EO365Event *o365_event,
 			   GCancellable *cancellable,
 			   GError **error)
 {
-	return NULL;
+	ECalMetaBackendInfo *nfo;
+	ICalComponent *icomp;
+
+	icomp = ecb_o365_json_to_ical (cbo365, o365_event, cancellable, error);
+
+	if (!icomp)
+		return NULL;
+
+	nfo = e_cal_meta_backend_info_new (i_cal_component_get_uid (icomp),
+		e_o365_event_get_change_key (o365_event),
+		NULL, NULL);
+
+	if (nfo) {
+		nfo->object = i_cal_component_as_ical_string (icomp);
+		nfo->extra = ecb_o365_join_to_extra (e_o365_event_get_change_key (o365_event), nfo->object);
+	}
+
+	g_clear_object (&icomp);
+
+	return nfo;
+}
+
+static JsonBuilder *
+ecb_o365_ical_to_json_locked (ECalBackendO365 *cbo365,
+			      ICalComponent *new_comp,
+			      ICalComponent *old_comp, /* nullable */
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	JsonBuilder *builder;
+	gint ii;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (new_comp != NULL, NULL);
+
+	builder = json_builder_new_immutable ();
+	e_o365_json_begin_object_member (builder, NULL);
+
+	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+		if (mappings[ii].add_simple_func) {
+			mappings[ii].add_simple_func (cbo365, new_comp, old_comp, mappings[ii].prop_kind, builder);
+		} else if (!mappings[ii].add_in_second_go && mappings[ii].add_func) {
+			success = mappings[ii].add_func (cbo365, new_comp, old_comp, mappings[ii].prop_kind, NULL, builder, cancellable, error);
+		}
+	}
+
+	e_o365_json_end_object_member (builder);
+
+	if (!success)
+		g_clear_object (&builder);
+
+	return builder;
+}
+
+static gboolean
+ecb_o365_ical_to_json_2nd_go_locked (ECalBackendO365 *cbo365,
+				     ICalComponent *new_comp,
+				     ICalComponent *old_comp, /* nullable */
+				     const gchar *o365_id,
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	gint ii;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (new_comp != NULL, FALSE);
+
+	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+		if (mappings[ii].add_in_second_go && mappings[ii].add_func) {
+			success = mappings[ii].add_func (cbo365, new_comp, old_comp, mappings[ii].prop_kind, o365_id, NULL, cancellable, error);
+		}
+	}
+
+	return success;
 }
 
 static gboolean
@@ -448,7 +2128,8 @@ ecb_o365_load_component_sync (ECalMetaBackend *meta_backend,
 			      GError **error)
 {
 	ECalBackendO365 *cbo365;
-	gboolean success = FALSE;
+	EO365Event *event = NULL;
+	gboolean success;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_O365 (meta_backend), FALSE);
 	g_return_val_if_fail (uid != NULL, FALSE);
@@ -458,6 +2139,25 @@ ecb_o365_load_component_sync (ECalMetaBackend *meta_backend,
 	cbo365 = E_CAL_BACKEND_O365 (meta_backend);
 
 	LOCK (cbo365);
+
+	success = e_o365_connection_get_event_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id,
+		cbo365->priv->calendar_id, uid, NULL, NULL, &event, cancellable, error);
+
+	if (success) {
+		*out_component = ecb_o365_json_to_ical (cbo365, event, cancellable, error);
+
+		if (*out_component) {
+			gchar *ical_str;
+
+			ical_str = i_cal_component_as_ical_string (*out_component);
+
+			*out_extra = ecb_o365_join_to_extra (e_o365_event_get_change_key (event), ical_str);
+
+			g_free (ical_str);
+		} else {
+			success = FALSE;
+		}
+	}
 
 	UNLOCK (cbo365);
 
@@ -480,6 +2180,8 @@ ecb_o365_save_component_sync (ECalMetaBackend *meta_backend,
 			      GError **error)
 {
 	ECalBackendO365 *cbo365;
+	ICalComponent *new_comp, *old_comp = NULL;
+	JsonBuilder *builder;
 	gboolean success = FALSE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_O365 (meta_backend), FALSE);
@@ -488,10 +2190,80 @@ ecb_o365_save_component_sync (ECalMetaBackend *meta_backend,
 
 	LOCK (cbo365);
 
+	new_comp = e_cal_meta_backend_merge_instances (meta_backend, instances, TRUE);
+
+	if (extra && *extra) {
+		const gchar *comp_str;
+
+		comp_str = ecb_o365_get_component_from_extra (extra);
+
+		if (comp_str)
+			old_comp = i_cal_component_new_from_string (comp_str);
+	}
+
+	builder = ecb_o365_ical_to_json_locked (cbo365, new_comp, old_comp, cancellable, error);
+
+	if (builder) {
+		if (overwrite_existing) {
+			const gchar *uid = i_cal_component_get_uid (new_comp);
+
+			success = e_o365_connection_update_event_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id,
+				cbo365->priv->calendar_id, uid, builder, cancellable, error);
+
+			if (success)
+				success = ecb_o365_ical_to_json_2nd_go_locked (cbo365, new_comp, old_comp, uid, cancellable, error);
+
+			if (success) {
+				/* To re-read it from the server */
+				*out_new_uid = g_strdup (uid);
+			}
+		} else {
+			EO365Event *created_event = NULL;
+
+			success = e_o365_connection_create_event_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id,
+				cbo365->priv->calendar_id, builder, &created_event, cancellable, error);
+
+			if (success && created_event) {
+				const gchar *o365_id = e_o365_event_get_id (created_event);
+
+				success = ecb_o365_ical_to_json_2nd_go_locked (cbo365, new_comp, old_comp, o365_id, cancellable, error);
+			}
+
+			if (success && created_event) {
+				ICalComponent *icomp;
+
+				*out_new_uid = g_strdup (e_o365_event_get_id (created_event));
+
+				icomp = ecb_o365_json_to_ical (cbo365, created_event, cancellable, error);
+
+				if (icomp) {
+					gchar *ical_str;
+
+					ical_str = i_cal_component_as_ical_string (icomp);
+
+					*out_new_extra = ecb_o365_join_to_extra (e_o365_event_get_change_key (created_event), ical_str);
+
+					g_clear_object (&icomp);
+					g_free (ical_str);
+				} else {
+					success = FALSE;
+				}
+			}
+
+			if (created_event)
+				json_object_unref (created_event);
+		}
+
+		g_clear_object (&builder);
+	}
+
 	UNLOCK (cbo365);
 
 	ecb_o365_convert_error_to_client_error (error);
 	ecb_o365_maybe_disconnect_sync (cbo365, error, cancellable);
+
+	g_clear_object (&new_comp);
+	g_clear_object (&old_comp);
 
 	return success;
 }
@@ -515,6 +2287,9 @@ ecb_o365_remove_component_sync (ECalMetaBackend *meta_backend,
 	cbo365 = E_CAL_BACKEND_O365 (meta_backend);
 
 	LOCK (cbo365);
+
+	success = e_o365_connection_delete_event_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id,
+		cbo365->priv->calendar_id, uid, cancellable, error);
 
 	UNLOCK (cbo365);
 

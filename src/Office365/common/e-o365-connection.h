@@ -533,7 +533,29 @@ gboolean	e_o365_connection_list_event_attachments_sync
 						 const gchar *group_id, /* nullable, then the default group is used */
 						 const gchar *calendar_id,
 						 const gchar *event_id,
+						 const gchar *select, /* nullable - properties to select */
 						 GSList **out_attachments, /* EO365Attachment * */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_event_attachment_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 const gchar *attachment_id,
+						 EO365ConnectionRawDataFunc func,
+						 gpointer func_user_data,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_add_event_attachment_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 JsonBuilder *in_attachment,
+						 EO365Attachment **out_attachment, /* nullable */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_delete_event_attachment_sync
