@@ -643,6 +643,21 @@ e_o365_get_date_time_offset_member (JsonObject *object,
 
 		dt = g_date_time_new_from_iso8601 (value, NULL);
 
+		if (!dt) {
+			gint len = strlen (value);
+
+			/* 2020-07-14T00:00:00.0000000 , eventually with 'Z' at the end */
+			if (len == 27 && value[4] == '-' && value[7] == '-' && value[10] == 'T' && value[13] == ':' && value[16] == ':' && value[19] == '.') {
+				gchar tmp[32];
+
+				strncpy (tmp, value, 27);
+				tmp[27] = 'Z';
+				tmp[28] = '\0';
+
+				dt = g_date_time_new_from_iso8601 (tmp, NULL);
+			}
+		}
+
 		if (dt) {
 			res = (time_t) g_date_time_to_unix (dt);
 			g_date_time_unref (dt);

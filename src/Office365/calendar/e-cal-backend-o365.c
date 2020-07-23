@@ -17,6 +17,8 @@
 
 #include "evolution-ews-config.h"
 
+#include <string.h>
+
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
@@ -345,11 +347,13 @@ ecb_o365_get_body (ECalBackendO365 *cbo365,
 		   ICalPropertyKind prop_kind)
 {
 	EO365ItemBody *value;
+	const gchar *content;
 
 	value = e_o365_event_get_body (o365_event);
+	content = value ? e_o365_item_body_get_content (value) : NULL;
 
-	if (value && e_o365_item_body_get_content (value))
-		i_cal_component_set_description (inout_comp, e_o365_item_body_get_content (value));
+	if (content && *content && strcmp (content, "\r\n") != 0)
+		i_cal_component_set_description (inout_comp, content);
 }
 
 static void
@@ -500,7 +504,7 @@ ecb_o365_get_location (ECalBackendO365 *cbo365,
 
 	tmp = e_o365_location_get_display_name (value);
 
-	if (tmp)
+	if (tmp && *tmp)
 		i_cal_component_set_location (inout_comp, tmp);
 }
 
@@ -534,12 +538,19 @@ ecb_o365_get_organizer (ECalBackendO365 *cbo365,
 			ICalPropertyKind prop_kind)
 {
 	EO365Recipient *value;
+	JsonArray *attendees;
 	const gchar *name;
 	const gchar *address;
 
 	value = e_o365_event_get_organizer (o365_event);
 
 	if (!value)
+		return;
+
+	/* Include the organizer only if there is at least one attendee */
+	attendees = e_o365_event_get_attendees (o365_event);
+
+	if (!attendees || !json_array_get_length (attendees))
 		return;
 
 	name = e_o365_recipient_get_name (value);
@@ -1198,7 +1209,7 @@ ecb_o365_get_reminder (ECalBackendO365 *cbo365,
 		ECalComponentAlarmTrigger *trigger;
 		ICalDuration *duration;
 
-		duration = i_cal_duration_new_from_int (-e_o365_event_get_reminder_minutes_before_start (o365_event));
+		duration = i_cal_duration_new_from_int (-60 * e_o365_event_get_reminder_minutes_before_start (o365_event));
 		trigger = e_cal_component_alarm_trigger_new_relative (E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START, duration);
 		g_object_unref (duration);
 
@@ -2001,8 +2012,8 @@ ecb_o365_get_changes_sync (ECalMetaBackend *meta_backend,
 {
 	ECalBackendO365 *cbo365;
 	ECalCache *cal_cache;
-	EO365Calendar *o365_calendar = NULL;
-	gboolean changed = FALSE;
+	GSList *events = NULL, *link;
+	gboolean full_read;
 	gboolean success = TRUE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_O365 (meta_backend), FALSE);
@@ -2023,90 +2034,73 @@ ecb_o365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 	LOCK (cbo365);
 
-	if (e_o365_connection_get_calendar_folder_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id, cbo365->priv->calendar_id, "id,changeKey",
-		&o365_calendar, cancellable, error) && o365_calendar) {
-		changed = g_strcmp0 (last_sync_tag, e_o365_calendar_get_change_key (o365_calendar)) != 0;
+	full_read = !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
 
-		if (changed)
-			*out_new_sync_tag = g_strdup (e_o365_calendar_get_change_key (o365_calendar));
+	success = e_o365_connection_list_events_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id, cbo365->priv->calendar_id, NULL,
+		full_read ? NULL : "id,changeKey", &events, cancellable, error);
 
-		json_object_unref (o365_calendar);
-	} else {
-		success = FALSE;
-	}
+	if (success) {
+		GSList *new_ids = NULL; /* const gchar *, borrowed from 'events' objects */
+		GSList *changed_ids = NULL; /* const gchar *, borrowed from 'events' objects */
 
-	if (changed) {
-		GSList *events = NULL, *link;
-		gboolean full_read;
+		for (link = events; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+			EO365Event *event = link->data;
+			const gchar *id, *change_key;
+			gchar *extra = NULL;
 
-		full_read = !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
+			if (!event)
+				continue;
 
-		success = e_o365_connection_list_events_sync (cbo365->priv->cnc, NULL, cbo365->priv->group_id, cbo365->priv->calendar_id, NULL,
-			full_read ? NULL : "id,changeKey", &events, cancellable, error);
+			id = e_o365_event_get_id (event);
+			change_key = e_o365_event_get_change_key (event);
 
-		if (success) {
-			GSList *new_ids = NULL; /* const gchar *, borrowed from 'events' objects */
-			GSList *changed_ids = NULL; /* const gchar *, borrowed from 'events' objects */
+			if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
+				const gchar *saved_change_key = NULL;
 
-			for (link = events; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
-				EO365Event *event = link->data;
-				const gchar *id, *change_key;
-				gchar *extra = NULL;
+				ecb_o365_split_extra (extra, &saved_change_key, NULL);
 
-				if (!event)
-					continue;
-
-				id = e_o365_event_get_id (event);
-				change_key = e_o365_event_get_change_key (event);
-
-				if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
-					const gchar *saved_change_key = NULL;
-
-					ecb_o365_split_extra (extra, &saved_change_key, NULL);
-
-					if (g_strcmp0 (saved_change_key, change_key) == 0) {
-						g_free (extra);
-						continue;
-					} else if (full_read) {
-						ECalMetaBackendInfo *nfo;
-
-						nfo = ecb_o365_json_to_ical_nfo (cbo365, event, cancellable, NULL);
-
-						if (nfo)
-							*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
-					} else {
-						changed_ids = g_slist_prepend (changed_ids, (gpointer) id);
-					}
-
+				if (g_strcmp0 (saved_change_key, change_key) == 0) {
 					g_free (extra);
+					continue;
 				} else if (full_read) {
 					ECalMetaBackendInfo *nfo;
 
 					nfo = ecb_o365_json_to_ical_nfo (cbo365, event, cancellable, NULL);
 
 					if (nfo)
-						*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
+						*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
 				} else {
-					new_ids = g_slist_prepend (new_ids, (gpointer) id);
+					changed_ids = g_slist_prepend (changed_ids, (gpointer) id);
 				}
-			}
 
-			if (new_ids) {
-				new_ids = g_slist_reverse (new_ids);
-				success = ecb_o365_download_event_changes_locked (cbo365, new_ids, out_created_objects, cancellable, error);
-			}
+				g_free (extra);
+			} else if (full_read) {
+				ECalMetaBackendInfo *nfo;
 
-			if (success && changed_ids) {
-				changed_ids = g_slist_reverse (changed_ids);
-				success = ecb_o365_download_event_changes_locked (cbo365, changed_ids, out_modified_objects, cancellable, error);
-			}
+				nfo = ecb_o365_json_to_ical_nfo (cbo365, event, cancellable, NULL);
 
-			g_slist_free (new_ids);
-			g_slist_free (changed_ids);
+				if (nfo)
+					*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
+			} else {
+				new_ids = g_slist_prepend (new_ids, (gpointer) id);
+			}
 		}
 
-		g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+		if (new_ids) {
+			new_ids = g_slist_reverse (new_ids);
+			success = ecb_o365_download_event_changes_locked (cbo365, new_ids, out_created_objects, cancellable, error);
+		}
+
+		if (success && changed_ids) {
+			changed_ids = g_slist_reverse (changed_ids);
+			success = ecb_o365_download_event_changes_locked (cbo365, changed_ids, out_modified_objects, cancellable, error);
+		}
+
+		g_slist_free (new_ids);
+		g_slist_free (changed_ids);
 	}
+
+	g_slist_free_full (events, (GDestroyNotify) json_object_unref);
 
 	UNLOCK (cbo365);
 
