@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Evolution-EWS 3.37.3 2020-07-03
 -------------------------------
 
@@ -10,6 +11,9 @@ Miscellaneous:
 
 Translations:
 	Daniel Șerbănescu (ro)
+=======
+Test for https://gitlab.gnome.org/Infrastructure/sysadmin-bin/-/issues/1#note_871528
+>>>>>>> 680b9072... Test “%s” 4∶20 1×7 dots… user’s E→M ěščřžýáíéůú§ ウエオヤユヨ شﻻؤي
 
 Evolution-EWS 3.37.2 2020-05-29
 -------------------------------
