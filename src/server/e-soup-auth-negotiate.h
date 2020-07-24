@@ -1,4 +1,8 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * SPDX-FileCopyrightText: (C) 2014 Daniel Sands
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ */
 
 #ifndef E_SOUP_AUTH_NEGOTIATE_H
 #define E_SOUP_AUTH_NEGOTIATE_H

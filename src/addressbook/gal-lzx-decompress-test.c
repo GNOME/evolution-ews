@@ -1,3 +1,8 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * SPDX-FileCopyrightText: (C) 1999-2011 Novell, Inc. (www.novell.com)
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ */
 
 #include "ews-oab-decompress.h"
 #include <glib.h>
