@@ -179,26 +179,26 @@ if(ENABLE_TESTS)
 endif(ENABLE_TESTS)
 
 # ******************************
-# Office365 OAuth2 support
+# Microsoft365 OAuth2 support
 # ******************************
 
-add_printable_variable(WITH_OFFICE365_TENANT "Office365.com OAuth 2.0 tenant" "")
+add_printable_variable(WITH_MICROSOFT365_TENANT "Microsoft 365 OAuth 2.0 tenant" "")
 
-if(WITH_OFFICE365_TENANT STREQUAL "")
-	set(WITH_OFFICE365_TENANT "common")
-endif(WITH_OFFICE365_TENANT STREQUAL "")
+if(WITH_MICROSOFT365_TENANT STREQUAL "")
+	set(WITH_MICROSOFT365_TENANT "common")
+endif(WITH_MICROSOFT365_TENANT STREQUAL "")
 
-add_printable_variable(WITH_OFFICE365_CLIENT_ID "Office365.com OAuth 2.0 client ID" "")
+add_printable_variable(WITH_MICROSOFT365_CLIENT_ID "Microsoft 365 OAuth 2.0 client ID" "")
 
-if(WITH_OFFICE365_CLIENT_ID STREQUAL "")
-	set(WITH_OFFICE365_CLIENT_ID "20460e5d-ce91-49af-a3a5-70b6be7486d1")
-endif(WITH_OFFICE365_CLIENT_ID STREQUAL "")
+if(WITH_MICROSOFT365_CLIENT_ID STREQUAL "")
+	set(WITH_MICROSOFT365_CLIENT_ID "20460e5d-ce91-49af-a3a5-70b6be7486d1")
+endif(WITH_MICROSOFT365_CLIENT_ID STREQUAL "")
 
-add_printable_variable(WITH_OFFICE365_REDIRECT_URI "Office365.com OAuth 2.0 redirect URI" "")
+add_printable_variable(WITH_MICROSOFT365_REDIRECT_URI "Microsoft 365 OAuth 2.0 redirect URI" "")
 
-if(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
-	set(WITH_OFFICE365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
-endif(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
+if(WITH_MICROSOFT365_REDIRECT_URI STREQUAL "")
+	set(WITH_MICROSOFT365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
+endif(WITH_MICROSOFT365_REDIRECT_URI STREQUAL "")
 
 # ******************************
 # Special directories

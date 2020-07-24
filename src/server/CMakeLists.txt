@@ -3,6 +3,8 @@ glib_mkenums(e-ews-enumtypes e-ews-enums.h E_EWS_ENUMTYPES_H)
 set(SOURCES
 	camel-ews-settings.c
 	camel-ews-settings.h
+	camel-sasl-xoauth2-office365.c
+	camel-sasl-xoauth2-office365.h
 	e-ews-calendar-utils.c
 	e-ews-calendar-utils.h
 	e-ews-camel-common.c
@@ -26,6 +28,8 @@ set(SOURCES
 	e-ews-oof-settings.c
 	e-ews-query-to-restriction.c
 	e-ews-query-to-restriction.h
+	e-oauth2-service-office365.c
+	e-oauth2-service-office365.h
 	e-soup-auth-negotiate.c
 	e-soup-auth-negotiate.h
 	e-soap-message.c
