@@ -41,26 +41,30 @@ prepare_fake_data (guint *number,
 		   GList **fake_hostnames,
 		   GList **fake_server_uris)
 {
-	guint i;
-	const gchar *supported_versions[] = {
-		"2007_SP1",
-		"2010_SP2",
-		NULL
+	/* Underscores cannot be used in the host name (A disallowed SNI server name has been received).
+	   See https://gitlab.com/uhttpmock/uhttpmock/-/issues/5 */
+	struct _supported_versions {
+		const gchar *hostname;
+		const gchar *version;
+	} supported_versions[] = {
+		{ "2007SP1", "2007_SP1" },
+		{ "2010SP2", "2010_SP2" }
 	};
+	guint ii;
 
-	for (i = 0; supported_versions[i] != NULL; i++) {
+	for (ii = 0; ii < G_N_ELEMENTS (supported_versions); ii++) {
 		*fake_versions = g_list_append (
 			*fake_versions,
-			g_strdup_printf ("Exchange%s", supported_versions[i]));
+			g_strdup_printf ("Exchange%s", supported_versions[ii].version));
 		*fake_hostnames = g_list_append (
 			*fake_hostnames,
-			g_strdup_printf ("exchange%s.server.com", supported_versions[i]));
+			g_strdup_printf ("exchange%s.server.com", supported_versions[ii].hostname));
 		*fake_server_uris = g_list_append (
 			*fake_server_uris,
-			g_strdup_printf ("https://exchange%s.server.com:PORT/EWS/Exchange.asmx", supported_versions[i]));
+			g_strdup_printf ("https://exchange%s.server.com:PORT/EWS/Exchange.asmx", supported_versions[ii].hostname));
 	}
 
-	*number = i;
+	*number = ii;
 }
 
 static void
@@ -227,6 +231,7 @@ ews_test_init (gint argc,
 		etd = g_new0 (EwsTestData, 1);
 		if (write_traces) {
 			CamelEwsSettings *settings = NULL;
+			SoupSession *session;
 
 			settings = g_object_new (
 				CAMEL_TYPE_EWS_SETTINGS,
@@ -237,6 +242,10 @@ ews_test_init (gint argc,
 			etd->connection = e_ews_connection_new (NULL, g_list_nth_data (server_uris, i), settings);
 			e_ews_connection_set_password (etd->connection, g_list_nth_data (passwords, i));
 			e_ews_connection_set_server_version_from_string (etd->connection, etd->version);
+
+			session = e_ews_connection_ref_soup_session (etd->connection);
+			g_object_set (G_OBJECT (session), SOUP_SESSION_SSL_STRICT, FALSE, NULL);
+			g_object_unref (session);
 
 			g_object_unref (settings);
 		} else {
@@ -296,6 +305,7 @@ ews_test_set_https_port (UhmServer *server,
 			 EwsTestData *etd)
 {
 	CamelEwsSettings *ews_settings;
+	SoupSession *session;
 	guint16 port;
 	gchar *uri;
 	gchar **tokens;
@@ -313,6 +323,10 @@ ews_test_set_https_port (UhmServer *server,
 	etd->connection = e_ews_connection_new (NULL, uri, ews_settings);
 	e_ews_connection_set_password (etd->connection, "bar");
 	e_ews_connection_set_server_version_from_string (etd->connection, etd->version);
+
+	session = e_ews_connection_ref_soup_session (etd->connection);
+	g_object_set (G_OBJECT (session), SOUP_SESSION_SSL_STRICT, FALSE, NULL);
+	g_object_unref (session);
 
 	g_free (uri);
 	g_strfreev (tokens);
