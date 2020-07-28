@@ -16,6 +16,7 @@
 
 #include "common/camel-m365-settings.h"
 #include "common/e-m365-connection.h"
+#include "common/e-m365-tz-utils.h"
 #include "common/e-source-m365-folder.h"
 
 #include "e-cal-backend-m365.h"
@@ -221,6 +222,11 @@ ecb_m365_get_date_time_zone (ECalBackendM365 *cbm365,
 	/* Reads the time in UTC, just make sure it's still a true expectation */
 	g_warn_if_fail (!zone || !*zone || g_strcmp0 (zone, "UTC") == 0);
 
+	tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
+
+	if (!tzid)
+		tzid = "UTC";
+
 	tz = ecb_m365_get_timezone_sync (cbm365, tzid);
 	itt = i_cal_time_new_from_timet_with_zone (tt, e_m365_event_get_is_all_day (m365_event), i_cal_timezone_get_utc_timezone ());
 
@@ -242,7 +248,75 @@ ecb_m365_add_date_time_zone (ECalBackendM365 *cbm365,
 			     ICalPropertyKind prop_kind,
 			     JsonBuilder *builder)
 {
-	/* TODO */			
+	ICalProperty *new_prop;
+	ICalParameter *new_param;
+	ICalTime *old_value, *new_value;
+	const gchar *new_tzid = NULL;
+	void (* add_func) (JsonBuilder *builder, time_t date_time, const gchar *zone) = NULL;
+	gboolean same = FALSE;
+
+	if (prop_kind == I_CAL_DTSTART_PROPERTY) {
+		new_value = i_cal_component_get_dtstart (new_comp);
+		old_value = old_comp ? i_cal_component_get_dtstart (old_comp) : NULL;
+		add_func = e_m365_event_add_start;
+	} else if (prop_kind == I_CAL_DTEND_PROPERTY) {
+		new_value = i_cal_component_get_dtend (new_comp);
+		old_value = old_comp ? i_cal_component_get_dtend (old_comp) : NULL;
+		add_func = e_m365_event_add_end;
+	} else {
+		g_warn_if_reached ();
+		return;
+	}
+
+	if (!new_value && !old_value)
+		return;
+
+	new_prop = i_cal_component_get_first_property (new_comp, prop_kind);
+	new_param = new_prop ? i_cal_property_get_first_parameter (new_prop, I_CAL_TZID_PARAMETER) : NULL;
+
+	if (new_param)
+		new_tzid = i_cal_parameter_get_tzid (new_param);
+
+	if (new_value && old_value) {
+		same = i_cal_time_compare (new_value, old_value) == 0;
+
+		if (same) {
+			ICalProperty *old_prop;
+			ICalParameter *old_param;
+			const gchar *old_tzid;
+
+			old_prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+			old_param = old_prop ? i_cal_property_get_first_parameter (old_prop, I_CAL_TZID_PARAMETER) : NULL;
+			old_tzid = old_param ? i_cal_parameter_get_tzid (old_param) : NULL;
+
+			same = g_strcmp0 (old_tzid, new_tzid) == 0;
+
+			g_clear_object (&old_param);
+			g_clear_object (&old_prop);
+		}
+	}
+
+	if (!same) {
+		ICalTimezone *izone = NULL;
+		const gchar *wzone = NULL;
+		time_t tt;
+
+		if (new_tzid) {
+			izone = e_timezone_cache_get_timezone (E_TIMEZONE_CACHE (cbm365), new_tzid);
+
+			if (izone)
+				wzone = e_m365_tz_utils_get_msdn_equivalent (i_cal_timezone_get_location (izone));
+		}
+
+		tt = i_cal_time_as_timet_with_zone (new_value, wzone ? NULL : izone);
+
+		add_func (builder, tt, wzone);
+	}
+
+	g_clear_object (&new_prop);
+	g_clear_object (&new_param);
+	g_clear_object (&new_value);
+	g_clear_object (&old_value);
 }
 
 static void
@@ -291,12 +365,116 @@ ecb_m365_get_categories (ECalBackendM365 *cbm365,
 }
 
 static void
+ecb_m365_extract_categories (ICalComponent *comp,
+			     GHashTable **out_hash, /* gchar * ~> NULL */
+			     GSList **out_slist) /* gchar * */
+{
+	ICalProperty *prop;
+
+	if (!comp)
+		return;
+
+	for (prop = i_cal_component_get_first_property (comp, I_CAL_CATEGORIES_PROPERTY);
+	     prop;
+	     g_object_unref (prop), prop = i_cal_component_get_next_property (comp, I_CAL_CATEGORIES_PROPERTY)) {
+		const gchar *categories;
+
+		categories = i_cal_property_get_categories (prop);
+
+		if (categories && *categories) {
+			if (out_hash && !*out_hash)
+				*out_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+			if (strchr (categories, ',')) {
+				gchar **strv;
+				guint ii;
+
+				strv = g_strsplit (categories, ",", -1);
+
+				for (ii = 0; strv[ii]; ii++) {
+					gchar *category = g_strchomp (strv[ii]);
+
+					if (*category) {
+						if (out_hash) {
+							g_hash_table_insert (*out_hash, category, NULL);
+						} else if (out_slist) {
+							*out_slist = g_slist_prepend (*out_slist, category);
+						} else {
+							g_warn_if_reached ();
+							g_free (category);
+						}
+					} else {
+						g_free (category);
+					}
+				}
+
+				g_free (strv);
+			} else if (out_hash) {
+				g_hash_table_insert (*out_hash, g_strchomp (g_strdup (categories)), NULL);
+			} else if (out_slist) {
+				*out_slist = g_slist_prepend (*out_slist, g_strchomp (g_strdup (categories)));
+			} else {
+				g_warn_if_reached ();
+			}
+		}
+	}
+
+	g_clear_object (&prop);
+
+	if (out_slist && *out_slist)
+		*out_slist = g_slist_reverse (*out_slist);
+}
+
+static void
 ecb_m365_add_categories (ECalBackendM365 *cbm365,
 			 ICalComponent *new_comp,
 			 ICalComponent *old_comp,
 			 ICalPropertyKind prop_kind,
 			 JsonBuilder *builder)
 {
+	GHashTable *old_value = NULL;
+	GSList *new_value = NULL;
+
+	ecb_m365_extract_categories (new_comp, NULL, &new_value);
+	ecb_m365_extract_categories (old_comp, &old_value, NULL);
+
+	if (!new_value && !old_value)
+		return;
+
+	if (new_value) {
+		GSList *link;
+		gboolean same = FALSE;
+
+		if (old_value && g_hash_table_size (old_value) == g_slist_length (new_value)) {
+			same = TRUE;
+
+			for (link = new_value; link && same; link = g_slist_next (link)) {
+				const gchar *category = link->data;
+
+				same = g_hash_table_contains (old_value, category);
+			}
+		}
+
+		if (!same) {
+			e_m365_event_begin_categories (builder);
+
+			for (link = new_value; link; link = g_slist_next (link)) {
+				const gchar *category = link->data;
+
+				e_m365_event_add_category (builder, category);
+			}
+
+			e_m365_event_end_categories (builder);
+		}
+	} else {
+		e_m365_event_begin_categories (builder);
+		e_m365_event_end_categories (builder);
+	}
+
+	if (new_value)
+		g_slist_free_full (new_value, g_free);
+	if (old_value)
+		g_hash_table_destroy (old_value);
 }
 
 static void
@@ -2168,12 +2346,20 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 	gboolean success = FALSE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
+	g_return_val_if_fail (instances != NULL, FALSE);
+
+	if (instances->next) {
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+			_("Can store only simple events into Microsoft 365 calendar")));
+
+		return FALSE;
+	}
 
 	cbm365 = E_CAL_BACKEND_M365 (meta_backend);
 
 	LOCK (cbm365);
 
-	new_comp = e_cal_meta_backend_merge_instances (meta_backend, instances, TRUE);
+	new_comp = e_cal_component_get_icalcomponent (instances->data);
 
 	if (extra && *extra) {
 		const gchar *comp_str;
@@ -2245,7 +2431,6 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 	ecb_m365_convert_error_to_client_error (error);
 	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
 
-	g_clear_object (&new_comp);
 	g_clear_object (&old_comp);
 
 	return success;
@@ -2386,6 +2571,8 @@ ecb_m365_constructed (GObject *object)
 	g_mkdir_with_parents (cbm365->priv->attachments_dir, 0777);
 
 	g_free (cache_dirname);
+
+	e_m365_tz_utils_ref_windows_zones ();
 }
 
 static void
@@ -2407,6 +2594,8 @@ ecb_m365_finalize (GObject *object)
 	g_free (cbm365->priv->attachments_dir);
 
 	g_rec_mutex_clear (&cbm365->priv->property_lock);
+
+	e_m365_tz_utils_unref_windows_zones ();
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_m365_parent_class)->finalize (object);

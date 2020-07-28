@@ -656,10 +656,11 @@ e_m365_get_date_time_offset_member (JsonObject *object,
 	return res;
 }
 
-void
-e_m365_add_date_time_offset_member (JsonBuilder *builder,
-				    const gchar *member_name,
-				    time_t value)
+static void
+e_m365_add_date_time_offset_member_ex (JsonBuilder *builder,
+				       const gchar *member_name,
+				       time_t value,
+				       gboolean with_utc_zone_char)
 {
 	GDateTime *dt;
 	gchar *value_str;
@@ -674,10 +675,27 @@ e_m365_add_date_time_offset_member (JsonBuilder *builder,
 
 	value_str = g_date_time_format_iso8601 (dt);
 
+	if (value_str && !with_utc_zone_char) {
+		gchar *z_pos;
+
+		z_pos = strrchr (value_str, 'Z');
+
+		if (z_pos)
+			*z_pos = '\0';
+	}
+
 	e_m365_json_add_string_member (builder, member_name, value_str);
 
 	g_date_time_unref (dt);
 	g_free (value_str);
+}
+
+void
+e_m365_add_date_time_offset_member (JsonBuilder *builder,
+				    const gchar *member_name,
+				    time_t value)
+{
+	e_m365_add_date_time_offset_member_ex (builder, member_name, value, TRUE);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0 */
@@ -709,8 +727,8 @@ e_m365_add_date_time (JsonBuilder *builder,
 
 	e_m365_json_begin_object_member (builder, member_name);
 
-	e_m365_add_date_time_offset_member (builder, "dateTime", date_time);
-	e_m365_json_add_nonempty_string_member (builder, "timeZone", zone);
+	e_m365_add_date_time_offset_member_ex (builder, "dateTime", date_time, FALSE);
+	e_m365_json_add_string_member (builder, "timeZone", (zone && *zone) ? zone : "UTC");
 
 	e_m365_json_end_object_member (builder);
 }

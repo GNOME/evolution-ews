@@ -10,6 +10,8 @@ set(SOURCES
 	e-m365-enums.h
 	e-m365-json-utils.c
 	e-m365-json-utils.h
+	e-m365-tz-utils.c
+	e-m365-tz-utils.h
 	e-oauth2-service-microsoft365.c
 	e-oauth2-service-microsoft365.h
 	e-source-m365-folder.c
@@ -24,6 +26,7 @@ add_library(evolution-microsoft365 SHARED
 
 target_compile_definitions(evolution-microsoft365 PRIVATE
 	-DG_LOG_DOMAIN=\"evolution-microsoft365\"
+	-DM365_DATADIR=\"${ewsdatadir}\"
 )
 
 target_compile_options(evolution-microsoft365 PUBLIC
