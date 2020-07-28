@@ -255,6 +255,7 @@ ews_connection_utils_ensure_bearer_auth_usage (SoupSession *session,
 					       SoupMessage *message,
 					       ESoupAuthBearer *bearer)
 {
+	SoupAuthManager *auth_manager;
 	SoupSessionFeature *feature;
 	SoupURI *soup_uri;
 
@@ -280,9 +281,12 @@ ews_connection_utils_ensure_bearer_auth_usage (SoupSession *session,
 
 	g_return_if_fail (soup_uri != NULL);
 
-	soup_auth_manager_use_auth (
-		SOUP_AUTH_MANAGER (feature),
-		soup_uri, SOUP_AUTH (bearer));
+	auth_manager = SOUP_AUTH_MANAGER (feature);
+
+	/* This will make sure the 'bearer' is used regardless of the current 'auth_manager' state.
+	   See https://gitlab.gnome.org/GNOME/libsoup/-/issues/196 for more information. */
+	soup_auth_manager_clear_cached_credentials (auth_manager);
+	soup_auth_manager_use_auth (auth_manager, soup_uri, SOUP_AUTH (bearer));
 
 	soup_uri_free (soup_uri);
 }
