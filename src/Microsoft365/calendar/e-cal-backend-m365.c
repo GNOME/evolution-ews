@@ -219,8 +219,15 @@ ecb_m365_get_date_time_zone (ECalBackendM365 *cbm365,
 	tt = e_m365_date_time_get_date_time (value);
 	zone = e_m365_date_time_get_time_zone (value);
 
-	/* Reads the time in UTC, just make sure it's still a true expectation */
-	g_warn_if_fail (!zone || !*zone || g_strcmp0 (zone, "UTC") == 0);
+	if (zone && *zone)
+		zone = e_m365_tz_utils_get_ical_equivalent (zone);
+
+	tz = zone && *zone ? ecb_m365_get_timezone_sync (cbm365, zone) : NULL;
+
+	if (!tz)
+		tz = i_cal_timezone_get_utc_timezone ();
+
+	itt = i_cal_time_new_from_timet_with_zone (tt, e_m365_event_get_is_all_day (m365_event), tz);
 
 	tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
 
@@ -228,7 +235,6 @@ ecb_m365_get_date_time_zone (ECalBackendM365 *cbm365,
 		tzid = "UTC";
 
 	tz = ecb_m365_get_timezone_sync (cbm365, tzid);
-	itt = i_cal_time_new_from_timet_with_zone (tt, e_m365_event_get_is_all_day (m365_event), i_cal_timezone_get_utc_timezone ());
 
 	if (tz && !e_m365_event_get_is_all_day (m365_event))
 		i_cal_time_convert_to_zone_inplace (itt, tz);
@@ -1055,218 +1061,6 @@ ecb_m365_add_attendees (ECalBackendM365 *cbm365,
 		g_hash_table_destroy (old_value);
 }
 
-static ICalRecurrenceWeekday
-ecb_m365_day_of_week_to_ical (EM365DayOfWeekType dow)
-{
-	switch (dow) {
-	case E_M365_DAY_OF_WEEK_SUNDAY:
-		return I_CAL_SUNDAY_WEEKDAY;
-	case E_M365_DAY_OF_WEEK_MONDAY:
-		return I_CAL_MONDAY_WEEKDAY;
-	case E_M365_DAY_OF_WEEK_TUESDAY:
-		return I_CAL_TUESDAY_WEEKDAY;
-	case E_M365_DAY_OF_WEEK_WEDNESDAY:
-		return I_CAL_WEDNESDAY_WEEKDAY;
-	case E_M365_DAY_OF_WEEK_THURSDAY:
-		return I_CAL_THURSDAY_WEEKDAY;
-	case E_M365_DAY_OF_WEEK_FRIDAY:
-		return I_CAL_FRIDAY_WEEKDAY;
-	case E_M365_DAY_OF_WEEK_SATURDAY:
-		return I_CAL_SATURDAY_WEEKDAY;
-	default:
-		break;
-	}
-
-	return I_CAL_NO_WEEKDAY;
-}
-
-static void
-ecb_m365_set_index_to_ical (ICalRecurrence *recr,
-			    EM365WeekIndexType index)
-{
-	gint by_pos = -2;
-
-	switch (index) {
-	case E_M365_WEEK_INDEX_FIRST:
-		by_pos = 1;
-		break;
-	case E_M365_WEEK_INDEX_SECOND:
-		by_pos = 2;
-		break;
-	case E_M365_WEEK_INDEX_THIRD:
-		by_pos = 3;
-		break;
-	case E_M365_WEEK_INDEX_FOURTH:
-		by_pos = 4;
-		break;
-	case E_M365_WEEK_INDEX_LAST:
-		by_pos = -1;
-		break;
-	default:
-		break;
-	}
-
-	if (by_pos != -2)
-		i_cal_recurrence_set_by_set_pos (recr, 0, by_pos);
-}
-
-static void
-ecb_m365_set_days_of_week_to_ical (ICalRecurrence *recr,
-				   JsonArray *days_of_week)
-{
-	gint ii, jj, sz;
-
-	if (!days_of_week)
-		return;
-
-	ii = 0;
-	sz = json_array_get_length (days_of_week);
-
-	for (jj = 0; jj < sz; jj++) {
-		ICalRecurrenceWeekday week_day;
-
-		week_day = ecb_m365_day_of_week_to_ical (e_m365_array_get_day_of_week_element (days_of_week, jj));
-
-		if (week_day != I_CAL_SUNDAY_WEEKDAY) {
-			i_cal_recurrence_set_by_day (recr, ii, week_day);
-			ii++;
-		}
-	}
-
-	i_cal_recurrence_set_by_day (recr, ii, I_CAL_RECURRENCE_ARRAY_MAX);
-}
-
-static void
-ecb_m365_get_recurrence (ECalBackendM365 *cbm365,
-			 EM365Event *m365_event,
-			 ICalComponent *inout_comp,
-			 ICalPropertyKind prop_kind)
-{
-	EM365PatternedRecurrence *m365_recr;
-	EM365RecurrencePattern *m365_pattern;
-	EM365RecurrenceRange *m365_range;
-	ICalRecurrence *ical_recr;
-	ICalRecurrenceWeekday week_day;
-	gint month;
-
-	m365_recr = e_m365_event_get_recurrence (m365_event);
-	m365_pattern = m365_recr ? e_m365_patterned_recurrence_get_pattern (m365_recr) : NULL;
-	m365_range = m365_recr ? e_m365_patterned_recurrence_get_range (m365_recr) : NULL;
-
-	if (!m365_recr || !m365_pattern || !m365_range)
-		return;
-
-	ical_recr = i_cal_recurrence_new ();
-
-	switch (e_m365_recurrence_pattern_get_type (m365_pattern)) {
-	case E_M365_RECURRENCE_PATTERN_DAILY:
-		i_cal_recurrence_set_freq (ical_recr, I_CAL_DAILY_RECURRENCE);
-		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
-		break;
-	case E_M365_RECURRENCE_PATTERN_WEEKLY:
-		i_cal_recurrence_set_freq (ical_recr, I_CAL_WEEKLY_RECURRENCE);
-		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-
-		week_day = ecb_m365_day_of_week_to_ical (e_m365_recurrence_pattern_get_first_day_of_week (m365_recr));
-
-		if (week_day != I_CAL_NO_WEEKDAY)
-			i_cal_recurrence_set_week_start (ical_recr, week_day);
-
-		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
-		break;
-	case E_M365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY:
-		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
-		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_m365_recurrence_pattern_get_day_of_month (m365_pattern));
-		break;
-	case E_M365_RECURRENCE_PATTERN_RELATIVE_MONTHLY:
-		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
-		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
-		week_day = ecb_m365_day_of_week_to_ical (e_m365_recurrence_pattern_get_first_day_of_week (m365_recr));
-
-		if (week_day != I_CAL_NO_WEEKDAY)
-			i_cal_recurrence_set_week_start (ical_recr, week_day);
-
-		ecb_m365_set_index_to_ical (ical_recr, e_m365_recurrence_pattern_get_index (m365_recr));
-		break;
-	case E_M365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY:
-		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
-		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_m365_recurrence_pattern_get_day_of_month (m365_pattern));
-
-		month = e_m365_recurrence_pattern_get_month (m365_recr);
-
-		if (month >= 1 && month <= 12)
-			i_cal_recurrence_set_by_month (ical_recr, 0, month);
-		break;
-	case E_M365_RECURRENCE_PATTERN_RELATIVE_YEARLY:
-		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
-		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
-		week_day = ecb_m365_day_of_week_to_ical (e_m365_recurrence_pattern_get_first_day_of_week (m365_recr));
-
-		if (week_day != I_CAL_NO_WEEKDAY)
-			i_cal_recurrence_set_week_start (ical_recr, week_day);
-
-		ecb_m365_set_index_to_ical (ical_recr, e_m365_recurrence_pattern_get_index (m365_recr));
-
-		month = e_m365_recurrence_pattern_get_month (m365_recr);
-
-		if (month >= 1 && month <= 12)
-			i_cal_recurrence_set_by_month (ical_recr, 0, month);
-		break;
-	default:
-		g_object_unref (ical_recr);
-		g_warning ("%s: Unknown pattern type: %d", G_STRFUNC, e_m365_recurrence_pattern_get_type (m365_pattern));
-		return;
-	}
-
-	switch (e_m365_recurrence_range_get_type (m365_range)) {
-	case E_M365_RECURRENCE_RANGE_ENDDATE:
-		if (e_m365_recurrence_range_get_end_date (m365_range) > 0) {
-			guint yy = 0, mm = 0, dd = 0;
-
-			if (e_m365_date_decode (e_m365_recurrence_range_get_end_date (m365_range), &yy, &mm, &dd)) {
-				ICalTime *itt;
-
-				itt = i_cal_time_new ();
-				i_cal_time_set_date (itt, yy, mm, dd);
-				i_cal_time_set_is_date (itt, TRUE);
-
-				i_cal_recurrence_set_until (ical_recr, itt);
-
-				g_clear_object (&itt);
-			}
-		}
-		break;
-	case E_M365_RECURRENCE_RANGE_NOEND:
-		break;
-	case E_M365_RECURRENCE_RANGE_NUMBERED:
-		i_cal_recurrence_set_count (ical_recr, e_m365_recurrence_range_get_number_of_occurrences (m365_range));
-		break;
-	default:
-		g_warning ("%s: Unknown range type: %d", G_STRFUNC, e_m365_recurrence_range_get_type (m365_range));
-		g_object_unref (ical_recr);
-		return;
-	}
-
-	i_cal_component_take_property (inout_comp, i_cal_property_new_rrule (ical_recr));
-
-	g_object_unref (ical_recr);
-}
-
-static void
-ecb_m365_add_recurrence (ECalBackendM365 *cbm365,
-			 ICalComponent *new_comp,
-			 ICalComponent *old_comp,
-			 ICalPropertyKind prop_kind,
-			 JsonBuilder *builder)
-{
-	/* TODO */			
-}
-
 static void
 ecb_m365_get_importance (ECalBackendM365 *cbm365,
 			 EM365Event *m365_event,
@@ -1361,6 +1155,479 @@ ecb_m365_get_status (ECalBackendM365 *cbm365,
 
 	if (status != I_CAL_STATUS_NONE)
 		i_cal_component_take_property (inout_comp, i_cal_property_new_status (status));
+}
+
+static ICalRecurrenceWeekday
+ecb_m365_day_of_week_to_ical (EM365DayOfWeekType dow)
+{
+	switch (dow) {
+	case E_M365_DAY_OF_WEEK_SUNDAY:
+		return I_CAL_SUNDAY_WEEKDAY;
+	case E_M365_DAY_OF_WEEK_MONDAY:
+		return I_CAL_MONDAY_WEEKDAY;
+	case E_M365_DAY_OF_WEEK_TUESDAY:
+		return I_CAL_TUESDAY_WEEKDAY;
+	case E_M365_DAY_OF_WEEK_WEDNESDAY:
+		return I_CAL_WEDNESDAY_WEEKDAY;
+	case E_M365_DAY_OF_WEEK_THURSDAY:
+		return I_CAL_THURSDAY_WEEKDAY;
+	case E_M365_DAY_OF_WEEK_FRIDAY:
+		return I_CAL_FRIDAY_WEEKDAY;
+	case E_M365_DAY_OF_WEEK_SATURDAY:
+		return I_CAL_SATURDAY_WEEKDAY;
+	default:
+		break;
+	}
+
+	return I_CAL_NO_WEEKDAY;
+}
+
+static EM365DayOfWeekType
+ecb_m365_day_of_week_from_ical (ICalRecurrenceWeekday dow)
+{
+	switch (dow) {
+	case I_CAL_SUNDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_SUNDAY;
+		break;
+	case I_CAL_MONDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_MONDAY;
+		break;
+	case I_CAL_TUESDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_TUESDAY;
+		break;
+	case I_CAL_WEDNESDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_WEDNESDAY;
+		break;
+	case I_CAL_THURSDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_THURSDAY;
+		break;
+	case I_CAL_FRIDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_FRIDAY;
+		break;
+	case I_CAL_SATURDAY_WEEKDAY:
+		return E_M365_DAY_OF_WEEK_SATURDAY;
+		break;
+	default:
+		break;
+	}
+
+	return E_M365_DAY_OF_WEEK_UNKNOWN;
+}
+
+static void
+ecb_m365_set_index_to_ical (ICalRecurrence *recr,
+			    EM365WeekIndexType index)
+{
+	gint by_pos = -2;
+
+	switch (index) {
+	case E_M365_WEEK_INDEX_FIRST:
+		by_pos = 1;
+		break;
+	case E_M365_WEEK_INDEX_SECOND:
+		by_pos = 2;
+		break;
+	case E_M365_WEEK_INDEX_THIRD:
+		by_pos = 3;
+		break;
+	case E_M365_WEEK_INDEX_FOURTH:
+		by_pos = 4;
+		break;
+	case E_M365_WEEK_INDEX_LAST:
+		by_pos = -1;
+		break;
+	default:
+		break;
+	}
+
+	if (by_pos != -2)
+		i_cal_recurrence_set_by_set_pos (recr, 0, by_pos);
+}
+
+static void
+ecb_m365_add_index_from_ical (JsonBuilder *builder,
+			      gint by_pos)
+{
+	EM365WeekIndexType index = E_M365_WEEK_INDEX_UNKNOWN;
+
+	if (by_pos == 1)
+		index = E_M365_WEEK_INDEX_FIRST;
+	else if (by_pos == 2)
+		index = E_M365_WEEK_INDEX_SECOND;
+	else if (by_pos == 3)
+		index = E_M365_WEEK_INDEX_THIRD;
+	else if (by_pos == 4)
+		index = E_M365_WEEK_INDEX_FOURTH;
+	else if (by_pos == -1)
+		index = E_M365_WEEK_INDEX_LAST;
+
+	if (index != E_M365_WEEK_INDEX_UNKNOWN)
+		e_m365_recurrence_pattern_add_index (builder, index);
+}
+
+static void
+ecb_m365_set_days_of_week_to_ical (ICalRecurrence *recr,
+				   JsonArray *days_of_week)
+{
+	gint ii, jj, sz;
+
+	if (!days_of_week)
+		return;
+
+	ii = 0;
+	sz = json_array_get_length (days_of_week);
+
+	for (jj = 0; jj < sz; jj++) {
+		ICalRecurrenceWeekday week_day;
+
+		week_day = ecb_m365_day_of_week_to_ical (e_m365_array_get_day_of_week_element (days_of_week, jj));
+
+		if (week_day != I_CAL_SUNDAY_WEEKDAY) {
+			i_cal_recurrence_set_by_day (recr, ii, week_day);
+			ii++;
+		}
+	}
+
+	i_cal_recurrence_set_by_day (recr, ii, I_CAL_RECURRENCE_ARRAY_MAX);
+}
+
+static void
+ecb_m365_add_days_of_week_from_ical (JsonBuilder *builder,
+				     ICalRecurrence *recr)
+{
+	gint ii;
+
+	e_m365_recurrence_pattern_begin_days_of_week (builder);
+
+	for (ii = 0; ii < I_CAL_BY_DAY_SIZE; ii++) {
+		ICalRecurrenceWeekday week_day;
+		EM365DayOfWeekType m365_week_day;
+
+		week_day = i_cal_recurrence_get_by_day (recr, ii);
+
+		if (((gint) week_day) == I_CAL_RECURRENCE_ARRAY_MAX)
+			break;
+
+		m365_week_day = ecb_m365_day_of_week_from_ical (week_day);
+
+		if (m365_week_day != E_M365_DAY_OF_WEEK_UNKNOWN)
+			e_m365_recurrence_pattern_add_day_of_week (builder, m365_week_day);
+	}
+
+	e_m365_recurrence_pattern_end_days_of_week (builder);
+}
+
+static gboolean
+ecb_m365_get_recurrence (ECalBackendM365 *cbm365,
+			 EM365Event *m365_event,
+			 ICalComponent *inout_comp,
+			 ICalPropertyKind prop_kind,
+			 GCancellable *cancellable,
+			 GError **error)
+{
+	EM365PatternedRecurrence *m365_recr;
+	EM365RecurrencePattern *m365_pattern;
+	EM365RecurrenceRange *m365_range;
+	ICalRecurrence *ical_recr;
+	ICalRecurrenceWeekday week_day;
+	gint month;
+
+	m365_recr = e_m365_event_get_recurrence (m365_event);
+	m365_pattern = m365_recr ? e_m365_patterned_recurrence_get_pattern (m365_recr) : NULL;
+	m365_range = m365_recr ? e_m365_patterned_recurrence_get_range (m365_recr) : NULL;
+
+	if (!m365_recr || !m365_pattern || !m365_range)
+		return TRUE;
+
+	ical_recr = i_cal_recurrence_new ();
+
+	switch (e_m365_recurrence_pattern_get_type (m365_pattern)) {
+	case E_M365_RECURRENCE_PATTERN_DAILY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_DAILY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
+		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
+		break;
+	case E_M365_RECURRENCE_PATTERN_WEEKLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_WEEKLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
+
+		week_day = ecb_m365_day_of_week_to_ical (e_m365_recurrence_pattern_get_first_day_of_week (m365_pattern));
+
+		if (week_day != I_CAL_NO_WEEKDAY)
+			i_cal_recurrence_set_week_start (ical_recr, week_day);
+
+		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
+		break;
+	case E_M365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
+		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_m365_recurrence_pattern_get_day_of_month (m365_pattern));
+		break;
+	case E_M365_RECURRENCE_PATTERN_RELATIVE_MONTHLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
+		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
+		week_day = ecb_m365_day_of_week_to_ical (e_m365_recurrence_pattern_get_first_day_of_week (m365_pattern));
+
+		if (week_day != I_CAL_NO_WEEKDAY)
+			i_cal_recurrence_set_week_start (ical_recr, week_day);
+
+		ecb_m365_set_index_to_ical (ical_recr, e_m365_recurrence_pattern_get_index (m365_pattern));
+		break;
+	case E_M365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
+		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_m365_recurrence_pattern_get_day_of_month (m365_pattern));
+
+		month = e_m365_recurrence_pattern_get_month (m365_pattern);
+
+		if (month >= 1 && month <= 12)
+			i_cal_recurrence_set_by_month (ical_recr, 0, month);
+		break;
+	case E_M365_RECURRENCE_PATTERN_RELATIVE_YEARLY:
+		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
+		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
+		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
+		week_day = ecb_m365_day_of_week_to_ical (e_m365_recurrence_pattern_get_first_day_of_week (m365_pattern));
+
+		if (week_day != I_CAL_NO_WEEKDAY)
+			i_cal_recurrence_set_week_start (ical_recr, week_day);
+
+		ecb_m365_set_index_to_ical (ical_recr, e_m365_recurrence_pattern_get_index (m365_pattern));
+
+		month = e_m365_recurrence_pattern_get_month (m365_pattern);
+
+		if (month >= 1 && month <= 12)
+			i_cal_recurrence_set_by_month (ical_recr, 0, month);
+		break;
+	default:
+		g_object_unref (ical_recr);
+		g_warning ("%s: Unknown pattern type: %d", G_STRFUNC, e_m365_recurrence_pattern_get_type (m365_pattern));
+		/* Ignore the error (in the code) and continue. */
+		return TRUE;
+	}
+
+	switch (e_m365_recurrence_range_get_type (m365_range)) {
+	case E_M365_RECURRENCE_RANGE_ENDDATE:
+		if (e_m365_recurrence_range_get_end_date (m365_range) > 0) {
+			guint yy = 0, mm = 0, dd = 0;
+
+			if (e_m365_date_decode (e_m365_recurrence_range_get_end_date (m365_range), &yy, &mm, &dd)) {
+				ICalTime *itt;
+
+				itt = i_cal_time_new ();
+				i_cal_time_set_date (itt, yy, mm, dd);
+				i_cal_time_set_is_date (itt, TRUE);
+
+				i_cal_recurrence_set_until (ical_recr, itt);
+
+				g_clear_object (&itt);
+			}
+		}
+		break;
+	case E_M365_RECURRENCE_RANGE_NOEND:
+		break;
+	case E_M365_RECURRENCE_RANGE_NUMBERED:
+		i_cal_recurrence_set_count (ical_recr, e_m365_recurrence_range_get_number_of_occurrences (m365_range));
+		break;
+	default:
+		g_warning ("%s: Unknown range type: %d", G_STRFUNC, e_m365_recurrence_range_get_type (m365_range));
+		g_object_unref (ical_recr);
+		/* Ignore the error (in the code) and continue. */
+		return TRUE;
+	}
+
+	i_cal_component_take_property (inout_comp, i_cal_property_new_rrule (ical_recr));
+
+	g_object_unref (ical_recr);
+
+	return TRUE;
+}
+
+static gboolean
+ecb_m365_add_recurrence (ECalBackendM365 *cbm365,
+			 ICalComponent *new_comp,
+			 ICalComponent *old_comp,
+			 ICalPropertyKind prop_kind,
+			 const gchar *m365_id,
+			 JsonBuilder *builder,
+			 GCancellable *cancellable,
+			 GError **error)
+{
+	ICalProperty *new_value, *old_value;
+	gboolean success = TRUE;
+
+	if (i_cal_component_count_properties (new_comp, prop_kind) > 1) {
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+			_("Microsoft 365 calendar cannot store more than one recurrence")));
+
+		return FALSE;
+	}
+
+	if (i_cal_component_count_properties (new_comp, I_CAL_RDATE_PROPERTY) > 0 ||
+	    i_cal_component_count_properties (new_comp, I_CAL_EXDATE_PROPERTY) > 0 ||
+	    i_cal_component_count_properties (new_comp, I_CAL_EXRULE_PROPERTY) > 0) {
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+			_("Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE properties")));
+
+		return FALSE;
+	}
+
+	new_value = i_cal_component_get_first_property (new_comp, prop_kind);
+	old_value = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+
+	if (!new_value && !old_value)
+		return TRUE;
+
+	if (new_value) {
+		ICalRecurrence *new_rrule;
+		gboolean same = FALSE;
+
+		new_rrule = i_cal_property_get_rrule (new_value);
+
+		if (old_value && new_rrule) {
+			ICalRecurrence *old_rrule;
+
+			old_rrule = i_cal_property_get_rrule (old_value);
+
+			if (old_rrule) {
+				gchar *new_str, *old_str;
+
+				new_str = i_cal_recurrence_to_string (new_rrule);
+				old_str = i_cal_recurrence_to_string (old_rrule);
+
+				same = g_strcmp0 (new_str, old_str) == 0;
+
+				g_free (new_str);
+				g_free (old_str);
+			}
+
+			g_clear_object (&old_rrule);
+		}
+
+		if (!same && new_rrule) {
+			EM365DayOfWeekType week_day;
+			ICalTime *dtstart;
+			gint by_pos, month, yy = 0, mm = 0, dd = 0;
+
+			e_m365_event_begin_recurrence (builder);
+			e_m365_patterned_recurrence_begin_pattern (builder);
+
+			switch (i_cal_recurrence_get_freq (new_rrule)) {
+			case I_CAL_DAILY_RECURRENCE:
+				e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_DAILY);
+				e_m365_recurrence_pattern_add_interval (builder, i_cal_recurrence_get_interval (new_rrule));
+				ecb_m365_add_days_of_week_from_ical (builder, new_rrule);
+				break;
+			case I_CAL_WEEKLY_RECURRENCE:
+				e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_WEEKLY);
+				e_m365_recurrence_pattern_add_interval (builder, i_cal_recurrence_get_interval (new_rrule));
+
+				week_day = ecb_m365_day_of_week_from_ical (i_cal_recurrence_get_week_start (new_rrule));
+
+				if (week_day != E_M365_DAY_OF_WEEK_UNKNOWN)
+					e_m365_recurrence_pattern_add_first_day_of_week (builder, week_day);
+
+				ecb_m365_add_days_of_week_from_ical (builder, new_rrule);
+				break;
+			case I_CAL_MONTHLY_RECURRENCE:
+				by_pos = i_cal_recurrence_get_by_set_pos (new_rrule, 0);
+
+				e_m365_recurrence_pattern_add_interval (builder, i_cal_recurrence_get_interval (new_rrule));
+
+				if (by_pos == I_CAL_RECURRENCE_ARRAY_MAX) {
+					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY);
+					e_m365_recurrence_pattern_add_day_of_month (builder, i_cal_recurrence_get_by_month_day (new_rrule, 0));
+				} else {
+					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_RELATIVE_MONTHLY);
+
+					week_day = ecb_m365_day_of_week_from_ical (i_cal_recurrence_get_week_start (new_rrule));
+
+					if (week_day != E_M365_DAY_OF_WEEK_UNKNOWN)
+						e_m365_recurrence_pattern_add_first_day_of_week (builder, week_day);
+
+					ecb_m365_add_days_of_week_from_ical (builder, new_rrule);
+					ecb_m365_add_index_from_ical (builder, by_pos);
+				}
+				break;
+			case I_CAL_YEARLY_RECURRENCE:
+				by_pos = i_cal_recurrence_get_by_set_pos (new_rrule, 0);
+
+				e_m365_recurrence_pattern_add_interval (builder, i_cal_recurrence_get_interval (new_rrule));
+
+				month = i_cal_recurrence_get_by_month (new_rrule, 0);
+
+				if (month >= 1 && month <= 12)
+					e_m365_recurrence_pattern_add_month (builder, month);
+
+				if (by_pos == I_CAL_RECURRENCE_ARRAY_MAX) {
+					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY);
+					e_m365_recurrence_pattern_add_day_of_month (builder, i_cal_recurrence_get_by_month_day (new_rrule, 0));
+				} else {
+					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_RELATIVE_YEARLY);
+
+					week_day = ecb_m365_day_of_week_from_ical (i_cal_recurrence_get_week_start (new_rrule));
+
+					if (week_day != E_M365_DAY_OF_WEEK_UNKNOWN)
+						e_m365_recurrence_pattern_add_first_day_of_week (builder, week_day);
+
+					ecb_m365_add_days_of_week_from_ical (builder, new_rrule);
+					ecb_m365_add_index_from_ical (builder, by_pos);
+				}
+
+				break;
+			default:
+				g_set_error (error, E_CLIENT_ERROR, E_CLIENT_ERROR_NOT_SUPPORTED,
+					_("Unknown recurrence frequency (%d)"), i_cal_recurrence_get_freq (new_rrule));
+
+				success = FALSE;
+				break;
+			}
+
+			e_m365_patterned_recurrence_end_pattern (builder);
+			e_m365_patterned_recurrence_begin_range (builder);
+
+			dtstart = i_cal_component_get_dtstart (new_comp);
+			i_cal_time_get_date (dtstart, &yy, &mm, &dd);
+			g_clear_object (&dtstart);
+
+			e_m365_recurrence_range_add_start_date (builder, e_m365_date_encode (yy, mm, dd));
+
+			if (!i_cal_recurrence_get_count (new_rrule)) {
+				ICalTime *until;
+				gint yy = 0, mm = 0, dd = 0;
+
+				until = i_cal_recurrence_get_until (new_rrule);
+
+				if (until)
+					i_cal_time_get_date (until, &yy, &mm, &dd);
+
+				if (!until || yy == 0) {
+					e_m365_recurrence_range_add_type (builder, E_M365_RECURRENCE_RANGE_NOEND);
+				} else {
+					e_m365_recurrence_range_add_type (builder, E_M365_RECURRENCE_RANGE_ENDDATE);
+					e_m365_recurrence_range_add_end_date (builder, e_m365_date_encode (yy, mm, dd));
+				}
+
+				g_clear_object (&until);
+			} else {
+				e_m365_recurrence_range_add_type (builder, E_M365_RECURRENCE_RANGE_NUMBERED);
+				e_m365_recurrence_range_add_number_of_occurrences (builder, i_cal_recurrence_get_count (new_rrule));
+			}
+
+			e_m365_patterned_recurrence_end_range (builder);
+			e_m365_event_end_recurrence (builder);
+		}
+
+		g_clear_object (&new_rrule);
+	} else {
+		e_m365_event_add_null_recurrence (builder);
+	}
+
+	g_clear_object (&new_value);
+	g_clear_object (&old_value);
+
+	return success;
 }
 
 static gboolean
@@ -1870,9 +2137,9 @@ struct _mappings {
 	SIMPLE_FIELD	(I_CAL_LOCATION_PROPERTY,	ecb_m365_get_location,		ecb_m365_add_location),
 	SIMPLE_FIELD	(I_CAL_ORGANIZER_PROPERTY,	ecb_m365_get_organizer,		ecb_m365_add_organizer),
 	SIMPLE_FIELD	(I_CAL_ATTENDEE_PROPERTY,	ecb_m365_get_attendees,		ecb_m365_add_attendees),
-	SIMPLE_FIELD	(I_CAL_RRULE_PROPERTY,		ecb_m365_get_recurrence,	ecb_m365_add_recurrence),
 	SIMPLE_FIELD	(I_CAL_PRIORITY_PROPERTY,	ecb_m365_get_importance,	ecb_m365_add_importance),
 	SIMPLE_FIELD	(I_CAL_STATUS_PROPERTY,		ecb_m365_get_status,		NULL),
+	COMPLEX_FIELD	(I_CAL_RRULE_PROPERTY,		ecb_m365_get_recurrence,	ecb_m365_add_recurrence),
 	COMPLEX_FIELD	(I_CAL_X_PROPERTY,		ecb_m365_get_reminder,		ecb_m365_add_reminder),
 	COMPLEX_FIELD_2	(I_CAL_ATTACH_PROPERTY,		ecb_m365_get_attachments,	ecb_m365_add_attachments)
 };
