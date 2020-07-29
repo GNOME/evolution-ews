@@ -1410,7 +1410,7 @@ ecb_m365_get_recurrence (ECalBackendM365 *cbm365,
 	switch (e_m365_recurrence_range_get_type (m365_range)) {
 	case E_M365_RECURRENCE_RANGE_ENDDATE:
 		if (e_m365_recurrence_range_get_end_date (m365_range) > 0) {
-			guint yy = 0, mm = 0, dd = 0;
+			gint yy = 0, mm = 0, dd = 0;
 
 			if (e_m365_date_decode (e_m365_recurrence_range_get_end_date (m365_range), &yy, &mm, &dd)) {
 				ICalTime *itt;
@@ -2734,6 +2734,169 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 	return success;
 }
 
+static void
+ecb_m365_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
+			     EDataCal *cal,
+			     GCancellable *cancellable,
+			     const gchar *uid,
+			     const gchar *rid,
+			     const gchar *auid,
+			     guint32 opflags,
+			     GError **error)
+{
+	ECalBackendM365 *cbm365;
+
+	g_return_if_fail (E_IS_CAL_BACKEND_M365 (cal_backend_sync));
+	g_return_if_fail (uid != NULL);
+
+	cbm365 = E_CAL_BACKEND_M365 (cal_backend_sync);
+
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbm365), cancellable, error))
+		return;
+
+	LOCK (cbm365);
+
+	e_m365_connection_dismiss_reminder_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+		cbm365->priv->calendar_id, uid, cancellable, error);
+
+	UNLOCK (cbm365);
+
+	ecb_m365_convert_error_to_client_error (error);
+	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
+}
+
+static void
+ecb_m365_get_free_busy_sync (ECalBackendSync *cal_backend_sync,
+			     EDataCal *cal,
+			     GCancellable *cancellable,
+			     const GSList *users,
+			     time_t start,
+			     time_t end,
+			     GSList **out_freebusyobjs,
+			     GError **error)
+{
+	ECalBackendM365 *cbm365;
+	GSList *infos = NULL;
+	gboolean success;
+
+	g_return_if_fail (E_IS_CAL_BACKEND_M365 (cal_backend_sync));
+	g_return_if_fail (users != NULL);
+	g_return_if_fail (out_freebusyobjs != NULL);
+
+	cbm365 = E_CAL_BACKEND_M365 (cal_backend_sync);
+
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbm365), cancellable, error))
+		return;
+
+	LOCK (cbm365);
+
+	success = e_m365_connection_get_schedule_sync (cbm365->priv->cnc, NULL, 30, start, end, users, &infos, cancellable, error);
+
+	UNLOCK (cbm365);
+
+	ecb_m365_convert_error_to_client_error (error);
+	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
+
+	if (success) {
+		ICalTimezone *utc_zone = i_cal_timezone_get_utc_timezone ();
+		GSList *link;
+
+		*out_freebusyobjs = NULL;
+
+		for (link = infos; link; link = g_slist_next (link)) {
+			EM365ScheduleInformation *schinfo = link->data;
+			ICalComponent *vfb = NULL;
+			JsonArray *array;
+			guint ii, sz;
+
+			if (!schinfo || !e_m365_schedule_information_get_schedule_id (schinfo))
+				continue;
+
+			array = e_m365_schedule_information_get_schedule_items (schinfo);
+			sz = array ? json_array_get_length (array) : 0;
+
+			for (ii = 0; ii < sz; ii++) {
+				EM365ScheduleItem *schitem = json_array_get_object_element (array, ii);
+				EM365DateTimeWithZone *dt;
+				ICalProperty *prop;
+				ICalPeriod *ipt;
+				ICalTime *itt;
+				const gchar *tmp;
+
+				if (!schitem || !e_m365_schedule_item_get_start (schitem) || !e_m365_schedule_item_get_end (schitem))
+					continue;
+
+				ipt = i_cal_period_new_null_period ();
+
+				dt = e_m365_schedule_item_get_start (schitem);
+				itt = i_cal_time_new_from_timet_with_zone (e_m365_date_time_get_date_time (dt), 0, utc_zone);
+				i_cal_period_set_start (ipt, itt);
+				g_clear_object (&itt);
+
+				dt = e_m365_schedule_item_get_end (schitem);
+				itt = i_cal_time_new_from_timet_with_zone (e_m365_date_time_get_date_time (dt), 0, utc_zone);
+				i_cal_period_set_end (ipt, itt);
+				g_clear_object (&itt);
+
+				prop = i_cal_property_new_freebusy (ipt);
+				g_clear_object (&ipt);
+
+				switch (e_m365_schedule_item_get_status (schitem)) {
+				case E_M365_FREE_BUSY_STATUS_FREE:
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "FREE");
+					break;
+				case E_M365_FREE_BUSY_STATUS_TENTATIVE:
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY-TENTATIVE");
+					break;
+				case E_M365_FREE_BUSY_STATUS_BUSY:
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY");
+					break;
+				case E_M365_FREE_BUSY_STATUS_OOF:
+				case E_M365_FREE_BUSY_STATUS_WORKING_ELSEWHERE:
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY-UNAVAILABLE");
+					break;
+				default:
+					break;
+				}
+
+				tmp = e_m365_schedule_item_get_subject (schitem);
+
+				if (tmp && *tmp)
+					i_cal_property_set_parameter_from_string (prop, "X-SUMMARY", tmp);
+
+				tmp = e_m365_schedule_item_get_location (schitem);
+
+				if (tmp && *tmp)
+					i_cal_property_set_parameter_from_string (prop, "X-LOCATION", tmp);
+
+				if (!vfb)
+					vfb = i_cal_component_new_vfreebusy ();
+
+				i_cal_component_take_property (vfb, prop);
+			}
+
+			if (vfb) {
+				gchar *mailto;
+
+				mailto = g_strconcat ("mailto:", e_m365_schedule_information_get_schedule_id (schinfo), NULL);
+				i_cal_component_take_property (vfb, i_cal_property_new_attendee (mailto));
+				g_free (mailto);
+
+				*out_freebusyobjs = g_slist_prepend (*out_freebusyobjs, i_cal_component_as_ical_string (vfb));
+
+				g_clear_object (&vfb);
+			}
+		}
+
+		*out_freebusyobjs = g_slist_reverse (*out_freebusyobjs);
+	}
+
+	g_slist_free_full (infos, (GDestroyNotify) json_object_unref);
+
+	ecb_m365_convert_error_to_client_error (error);
+	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
+}
+
 static gchar *
 ecb_m365_get_backend_property (ECalBackend *cal_backend,
 			      const gchar *prop_name)
@@ -2882,6 +3045,7 @@ e_cal_backend_m365_class_init (ECalBackendM365Class *klass)
 	GObjectClass *object_class;
 	EBackendClass *backend_class;
 	ECalBackendClass *cal_backend_class;
+	ECalBackendSyncClass *cal_backend_sync_class;
 	ECalMetaBackendClass *cal_meta_backend_class;
 
 	cal_meta_backend_class = E_CAL_META_BACKEND_CLASS (klass);
@@ -2891,6 +3055,10 @@ e_cal_backend_m365_class_init (ECalBackendM365Class *klass)
 	cal_meta_backend_class->load_component_sync = ecb_m365_load_component_sync;
 	cal_meta_backend_class->save_component_sync = ecb_m365_save_component_sync;
 	cal_meta_backend_class->remove_component_sync = ecb_m365_remove_component_sync;
+
+	cal_backend_sync_class = E_CAL_BACKEND_SYNC_CLASS (klass);
+	cal_backend_sync_class->discard_alarm_sync = ecb_m365_discard_alarm_sync;
+	cal_backend_sync_class->get_free_busy_sync = ecb_m365_get_free_busy_sync;
 
 	cal_backend_class = E_CAL_BACKEND_CLASS (klass);
 	cal_backend_class->impl_get_backend_property = ecb_m365_get_backend_property;

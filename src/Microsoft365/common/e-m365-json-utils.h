@@ -25,6 +25,7 @@ G_BEGIN_DECLS
 #define EM365Event			JsonObject
 #define EM365Folder			JsonObject
 #define EM365FollowupFlag		JsonObject
+#define EM365FreeBusyError		JsonObject
 #define EM365InternetMessageHeader	JsonObject
 #define EM365ItemBody			JsonObject
 #define EM365Location			JsonObject
@@ -39,6 +40,10 @@ G_BEGIN_DECLS
 #define EM365RecurrencePattern		JsonObject
 #define EM365RecurrenceRange		JsonObject
 #define EM365ResponseStatus		JsonObject
+#define EM365ScheduleInformation	JsonObject
+#define EM365ScheduleItem		JsonObject
+#define EM365TimeOfDay			gint64
+#define EM365WorkingHours		JsonObject
 
 typedef enum _EM365AttachmentDataType {
 	E_M365_ATTACHMENT_DATA_TYPE_NOT_SET,
@@ -277,12 +282,26 @@ void		e_m365_add_date				(JsonBuilder *builder,
 							 const gchar *member_name,
 							 EM365Date value);
 gboolean	e_m365_date_decode			(EM365Date dt,
-							 guint *out_year,
-							 guint *out_month,
-							 guint *out_day);
-EM365Date	e_m365_date_encode			(guint year,
-							 guint month,
-							 guint day);
+							 gint *out_year,
+							 gint *out_month,
+							 gint *out_day);
+EM365Date	e_m365_date_encode			(gint year,
+							 gint month,
+							 gint day);
+EM365TimeOfDay	e_m365_time_of_day_get			(JsonObject *object,
+							 const gchar *member_name);
+void		e_m365_add_time_of_day			(JsonBuilder *builder,
+							 const gchar *member_name,
+							 EM365TimeOfDay value);
+gboolean	e_m365_time_of_day_decode		(EM365TimeOfDay tod,
+							 gint *out_hour,
+							 gint *out_minute,
+							 gint *out_second,
+							 gint *out_fraction);
+EM365TimeOfDay	e_m365_time_of_day_encode		(gint hour,
+							 gint minute,
+							 gint second,
+							 gint fraction);
 
 time_t		e_m365_get_date_time_offset_member	(JsonObject *object,
 							 const gchar *member_name);
@@ -913,6 +932,37 @@ void		e_m365_event_add_subject		(JsonBuilder *builder,
 EM365EventTypeType
 		e_m365_event_get_type			(EM365Event *event);
 const gchar *	e_m365_event_get_web_link		(EM365Event *event);
+
+const gchar *	e_m365_free_busy_error_get_message	(EM365FreeBusyError *fberror);
+const gchar *	e_m365_free_busy_error_get_response_code(EM365FreeBusyError *fberror);
+
+EM365DateTimeWithZone *
+		e_m365_schedule_item_get_end		(EM365ScheduleItem *schitem);
+gboolean	e_m365_schedule_item_get_is_private	(EM365ScheduleItem *schitem);
+const gchar *	e_m365_schedule_item_get_location	(EM365ScheduleItem *schitem);
+EM365DateTimeWithZone *
+		e_m365_schedule_item_get_start		(EM365ScheduleItem *schitem);
+EM365FreeBusyStatusType
+		e_m365_schedule_item_get_status		(EM365ScheduleItem *schitem);
+const gchar *	e_m365_schedule_item_get_subject	(EM365ScheduleItem *schitem);
+
+JsonArray *	e_m365_working_hours_get_days_of_week	(EM365WorkingHours *wrkhrs); /* Use e_m365_array_get_day_of_week_element() to get the items */
+EM365TimeOfDay	e_m365_working_hours_get_start_time	(EM365WorkingHours *wrkhrs);
+EM365TimeOfDay	e_m365_working_hours_get_end_time	(EM365WorkingHours *wrkhrs);
+const gchar *	e_m365_working_hours_get_time_zone_name	(EM365WorkingHours *wrkhrs);
+
+const gchar *	e_m365_schedule_information_get_availability_view
+							(EM365ScheduleInformation *schinfo);
+EM365FreeBusyError *
+		e_m365_schedule_information_get_free_busy_error
+							(EM365ScheduleInformation *schinfo);
+const gchar *	e_m365_schedule_information_get_schedule_id
+							(EM365ScheduleInformation *schinfo);
+JsonArray *	e_m365_schedule_information_get_schedule_items /* EM365ScheduleItem * */
+							(EM365ScheduleInformation *schinfo);
+EM365WorkingHours *
+		e_m365_schedule_information_get_working_hours
+							(EM365ScheduleInformation *schinfo);
 
 G_END_DECLS
 

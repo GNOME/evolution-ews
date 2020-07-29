@@ -554,14 +554,14 @@ e_m365_date_get (JsonObject *object,
 		 const gchar *member_name)
 {
 	const gchar *value;
-	guint year = 0, month = 0, day = 0;
+	gint year = 0, month = 0, day = 0;
 
 	value = e_m365_json_get_string_member (object, member_name, NULL);
 
 	if (!value || !*value)
 		return -1;
 
-	if (sscanf (value, "%04u-%02u-%02u", &year, &month, &day) != 3) {
+	if (sscanf (value, "%04d-%02d-%02d", &year, &month, &day) != 3) {
 		g_warning ("%s: Failed to decode date '%s' of member '%s'", G_STRFUNC, value, member_name);
 		return -1;
 	}
@@ -574,21 +574,21 @@ e_m365_add_date (JsonBuilder *builder,
 		 const gchar *member_name,
 		 EM365Date value)
 {
-	guint year, month, day;
+	gint year, month, day;
 
 	if (e_m365_date_decode (value, &year, &month, &day)) {
 		gchar buff[128];
 
-		g_snprintf (buff, sizeof (buff), "%04u-%02u-%02u", year, month, day);
+		g_snprintf (buff, sizeof (buff), "%04d-%02d-%02d", year, month, day);
 		e_m365_json_add_string_member (builder, member_name, buff);
 	}
 }
 
 gboolean
 e_m365_date_decode (EM365Date dt,
-		    guint *out_year,
-		    guint *out_month,
-		    guint *out_day)
+		    gint *out_year,
+		    gint *out_month,
+		    gint *out_day)
 {
 	g_return_val_if_fail (out_year != NULL, FALSE);
 	g_return_val_if_fail (out_month != NULL, FALSE);
@@ -607,15 +607,89 @@ e_m365_date_decode (EM365Date dt,
 }
 
 EM365Date
-e_m365_date_encode (guint year,
-		    guint month,
-		    guint day)
+e_m365_date_encode (gint year,
+		    gint month,
+		    gint day)
 {
 	g_return_val_if_fail (year > 0 && year < 10000, -1);
 	g_return_val_if_fail (month >= 1 && month <= 12, -1);
 	g_return_val_if_fail (day >= 1 && day <= 31, -1);
 
 	return year + (10000 * month) + (1000000 * day);
+}
+
+EM365TimeOfDay
+e_m365_time_of_day_get (JsonObject *object,
+			const gchar *member_name)
+{
+	const gchar *value;
+	gint hour = 0, minute = 0, second = 0, fraction = 0;
+
+	value = e_m365_json_get_string_member (object, member_name, NULL);
+
+	if (!value || !*value)
+		return -1;
+
+	if (sscanf (value, "%02d:%02d:%02d.%07d", &hour, &minute, &second, &fraction) != 4) {
+		g_warning ("%s: Failed to decode timeOfDay '%s' of member '%s'", G_STRFUNC, value, member_name);
+		return -1;
+	}
+
+	return e_m365_time_of_day_encode (hour, minute, second, fraction);
+}
+
+void
+e_m365_add_time_of_day (JsonBuilder *builder,
+			const gchar *member_name,
+			EM365TimeOfDay value)
+{
+	gint hour, minute, second, fraction;
+
+	if (e_m365_time_of_day_decode (value, &hour, &minute, &second, &fraction)) {
+		gchar buff[128];
+
+		g_snprintf (buff, sizeof (buff), "%02d:%02d:%02d.%07d", hour, minute, second, fraction);
+		e_m365_json_add_string_member (builder, member_name, buff);
+	}
+}
+
+gboolean
+e_m365_time_of_day_decode (EM365TimeOfDay tod,
+			   gint *out_hour,
+			   gint *out_minute,
+			   gint *out_second,
+			   gint *out_fraction)
+{
+	g_return_val_if_fail (out_hour != NULL, FALSE);
+	g_return_val_if_fail (out_minute != NULL, FALSE);
+	g_return_val_if_fail (out_second != NULL, FALSE);
+	g_return_val_if_fail (out_fraction != NULL, FALSE);
+
+	if (tod <= 0)
+		return FALSE;
+
+	*out_hour = tod % 100;
+	*out_minute = (tod / 100) % 100;
+	*out_second = (tod / 10000) % 100;
+	*out_fraction = tod / 1000000;
+
+	return *out_hour >= 0 && *out_hour < 24 &&
+		*out_minute >= 0 && *out_minute < 60 &&
+		*out_second >= 0 && *out_second < 60;
+}
+
+EM365TimeOfDay
+e_m365_time_of_day_encode (gint hour,
+			   gint minute,
+			   gint second,
+			   gint fraction)
+{
+	g_return_val_if_fail (hour >= 0 && hour < 24, -1);
+	g_return_val_if_fail (minute >= 0 && minute < 60, -1);
+	g_return_val_if_fail (second >= 0 && second < 60, -1);
+	g_return_val_if_fail (fraction >= 0 && fraction < 10000000, -1);
+
+	return ((EM365TimeOfDay) hour) + (100L * minute) + (10000L * second) + (1000000L * fraction);
 }
 
 time_t
@@ -3358,4 +3432,126 @@ const gchar *
 e_m365_event_get_web_link (EM365Event *event)
 {
 	return e_m365_json_get_string_member (event, "webLink", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/freebusyerror?view=graph-rest-1.0 */
+
+const gchar *
+e_m365_free_busy_error_get_message (EM365FreeBusyError *fberror)
+{
+	return e_m365_json_get_string_member (fberror, "message", NULL);
+}
+
+const gchar *
+e_m365_free_busy_error_get_response_code (EM365FreeBusyError *fberror)
+{
+	return e_m365_json_get_string_member (fberror, "responseCode", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/scheduleitem?view=graph-rest-1.0 */
+
+EM365DateTimeWithZone *
+e_m365_schedule_item_get_end (EM365ScheduleItem *schitem)
+{
+	return e_m365_json_get_object_member (schitem, "end");
+}
+
+gboolean
+e_m365_schedule_item_get_is_private (EM365ScheduleItem *schitem)
+{
+	return e_m365_json_get_boolean_member (schitem, "isPrivate", FALSE);
+}
+
+const gchar *
+e_m365_schedule_item_get_location (EM365ScheduleItem *schitem)
+{
+	return e_m365_json_get_string_member (schitem, "location", NULL);
+}
+
+EM365DateTimeWithZone *
+e_m365_schedule_item_get_start (EM365ScheduleItem *schitem)
+{
+	return e_m365_json_get_object_member (schitem, "start");
+}
+
+EM365FreeBusyStatusType
+e_m365_schedule_item_get_status (EM365ScheduleItem *schitem)
+{
+	return m365_json_utils_get_json_as_enum (schitem, "status",
+		free_busy_status_map, G_N_ELEMENTS (free_busy_status_map),
+		E_M365_FREE_BUSY_STATUS_NOT_SET,
+		E_M365_FREE_BUSY_STATUS_UNKNOWN);
+}
+
+const gchar *
+e_m365_schedule_item_get_subject (EM365ScheduleItem *schitem)
+{
+	return e_m365_json_get_string_member (schitem, "subject", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/workinghours?view=graph-rest-1.0 */
+
+JsonArray * /* Use e_m365_array_get_day_of_week_element() to get the items */
+e_m365_working_hours_get_days_of_week (EM365WorkingHours *wrkhrs)
+{
+	return e_m365_json_get_array_member (wrkhrs, "daysOfWeek");
+}
+
+EM365TimeOfDay
+e_m365_working_hours_get_start_time (EM365WorkingHours *wrkhrs)
+{
+	return e_m365_time_of_day_get (wrkhrs, "startTime");
+}
+
+EM365TimeOfDay
+e_m365_working_hours_get_end_time (EM365WorkingHours *wrkhrs)
+{
+	return e_m365_time_of_day_get (wrkhrs, "endTime");
+}
+
+const gchar *
+e_m365_working_hours_get_time_zone_name (EM365WorkingHours *wrkhrs)
+{
+	JsonObject *value;
+
+	value = e_m365_json_get_object_member (wrkhrs, "timeZone");
+
+	if (!value)
+		return NULL;
+
+	/* https://docs.microsoft.com/en-us/graph/api/resources/timezonebase?view=graph-rest-1.0 */
+
+	return e_m365_json_get_string_member (value, "name", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/scheduleinformation?view=graph-rest-1.0 */
+
+const gchar *
+e_m365_schedule_information_get_availability_view (EM365ScheduleInformation *schinfo)
+{
+	return e_m365_json_get_string_member (schinfo, "availabilityView", NULL);
+}
+
+EM365FreeBusyError *
+e_m365_schedule_information_get_free_busy_error (EM365ScheduleInformation *schinfo)
+{
+	return e_m365_json_get_object_member (schinfo, "error");
+}
+
+const gchar *
+e_m365_schedule_information_get_schedule_id (EM365ScheduleInformation *schinfo)
+{
+	return e_m365_json_get_string_member (schinfo, "scheduleId", NULL);
+}
+
+JsonArray * /* EM365ScheduleItem * */
+e_m365_schedule_information_get_schedule_items (EM365ScheduleInformation *schinfo)
+{
+	return e_m365_json_get_array_member (schinfo, "scheduleItems");
+}
+
+EM365WorkingHours *
+e_m365_schedule_information_get_working_hours (EM365ScheduleInformation *schinfo)
+{
+	return e_m365_json_get_object_member (schinfo, "workingHours");
 }

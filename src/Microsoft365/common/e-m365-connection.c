@@ -4790,3 +4790,79 @@ e_m365_connection_delete_event_attachment_sync (EM365Connection *cnc,
 
 	return success;
 }
+
+/* https://docs.microsoft.com/en-us/graph/api/calendar-getschedule?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_schedule_sync (EM365Connection *cnc,
+				     const gchar *user_override, /* for which user, NULL to use the account user */
+				     gint interval_minutes, /* between 5 and 1440, -1 to use the default (30) */
+				     time_t start_time,
+				     time_t end_time,
+				     const GSList *email_addresses, /* const gchar * - SMTP addresses to query */
+				     GSList **out_infos, /* EM365ScheduleInformation * */
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	EM365ResponseData rd;
+	JsonBuilder *builder;
+	SoupMessage *message;
+	GSList *link;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (email_addresses != NULL, FALSE);
+	g_return_val_if_fail (out_infos != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"calendar",
+		"getSchedule",
+		NULL,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	e_m365_json_begin_object_member (builder, NULL);
+
+	if (interval_minutes > 0)
+		e_m365_json_add_int_member (builder, "interval", interval_minutes);
+
+	e_m365_add_date_time (builder, "startTime", start_time, "UTC");
+	e_m365_add_date_time (builder, "endTime", end_time, "UTC");
+	e_m365_json_begin_array_member (builder, "schedules");
+
+	for (link = (GSList *) email_addresses; link; link = g_slist_next (link)) {
+		const gchar *addr = link->data;
+
+		if (addr && *addr)
+			json_builder_add_string_value (builder, addr);
+	}
+
+	e_m365_json_end_array_member (builder); /* "schedules" */
+	e_m365_json_end_object_member (builder);
+
+	e_m365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = out_infos;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}

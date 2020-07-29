@@ -556,6 +556,16 @@ gboolean	e_m365_connection_delete_event_attachment_sync
 						 const gchar *attachment_id,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_get_schedule_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 gint interval_minutes, /* between 5 and 1440, -1 to use the default (30) */
+						 time_t start_time,
+						 time_t end_time,
+						 const GSList *email_addresses, /* const gchar * - SMTP addresses to query */
+						 GSList **out_infos, /* EM365ScheduleInformation * */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 
