@@ -21,15 +21,6 @@
 
 #include "e-cal-backend-m365.h"
 
-#ifdef G_OS_WIN32
-#ifdef gmtime_r
-#undef gmtime_r
-#endif
-
-/* The gmtime() in Microsoft's C library is MT-safe */
-#define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
-#endif
-
 #define EC_ERROR(_code) e_client_error_create (_code, NULL)
 #define EC_ERROR_EX(_code, _msg) e_client_error_create (_code, _msg)
 #define ECC_ERROR(_code) e_cal_client_error_create (_code, NULL)
@@ -42,7 +33,7 @@ struct _ECalBackendM365Private {
 	GRecMutex property_lock;
 	EM365Connection *cnc;
 	gchar *group_id;
-	gchar *calendar_id;
+	gchar *folder_id;
 	gchar *attachments_dir;
 };
 
@@ -1744,8 +1735,6 @@ ecb_m365_add_reminder (ECalBackendM365 *cbm365,
 	return success;
 }
 
-
-
 static gboolean
 ecb_m365_get_attachments (ECalBackendM365 *cbm365,
 			  EM365Event *m365_event,
@@ -1761,7 +1750,7 @@ ecb_m365_get_attachments (ECalBackendM365 *cbm365,
 		return TRUE;
 
 	if (!e_m365_connection_list_event_attachments_sync (cbm365->priv->cnc, NULL,
-		cbm365->priv->group_id, cbm365->priv->calendar_id, e_m365_event_get_id (m365_event), "id,name,contentType,contentBytes",
+		cbm365->priv->group_id, cbm365->priv->folder_id, e_m365_event_get_id (m365_event), "id,name,contentType,contentBytes",
 		&attachments, cancellable, error)) {
 		return FALSE;
 	}
@@ -2058,7 +2047,7 @@ ecb_m365_add_attachments (ECalBackendM365 *cbm365,
 				e_m365_attachment_end_attachment (builder);
 
 				success = e_m365_connection_add_event_attachment_sync (cbm365->priv->cnc, NULL,
-					cbm365->priv->group_id, cbm365->priv->calendar_id, m365_id,
+					cbm365->priv->group_id, cbm365->priv->folder_id, m365_id,
 					builder, NULL, cancellable, error);
 
 				g_object_unref (builder);
@@ -2081,7 +2070,7 @@ ecb_m365_add_attachments (ECalBackendM365 *cbm365,
 			const gchar *attachment_id = key;
 
 			success = e_m365_connection_delete_event_attachment_sync (cbm365->priv->cnc, NULL,
-				cbm365->priv->group_id, cbm365->priv->calendar_id, i_cal_component_get_uid (new_comp),
+				cbm365->priv->group_id, cbm365->priv->folder_id, i_cal_component_get_uid (new_comp),
 				attachment_id, cancellable, error);
 		}
 	}
@@ -2276,7 +2265,7 @@ ecb_m365_download_event_changes_locked (ECalBackendM365 *cbm365,
 	if (!ids)
 		return TRUE;
 
-	if (!e_m365_connection_get_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->calendar_id, ids, NULL, NULL, &events, cancellable, error))
+	if (!e_m365_connection_get_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, ids, NULL, NULL, &events, cancellable, error))
 		return FALSE;
 
 	for (link = events; link; link = g_slist_next (link)) {
@@ -2329,7 +2318,7 @@ ecb_m365_unset_connection_sync (ECalBackendM365 *cbm365,
 
 	g_clear_object (&cbm365->priv->cnc);
 	g_clear_pointer (&cbm365->priv->group_id, g_free);
-	g_clear_pointer (&cbm365->priv->calendar_id, g_free);
+	g_clear_pointer (&cbm365->priv->folder_id, g_free);
 
 	UNLOCK (cbm365);
 
@@ -2369,7 +2358,7 @@ ecb_m365_connect_sync (ECalMetaBackend *meta_backend,
 		ESourceM365Folder *m365_folder_extension;
 		CamelM365Settings *m365_settings;
 		gchar *group_id;
-		gchar *calendar_id;
+		gchar *folder_id;
 
 		backend = E_BACKEND (cbm365);
 		source = e_backend_get_source (backend);
@@ -2379,28 +2368,28 @@ ecb_m365_connect_sync (ECalMetaBackend *meta_backend,
 
 		m365_folder_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_M365_FOLDER);
 		group_id = e_source_m365_folder_dup_group_id (m365_folder_extension);
-		calendar_id = e_source_m365_folder_dup_id (m365_folder_extension);
+		folder_id = e_source_m365_folder_dup_id (m365_folder_extension);
 
-		if (calendar_id) {
+		if (folder_id) {
 			cnc = e_m365_connection_new_for_backend (backend, registry, source, m365_settings);
 
-			*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_CALENDAR, group_id, calendar_id,
+			*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_CALENDAR, group_id, folder_id,
 				out_certificate_pem, out_certificate_errors, cancellable, error);
 
 			if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 				cbm365->priv->cnc = g_object_ref (cnc);
 
 				g_warn_if_fail (cbm365->priv->group_id == NULL);
-				g_warn_if_fail (cbm365->priv->calendar_id == NULL);
+				g_warn_if_fail (cbm365->priv->folder_id == NULL);
 
 				g_free (cbm365->priv->group_id);
 				cbm365->priv->group_id = group_id;
 
-				g_free (cbm365->priv->calendar_id);
-				cbm365->priv->calendar_id = calendar_id;
+				g_free (cbm365->priv->folder_id);
+				cbm365->priv->folder_id = folder_id;
 
 				group_id = NULL;
-				calendar_id = NULL;
+				folder_id = NULL;
 				success = TRUE;
 
 				e_cal_backend_set_writable (E_CAL_BACKEND (cbm365), TRUE);
@@ -2412,7 +2401,7 @@ ecb_m365_connect_sync (ECalMetaBackend *meta_backend,
 
 		g_clear_object (&cnc);
 		g_free (group_id);
-		g_free (calendar_id);
+		g_free (folder_id);
 	}
 
 	UNLOCK (cbm365);
@@ -2470,7 +2459,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 	full_read = !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
 
-	success = e_m365_connection_list_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->calendar_id, NULL,
+	success = e_m365_connection_list_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, NULL,
 		full_read ? NULL : "id,changeKey", &events, cancellable, error);
 
 	if (success) {
@@ -2569,7 +2558,7 @@ ecb_m365_load_component_sync (ECalMetaBackend *meta_backend,
 	LOCK (cbm365);
 
 	success = e_m365_connection_get_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-		cbm365->priv->calendar_id, uid, NULL, NULL, &event, cancellable, error);
+		cbm365->priv->folder_id, uid, NULL, NULL, &event, cancellable, error);
 
 	if (success) {
 		*out_component = ecb_m365_json_to_ical (cbm365, event, cancellable, error);
@@ -2644,7 +2633,7 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 			const gchar *uid = i_cal_component_get_uid (new_comp);
 
 			success = e_m365_connection_update_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-				cbm365->priv->calendar_id, uid, builder, cancellable, error);
+				cbm365->priv->folder_id, uid, builder, cancellable, error);
 
 			if (success)
 				success = ecb_m365_ical_to_json_2nd_go_locked (cbm365, new_comp, old_comp, uid, cancellable, error);
@@ -2657,7 +2646,7 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 			EM365Event *created_event = NULL;
 
 			success = e_m365_connection_create_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-				cbm365->priv->calendar_id, builder, &created_event, cancellable, error);
+				cbm365->priv->folder_id, builder, &created_event, cancellable, error);
 
 			if (success && created_event) {
 				const gchar *m365_id = e_m365_event_get_id (created_event);
@@ -2724,7 +2713,7 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 	LOCK (cbm365);
 
 	success = e_m365_connection_delete_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-		cbm365->priv->calendar_id, uid, cancellable, error);
+		cbm365->priv->folder_id, uid, cancellable, error);
 
 	UNLOCK (cbm365);
 
@@ -2757,7 +2746,7 @@ ecb_m365_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 	LOCK (cbm365);
 
 	e_m365_connection_dismiss_reminder_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-		cbm365->priv->calendar_id, uid, cancellable, error);
+		cbm365->priv->folder_id, uid, cancellable, error);
 
 	UNLOCK (cbm365);
 
