@@ -147,7 +147,7 @@ e_source_m365_deltas_set_contacts_link (ESourceM365Deltas *extension,
 	}
 
 	g_free (extension->priv->contacts_link);
-	extension->priv->contacts_link = g_strdup (delta_link);
+	extension->priv->contacts_link = e_util_strdup_strip (delta_link);
 
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 

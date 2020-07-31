@@ -204,7 +204,7 @@ e_source_m365_folder_set_id (ESourceM365Folder *extension,
 	}
 
 	g_free (extension->priv->id);
-	extension->priv->id = g_strdup (id);
+	extension->priv->id = e_util_strdup_strip (id);
 
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
@@ -279,7 +279,7 @@ e_source_m365_folder_set_group_id (ESourceM365Folder *extension,
 	}
 
 	g_free (extension->priv->group_id);
-	extension->priv->group_id = g_strdup (group_id);
+	extension->priv->group_id = e_util_strdup_strip (group_id);
 
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 

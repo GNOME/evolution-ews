@@ -120,27 +120,62 @@ ecb_m365_split_extra (gchar *inout_extra,
 
 static void
 ecb_m365_get_uid (ECalBackendM365 *cbm365,
-		  EM365Event *m365_event,
+		  JsonObject *m365_object,
 		  ICalComponent *inout_comp,
 		  ICalPropertyKind prop_kind)
 {
-	i_cal_component_set_uid (inout_comp, e_m365_event_get_id (m365_event));
+	const gchar *id;
+
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		id = e_m365_event_get_id (m365_object);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		id = e_m365_task_get_id (m365_object);
+		break;
+	default:
+		g_warn_if_reached ();
+		return;
+	}
+
+	i_cal_component_set_uid (inout_comp, id);
 }
 
 static void
 ecb_m365_get_date_time (ECalBackendM365 *cbm365,
-			EM365Event *m365_event,
+			JsonObject *m365_object,
 			ICalComponent *inout_comp,
 			ICalPropertyKind prop_kind)
 {
 	time_t tt = (time_t) 0;
 
-	if (prop_kind == I_CAL_CREATED_PROPERTY)
-		tt = e_m365_event_get_created_date_time (m365_event);
-	else if (prop_kind == I_CAL_LASTMODIFIED_PROPERTY)
-		tt = e_m365_event_get_last_modified_date_time (m365_event);
-	else
+	if (prop_kind == I_CAL_CREATED_PROPERTY) {
+		switch (i_cal_component_isa (inout_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			tt = e_m365_event_get_created_date_time (m365_object);
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			tt = e_m365_task_get_created_date_time (m365_object);
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
+	} else if (prop_kind == I_CAL_LASTMODIFIED_PROPERTY) {
+		switch (i_cal_component_isa (inout_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			tt = e_m365_event_get_last_modified_date_time (m365_object);
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			tt = e_m365_task_get_last_modified_date_time (m365_object);
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
+	} else {
 		g_warn_if_reached ();
+	}
 
 	if (tt > (time_t) 0) {
 		ICalProperty *prop;
@@ -183,22 +218,45 @@ ecb_m365_get_timezone_sync (ECalBackendM365 *cbm365,
 
 static void
 ecb_m365_get_date_time_zone (ECalBackendM365 *cbm365,
-			     EM365Event *m365_event,
+			     JsonObject *m365_object,
 			     ICalComponent *inout_comp,
 			     ICalPropertyKind prop_kind)
 {
-	EM365DateTimeWithZone *value = NULL;
+	EM365DateTimeWithZone *value;
 	ICalTimezone *tz;
 	ICalTime *itt;
 	time_t tt;
 	const gchar *tzid, *zone;
+	gboolean is_date;
 
 	if (prop_kind == I_CAL_DTSTART_PROPERTY) {
-		value = e_m365_event_get_start (m365_event);
-		tzid = e_m365_event_get_original_start_timezone (m365_event);
+		switch (i_cal_component_isa (inout_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			value = e_m365_event_get_start (m365_object);
+			tzid = e_m365_event_get_original_start_timezone (m365_object);
+			is_date = e_m365_event_get_is_all_day (m365_object);
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			value = e_m365_task_get_start_date_time (m365_object);
+			tzid = "UTC";
+			is_date = TRUE;
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
 	} else if (prop_kind == I_CAL_DTEND_PROPERTY) {
-		value = e_m365_event_get_end (m365_event);
-		tzid = e_m365_event_get_original_end_timezone (m365_event);
+		value = e_m365_event_get_end (m365_object);
+		tzid = e_m365_event_get_original_end_timezone (m365_object);
+		is_date = e_m365_event_get_is_all_day (m365_object);
+	} else if (prop_kind == I_CAL_COMPLETED_PROPERTY) {
+		value = e_m365_task_get_completed_date_time (m365_object);
+		tzid = "UTC";
+		is_date = TRUE;
+	} else if (prop_kind == I_CAL_DUE_PROPERTY) {
+		value = e_m365_task_get_due_date_time (m365_object);
+		tzid = "UTC";
+		is_date = TRUE;
 	} else {
 		g_warn_if_reached ();
 		return;
@@ -218,7 +276,7 @@ ecb_m365_get_date_time_zone (ECalBackendM365 *cbm365,
 	if (!tz)
 		tz = i_cal_timezone_get_utc_timezone ();
 
-	itt = i_cal_time_new_from_timet_with_zone (tt, e_m365_event_get_is_all_day (m365_event), tz);
+	itt = i_cal_time_new_from_timet_with_zone (tt, is_date, tz);
 
 	tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
 
@@ -227,13 +285,17 @@ ecb_m365_get_date_time_zone (ECalBackendM365 *cbm365,
 
 	tz = ecb_m365_get_timezone_sync (cbm365, tzid);
 
-	if (tz && !e_m365_event_get_is_all_day (m365_event))
+	if (tz && !is_date)
 		i_cal_time_convert_to_zone_inplace (itt, tz);
 
 	if (prop_kind == I_CAL_DTSTART_PROPERTY)
 		i_cal_component_set_dtstart (inout_comp, itt);
-	else /* I_CAL_DTEND_PROPERTY */
+	else if (prop_kind == I_CAL_DTEND_PROPERTY)
 		i_cal_component_set_dtend (inout_comp, itt);
+	else if (prop_kind == I_CAL_COMPLETED_PROPERTY)
+		i_cal_component_take_property (inout_comp, i_cal_property_new_completed (itt));
+	else /* if (prop_kind == I_CAL_DUE_PROPERTY) */
+		i_cal_component_set_due (inout_comp, itt);
 
 	g_clear_object (&itt);
 }
@@ -255,11 +317,37 @@ ecb_m365_add_date_time_zone (ECalBackendM365 *cbm365,
 	if (prop_kind == I_CAL_DTSTART_PROPERTY) {
 		new_value = i_cal_component_get_dtstart (new_comp);
 		old_value = old_comp ? i_cal_component_get_dtstart (old_comp) : NULL;
-		add_func = e_m365_event_add_start;
+
+		switch (i_cal_component_isa (new_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			add_func = e_m365_event_add_start;
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			add_func = e_m365_task_add_start_date_time;
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
 	} else if (prop_kind == I_CAL_DTEND_PROPERTY) {
 		new_value = i_cal_component_get_dtend (new_comp);
 		old_value = old_comp ? i_cal_component_get_dtend (old_comp) : NULL;
 		add_func = e_m365_event_add_end;
+	} else if (prop_kind == I_CAL_COMPLETED_PROPERTY) {
+		ICalProperty *new_prop, *old_prop;
+
+		new_prop = i_cal_component_get_first_property (new_comp, prop_kind);
+		old_prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+		new_value = new_prop ? i_cal_property_get_completed (new_prop) : NULL;
+		old_value = old_prop ? i_cal_property_get_completed (old_prop) : NULL;
+		add_func = e_m365_task_add_completed_date_time;
+
+		g_clear_object (&new_prop);
+		g_clear_object (&old_prop);
+	} else if (prop_kind == I_CAL_DUE_PROPERTY) {
+		new_value = i_cal_component_get_due (new_comp);
+		old_value = old_comp ? i_cal_component_get_due (old_comp) : NULL;
+		add_func = e_m365_task_add_due_date_time;
 	} else {
 		g_warn_if_reached ();
 		return;
@@ -318,13 +406,23 @@ ecb_m365_add_date_time_zone (ECalBackendM365 *cbm365,
 
 static void
 ecb_m365_get_categories (ECalBackendM365 *cbm365,
-			 EM365Event *m365_event,
+			 JsonObject *m365_object,
 			 ICalComponent *inout_comp,
 			 ICalPropertyKind prop_kind)
 {
 	JsonArray *categories;
 
-	categories = e_m365_event_get_categories (m365_event);
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		categories = e_m365_event_get_categories (m365_object);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		categories = e_m365_task_get_categories (m365_object);
+		break;
+	default:
+		g_warn_if_reached ();
+		return;
+	}
 
 	if (categories) {
 		GString *categories_str = NULL;
@@ -431,6 +529,25 @@ ecb_m365_add_categories (ECalBackendM365 *cbm365,
 {
 	GHashTable *old_value = NULL;
 	GSList *new_value = NULL;
+	void (* begin_categories_func) (JsonBuilder *builder);
+	void (* end_categories_func) (JsonBuilder *builder);
+	void (* add_category_func) (JsonBuilder *builder, const gchar *category);
+
+	switch (i_cal_component_isa (new_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		begin_categories_func = e_m365_event_begin_categories;
+		end_categories_func = e_m365_event_end_categories;
+		add_category_func = e_m365_event_add_category;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		begin_categories_func = e_m365_task_begin_categories;
+		end_categories_func = e_m365_task_end_categories;
+		add_category_func = e_m365_task_add_category;
+		break;
+	default:
+		g_warn_if_reached ();
+		return;
+	}
 
 	ecb_m365_extract_categories (new_comp, NULL, &new_value);
 	ecb_m365_extract_categories (old_comp, &old_value, NULL);
@@ -453,19 +570,19 @@ ecb_m365_add_categories (ECalBackendM365 *cbm365,
 		}
 
 		if (!same) {
-			e_m365_event_begin_categories (builder);
+			begin_categories_func (builder);
 
 			for (link = new_value; link; link = g_slist_next (link)) {
 				const gchar *category = link->data;
 
-				e_m365_event_add_category (builder, category);
+				add_category_func (builder, category);
 			}
 
-			e_m365_event_end_categories (builder);
+			end_categories_func (builder);
 		}
 	} else {
-		e_m365_event_begin_categories (builder);
-		e_m365_event_end_categories (builder);
+		begin_categories_func (builder);
+		end_categories_func (builder);
 	}
 
 	if (new_value)
@@ -476,13 +593,23 @@ ecb_m365_add_categories (ECalBackendM365 *cbm365,
 
 static void
 ecb_m365_get_subject (ECalBackendM365 *cbm365,
-		      EM365Event *m365_event,
+		      EM365Event *m365_object,
 		      ICalComponent *inout_comp,
 		      ICalPropertyKind prop_kind)
 {
 	const gchar *subject;
 
-	subject = e_m365_event_get_subject (m365_event);
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		subject = e_m365_event_get_subject (m365_object);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		subject = e_m365_task_get_subject (m365_object);
+		break;
+	default:
+		g_warn_if_reached ();
+		return;
+	}
 
 	if (subject)
 		i_cal_component_set_summary (inout_comp, subject);
@@ -500,20 +627,42 @@ ecb_m365_add_subject (ECalBackendM365 *cbm365,
 	new_value = i_cal_component_get_summary (new_comp);
 	old_value = old_comp ? i_cal_component_get_summary (old_comp) : NULL;
 
-	if (g_strcmp0 (new_value, old_value) != 0)
-		e_m365_event_add_subject (builder, new_value ? new_value : "");
+	if (g_strcmp0 (new_value, old_value) != 0) {
+		switch (i_cal_component_isa (new_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			e_m365_event_add_subject (builder, new_value ? new_value : "");
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			e_m365_task_add_subject (builder, new_value ? new_value : "");
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
+	}
 }
 
 static void
 ecb_m365_get_body (ECalBackendM365 *cbm365,
-		   EM365Event *m365_event,
+		   JsonObject *m365_object,
 		   ICalComponent *inout_comp,
 		   ICalPropertyKind prop_kind)
 {
 	EM365ItemBody *value;
 	const gchar *content;
 
-	value = e_m365_event_get_body (m365_event);
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		value = e_m365_event_get_body (m365_object);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		value = e_m365_task_get_body (m365_object);
+		break;
+	default:
+		g_warn_if_reached ();
+		return;
+	}
+
 	content = value ? e_m365_item_body_get_content (value) : NULL;
 
 	if (content && *content && strcmp (content, "\r\n") != 0)
@@ -532,20 +681,41 @@ ecb_m365_add_body (ECalBackendM365 *cbm365,
 	new_value = i_cal_component_get_description (new_comp);
 	old_value = old_comp ? i_cal_component_get_description (old_comp) : NULL;
 
-	if (g_strcmp0 (new_value, old_value) != 0)
-		e_m365_event_add_body (builder, E_M365_ITEM_BODY_CONTENT_TYPE_TEXT, new_value);
+	if (g_strcmp0 (new_value, old_value) != 0) {
+		switch (i_cal_component_isa (new_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			e_m365_event_add_body (builder, E_M365_ITEM_BODY_CONTENT_TYPE_TEXT, new_value);
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			e_m365_task_add_body (builder, E_M365_ITEM_BODY_CONTENT_TYPE_TEXT, new_value);
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
+	}
 }
 
 static void
 ecb_m365_get_sensitivity (ECalBackendM365 *cbm365,
-			  EM365Event *m365_event,
+			  JsonObject *m365_object,
 			  ICalComponent *inout_comp,
 			  ICalPropertyKind prop_kind)
 {
 	EM365SensitivityType value;
 	ICalProperty_Class cls = I_CAL_CLASS_NONE;
 
-	value = e_m365_event_get_sensitivity (m365_event);
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		value = e_m365_event_get_sensitivity (m365_object);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		value = e_m365_task_get_sensitivity (m365_object);
+		break;
+	default:
+		g_warn_if_reached ();
+		return;
+	}
 
 	if (value == E_M365_SENSITIVITY_NORMAL)
 		cls = I_CAL_CLASS_PUBLIC;
@@ -592,7 +762,17 @@ ecb_m365_add_sensitivity (ECalBackendM365 *cbm365,
 		else if (new_value == I_CAL_CLASS_CONFIDENTIAL)
 			value = E_M365_SENSITIVITY_CONFIDENTIAL;
 
-		e_m365_event_add_sensitivity (builder, value);
+		switch (i_cal_component_isa (new_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			e_m365_event_add_sensitivity (builder, value);
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			e_m365_task_add_sensitivity (builder, value);
+			break;
+		default:
+			g_warn_if_reached ();
+			return;
+		}
 	}
 }
 
@@ -1114,10 +1294,10 @@ ecb_m365_add_importance (ECalBackendM365 *cbm365,
 }
 
 static void
-ecb_m365_get_status (ECalBackendM365 *cbm365,
-		     EM365Event *m365_event,
-		     ICalComponent *inout_comp,
-		     ICalPropertyKind prop_kind)
+ecb_m365_get_event_status (ECalBackendM365 *cbm365,
+			   EM365Event *m365_event,
+			   ICalComponent *inout_comp,
+			   ICalPropertyKind prop_kind)
 {
 	ICalPropertyStatus status = I_CAL_STATUS_NONE;
 
@@ -1310,7 +1490,7 @@ ecb_m365_add_days_of_week_from_ical (JsonBuilder *builder,
 
 static gboolean
 ecb_m365_get_recurrence (ECalBackendM365 *cbm365,
-			 EM365Event *m365_event,
+			 JsonObject *m365_object,
 			 ICalComponent *inout_comp,
 			 ICalPropertyKind prop_kind,
 			 GCancellable *cancellable,
@@ -1323,7 +1503,18 @@ ecb_m365_get_recurrence (ECalBackendM365 *cbm365,
 	ICalRecurrenceWeekday week_day;
 	gint month;
 
-	m365_recr = e_m365_event_get_recurrence (m365_event);
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		m365_recr = e_m365_event_get_recurrence (m365_object);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		m365_recr = e_m365_task_get_recurrence (m365_object);
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
+	}
+
 	m365_pattern = m365_recr ? e_m365_patterned_recurrence_get_pattern (m365_recr) : NULL;
 	m365_range = m365_recr ? e_m365_patterned_recurrence_get_range (m365_recr) : NULL;
 
@@ -1447,6 +1638,25 @@ ecb_m365_add_recurrence (ECalBackendM365 *cbm365,
 {
 	ICalProperty *new_value, *old_value;
 	gboolean success = TRUE;
+	void (* begin_recurrence_func) (JsonBuilder *builder);
+	void (* end_recurrence_func) (JsonBuilder *builder);
+	void (* add_null_recurrence_func) (JsonBuilder *builder);
+
+	switch (i_cal_component_isa (new_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		begin_recurrence_func = e_m365_event_begin_recurrence;
+		end_recurrence_func = e_m365_event_end_recurrence;
+		add_null_recurrence_func = e_m365_event_add_null_recurrence;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		begin_recurrence_func = e_m365_task_begin_recurrence;
+		end_recurrence_func = e_m365_task_end_recurrence;
+		add_null_recurrence_func = e_m365_task_add_null_recurrence;
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
+	}
 
 	if (i_cal_component_count_properties (new_comp, prop_kind) > 1) {
 		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
@@ -1501,7 +1711,7 @@ ecb_m365_add_recurrence (ECalBackendM365 *cbm365,
 			ICalTime *dtstart;
 			gint by_pos, month, yy = 0, mm = 0, dd = 0;
 
-			e_m365_event_begin_recurrence (builder);
+			begin_recurrence_func (builder);
 			e_m365_patterned_recurrence_begin_pattern (builder);
 
 			switch (i_cal_recurrence_get_freq (new_rrule)) {
@@ -1607,12 +1817,12 @@ ecb_m365_add_recurrence (ECalBackendM365 *cbm365,
 			}
 
 			e_m365_patterned_recurrence_end_range (builder);
-			e_m365_event_end_recurrence (builder);
+			end_recurrence_func (builder);
 		}
 
 		g_clear_object (&new_rrule);
 	} else {
-		e_m365_event_add_null_recurrence (builder);
+		add_null_recurrence_func (builder);
 	}
 
 	g_clear_object (&new_value);
@@ -1623,30 +1833,78 @@ ecb_m365_add_recurrence (ECalBackendM365 *cbm365,
 
 static gboolean
 ecb_m365_get_reminder (ECalBackendM365 *cbm365,
-		       EM365Event *m365_event,
+		       EM365Event *m365_object,
 		       ICalComponent *inout_comp,
 		       ICalPropertyKind prop_kind,
 		       GCancellable *cancellable,
 		       GError **error)
 {
-	if (e_m365_event_get_is_reminder_on (m365_event)) {
-		ECalComponentAlarm *alarm;
-		ECalComponentAlarmTrigger *trigger;
-		ICalDuration *duration;
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		if (e_m365_event_get_is_reminder_on (m365_object)) {
+			ECalComponentAlarm *alarm;
+			ECalComponentAlarmTrigger *trigger;
+			ICalDuration *duration;
 
-		duration = i_cal_duration_new_from_int (-60 * e_m365_event_get_reminder_minutes_before_start (m365_event));
-		trigger = e_cal_component_alarm_trigger_new_relative (E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START, duration);
-		g_object_unref (duration);
+			duration = i_cal_duration_new_from_int (-60 * e_m365_event_get_reminder_minutes_before_start (m365_object));
+			trigger = e_cal_component_alarm_trigger_new_relative (E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START, duration);
+			g_object_unref (duration);
 
-		alarm = e_cal_component_alarm_new ();
-		e_cal_component_alarm_set_action (alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
-		e_cal_component_alarm_take_summary (alarm, e_cal_component_text_new (e_m365_event_get_subject (m365_event), NULL));
-		e_cal_component_alarm_take_description (alarm, e_cal_component_text_new (e_m365_event_get_subject (m365_event), NULL));
-		e_cal_component_alarm_take_trigger (alarm, trigger);
+			alarm = e_cal_component_alarm_new ();
+			e_cal_component_alarm_set_action (alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
+			e_cal_component_alarm_take_summary (alarm, e_cal_component_text_new (e_m365_event_get_subject (m365_object), NULL));
+			e_cal_component_alarm_take_description (alarm, e_cal_component_text_new (e_m365_event_get_subject (m365_object), NULL));
+			e_cal_component_alarm_take_trigger (alarm, trigger);
 
-		i_cal_component_take_component (inout_comp, e_cal_component_alarm_get_as_component (alarm));
+			i_cal_component_take_component (inout_comp, e_cal_component_alarm_get_as_component (alarm));
 
-		e_cal_component_alarm_free (alarm);
+			e_cal_component_alarm_free (alarm);
+		}
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		if (e_m365_task_get_is_reminder_on (m365_object)) {
+			EM365DateTimeWithZone *reminder_dt;
+
+			reminder_dt = e_m365_task_get_reminder_date_time (m365_object);
+
+			if (reminder_dt) {
+				ECalComponentAlarm *alarm;
+				ECalComponentAlarmTrigger *trigger;
+				ICalTimezone *tz;
+				ICalTime *itt;
+				time_t tt;
+				const gchar *zone;
+
+				tt = e_m365_date_time_get_date_time (reminder_dt);
+				zone = e_m365_date_time_get_time_zone (reminder_dt);
+
+				if (zone && *zone)
+					zone = e_m365_tz_utils_get_ical_equivalent (zone);
+
+				tz = zone && *zone ? ecb_m365_get_timezone_sync (cbm365, zone) : NULL;
+
+				if (!tz)
+					tz = i_cal_timezone_get_utc_timezone ();
+
+				itt = i_cal_time_new_from_timet_with_zone (tt, FALSE, tz);
+				trigger = e_cal_component_alarm_trigger_new_absolute (itt);
+				g_object_unref (itt);
+
+				alarm = e_cal_component_alarm_new ();
+				e_cal_component_alarm_set_action (alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
+				e_cal_component_alarm_take_summary (alarm, e_cal_component_text_new (e_m365_task_get_subject (m365_object), NULL));
+				e_cal_component_alarm_take_description (alarm, e_cal_component_text_new (e_m365_task_get_subject (m365_object), NULL));
+				e_cal_component_alarm_take_trigger (alarm, trigger);
+
+				i_cal_component_take_component (inout_comp, e_cal_component_alarm_get_as_component (alarm));
+
+				e_cal_component_alarm_free (alarm);
+			}
+		}
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
 	}
 
 	return TRUE;
@@ -1679,22 +1937,46 @@ ecb_m365_add_reminder (ECalBackendM365 *cbm365,
 	if (new_value) {
 		ECalComponentAlarm *new_alarm;
 		ECalComponentAlarmTrigger *new_trigger;
+		ICalComponentKind kind;
 		ICalDuration *new_duration = NULL;
+		ICalTime *new_absolute_time = NULL;
 		gboolean changed = TRUE;
+
+		kind = i_cal_component_isa (new_comp);
 
 		new_alarm = e_cal_component_alarm_new_from_component (new_value);
 		new_trigger = new_alarm ? e_cal_component_alarm_get_trigger (new_alarm) : NULL;
 
-		success = new_trigger && e_cal_component_alarm_trigger_get_kind (new_trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START;
+		switch (kind) {
+		case I_CAL_VEVENT_COMPONENT:
+			success = new_trigger && e_cal_component_alarm_trigger_get_kind (new_trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START;
+			if (success) {
+				new_duration = e_cal_component_alarm_trigger_get_duration (new_trigger);
 
-		if (success) {
-			new_duration = e_cal_component_alarm_trigger_get_duration (new_trigger);
+				success = new_duration && i_cal_duration_as_int (new_duration) <= 0;
+			}
 
-			success = new_duration && i_cal_duration_as_int (new_duration) <= 0;
-		}
+			if (!success) {
+				g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 event can have only a reminder before event start")));
+			}
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			success = new_trigger && e_cal_component_alarm_trigger_get_kind (new_trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_ABSOLUTE;
 
-		if (!success) {
-			g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 calendar can store only a reminder before event start")));
+			if (success) {
+				new_absolute_time = e_cal_component_alarm_trigger_get_absolute_time (new_trigger);
+
+				success = new_absolute_time != NULL;
+			}
+
+			if (!success) {
+				g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 task can have only a reminder with absolute time")));
+			}
+			break;
+		default:
+			g_warn_if_reached ();
+			success = FALSE;
+			break;
 		}
 
 		if (success && old_value && new_trigger) {
@@ -1709,10 +1991,24 @@ ecb_m365_add_reminder (ECalBackendM365 *cbm365,
 
 				if (!changed) {
 					ICalDuration *old_duration;
+					ICalTime *old_absolute_time;
 
-					old_duration = e_cal_component_alarm_trigger_get_duration (old_trigger);
+					switch (kind) {
+					case I_CAL_VEVENT_COMPONENT:
+						old_duration = e_cal_component_alarm_trigger_get_duration (old_trigger);
 
-					changed = !old_duration || i_cal_duration_as_int (new_duration) != i_cal_duration_as_int (old_duration);
+						changed = !old_duration || i_cal_duration_as_int (new_duration) != i_cal_duration_as_int (old_duration);
+						break;
+					case I_CAL_VTODO_COMPONENT:
+						old_absolute_time = e_cal_component_alarm_trigger_get_absolute_time (old_trigger);
+
+						changed = !old_absolute_time || i_cal_time_compare (new_absolute_time, old_absolute_time) != 0;
+						break;
+					default:
+						g_warn_if_reached ();
+						changed = FALSE;
+						break;
+					}
 				}
 			}
 
@@ -1720,13 +2016,45 @@ ecb_m365_add_reminder (ECalBackendM365 *cbm365,
 		}
 
 		if (success && changed) {
-			e_m365_event_add_is_reminder_on (builder, TRUE);
-			e_m365_event_add_reminder_minutes_before_start (builder, i_cal_duration_as_int (new_duration) / -60);
+			ICalTimezone *izone = NULL;
+			const gchar *wzone = NULL;
+			time_t tt;
+
+			switch (kind) {
+			case I_CAL_VEVENT_COMPONENT:
+				e_m365_event_add_is_reminder_on (builder, TRUE);
+				e_m365_event_add_reminder_minutes_before_start (builder, i_cal_duration_as_int (new_duration) / -60);
+				break;
+			case I_CAL_VTODO_COMPONENT:
+				izone = i_cal_time_get_timezone (new_absolute_time);
+
+				if (izone)
+					wzone = e_m365_tz_utils_get_msdn_equivalent (i_cal_timezone_get_location (izone));
+
+				tt = i_cal_time_as_timet_with_zone (new_absolute_time, wzone ? NULL : izone);
+
+				e_m365_task_add_is_reminder_on (builder, TRUE);
+				e_m365_task_add_reminder_date_time (builder, tt, wzone);
+				break;
+			default:
+				g_warn_if_reached ();
+				break;
+			}
 		}
 
 		e_cal_component_alarm_free (new_alarm);
 	} else {
-		e_m365_event_add_is_reminder_on (builder, FALSE);
+		switch (i_cal_component_isa (new_comp)) {
+		case I_CAL_VEVENT_COMPONENT:
+			e_m365_event_add_is_reminder_on (builder, FALSE);
+			break;
+		case I_CAL_VTODO_COMPONENT:
+			e_m365_task_add_is_reminder_on (builder, FALSE);
+			break;
+		default:
+			g_warn_if_reached ();
+			break;
+		}
 	}
 
 	g_clear_object (&new_value);
@@ -1737,21 +2065,43 @@ ecb_m365_add_reminder (ECalBackendM365 *cbm365,
 
 static gboolean
 ecb_m365_get_attachments (ECalBackendM365 *cbm365,
-			  EM365Event *m365_event,
+			  JsonObject *m365_object,
 			  ICalComponent *inout_comp,
 			  ICalPropertyKind prop_kind,
 			  GCancellable *cancellable,
 			  GError **error)
 {
 	GSList *attachments = NULL, *link;
+	const gchar *id;
 	gboolean success = TRUE;
 
-	if (!e_m365_event_get_has_attachments (m365_event))
-		return TRUE;
+	switch (i_cal_component_isa (inout_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		if (!e_m365_event_get_has_attachments (m365_object))
+			return TRUE;
 
-	if (!e_m365_connection_list_event_attachments_sync (cbm365->priv->cnc, NULL,
-		cbm365->priv->group_id, cbm365->priv->folder_id, e_m365_event_get_id (m365_event), "id,name,contentType,contentBytes",
-		&attachments, cancellable, error)) {
+		id = e_m365_event_get_id (m365_object);
+
+		if (!e_m365_connection_list_event_attachments_sync (cbm365->priv->cnc, NULL,
+			cbm365->priv->group_id, cbm365->priv->folder_id, id, "id,name,contentType,contentBytes",
+			&attachments, cancellable, error)) {
+			return FALSE;
+		}
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		if (!e_m365_task_get_has_attachments (m365_object))
+			return TRUE;
+
+		id = e_m365_task_get_id (m365_object);
+
+		if (!e_m365_connection_list_task_attachments_sync (cbm365->priv->cnc, NULL,
+			cbm365->priv->group_id, cbm365->priv->folder_id, id, "id,name,contentType,contentBytes",
+			&attachments, cancellable, error)) {
+			return FALSE;
+		}
+		break;
+	default:
+		g_warn_if_reached ();
 		return FALSE;
 	}
 
@@ -1764,7 +2114,7 @@ ecb_m365_get_attachments (ECalBackendM365 *cbm365,
 		    !e_m365_attachment_get_name (m365_attach))
 			continue;
 
-		filename = g_build_filename (cbm365->priv->attachments_dir, e_m365_event_get_id (m365_event), e_m365_attachment_get_id (m365_attach), NULL);
+		filename = g_build_filename (cbm365->priv->attachments_dir, id, e_m365_attachment_get_id (m365_attach), NULL);
 
 		content_stream = camel_stream_fs_new_with_name (filename, O_CREAT | O_TRUNC | O_WRONLY, 0666, error);
 
@@ -1896,7 +2246,38 @@ ecb_m365_add_attachments (ECalBackendM365 *cbm365,
 {
 	GSList *new_attachs = NULL;
 	GHashTable *old_attachs = NULL;
+	gboolean (* add_attachment_func) (EM365Connection *cnc,
+					  const gchar *user_override,
+					  const gchar *group_id,
+					  const gchar *folder_id,
+					  const gchar *item_id,
+					  JsonBuilder *in_attachment,
+					  EM365Attachment **out_attachment,
+					  GCancellable *cancellable,
+					  GError **error);
+	gboolean (* delete_attachment_func) (EM365Connection *cnc,
+					     const gchar *user_override,
+					     const gchar *group_id,
+					     const gchar *folder_id,
+					     const gchar *item_id,
+					     const gchar *attachment_id,
+					     GCancellable *cancellable,
+					     GError **error);
 	gboolean success = TRUE;
+
+	switch (i_cal_component_isa (new_comp)) {
+	case I_CAL_VEVENT_COMPONENT:
+		add_attachment_func = e_m365_connection_add_event_attachment_sync;
+		delete_attachment_func = e_m365_connection_delete_event_attachment_sync;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		add_attachment_func = e_m365_connection_add_task_attachment_sync;
+		delete_attachment_func = e_m365_connection_delete_task_attachment_sync;
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
+	}
 
 	if (!i_cal_component_count_properties (new_comp, I_CAL_ATTACH_PROPERTY) &&
 	    !(old_comp ? i_cal_component_count_properties (old_comp, I_CAL_ATTACH_PROPERTY) : 0)) {
@@ -2046,7 +2427,7 @@ ecb_m365_add_attachments (ECalBackendM365 *cbm365,
 
 				e_m365_attachment_end_attachment (builder);
 
-				success = e_m365_connection_add_event_attachment_sync (cbm365->priv->cnc, NULL,
+				success = add_attachment_func (cbm365->priv->cnc, NULL,
 					cbm365->priv->group_id, cbm365->priv->folder_id, m365_id,
 					builder, NULL, cancellable, error);
 
@@ -2069,7 +2450,7 @@ ecb_m365_add_attachments (ECalBackendM365 *cbm365,
 		while (g_hash_table_iter_next (&iter, &key, NULL) && success) {
 			const gchar *attachment_id = key;
 
-			success = e_m365_connection_delete_event_attachment_sync (cbm365->priv->cnc, NULL,
+			success = delete_attachment_func (cbm365->priv->cnc, NULL,
 				cbm365->priv->group_id, cbm365->priv->folder_id, i_cal_component_get_uid (new_comp),
 				attachment_id, cancellable, error);
 		}
@@ -2080,6 +2461,82 @@ ecb_m365_add_attachments (ECalBackendM365 *cbm365,
 	g_slist_free_full (new_attachs, g_object_unref);
 
 	return success;
+}
+
+static void
+ecb_m365_get_task_status (ECalBackendM365 *cbm365,
+			  EM365Task *m365_task,
+			  ICalComponent *inout_comp,
+			  ICalPropertyKind prop_kind)
+{
+	ICalPropertyStatus status = I_CAL_STATUS_NONE;
+
+	switch (e_m365_task_get_status (m365_task)) {
+	case E_M365_STATUS_NOT_STARTED:
+		break;
+	case E_M365_STATUS_IN_PROGRESS:
+	case E_M365_STATUS_WAITING_ON_OTHERS:
+		status = I_CAL_STATUS_INPROCESS;
+		break;
+	case E_M365_STATUS_COMPLETED:
+		status = I_CAL_STATUS_COMPLETED;
+		break;
+	case E_M365_STATUS_DEFERRED:
+		status = I_CAL_STATUS_CANCELLED;
+		break;
+	default:
+		break;
+	}
+
+	if (status != I_CAL_STATUS_NONE)
+		i_cal_component_take_property (inout_comp, i_cal_property_new_status (status));
+}
+
+static void
+ecb_m365_add_task_status (ECalBackendM365 *cbm365,
+			  ICalComponent *new_comp,
+			  ICalComponent *old_comp,
+			  ICalPropertyKind prop_kind,
+			  JsonBuilder *builder)
+{
+	ICalProperty *new_prop, *old_prop;
+	ICalPropertyStatus new_value, old_value;
+
+	new_prop = i_cal_component_get_first_property (new_comp, prop_kind);
+	old_prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
+
+	if (!new_prop && !old_prop)
+		return;
+
+	new_value = new_prop ? i_cal_property_get_status (new_prop) : I_CAL_STATUS_NONE;
+	old_value = old_prop ? i_cal_property_get_status (old_prop) : I_CAL_STATUS_NONE;
+
+	if (new_value != old_value) {
+		EM365StatusType value = E_M365_STATUS_UNKNOWN;
+
+		switch (new_value) {
+		case I_CAL_STATUS_NONE:
+			value = E_M365_STATUS_NOT_STARTED;
+			break;
+		case I_CAL_STATUS_INPROCESS:
+			value = E_M365_STATUS_IN_PROGRESS;
+			break;
+		case I_CAL_STATUS_COMPLETED:
+			value = E_M365_STATUS_COMPLETED;
+			break;
+		case I_CAL_STATUS_CANCELLED:
+			value = E_M365_STATUS_DEFERRED;
+			break;
+		default:
+			break;
+		}
+
+		if (value != E_M365_STATUS_UNKNOWN)
+			e_m365_task_add_status (builder, value);
+	}
+
+	g_clear_object (&new_prop);
+	g_clear_object (&old_prop);
 }
 
 #define SIMPLE_FIELD(propknd, getfn, addfn) { propknd, FALSE, getfn, NULL, addfn, NULL }
@@ -2112,7 +2569,7 @@ struct _mappings {
 						 JsonBuilder *builder,
 						 GCancellable *cancellable,
 						 GError **error);
-} mappings[] = {
+} event_mappings[] = {
 	SIMPLE_FIELD	(I_CAL_UID_PROPERTY,		ecb_m365_get_uid,		NULL),
 	SIMPLE_FIELD	(I_CAL_CREATED_PROPERTY,	ecb_m365_get_date_time,		NULL),
 	SIMPLE_FIELD	(I_CAL_LASTMODIFIED_PROPERTY,	ecb_m365_get_date_time,		NULL),
@@ -2127,11 +2584,49 @@ struct _mappings {
 	SIMPLE_FIELD	(I_CAL_ORGANIZER_PROPERTY,	ecb_m365_get_organizer,		ecb_m365_add_organizer),
 	SIMPLE_FIELD	(I_CAL_ATTENDEE_PROPERTY,	ecb_m365_get_attendees,		ecb_m365_add_attendees),
 	SIMPLE_FIELD	(I_CAL_PRIORITY_PROPERTY,	ecb_m365_get_importance,	ecb_m365_add_importance),
-	SIMPLE_FIELD	(I_CAL_STATUS_PROPERTY,		ecb_m365_get_status,		NULL),
+	SIMPLE_FIELD	(I_CAL_STATUS_PROPERTY,		ecb_m365_get_event_status,	NULL),
+	COMPLEX_FIELD	(I_CAL_RRULE_PROPERTY,		ecb_m365_get_recurrence,	ecb_m365_add_recurrence),
+	COMPLEX_FIELD	(I_CAL_X_PROPERTY,		ecb_m365_get_reminder,		ecb_m365_add_reminder),
+	COMPLEX_FIELD_2	(I_CAL_ATTACH_PROPERTY,		ecb_m365_get_attachments,	ecb_m365_add_attachments)
+}, task_mappings[] = {
+	SIMPLE_FIELD	(I_CAL_UID_PROPERTY,		ecb_m365_get_uid,		NULL),
+	SIMPLE_FIELD	(I_CAL_CREATED_PROPERTY,	ecb_m365_get_date_time,		NULL),
+	SIMPLE_FIELD	(I_CAL_LASTMODIFIED_PROPERTY,	ecb_m365_get_date_time,		NULL),
+	SIMPLE_FIELD	(I_CAL_DTSTART_PROPERTY,	ecb_m365_get_date_time_zone,	ecb_m365_add_date_time_zone),
+	SIMPLE_FIELD	(I_CAL_DUE_PROPERTY,		ecb_m365_get_date_time_zone,	ecb_m365_add_date_time_zone),
+	SIMPLE_FIELD	(I_CAL_COMPLETED_PROPERTY,	ecb_m365_get_date_time_zone,	ecb_m365_add_date_time_zone),
+	SIMPLE_FIELD	(I_CAL_CATEGORIES_PROPERTY,	ecb_m365_get_categories,	ecb_m365_add_categories),
+	SIMPLE_FIELD	(I_CAL_SUMMARY_PROPERTY,	ecb_m365_get_subject,		ecb_m365_add_subject),
+	SIMPLE_FIELD	(I_CAL_DESCRIPTION_PROPERTY,	ecb_m365_get_body,		ecb_m365_add_body),
+	SIMPLE_FIELD	(I_CAL_CLASS_PROPERTY,		ecb_m365_get_sensitivity,	ecb_m365_add_sensitivity),
+	SIMPLE_FIELD	(I_CAL_STATUS_PROPERTY,		ecb_m365_get_task_status,	ecb_m365_add_task_status),
 	COMPLEX_FIELD	(I_CAL_RRULE_PROPERTY,		ecb_m365_get_recurrence,	ecb_m365_add_recurrence),
 	COMPLEX_FIELD	(I_CAL_X_PROPERTY,		ecb_m365_get_reminder,		ecb_m365_add_reminder),
 	COMPLEX_FIELD_2	(I_CAL_ATTACH_PROPERTY,		ecb_m365_get_attachments,	ecb_m365_add_attachments)
 };
+
+static const struct _mappings *
+ecb_m365_get_mappings_for_backend (ECalBackendM365 *cbm365,
+				   guint *out_n_elements)
+{
+	ICalComponentKind kind;
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbm365));
+
+	if (kind == I_CAL_VEVENT_COMPONENT) {
+		*out_n_elements = G_N_ELEMENTS (event_mappings);
+		return event_mappings;
+	}
+
+	if (kind == I_CAL_VTODO_COMPONENT) {
+		*out_n_elements = G_N_ELEMENTS (task_mappings);
+		return task_mappings;
+	}
+
+	g_warn_if_reached ();
+
+	return NULL;
+}
 
 static gchar *
 ecb_m365_join_to_extra (const gchar *change_key,
@@ -2145,23 +2640,38 @@ ecb_m365_join_to_extra (const gchar *change_key,
 
 static ICalComponent *
 ecb_m365_json_to_ical (ECalBackendM365 *cbm365,
-		       EM365Event *m365_event,
+		       JsonObject *m365_object,
 		       GCancellable *cancellable,
 		       GError **error)
 {
-	ICalComponent *icomp;
-	gint ii;
+	const struct _mappings *mappings;
+	ICalComponent *icomp = NULL;
+	ICalComponentKind kind;
+	guint ii, n_elements = 0;
 	gboolean success = TRUE;
 
-	g_return_val_if_fail (m365_event != NULL, NULL);
+	g_return_val_if_fail (m365_object != NULL, NULL);
 
-	icomp = i_cal_component_new_vevent ();
+	mappings = ecb_m365_get_mappings_for_backend (cbm365, &n_elements);
+	g_return_val_if_fail (mappings != NULL, NULL);
 
-	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbm365));
+
+	if (kind == I_CAL_VEVENT_COMPONENT)
+		icomp = i_cal_component_new_vevent ();
+	else if (kind == I_CAL_VTODO_COMPONENT)
+		icomp = i_cal_component_new_vtodo ();
+	else
+		g_warn_if_reached ();
+
+	if (!icomp)
+		return NULL;
+
+	for (ii = 0; success && ii < n_elements; ii++) {
 		if (mappings[ii].get_simple_func) {
-			mappings[ii].get_simple_func (cbm365, m365_event, icomp, mappings[ii].prop_kind);
+			mappings[ii].get_simple_func (cbm365, m365_object, icomp, mappings[ii].prop_kind);
 		} else if (mappings[ii].get_func) {
-			success = mappings[ii].get_func (cbm365, m365_event, icomp, mappings[ii].prop_kind, cancellable, error);
+			success = mappings[ii].get_func (cbm365, m365_object, icomp, mappings[ii].prop_kind, cancellable, error);
 		}
 	}
 
@@ -2206,16 +2716,20 @@ ecb_m365_ical_to_json_locked (ECalBackendM365 *cbm365,
 			      GCancellable *cancellable,
 			      GError **error)
 {
+	const struct _mappings *mappings;
 	JsonBuilder *builder;
-	gint ii;
+	guint ii, n_elements = 0;
 	gboolean success = TRUE;
 
 	g_return_val_if_fail (new_comp != NULL, NULL);
 
+	mappings = ecb_m365_get_mappings_for_backend (cbm365, &n_elements);
+	g_return_val_if_fail (mappings != NULL, NULL);
+
 	builder = json_builder_new_immutable ();
 	e_m365_json_begin_object_member (builder, NULL);
 
-	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+	for (ii = 0; success && ii < n_elements; ii++) {
 		if (mappings[ii].add_simple_func) {
 			mappings[ii].add_simple_func (cbm365, new_comp, old_comp, mappings[ii].prop_kind, builder);
 		} else if (!mappings[ii].add_in_second_go && mappings[ii].add_func) {
@@ -2239,12 +2753,16 @@ ecb_m365_ical_to_json_2nd_go_locked (ECalBackendM365 *cbm365,
 				     GCancellable *cancellable,
 				     GError **error)
 {
-	gint ii;
+	const struct _mappings *mappings;
+	guint ii, n_elements = 0;
 	gboolean success = TRUE;
 
 	g_return_val_if_fail (new_comp != NULL, FALSE);
 
-	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+	mappings = ecb_m365_get_mappings_for_backend (cbm365, &n_elements);
+	g_return_val_if_fail (mappings != NULL, FALSE);
+
+	for (ii = 0; success && ii < n_elements; ii++) {
 		if (mappings[ii].add_in_second_go && mappings[ii].add_func) {
 			success = mappings[ii].add_func (cbm365, new_comp, old_comp, mappings[ii].prop_kind, m365_id, NULL, cancellable, error);
 		}
@@ -2254,34 +2772,45 @@ ecb_m365_ical_to_json_2nd_go_locked (ECalBackendM365 *cbm365,
 }
 
 static gboolean
-ecb_m365_download_event_changes_locked (ECalBackendM365 *cbm365,
-					const GSList *ids,
-					GSList **out_info_objects,
-					GCancellable *cancellable,
-					GError **error)
+ecb_m365_download_changes_locked (ECalBackendM365 *cbm365,
+				  const GSList *ids,
+				  GSList **out_info_objects,
+				  GCancellable *cancellable,
+				  GError **error)
 {
-	GSList *events = NULL, *link;
+	GSList *items = NULL, *link;
 
 	if (!ids)
 		return TRUE;
 
-	if (!e_m365_connection_get_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, ids, NULL, NULL, &events, cancellable, error))
+	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbm365))) {
+	case I_CAL_VEVENT_COMPONENT:
+		if (!e_m365_connection_get_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, ids, NULL, NULL, &items, cancellable, error))
+			return FALSE;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		if (!e_m365_connection_get_tasks_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, ids, NULL, NULL, &items, cancellable, error))
+			return FALSE;
+		break;
+	default:
+		g_warn_if_reached ();
 		return FALSE;
+	}
 
-	for (link = events; link; link = g_slist_next (link)) {
-		EM365Event *event = link->data;
+	for (link = items; link; link = g_slist_next (link)) {
+		JsonObject *item = link->data;
 		ECalMetaBackendInfo *nfo;
 
-		if (!event)
+		if (!item)
 			continue;
 
-		nfo = ecb_m365_json_to_ical_nfo (cbm365, event, cancellable, error);
+		nfo = ecb_m365_json_to_ical_nfo (cbm365, item, cancellable, error);
 
 		if (nfo)
 			*out_info_objects = g_slist_prepend (*out_info_objects, nfo);
 	}
 
-	g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
 
 	return TRUE;
 }
@@ -2335,10 +2864,23 @@ ecb_m365_connect_sync (ECalMetaBackend *meta_backend,
 		       GError **error)
 {
 	ECalBackendM365 *cbm365;
+	EM365FolderKind folder_kind;
 	gboolean success = FALSE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (out_auth_result != NULL, FALSE);
+
+	switch (e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend))) {
+	case I_CAL_VEVENT_COMPONENT:
+		folder_kind = E_M365_FOLDER_KIND_CALENDAR;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		folder_kind = E_M365_FOLDER_KIND_TASKS;
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
+	}
 
 	cbm365 = E_CAL_BACKEND_M365 (meta_backend);
 
@@ -2373,7 +2915,7 @@ ecb_m365_connect_sync (ECalMetaBackend *meta_backend,
 		if (folder_id) {
 			cnc = e_m365_connection_new_for_backend (backend, registry, source, m365_settings);
 
-			*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_CALENDAR, group_id, folder_id,
+			*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, folder_kind, group_id, folder_id,
 				out_certificate_pem, out_certificate_errors, cancellable, error);
 
 			if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
@@ -2435,9 +2977,20 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 {
 	ECalBackendM365 *cbm365;
 	ECalCache *cal_cache;
-	GSList *events = NULL, *link;
+	GSList *items = NULL, *link;
 	gboolean full_read;
 	gboolean success = TRUE;
+	gboolean (* list_items_func) (EM365Connection *cnc,
+				      const gchar *user_override,
+				      const gchar *group_id,
+				      const gchar *calendar_id,
+				      const gchar *prefer_outlook_timezone,
+				      const gchar *select,
+				      GSList **out_items,
+				      GCancellable *cancellable,
+				      GError **error);
+	const gchar *(* get_id_func) (JsonObject *item);
+	const gchar *(* get_change_key_func) (JsonObject *item);
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (out_new_sync_tag != NULL, FALSE);
@@ -2445,6 +2998,22 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	g_return_val_if_fail (out_created_objects != NULL, FALSE);
 	g_return_val_if_fail (out_modified_objects != NULL, FALSE);
 	g_return_val_if_fail (out_removed_objects != NULL, FALSE);
+
+	switch (e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend))) {
+	case I_CAL_VEVENT_COMPONENT:
+		list_items_func = e_m365_connection_list_events_sync;
+		get_id_func = e_m365_event_get_id;
+		get_change_key_func = e_m365_event_get_change_key;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		list_items_func = e_m365_connection_list_tasks_sync;
+		get_id_func = e_m365_task_get_id;
+		get_change_key_func = e_m365_task_get_change_key;
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
+	}
 
 	*out_created_objects = NULL;
 	*out_modified_objects = NULL;
@@ -2459,23 +3028,23 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 	full_read = !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
 
-	success = e_m365_connection_list_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, NULL,
-		full_read ? NULL : "id,changeKey", &events, cancellable, error);
+	success = list_items_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, NULL,
+		full_read ? NULL : "id,changeKey", &items, cancellable, error);
 
 	if (success) {
-		GSList *new_ids = NULL; /* const gchar *, borrowed from 'events' objects */
-		GSList *changed_ids = NULL; /* const gchar *, borrowed from 'events' objects */
+		GSList *new_ids = NULL; /* const gchar *, borrowed from 'items' objects */
+		GSList *changed_ids = NULL; /* const gchar *, borrowed from 'items' objects */
 
-		for (link = events; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
-			EM365Event *event = link->data;
+		for (link = items; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+			JsonObject *item = link->data;
 			const gchar *id, *change_key;
 			gchar *extra = NULL;
 
-			if (!event)
+			if (!item)
 				continue;
 
-			id = e_m365_event_get_id (event);
-			change_key = e_m365_event_get_change_key (event);
+			id = get_id_func (item);
+			change_key = get_change_key_func (item);
 
 			if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
 				const gchar *saved_change_key = NULL;
@@ -2488,7 +3057,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 				} else if (full_read) {
 					ECalMetaBackendInfo *nfo;
 
-					nfo = ecb_m365_json_to_ical_nfo (cbm365, event, cancellable, NULL);
+					nfo = ecb_m365_json_to_ical_nfo (cbm365, item, cancellable, NULL);
 
 					if (nfo)
 						*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
@@ -2500,7 +3069,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 			} else if (full_read) {
 				ECalMetaBackendInfo *nfo;
 
-				nfo = ecb_m365_json_to_ical_nfo (cbm365, event, cancellable, NULL);
+				nfo = ecb_m365_json_to_ical_nfo (cbm365, item, cancellable, NULL);
 
 				if (nfo)
 					*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
@@ -2511,19 +3080,19 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 		if (new_ids) {
 			new_ids = g_slist_reverse (new_ids);
-			success = ecb_m365_download_event_changes_locked (cbm365, new_ids, out_created_objects, cancellable, error);
+			success = ecb_m365_download_changes_locked (cbm365, new_ids, out_created_objects, cancellable, error);
 		}
 
 		if (success && changed_ids) {
 			changed_ids = g_slist_reverse (changed_ids);
-			success = ecb_m365_download_event_changes_locked (cbm365, changed_ids, out_modified_objects, cancellable, error);
+			success = ecb_m365_download_changes_locked (cbm365, changed_ids, out_modified_objects, cancellable, error);
 		}
 
 		g_slist_free (new_ids);
 		g_slist_free (changed_ids);
 	}
 
-	g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
 
 	UNLOCK (cbm365);
 
@@ -2545,7 +3114,8 @@ ecb_m365_load_component_sync (ECalMetaBackend *meta_backend,
 			      GError **error)
 {
 	ECalBackendM365 *cbm365;
-	EM365Event *event = NULL;
+	JsonObject *item = NULL;
+	const gchar *(* get_change_key_func) (JsonObject *item);
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
@@ -2557,18 +3127,31 @@ ecb_m365_load_component_sync (ECalMetaBackend *meta_backend,
 
 	LOCK (cbm365);
 
-	success = e_m365_connection_get_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-		cbm365->priv->folder_id, uid, NULL, NULL, &event, cancellable, error);
+	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbm365))) {
+	case I_CAL_VEVENT_COMPONENT:
+		success = e_m365_connection_get_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			cbm365->priv->folder_id, uid, NULL, NULL, &item, cancellable, error);
+		get_change_key_func = e_m365_event_get_change_key;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		success = e_m365_connection_get_task_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			cbm365->priv->folder_id, uid, NULL, NULL, &item, cancellable, error);
+		get_change_key_func = e_m365_task_get_change_key;
+		break;
+	default:
+		success = FALSE;
+		break;
+	}
 
 	if (success) {
-		*out_component = ecb_m365_json_to_ical (cbm365, event, cancellable, error);
+		*out_component = ecb_m365_json_to_ical (cbm365, item, cancellable, error);
 
 		if (*out_component) {
 			gchar *ical_str;
 
 			ical_str = i_cal_component_as_ical_string (*out_component);
 
-			*out_extra = ecb_m365_join_to_extra (e_m365_event_get_change_key (event), ical_str);
+			*out_extra = ecb_m365_join_to_extra (get_change_key_func (item), ical_str);
 
 			g_free (ical_str);
 		} else {
@@ -2600,14 +3183,58 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 	ICalComponent *new_comp, *old_comp = NULL;
 	JsonBuilder *builder;
 	gboolean success = FALSE;
+	gboolean (* create_item_func) (EM365Connection *cnc,
+				       const gchar *user_override,
+				       const gchar *group_id,
+				       const gchar *folder_id,
+				       JsonBuilder *item,
+				       JsonObject **out_created_item,
+				       GCancellable *cancellable,
+				       GError **error);
+	gboolean (* update_item_func) (EM365Connection *cnc,
+				       const gchar *user_override,
+				       const gchar *group_id,
+				       const gchar *folder_id,
+				       const gchar *item_id,
+				       JsonBuilder *item,
+				       GCancellable *cancellable,
+				       GError **error);
+	const gchar *(* get_id_func) (JsonObject *item);
+	const gchar *(* get_change_key_func) (JsonObject *item);
+
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (instances != NULL, FALSE);
 
-	if (instances->next) {
-		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
-			_("Can store only simple events into Microsoft 365 calendar")));
+	switch (e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend))) {
+	case I_CAL_VEVENT_COMPONENT:
+		if (instances->next) {
+			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+				_("Can store only simple events into Microsoft 365 calendar")));
 
+			return FALSE;
+		}
+
+		create_item_func = e_m365_connection_create_event_sync;
+		update_item_func = e_m365_connection_update_event_sync;
+		get_id_func = e_m365_event_get_id;
+		get_change_key_func = e_m365_event_get_change_key;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		if (instances->next) {
+			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+				_("Can store only simple tasks into Microsoft 365 task folder")));
+
+			return FALSE;
+		}
+
+		create_item_func = e_m365_connection_create_task_sync;
+		update_item_func = e_m365_connection_update_task_sync;
+		get_id_func = e_m365_task_get_id;
+		get_change_key_func = e_m365_task_get_change_key;
+		break;
+	default:
+		g_warn_if_reached ();
 		return FALSE;
 	}
 
@@ -2632,7 +3259,7 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 		if (overwrite_existing) {
 			const gchar *uid = i_cal_component_get_uid (new_comp);
 
-			success = e_m365_connection_update_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			success = update_item_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
 				cbm365->priv->folder_id, uid, builder, cancellable, error);
 
 			if (success)
@@ -2643,30 +3270,30 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 				*out_new_uid = g_strdup (uid);
 			}
 		} else {
-			EM365Event *created_event = NULL;
+			JsonObject *created_item = NULL;
 
-			success = e_m365_connection_create_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-				cbm365->priv->folder_id, builder, &created_event, cancellable, error);
+			success = create_item_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+				cbm365->priv->folder_id, builder, &created_item, cancellable, error);
 
-			if (success && created_event) {
-				const gchar *m365_id = e_m365_event_get_id (created_event);
+			if (success && created_item) {
+				const gchar *m365_id = get_id_func (created_item);
 
 				success = ecb_m365_ical_to_json_2nd_go_locked (cbm365, new_comp, old_comp, m365_id, cancellable, error);
 			}
 
-			if (success && created_event) {
+			if (success && created_item) {
 				ICalComponent *icomp;
 
-				*out_new_uid = g_strdup (e_m365_event_get_id (created_event));
+				*out_new_uid = g_strdup (get_id_func (created_item));
 
-				icomp = ecb_m365_json_to_ical (cbm365, created_event, cancellable, error);
+				icomp = ecb_m365_json_to_ical (cbm365, created_item, cancellable, error);
 
 				if (icomp) {
 					gchar *ical_str;
 
 					ical_str = i_cal_component_as_ical_string (icomp);
 
-					*out_new_extra = ecb_m365_join_to_extra (e_m365_event_get_change_key (created_event), ical_str);
+					*out_new_extra = ecb_m365_join_to_extra (get_change_key_func (created_item), ical_str);
 
 					g_clear_object (&icomp);
 					g_free (ical_str);
@@ -2675,8 +3302,8 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 				}
 			}
 
-			if (created_event)
-				json_object_unref (created_event);
+			if (created_item)
+				json_object_unref (created_item);
 		}
 
 		g_clear_object (&builder);
@@ -2703,7 +3330,7 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 				GError **error)
 {
 	ECalBackendM365 *cbm365;
-	gboolean success = FALSE;
+	gboolean success;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (object != NULL, FALSE);
@@ -2712,8 +3339,19 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 
 	LOCK (cbm365);
 
-	success = e_m365_connection_delete_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-		cbm365->priv->folder_id, uid, cancellable, error);
+	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbm365))) {
+	case I_CAL_VEVENT_COMPONENT:
+		success = e_m365_connection_delete_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			cbm365->priv->folder_id, uid, cancellable, error);
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		success = e_m365_connection_delete_task_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			cbm365->priv->folder_id, uid, cancellable, error);
+		break;
+	default:
+		g_warn_if_reached ();
+		success = FALSE;
+	}
 
 	UNLOCK (cbm365);
 
@@ -2737,6 +3375,11 @@ ecb_m365_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 
 	g_return_if_fail (E_IS_CAL_BACKEND_M365 (cal_backend_sync));
 	g_return_if_fail (uid != NULL);
+
+	if (e_cal_backend_get_kind (E_CAL_BACKEND (cal_backend_sync)) != I_CAL_VEVENT_COMPONENT) {
+		g_propagate_error (error, EC_ERROR (E_CLIENT_ERROR_NOT_SUPPORTED));
+		return;
+	}
 
 	cbm365 = E_CAL_BACKEND_M365 (cal_backend_sync);
 
@@ -2771,6 +3414,11 @@ ecb_m365_get_free_busy_sync (ECalBackendSync *cal_backend_sync,
 	g_return_if_fail (E_IS_CAL_BACKEND_M365 (cal_backend_sync));
 	g_return_if_fail (users != NULL);
 	g_return_if_fail (out_freebusyobjs != NULL);
+
+	if (e_cal_backend_get_kind (E_CAL_BACKEND (cal_backend_sync)) != I_CAL_VEVENT_COMPONENT) {
+		g_propagate_error (error, EC_ERROR (E_CLIENT_ERROR_NOT_SUPPORTED));
+		return;
+	}
 
 	cbm365 = E_CAL_BACKEND_M365 (cal_backend_sync);
 
