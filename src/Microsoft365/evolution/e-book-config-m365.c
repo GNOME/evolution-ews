@@ -18,7 +18,7 @@ G_DEFINE_DYNAMIC_TYPE (EBookConfigM365, e_book_config_m365, E_TYPE_SOURCE_CONFIG
 static gboolean
 book_config_m365_allow_creation (ESourceConfigBackend *backend)
 {
-	return TRUE;
+	return FALSE;
 }
 
 static void

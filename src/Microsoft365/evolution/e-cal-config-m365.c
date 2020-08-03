@@ -13,6 +13,7 @@ G_DEFINE_DYNAMIC_TYPE (ECalConfigM365, e_cal_config_m365, E_TYPE_SOURCE_CONFIG_B
 static gboolean
 cal_config_m365_allow_creation (ESourceConfigBackend *backend)
 {
+#if 0
 	ESourceConfig *config;
 	ECalSourceConfig *cal_config;
 	ECalClientSourceType source_type;
@@ -34,6 +35,8 @@ cal_config_m365_allow_creation (ESourceConfigBackend *backend)
 	}
 
 	return allow_creation;
+#endif
+	return FALSE;
 }
 
 static void
