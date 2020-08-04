@@ -8,6 +8,8 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "server/camel-sasl-xoauth2-office365.h"
+#include "server/e-oauth2-service-office365.h"
 #include "server/e-source-ews-folder.h"
 
 #include "e-cal-config-ews.h"
@@ -51,6 +53,8 @@ e_module_load (GTypeModule *type_module)
 	e_ews_config_ui_extension_type_register (type_module);
 	e_ews_ooo_notificator_type_register (type_module);
 	e_ews_photo_source_type_register (type_module);
+	camel_sasl_xoauth2_office365_type_register (type_module);
+	e_oauth2_service_office365_type_register (type_module);
 
 	e_source_ews_folder_type_register (type_module);
 }

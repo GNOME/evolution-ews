@@ -8,6 +8,7 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "server/e-oauth2-service-office365.h"
 #include "server/e-source-ews-folder.h"
 
 #include "e-ews-backend.h"
@@ -25,6 +26,7 @@ e_module_load (GTypeModule *type_module)
 
 	e_ews_backend_type_register (type_module);
 	e_ews_backend_factory_type_register (type_module);
+	e_oauth2_service_office365_type_register (type_module);
 
 	e_source_ews_folder_type_register (type_module);
 }
