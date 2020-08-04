@@ -24,6 +24,15 @@
 /* libmspack has OAB support */
 #cmakedefine WITH_MSPACK 1
 
+/* Define Office365 OAuth 2.0 default Tenant to use */
+#define OFFICE365_TENANT "@WITH_OFFICE365_TENANT@"
+
+/* Define Office365 OAuth 2.0 default Client ID to use */
+#define OFFICE365_CLIENT_ID "@WITH_OFFICE365_CLIENT_ID@"
+
+/* Define Office365 OAuth 2.0 default Redirect URI to use */
+#define OFFICE365_REDIRECT_URI "@WITH_OFFICE365_REDIRECT_URI@"
+
 /* Define Microsoft 365 OAuth 2.0 default Tenant to use */
 #define MICROSOFT365_TENANT "@WITH_MICROSOFT365_TENANT@"
 

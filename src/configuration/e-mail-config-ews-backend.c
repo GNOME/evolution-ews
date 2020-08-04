@@ -335,13 +335,13 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	mail_config_ews_backend_set_oauth2_tooltip (widget, MICROSOFT365_TENANT,
+	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_TENANT,
 		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		_("Default tenant is “common“"),
 		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
-		g_strdup_printf (_("Default tenant is “%s”"), MICROSOFT365_TENANT));
+		g_strdup_printf (_("Default tenant is “%s”"), OFFICE365_TENANT));
 
 	widget = gtk_label_new_with_mnemonic (_("Application I_D:"));
 	gtk_widget_set_margin_left (widget, 12);
@@ -365,9 +365,9 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	mail_config_ews_backend_set_oauth2_tooltip (widget, MICROSOFT365_CLIENT_ID,
+	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_CLIENT_ID,
 		_("There is not set any default application ID"),
-		g_strdup_printf (_("Default application ID is “%s”"), MICROSOFT365_CLIENT_ID));
+		g_strdup_printf (_("Default application ID is “%s”"), OFFICE365_CLIENT_ID));
 
 	widget = gtk_label_new_with_mnemonic (_("_Redirect URI:"));
 	gtk_widget_set_margin_left (widget, 12);
@@ -392,9 +392,9 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_SYNC_CREATE);
 
 	markup = g_strdup_printf (_("Default redirect URI is “%s”"), "https://login.microsoftonline.com/common/oauth2/nativeclient");
-	mail_config_ews_backend_set_oauth2_tooltip (widget, MICROSOFT365_REDIRECT_URI,
+	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_REDIRECT_URI,
 		markup,
-		g_strdup_printf (_("Default redirect URI is “%s”"), MICROSOFT365_REDIRECT_URI));
+		g_strdup_printf (_("Default redirect URI is “%s”"), OFFICE365_REDIRECT_URI));
 	g_free (markup);
 
 	gtk_widget_show_all (GTK_WIDGET (priv->oauth2_settings_grid));
@@ -610,7 +610,7 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
 			client_id = camel_ews_settings_get_oauth2_client_id (ews_settings);
 		} else {
-			client_id = MICROSOFT365_CLIENT_ID;
+			client_id = OFFICE365_CLIENT_ID;
 		}
 
 		correct = client_id && *client_id;

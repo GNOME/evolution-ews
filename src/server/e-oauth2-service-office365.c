@@ -119,7 +119,7 @@ eos_office365_get_client_id (EOAuth2Service *service,
 			return eos_office365_cache_string (oauth2_office365, client_id);
 	}
 
-	return MICROSOFT365_CLIENT_ID;
+	return OFFICE365_CLIENT_ID;
 }
 
 static const gchar *
@@ -149,14 +149,14 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 
 		res = eos_office365_cache_string (oauth2_office365,
 			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/authorize",
-				tenant ? tenant : MICROSOFT365_TENANT));
+				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
 
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" MICROSOFT365_TENANT "/oauth2/authorize";
+	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/authorize";
 }
 
 static const gchar *
@@ -179,14 +179,14 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 
 		res = eos_office365_cache_string (oauth2_office365,
 			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/token",
-				tenant ? tenant : MICROSOFT365_TENANT));
+				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
 
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" MICROSOFT365_TENANT "/oauth2/token";
+	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/token";
 }
 
 static const gchar *
@@ -212,7 +212,7 @@ eos_office365_get_redirect_uri (EOAuth2Service *service,
 			return eos_office365_cache_string (oauth2_office365, redirect_uri);
 	}
 
-	res = MICROSOFT365_REDIRECT_URI;
+	res = OFFICE365_REDIRECT_URI;
 	if (res && *res)
 		return res;
 
