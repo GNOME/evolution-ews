@@ -12,6 +12,9 @@
 /* Package name for gettext */
 #define GETTEXT_PACKAGE "@GETTEXT_PACKAGE@"
 
+/* Configured with enabled maintainer mode */
+#cmakedefine ENABLE_MAINTAINER_MODE 1
+
 /* Define to add support for low level tests */
 #cmakedefine ENABLE_TESTS 1
 
@@ -29,3 +32,12 @@
 
 /* Define Office365 OAuth 2.0 default Redirect URI to use */
 #define OFFICE365_REDIRECT_URI "@WITH_OFFICE365_REDIRECT_URI@"
+
+/* Define Microsoft 365 OAuth 2.0 default Tenant to use */
+#define MICROSOFT365_TENANT "@WITH_MICROSOFT365_TENANT@"
+
+/* Define Microsoft 365 OAuth 2.0 default Client ID to use */
+#define MICROSOFT365_CLIENT_ID "@WITH_MICROSOFT365_CLIENT_ID@"
+
+/* Define Microsoft 365 OAuth 2.0 default Redirect URI to use */
+#define MICROSOFT365_REDIRECT_URI "@WITH_MICROSOFT365_REDIRECT_URI@"

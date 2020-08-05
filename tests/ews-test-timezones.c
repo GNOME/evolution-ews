@@ -6,8 +6,8 @@
  */
 
 #include "calendar/e-cal-backend-ews-utils.h"
-#include "server/e-ews-connection.h"
-#include "server/e-ews-debug.h"
+#include "common/e-ews-connection.h"
+#include "common/e-ews-debug.h"
 
 #include "ews-test-common.h"
 

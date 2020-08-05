@@ -7,9 +7,9 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
-#include "server/e-ews-connection.h"
-#include "server/e-ews-debug.h"
-#include "server/e-ews-folder.h"
+#include "common/e-ews-connection.h"
+#include "common/e-ews-debug.h"
+#include "common/e-ews-folder.h"
 
 #include "ews-test-common.h"
 

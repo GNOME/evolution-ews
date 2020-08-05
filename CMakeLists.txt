@@ -46,6 +46,7 @@ set(eds_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJ
 set(evo_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(mspack_minimum_version 0.4)
 set(libical_glib_minimum_version 3.0.5)
+set(json_glib_minimum_version 1.0.4)
 
 # Load modules from the source tree
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
@@ -142,6 +143,8 @@ pkg_check_modules(SOUP REQUIRED libsoup-2.4>=${soup_minimum_version})
 
 pkg_check_modules(LIBICAL_GLIB REQUIRED libical-glib>=${libical_glib_minimum_version})
 
+pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0>=${json_glib_minimum_version})
+
 # ******************************
 # libmspack with OAB support
 # ******************************
@@ -196,6 +199,28 @@ add_printable_variable(WITH_OFFICE365_REDIRECT_URI "Office365.com OAuth 2.0 redi
 if(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
 	set(WITH_OFFICE365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
 endif(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
+
+# ******************************
+# Microsoft365 OAuth2 support (v2.0)
+# ******************************
+
+add_printable_variable(WITH_MICROSOFT365_TENANT "Microsoft 365 OAuth 2.0 tenant" "")
+
+if(WITH_MICROSOFT365_TENANT STREQUAL "")
+	set(WITH_MICROSOFT365_TENANT "common")
+endif(WITH_MICROSOFT365_TENANT STREQUAL "")
+
+add_printable_variable(WITH_MICROSOFT365_CLIENT_ID "Microsoft 365 OAuth 2.0 client ID" "")
+
+if(WITH_MICROSOFT365_CLIENT_ID STREQUAL "")
+	set(WITH_MICROSOFT365_CLIENT_ID "20460e5d-ce91-49af-a3a5-70b6be7486d1")
+endif(WITH_MICROSOFT365_CLIENT_ID STREQUAL "")
+
+add_printable_variable(WITH_MICROSOFT365_REDIRECT_URI "Microsoft 365 OAuth 2.0 redirect URI" "")
+
+if(WITH_MICROSOFT365_REDIRECT_URI STREQUAL "")
+	set(WITH_MICROSOFT365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
+endif(WITH_MICROSOFT365_REDIRECT_URI STREQUAL "")
 
 # ******************************
 # Special directories

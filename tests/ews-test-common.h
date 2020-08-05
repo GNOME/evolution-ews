@@ -10,8 +10,8 @@
 
 #include <uhttpmock/uhm.h>
 
-#include "server/camel-ews-settings.h"
-#include "server/e-ews-connection.h"
+#include "common/camel-ews-settings.h"
+#include "common/e-ews-connection.h"
 
 G_BEGIN_DECLS
 

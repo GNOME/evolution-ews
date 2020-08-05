@@ -32,8 +32,8 @@ macro(add_ews_test _name)
 	target_include_directories(${_name} PUBLIC
 		${CMAKE_BINARY_DIR}
 		${CMAKE_SOURCE_DIR}
-		${CMAKE_BINARY_DIR}/src
-		${CMAKE_SOURCE_DIR}/src
+		${CMAKE_BINARY_DIR}/src/EWS
+		${CMAKE_SOURCE_DIR}/src/EWS
 		${LIBECAL_INCLUDE_DIRS}
 		${LIBEDATASERVER_INCLUDE_DIRS}
 		${UHTTPMOCK_INCLUDE_DIRS}

@@ -1,0 +1,39 @@
+set(sources
+	e-cal-config-m365.c
+	e-cal-config-m365.h
+	e-book-config-m365.c
+	e-book-config-m365.h
+	e-mail-config-m365-backend.c
+	e-mail-config-m365-backend.h
+	module-m365-configuration.c
+)
+set(extra_deps)
+set(extra_defines)
+set(extra_cflags
+	${EVOLUTION_MAIL_CFLAGS}
+	${EVOLUTION_SHELL_CFLAGS}
+	${LIBECAL_CFLAGS}
+	${LIBEBOOK_CFLAGS}
+)
+set(extra_incdirs
+	${EVOLUTION_MAIL_INCLUDE_DIRS}
+	${EVOLUTION_SHELL_INCLUDE_DIRS}
+	${LIBECAL_INCLUDE_DIRS}
+	${LIBEBOOK_INCLUDE_DIRS}
+)
+set(extra_ldflags
+	${EVOLUTION_MAIL_LDFLAGS}
+	${EVOLUTION_SHELL_LDFLAGS}
+	${LIBECAL_LDFLAGS}
+	${LIBEBOOK_LDFLAGS}
+)
+
+add_simple_module_m365(module-microsoft365-configuration
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${evo_moduledir}"
+)

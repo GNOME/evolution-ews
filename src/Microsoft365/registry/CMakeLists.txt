@@ -1,0 +1,24 @@
+set(extra_deps)
+set(sources
+	module-m365-backend.c
+	e-m365-backend.c
+	e-m365-backend.h
+	e-m365-backend-factory.c
+	e-m365-backend-factory.h
+	e-source-m365-deltas.c
+	e-source-m365-deltas.h
+)
+set(extra_defines)
+set(extra_cflags)
+set(extra_incdirs)
+set(extra_ldflags)
+
+add_simple_module_m365(module-microsoft365-backend
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${eds_moduledir}"
+)
