@@ -1,3 +1,15 @@
+Evolution-EWS 3.37.90 2020-08-07
+--------------------------------
+
+Bug Fixes:
+	I#66 - Adapt the timezones test (Milan Crha)
+	I#66 - Correct how tests use uhttpmock (Milan Crha)
+	I#111 - Correct license comments in the source files (Milan Crha)
+
+Miscellaneous:
+	Provided SoupAuth might not be always used by libsoup (Milan Crha)
+	Add (disabled by default) Microsoft 365 (Graph API) connector (Milan Crha)
+
 Evolution-EWS 3.37.3 2020-07-03
 -------------------------------
 
