@@ -1,3 +1,9 @@
+Evolution-EWS 3.36.5 2020-08-07
+-------------------------------
+
+Miscellaneous:
+	Provided SoupAuth might not be always used by libsoup (Milan Crha)
+
 Evolution-EWS 3.36.4 2020-07-03
 -------------------------------
 
