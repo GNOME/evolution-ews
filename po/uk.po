@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-03-30 13:18+0000\n"
-"PO-Revision-Date: 2020-04-03 19:07+0300\n"
+"POT-Creation-Date: 2020-08-05 06:58+0000\n"
+"PO-Revision-Date: 2020-08-08 17:08+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -20,95 +20,97 @@ msgstr ""
 "X-Generator: Lokalize 20.07.70\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/camel/camel-ews-provider.c:85
-#: ../src/configuration/e-ews-config-lookup.c:251
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
+#: ../src/EWS/camel/camel-ews-provider.c:68
+#: ../src/EWS/evolution/e-ews-config-lookup.c:240
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:122
 msgid "Exchange Web Services"
 msgstr "Вебслужби Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:70
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
 
-#: ../src/addressbook/e-book-backend-ews.c:3497
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3510
 msgid "Failed to update GAL:"
 msgstr "Не вдалося оновити GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3659
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3672
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
-"Не вдалося зберегти список контактів, підтримку передбачено лише у EWS Server"
-" 2010 та новіших версіях"
+"Не вдалося зберегти список контактів, підтримку передбачено лише у EWS "
+"Server 2010 та новіших версіях"
 
-#: ../src/addressbook/e-book-backend-ews.c:3752
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3765
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1840
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1921
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/calendar/e-cal-backend-ews.c:1843
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1924
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/calendar/e-cal-backend-ews.c:1845
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1926
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/calendar/e-cal-backend-ews.c:1847
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1928
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/calendar/e-cal-backend-ews.c:2423
-#: ../src/calendar/e-cal-backend-ews.c:2602
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2504
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2683
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/calendar/e-cal-backend-ews.c:2893
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2974
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr ""
-"Неможливо створити зустрічі, які організовано іншими користувачами, у"
-" календарі вебслужб Exchange."
+"Неможливо створити зустрічі, які організовано іншими користувачами, у "
+"календарі вебслужб Exchange."
 
-#: ../src/calendar/e-cal-backend-ews.c:3603
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3684
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
 
-#: ../src/calendar/e-cal-backend-ews-utils.c:2124
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
 msgid "Invalid occurrence ID"
 msgstr "Некоректний ідентифікатор повторення"
 
-#: ../src/camel/camel-ews-folder.c:374
+#: ../src/EWS/camel/camel-ews-folder.c:356
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Не вдалося відкрити тимчасовий файл вмісту MIME!"
 
-#: ../src/camel/camel-ews-folder.c:382
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Не вдалося створити обробник на основі вмісту MIME!"
 
-#: ../src/camel/camel-ews-folder.c:391
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Не вдалося обробити запит щодо зустрічі mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
+#: ../src/EWS/camel/camel-ews-folder.c:442
+#: ../src/EWS/camel/camel-ews-folder.c:652
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Не вдалося створити файл кешу"
 
-#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
+#: ../src/EWS/camel/camel-ews-folder.c:769
+#: ../src/EWS/camel/camel-ews-folder.c:890
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Не вдалося створити шлях «%s»: %s"
@@ -116,119 +118,132 @@ msgstr "Не вдалося створити шлях «%s»: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:922
+#: ../src/EWS/camel/camel-ews-folder.c:904
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Не вдалося перемістити кеш-файл повідомлень з «%s» до «%s»: %s"
 
-#: ../src/camel/camel-ews-folder.c:1855
+#: ../src/EWS/camel/camel-ews-folder.c:1843
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не вдалося завантажити резюме щодо %s"
 
-#: ../src/camel/camel-ews-folder.c:2328
+#: ../src/EWS/camel/camel-ews-folder.c:2314
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Оновлення теки «%s»"
 
-#: ../src/camel/camel-ews-folder.c:2512
+#: ../src/EWS/camel/camel-ews-folder.c:2498
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
 
-#: ../src/camel/camel-ews-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:30
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Checking for new mail"
 msgstr "Перевірка нової пошти"
 
-#: ../src/camel/camel-ews-provider.c:49
+#: ../src/EWS/camel/camel-ews-provider.c:32
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "C_heck for new messages in all folders"
 msgstr "П_еревіряти нову пошту в усіх теках"
 
-#: ../src/camel/camel-ews-provider.c:51
+#: ../src/EWS/camel/camel-ews-provider.c:34
 msgid "_Listen for server change notifications"
 msgstr "_Очікувати на сповіщення щодо змін на сервері"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:30
 msgid "Options"
 msgstr "Параметри"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:32
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "Зас_тосовувати фільтри до нових повідомлень у теці \"Вхідні\" на сервері"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:34
 msgid "Check new messages for _Junk contents"
 msgstr "Перевіряти нові повідомлення на _спамом"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/EWS/camel/camel-ews-provider.c:43
+#: ../src/Microsoft365/camel/camel-m365-provider.c:36
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Перевіряти наявність небажаних повідомлень лише у теці «В_хідні»"
 
-#: ../src/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:45
+#: ../src/Microsoft365/camel/camel-m365-provider.c:38
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "С_инхронізувати віддалену пошту локально в усіх теках"
 
-#: ../src/camel/camel-ews-provider.c:65
+#: ../src/EWS/camel/camel-ews-provider.c:48
 msgid "Show _Public Folders beside user folders"
 msgstr "Показувати за_гальнодоступні теки серед тек користувачів"
 
-#: ../src/camel/camel-ews-provider.c:68
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:42
 msgid "Connection"
 msgstr "З'єднання"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:72
+#: ../src/EWS/camel/camel-ews-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Час очікування на з'єднання (у секундах) %s"
 
-#: ../src/camel/camel-ews-provider.c:74
+#: ../src/EWS/camel/camel-ews-provider.c:57
+#: ../src/Microsoft365/camel/camel-m365-provider.c:48
 msgid "Numbe_r of concurrent connections to use"
 msgstr "_Кількість паралельних з'єднань"
 
-#: ../src/camel/camel-ews-provider.c:76
+#: ../src/EWS/camel/camel-ews-provider.c:59
 msgid "Override _User-Agent header value"
 msgstr "П_еревизначити значення заголовка User-Agent"
 
-#: ../src/camel/camel-ews-provider.c:102
+#: ../src/EWS/camel/camel-ews-provider.c:85
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/EWS/camel/camel-ews-provider.c:87
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
 msgstr ""
-"Якщо буде вибрано цей варіант, з'єднання із сервером Exchange відбуватиметься"
-" за допомогою звичайного текстового пароля і системи розпізнавання NTLM."
+"Якщо буде вибрано цей варіант, з'єднання із сервером Exchange "
+"відбуватиметься за допомогою звичайного текстового пароля і системи "
+"розпізнавання NTLM."
 
-#: ../src/camel/camel-ews-provider.c:112
+#: ../src/EWS/camel/camel-ews-provider.c:95
 msgid "Basic"
 msgstr "Просте"
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/EWS/camel/camel-ews-provider.c:97
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 msgstr ""
-"Якщо буде вибрано цей варіант, з'єднання із сервером Exchange відбуватиметься"
-" за допомогою звичайного текстового пароля і простої системи розпізнавання."
+"Якщо буде вибрано цей варіант, з'єднання із сервером Exchange "
+"відбуватиметься за допомогою звичайного текстового пароля і простої системи "
+"розпізнавання."
 
-#: ../src/camel/camel-ews-provider.c:122
+#: ../src/EWS/camel/camel-ews-provider.c:105
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:124
+#: ../src/EWS/camel/camel-ews-provider.c:107
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr ""
-"Якщо буде вибрано цей варіант, з'єднання із сервером Exchange відбуватиметься"
-" за допомогою системи розпізнавання Kerberos/GSSAPI."
+"Якщо буде вибрано цей варіант, з'єднання із сервером Exchange "
+"відбуватиметься за допомогою системи розпізнавання Kerberos/GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:335
+#: ../src/EWS/camel/camel-ews-store.c:323
+#: ../src/Microsoft365/camel/camel-m365-store.c:75
 #, c-format
 msgid "Session has no storage path"
 msgstr "У сеансу немає шляху для зберігання даних"
@@ -237,7 +252,7 @@ msgstr "У сеансу немає шляху для зберігання дан
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:372
+#: ../src/EWS/camel/camel-ews-store.c:360
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -247,22 +262,23 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:527
+#: ../src/EWS/camel/camel-ews-store.c:515
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:673 ../src/camel/camel-ews-store.c:1481
+#: ../src/EWS/camel/camel-ews-store.c:661
+#: ../src/EWS/camel/camel-ews-store.c:1488
 msgid "Checking “Out of Office” settings"
 msgstr "Перевіряємо параметр «За межами офісу»"
 
-#: ../src/camel/camel-ews-store.c:1487
+#: ../src/EWS/camel/camel-ews-store.c:1494
 msgid "Look up Exchange server categories"
 msgstr "Шукати категорії сервера Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1570
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -275,7 +291,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Строк дії пароля буде вичерпано за %d день. Відкрийте «%s», щоб змінити це."
 
-#: ../src/camel/camel-ews-store.c:1563
+#: ../src/EWS/camel/camel-ews-store.c:1576
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
@@ -284,1065 +300,222 @@ msgstr[1] "Строк дії пароля буде вичерпано за %d д
 msgstr[2] "Строк дії пароля буде вичерпано за %d днів"
 msgstr[3] "Строк дії пароля буде вичерпано завтра"
 
-#: ../src/camel/camel-ews-store.c:1789
+#: ../src/EWS/camel/camel-ews-store.c:1802
 msgid "Updating foreign folder structure"
 msgstr "Оновлюємо структуру сторонніх тек"
 
-#: ../src/camel/camel-ews-store.c:1925
+#: ../src/EWS/camel/camel-ews-store.c:1938
 msgid "Updating foreign folders"
 msgstr "Оновлюємо сторонні теки"
 
-#: ../src/camel/camel-ews-store.c:2341
+#: ../src/EWS/camel/camel-ews-store.c:2354
+#: ../src/Microsoft365/camel/camel-m365-store.c:630
 #, c-format
 msgid "No such folder: %s"
 msgstr "Немає такої теки: %s"
 
-#: ../src/camel/camel-ews-store.c:2694
+#: ../src/EWS/camel/camel-ews-store.c:2707
 msgid "Cannot list EWS public folders in offline mode"
 msgstr ""
 "Неможливо створити список загальнодоступних тек EWS у автономному режимі"
 
-#: ../src/camel/camel-ews-store.c:2767
+#: ../src/EWS/camel/camel-ews-store.c:2780
 msgid "Cannot find any EWS public folders"
 msgstr "Не вдалося знайти жодної загальнодоступної теки EWS"
 
-#: ../src/camel/camel-ews-store.c:2880
+#: ../src/EWS/camel/camel-ews-store.c:2893
+#: ../src/Microsoft365/camel/camel-m365-store.c:693
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Не вдалося створити теку «%s» — тека вже існує"
 
-#: ../src/camel/camel-ews-store.c:2895
+#: ../src/EWS/camel/camel-ews-store.c:2908
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Батьківської теки %s не існує"
 
-#: ../src/camel/camel-ews-store.c:2905
+#: ../src/EWS/camel/camel-ews-store.c:2918
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
-"Неможливо створити теку у «%s» — ця тека використовується лише для тек інших"
-" користувачів"
+"Неможливо створити теку у «%s» — ця тека використовується лише для тек інших "
+"користувачів"
 
-#: ../src/camel/camel-ews-store.c:2915
+#: ../src/EWS/camel/camel-ews-store.c:2928
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
-"Неможливо створити теку у «%s» — ця тека використовується лише для"
-" загальнодоступних тек"
+"Неможливо створити теку у «%s» — ця тека використовується лише для "
+"загальнодоступних тек"
 
-#: ../src/camel/camel-ews-store.c:3019
+#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/Microsoft365/camel/camel-m365-store.c:881
 #, c-format
 msgid "Folder does not exist"
 msgstr "Теки не існує"
 
-#: ../src/camel/camel-ews-store.c:3029
+#: ../src/EWS/camel/camel-ews-store.c:3042
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
-"Неможливо вилучити теку у «%s» — ця тека використовується лише для тек інших"
-" користувачів"
+"Неможливо вилучити теку у «%s» — ця тека використовується лише для тек інших "
+"користувачів"
 
-#: ../src/camel/camel-ews-store.c:3040
+#: ../src/EWS/camel/camel-ews-store.c:3053
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
-"Неможливо вилучити теку у «%s» — ця тека використовується лише для"
-" загальнодоступних тек"
+"Неможливо вилучити теку у «%s» — ця тека використовується лише для "
+"загальнодоступних тек"
 
-#: ../src/camel/camel-ews-store.c:3199
+#: ../src/EWS/camel/camel-ews-store.c:3212
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Теки %s не існує"
 
-#: ../src/camel/camel-ews-store.c:3208
+#: ../src/EWS/camel/camel-ews-store.c:3221
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Немає запису зміни ключа для теки %s"
 
-#: ../src/camel/camel-ews-store.c:3251
+#: ../src/EWS/camel/camel-ews-store.c:3264
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Не можна одночасно перейменовувати і пересувати теку"
 
-#: ../src/camel/camel-ews-store.c:3282
+#: ../src/EWS/camel/camel-ews-store.c:3295
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Не вдалося знайти ідентифікатор теки для батьківської теки %s"
 
-#: ../src/camel/camel-ews-store.c:3334 ../src/camel/camel-ews-transport.c:318
+#: ../src/EWS/camel/camel-ews-store.c:3347
+#: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Сервер Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3337
+#: ../src/EWS/camel/camel-ews-store.c:3350
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Служба Exchange для %s на %s"
 
-#: ../src/camel/camel-ews-store.c:3381
+#: ../src/EWS/camel/camel-ews-store.c:3394
+#: ../src/Microsoft365/camel/camel-m365-store.c:1455
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Не вдалося знайти теку «Смітник»"
 
-#: ../src/camel/camel-ews-store.c:3441
+#: ../src/EWS/camel/camel-ews-store.c:3454
+#: ../src/Microsoft365/camel/camel-m365-store.c:1513
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Не вдалося знайти теку «Спам»"
 
-#: ../src/camel/camel-ews-store.c:3632
+#: ../src/EWS/camel/camel-ews-store.c:3645
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Не можна підписуватися на теки EWS в автономному режимі"
 
-#: ../src/camel/camel-ews-store.c:3655
+#: ../src/EWS/camel/camel-ews-store.c:3668
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Неможливо підписатися на теку «%s» — немає загальнодоступних тек"
 
-#: ../src/camel/camel-ews-store.c:3665
+#: ../src/EWS/camel/camel-ews-store.c:3678
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Неможливо підписатися на теку «%s» — теку не знайдено"
 
-#: ../src/camel/camel-ews-store.c:3756
+#: ../src/EWS/camel/camel-ews-store.c:3769
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не можна скасовувати підписку на теки EWS в автономному режимі"
 
-#: ../src/camel/camel-ews-store.c:3873
+#: ../src/EWS/camel/camel-ews-store.c:3886
+#: ../src/Microsoft365/camel/camel-m365-store.c:1773
+#: ../src/Microsoft365/camel/camel-m365-store.c:1786
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Потрібно бути в мережі, щоб завершити цю операцію"
 
-#: ../src/camel/camel-ews-store.c:3917 ../src/camel/camel-ews-store.c:3954
+#: ../src/EWS/camel/camel-ews-store.c:3930
+#: ../src/EWS/camel/camel-ews-store.c:3967
 msgid "Unsetting the “Out of Office” status"
 msgstr "Скасовуємо стан «За межами офісу»"
 
-#: ../src/camel/camel-ews-store.h:56
+#: ../src/EWS/camel/camel-ews-store.h:40
 msgid "Foreign Folders"
 msgstr "Сторонні теки"
 
-#: ../src/camel/camel-ews-store.h:58
+#: ../src/EWS/camel/camel-ews-store.h:42
 msgid "Public Folders"
 msgstr "Загальнодоступні теки"
 
-#: ../src/camel/camel-ews-transport.c:321
+#: ../src/EWS/camel/camel-ews-transport.c:305
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Доставлення пошти Exchange за допомогою %s"
 
-#: ../src/camel/camel-ews-transport.c:370
+#: ../src/EWS/camel/camel-ews-transport.c:354
+#: ../src/Microsoft365/camel/camel-m365-transport.c:291
 msgid "Cannot send message with no From address"
 msgstr "Неможливо надіслати повідомлення без адреси «Від»"
 
-#: ../src/camel/camel-ews-transport.c:376
+#: ../src/EWS/camel/camel-ews-transport.c:360
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "Сервер Exchange не може надсилати повідомлення із декількома адресами «Від»"
 
-#: ../src/camel/camel-ews-transport.c:386
+#: ../src/EWS/camel/camel-ews-transport.c:370
+#: ../src/Microsoft365/camel/camel-m365-transport.c:306
 msgid "Failed to read From address"
 msgstr "Не вдалося прочитати адресу «Від»"
 
-#: ../src/camel/camel-ews-transport.c:396
+#: ../src/EWS/camel/camel-ews-transport.c:380
+#: ../src/Microsoft365/camel/camel-m365-transport.c:316
 #, c-format
 msgid "Service not connected"
 msgstr "Службу не з'єднано"
 
-#: ../src/collection/e-ews-backend.c:533
-#: ../src/configuration/e-mail-config-ews-gal.c:274
-msgid "Global Address List"
-msgstr "Загальний список адрес"
-
-#: ../src/collection/e-ews-backend.c:987
-#, c-format
-msgid "Could not determine a suitable folder class for a new folder named “%s”"
-msgstr "Не вдалося визначити належний клас тек для нової теки із назвою «%s»"
-
-#: ../src/collection/e-ews-backend.c:1075
-#, c-format
-msgid "Data source “%s” does not represent an Exchange Web Services folder"
-msgstr "Джерело даних «%s» не є відповідником теки веб служб Exchange"
-
-#: ../src/configuration/e-book-config-ews.c:100
-msgid "Use only _primary contact email address"
-msgstr "Лише _основна адреса електронної пошти контакту"
-
-#: ../src/configuration/e-book-config-ews.c:101
-msgid ""
-"When checked, the contacts looked up in the online Global Address List will "
-"contain only the primary email address"
-msgstr ""
-"Якщо позначено, записи контактів із загального списку адрес у мережі"
-" міститимуться лише основні адреси електронної пошти"
-
-#: ../src/configuration/e-book-config-ews.c:113
-msgid "_Fetch contact photos"
-msgstr "О_тримувати фотографії контактів"
-
-#: ../src/configuration/e-book-config-ews.c:114
-msgid "Tries to look up for user photo"
-msgstr "Намагатися отримати фотографії користувачів"
-
-#: ../src/configuration/e-ews-config-lookup.c:192
-msgid "Exchange Web Services autodiscovery"
-msgstr "Автовиявлення вебслужб Exchange"
-
-#: ../src/configuration/e-ews-config-lookup.c:235
-#, c-format
-msgid "User: %s"
-msgstr "Користувач: %s"
-
-#: ../src/configuration/e-ews-config-lookup.c:240
-#, c-format
-msgid "Host URL: %s"
-msgstr "Адреса вузла: %s"
-
-#: ../src/configuration/e-ews-config-lookup.c:245
-#, c-format
-msgid "OAB URL: %s"
-msgstr "Адреса OAB: %s"
-
-#: ../src/configuration/e-ews-config-lookup.c:322
-#, c-format
-msgid "Requires user password to continue"
-msgstr "Потрібен пароль користувача для продовження"
-
-#: ../src/configuration/e-ews-config-utils.c:574
-msgid "Folder"
-msgstr "Тека"
-
-#: ../src/configuration/e-ews-config-utils.c:584
-msgid "Size"
-msgstr "Розмір"
-
-#: ../src/configuration/e-ews-config-utils.c:622
-#: ../src/configuration/e-ews-config-utils.c:627
-msgid "Unable to retrieve folder size information"
-msgstr "Не вдалося отримати інформацію про розмір теки"
-
-#: ../src/configuration/e-ews-config-utils.c:754
-msgid "Folder Sizes"
-msgstr "Розміри тек"
-
-#: ../src/configuration/e-ews-config-utils.c:757
-msgid "_Close"
-msgstr "З_акрити"
-
-#: ../src/configuration/e-ews-config-utils.c:771
-msgid "Fetching folder list…"
-msgstr "Отримання списку тек…"
-
-#: ../src/configuration/e-ews-config-utils.c:834
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:766
-msgid "Subscribe to folder of other EWS user…"
-msgstr "Підписатися на теку іншого користувача EWS…"
-
-#: ../src/configuration/e-ews-config-utils.c:1021
-#, c-format
-msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr "Не можна редагувати права доступу до теки «%s». Виберіть іншу теку."
-
-#: ../src/configuration/e-ews-config-utils.c:1100
-msgid "Folder Sizes…"
-msgstr "Розміри тек…"
-
-#: ../src/configuration/e-ews-config-utils.c:1107
-msgid "Subscribe to folder of other user…"
-msgstr "Підписатися на теку іншого користувача…"
-
-#: ../src/configuration/e-ews-config-utils.c:1116
-#: ../src/configuration/e-ews-config-utils.c:1452
-#: ../src/configuration/e-ews-config-utils.c:1490
-#: ../src/configuration/e-ews-config-utils.c:1528
-#: ../src/configuration/e-ews-config-utils.c:1566
-msgid "Permissions…"
-msgstr "Права доступу…"
-
-#: ../src/configuration/e-ews-config-utils.c:1118
-msgid "Edit EWS folder permissions"
-msgstr "Редагувати права доступу до теки EWS"
-
-#: ../src/configuration/e-ews-config-utils.c:1454
-msgid "Edit EWS calendar permissions"
-msgstr "Редагувати права доступу до календаря EWS"
-
-#: ../src/configuration/e-ews-config-utils.c:1492
-msgid "Edit EWS tasks permissions"
-msgstr "Редагувати права доступу до завдань EWS"
-
-#: ../src/configuration/e-ews-config-utils.c:1530
-msgid "Edit EWS memos permissions"
-msgstr "Редагувати права доступу до приміток EWS"
-
-#: ../src/configuration/e-ews-config-utils.c:1568
-msgid "Edit EWS contacts permissions"
-msgstr "Редагувати права доступу до контактів EWS"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:85
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:416
-msgctxt "PermissionsLevel"
-msgid "None"
-msgstr "Немає"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:86
-msgctxt "PermissionsLevel"
-msgid "Owner"
-msgstr "Власник"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:96
-msgctxt "PermissionsLevel"
-msgid "Publishing Editor"
-msgstr "Редактор з правами оприлюднення"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:105
-msgctxt "PermissionsLevel"
-msgid "Editor"
-msgstr "Редактор"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:113
-msgctxt "PermissionsLevel"
-msgid "Publishing Author"
-msgstr "Автор із правами оприлюднення"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:120
-msgctxt "PermissionsLevel"
-msgid "Author"
-msgstr "Автор"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:126
-msgctxt "PermissionsLevel"
-msgid "Nonediting Author"
-msgstr "Автор без права редагування"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:131
-msgctxt "PermissionsLevel"
-msgid "Reviewer"
-msgstr "Рецензент"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:134
-msgctxt "PermissionsLevel"
-msgid "Contributor"
-msgstr "Учасник"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:137
-msgctxt "PermissionsLevel"
-msgid "Free/Busy time"
-msgstr "Зайнятий/вільний час"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:139
-msgctxt "PermissionsLevel"
-msgid "Free/Busy time, subject, location"
-msgstr "Зайнятий/вільний час, тема, місце"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:141
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:439
-msgctxt "PermissionsLevel"
-msgid "Custom"
-msgstr "Нетиповий"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:265
-msgid "Writing folder permissions, please wait…"
-msgstr "Записуємо права доступу до теки. Будь ласка, зачекайте…"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:779
-msgctxt "User"
-msgid "Anonymous"
-msgstr "Анонімний"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:782
-msgctxt "User"
-msgid "Default"
-msgstr "Типовий"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:788
-msgctxt "User"
-msgid "Unknown"
-msgstr "Невідомий"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:871
-#: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
-msgid "Name"
-msgstr "Ім'я"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:877
-msgid "Permission level"
-msgstr "Рівень доступу"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:929
-msgid "Edit EWS folder permissions…"
-msgstr "Редагувати права доступу до теки EWS…"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:954
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:787
-msgid "Account:"
-msgstr "Обліковий запис:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:982
-msgid "Folder name:"
-msgstr "Назва теки:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1006
-msgid "Folder ID:"
-msgstr "Ід. теки:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1071
-msgid "Permissions"
-msgstr "Права доступу"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1093
-msgid "Permi_ssion level:"
-msgstr "Р_івень доступу:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1127
-msgctxt "Permissions"
-msgid "Read"
-msgstr "Читання"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1206
-msgctxt "Permissions"
-msgid "None"
-msgstr "Немає"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1145
-msgctxt "Permissions"
-msgid "Free/Busy time"
-msgstr "Зайнятий/вільний час"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
-msgctxt "Permissions"
-msgid "Free/Busy time, subject, location"
-msgstr "Зайнятий/вільний час, тема, місце"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
-msgctxt "Permissions"
-msgid "Full Details"
-msgstr "Усі подробиці"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
-msgctxt "Permissions"
-msgid "Write"
-msgstr "Запис"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
-msgctxt "Permissions"
-msgid "Create items"
-msgstr "Створення записів"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
-msgctxt "Permissions"
-msgid "Create subfolders"
-msgstr "Створення підтек"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
-msgctxt "Permissions"
-msgid "Edit own"
-msgstr "Редагування свого"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
-msgctxt "Permissions"
-msgid "Edit all"
-msgstr "Редагування всього"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1194
-msgctxt "Permissions"
-msgid "Delete items"
-msgstr "Вилучення записів"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1211
-msgctxt "Permissions"
-msgid "Own"
-msgstr "Власність"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
-msgctxt "Permissions"
-msgid "All"
-msgstr "Усі"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1222
-msgctxt "Permissions"
-msgid "Other"
-msgstr "Інше"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
-msgctxt "Permissions"
-msgid "Folder owner"
-msgstr "Власник теки"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
-msgctxt "Permissions"
-msgid "Folder contact"
-msgstr "Контакт теки"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1242
-msgctxt "Permissions"
-msgid "Folder visible"
-msgstr "Перегляд тек"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1315
-msgid "Reading folder permissions, please wait…"
-msgstr "Читаємо права доступу до тек. Будь ласка, зачекайте…"
-
-#: ../src/configuration/e-ews-ooo-notificator.c:182
-msgid "Unset on Server"
-msgstr "Скасувати на сервері"
-
-#: ../src/configuration/e-ews-ooo-notificator.c:183
-msgid "Unset the “Out of Office” status"
-msgstr "Скасувати стан «За межами офісу»"
-
-#: ../src/configuration/e-ews-search-user.c:206
-#, c-format
-msgid "No users found, only one contact"
-msgid_plural "No users found, only %d contacts"
-msgstr[0] "Користувачів не знайдено, лише %d контакт"
-msgstr[1] "Користувачів не знайдено, лише %d контакти"
-msgstr[2] "Користувачів не знайдено, лише %d контактів"
-msgstr[3] "Користувачів не знайдено, лише один контакт"
-
-#: ../src/configuration/e-ews-search-user.c:211
-msgid "No users found"
-msgstr "Не знайдено жодного користувача"
-
-#: ../src/configuration/e-ews-search-user.c:215
-#, c-format
-msgid "Found one user"
-msgid_plural "Found %d users"
-msgstr[0] "Знайдено %d користувача"
-msgstr[1] "Знайдено %d користувачів"
-msgstr[2] "Знайдено %d користувачів"
-msgstr[3] "Знайдено одного користувача"
-
-#: ../src/configuration/e-ews-search-user.c:221
-#, c-format
-msgid "Found more than 100 users, but showing only first %d"
-msgid_plural "Found more than 100 users, but showing only first %d"
-msgstr[0] "Знайдено понад 100 користувачів, але показано лише %d першого"
-msgstr[1] "Знайдено понад 100 користувачів, але показано лише %d перших"
-msgstr[2] "Знайдено понад 100 користувачів, але показано лише %d перших"
-msgstr[3] "Знайдено понад 100 користувачів, але показано лише першого"
-
-#: ../src/configuration/e-ews-search-user.c:355
-#: ../src/configuration/e-ews-search-user.c:540
-msgid "Search for a user"
-msgstr "Пошук користувача"
-
-#: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching…"
-msgstr "Пошук…"
-
-#: ../src/configuration/e-ews-search-user.c:437
-msgid "E-mail"
-msgstr "Ел. пошта"
-
-#: ../src/configuration/e-ews-search-user.c:474
-msgid "Choose EWS user…"
-msgstr "Вибрати користувача EWS…"
-
-#: ../src/configuration/e-ews-search-user.c:497
-msgid "_Search:"
-msgstr "З_найти:"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
-#: ../src/server/e-ews-folder.c:823
-#, c-format
-msgid "Cannot add folder, folder already exists as “%s”"
-msgstr "Не вдалося додати теку — тека вже існує як «%s»"
-
-#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. * Example result: "Mailbox — John Smith"
-#.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:113
-#, c-format
-msgctxt "ForeignFolder"
-msgid "Mailbox — %s"
-msgstr "Поштова скринька — %s"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
-msgid "Cannot test foreign folder availability when the account is offline"
-msgstr ""
-"Не можна перевірити доступність сторонньої теки при роботі облікового запису"
-" в автономному режимі"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:314
-#, c-format
-msgid "User “%s” was not found on the server"
-msgstr "Користувача «%s» на сервері не виявлено"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:350
-#, c-format
-msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr ""
-"Ім'я користувача «%s» є неоднозначним. Вкажіть його точніше, будь ласка"
-
-#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:388
-msgid "Availability"
-msgstr "Доступність"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:406
-#, c-format
-msgid ""
-"Folder “%s” not found. Either it does not exist or you do not have "
-"permission to access it."
-msgstr ""
-"Не знайдено теки «%s». Теки або не існує, або ви не маєте достатніх прав"
-" доступу до неї."
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:425
-msgid "Cannot add folder, cannot determine folder’s type"
-msgstr "Не вдалося додати теку — не вдалося визначити тип теки"
-
-#. Translators: This is used to name foreign folder.
-#. * The first '%s' is replaced with user name to whom the folder belongs,
-#. * the second '%s' is replaced with folder name.
-#. * Example result: "John Smith — Calendar"
-#.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:470
-#, c-format
-msgctxt "ForeignFolder"
-msgid "%s — %s"
-msgstr "%s — %s"
-
-#. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:583
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
-msgid "Inbox"
-msgstr "Вхідні"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:585
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
-msgid "Contacts"
-msgstr "Контакти"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:587
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
-msgid "Calendar"
-msgstr "Календар"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:589
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
-msgid "Free/Busy as Calendar"
-msgstr "Вільний/зайнятий як календар"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:591
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
-msgid "Memos"
-msgstr "Примітки"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:593
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:872
-msgid "Tasks"
-msgstr "Завдання"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:610
-#, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait…"
-msgstr ""
-"Перевіряємо доступність теки «%s» користувача «%s». Будь ласка, зачекайте…"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:649
-msgid "Cannot search for user when the account is offline"
-msgstr ""
-"Не можна шукати користувача, якщо обліковий запис працює у автономному режимі"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:812
-msgid "User"
-msgstr "Користувач"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:819
-msgid "_User:"
-msgstr "_Користувач:"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:834
-msgid "C_hoose…"
-msgstr "Ви_брати…"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:850
-msgid "_Folder name:"
-msgstr "Назва _теки:"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:881
-msgid "Include _subfolders"
-msgstr "Вк_лючати підтеки"
-
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
-msgid "Querying Autodiscover service"
-msgstr "Опитування служби автовиявлення"
-
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
-msgid "Fetch _URL"
-msgstr "Отримати _адресу"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:178
-msgid "Configuration"
-msgstr "Налаштування"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:196
-msgid "User_name:"
-msgstr "_Користувач:"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:210
-msgid "_Host URL:"
-msgstr "Адреса _вузла:"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:229
-msgid "OAB U_RL:"
-msgstr "Ад_реса OAB:"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:243
-msgid "Open _Mailbox of other user"
-msgstr "Відкрити по_штову скриньку іншого користувача"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:277
-msgid "S_earch…"
-msgstr "По_шук…"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:288
-msgid "Authentication"
-msgstr "Розпізнавання"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:315
-msgid "_Override Office365 OAuth2 settings"
-msgstr "П_еревизначити параметри OAuth2 Office365"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:319
-msgid "Help…"
-msgstr "Довідка…"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/configuration/e-mail-config-ews-backend.c:328
-msgid "_Tenant:"
-msgstr "_Тенант:"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/configuration/e-mail-config-ews-backend.c:353
-msgid "Default tenant is “common“"
-msgstr "Типовим тенантом є «common»"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/configuration/e-mail-config-ews-backend.c:356
-#, c-format
-msgid "Default tenant is “%s”"
-msgstr "Типовим тенантом є «%s»"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:358
-msgid "Application I_D:"
-msgstr "_Ід. програми:"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:381
-msgid "There is not set any default application ID"
-msgstr "Не встановлено жодного ідентифікатора типової програми"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:382
-#, c-format
-msgid "Default application ID is “%s”"
-msgstr "Ідентифікатором типової програми є «%s»"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:384
-msgid "_Redirect URI:"
-msgstr "Адреса переспр_ямовування:"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:406
-#: ../src/configuration/e-mail-config-ews-backend.c:409
-#, c-format
-msgid "Default redirect URI is “%s”"
-msgstr "Типовою адресою переспрямовування є «%s»"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:592
-msgid "Host URL is not valid"
-msgstr "Адреса вузла є некоректною"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:596
-msgid "Host URL cannot be empty"
-msgstr "Адреса вузла не може бути порожньою"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:607
-msgid "OAB URL is not valid"
-msgstr "Адреса OAB є некоректною"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:617
-msgid "User name cannot be empty"
-msgstr "Обов'язково вкажіть користувача"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:631
-msgid "Application ID cannot be empty"
-msgstr "Ідентифікатор програми не може бути порожнім"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:417
-msgctxt "PermissionsLevel"
-msgid "Reviewer (can read items)"
-msgstr "Рецензент (може читати записи)"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
-msgctxt "PermissionsLevel"
-msgid "Author (can read and create items)"
-msgstr "Автор (може читати і створювати записи)"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
-msgctxt "PermissionsLevel"
-msgid "Editor (can read, create and modify items)"
-msgstr "Редактор (може читати, створювати і змінювати записи)"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:524
-msgid "Delegate permissions"
-msgstr "Делегування прав доступу"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:542
-msgid "C_alendar"
-msgstr "К_алендар"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:545
-msgid "_Delegate receives copies of meeting-related messages sent to me"
-msgstr ""
-"Де_легат отримує копію пов'язаних із зустріччю повідомлень, які надіслано вам"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:550
-msgid "_Tasks"
-msgstr "_Завдання"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:553
-msgid "_Inbox"
-msgstr "В_хідні"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:556
-msgid "C_ontacts"
-msgstr "_Контакти"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:559
-msgid "_Notes"
-msgstr "_Примітки"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:562
-msgid "_Journal"
-msgstr "_Журнал"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:565
-#, c-format
-msgid "Delegate “%s” has the following permissions"
-msgstr "Делегат «%s» має такі права доступу"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:583
-msgid "Delegate can see my _private items"
-msgstr "Делегат може бачити ва_ші конфіденційні записи"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:905
-msgid "Retrieving current user permissions, please wait…"
-msgstr "Отримуємо права доступу поточного користувача, будь ласка, зачекайте…"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1028
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1653
-msgid "Delegates"
-msgstr "Делегати"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1052
-msgid ""
-"Delegates can send items on your behalf, including creating and responding "
-"to meeting requests. If you want to grant folder permissions without giving "
-"send-on-behalf-of permissions, close this dialog box, right-click the "
-"folder, click Permissions and change the options there."
-msgstr ""
-"Делегати можуть надсилати записи від вашого імені, зможуть створювати і"
-" відповідати на запити щодо зустрічі. Якщо ви хочете надати права доступу до"
-" тек без надання прав надсилання від вашого імені, закрийте це діалогове"
-" вікно, клацніть правою кнопкою миші на теці, виберіть «Права доступу» і"
-" змініть відповідні параметри."
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1103
-msgid ""
-"Deliver meeting requests addressed to me and responses to meeting requests "
-"where I am the organizer to:"
-msgstr ""
-"Доставляти запити щодо зустрічі, які адресовано вам і відповіді за запити"
-" щодо зустрічі, де ви є організатором:"
-
-#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1114
-msgid ""
-"My delegates only, but _send a copy of meeting requests\n"
-"and responses to me (recommended)"
-msgstr ""
-"Лише ваші делегати, але _надсилати копію запитів щодо зустрічі\n"
-"та відповіді вам (рекомендовано)"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1121
-msgid "My d_elegates only"
-msgstr "Лише ва_ші делегати"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1128
-msgid "My delegates a_nd me"
-msgstr "Ваші деле_гати і ви"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1725
-msgid "Retrieving “Delegates” settings"
-msgstr "Отримуємо параметри «Делегатів»"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
-msgid "EWS Settings"
-msgstr "Параметри EWS"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
-msgid "View the size of all Exchange folders"
-msgstr "Переглянути розмір усіх тек Exchange"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:204
-msgid "Folder _Sizes"
-msgstr "_Розміри тек"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:222
-msgid "Locating offline address books"
-msgstr "Встановлення розташування автономних адресних книг"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:301
-msgid "Cache o_ffline address book"
-msgstr "_Кешувати автономну адресну книгу"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:327
-msgid "Select ad_dress list:"
-msgstr "Ви_беріть список адрес:"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:351
-msgid "Fetch List"
-msgstr "Отримати список"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:934
-msgid "Out of Office"
-msgstr "За межами офісу"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
-msgid ""
-"The messages specified below will be automatically sent to each internal and "
-"external person who sends a mail to you."
-msgstr ""
-"Вказані нижче повідомлення буде автоматично надіслано до усіх внутрішніх і"
-" зовнішніх осіб, які надсилають вам поштові повідомлення."
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:422
-msgid "Do _not send Out of Office replies"
-msgstr "Н_е надсилати назовні відповіді «За межами офісу»"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:430
-msgid "_Send Out of Office replies"
-msgstr "_Надсилати назовні відповіді «За межами офісу»"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:438
-msgid "Send Out of Office replies only _during this time period:"
-msgstr ""
-"Надсилати назовні відповіді «За межами офісу» лише під _час цього інтервалу"
-" часу:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:458
-msgid "_From:"
-msgstr "_Від:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:483
-msgid "_To:"
-msgstr "_Кому:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:508
-msgid "I_nternal:"
-msgstr "В_нутрішнє:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
-msgid "Message to be sent within the organization"
-msgstr "Повідомлення, яке буде надіслано у межах організації"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:545
-msgid "E_xternal:"
-msgstr "Зовн_ішнє:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:553
-msgid "Message to be sent outside the organization"
-msgstr "Повідомлення, яке буде надіслано за межі організації"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
-msgid "Do not reply to senders outside the organization"
-msgstr "Не відповідати відправникам поза організацією"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
-msgid "Reply only to known senders outside the organization"
-msgstr "Відповідати лише відомим відправникам поза організацією"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:569
-msgid "Reply to any sender outside the organization"
-msgstr "Відповідати будь-яким відправникам поза організацією"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1006
-msgid "Retrieving “Out of Office” settings"
-msgstr "Параметри отримання «За межами офісу»"
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:1
-msgid "Autodiscovery query failed."
-msgstr "Помилка запиту щодо автоматично виявлення."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:2
-msgid "The reported error was “{0}”."
-msgstr "Повідомлено про помилку «{0}»."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:3
-msgid "Failed to locate offline address books."
-msgstr "Не вдалося визначити місце зберігання автономних адресних книг."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:4
-msgid "Failed to retrieve “Out of Office” settings."
-msgstr "Не вдалося отримати параметри обробки «За межами офісу»."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:5
-msgid "Failed to retrieve “Delegates” settings."
-msgstr "Не вдалося отримати параметри обробки «Делегати»."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:6
-msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
-msgstr ""
-"Для вашого облікового запису Exchange «{0}» встановлено стан «За межами"
-" офісу»."
-
-#: ../src/server/camel-sasl-xoauth2-office365.c:23
+#: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
 msgid "OAuth2 (Office365)"
 msgstr "OAuth2 (Office365)"
 
-#: ../src/server/camel-sasl-xoauth2-office365.c:24
+#: ../src/EWS/common/camel-sasl-xoauth2-office365.c:15
 msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Office365."
 "com server"
 msgstr ""
-"Цей параметр використовуватиме ключ доступу OAuth 2.0 для з'єднання із"
-" сервером Office365.com"
+"Цей параметр використовуватиме ключ доступу OAuth 2.0 для з'єднання із "
+"сервером Office365.com"
 
-#: ../src/server/e-ews-calendar-utils.c:1220
+#: ../src/EWS/common/e-ews-calendar-utils.c:1207
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
 "monthly or yearly recurrence without exceptions and with start date."
 msgstr ""
-"Не вдалося зберегти це повторення. Змініть його на одинарне щоденне,"
-" щотижневе або щорічне повторення без виключення і з початковою датою."
+"Не вдалося зберегти це повторення. Змініть його на одинарне щоденне, "
+"щотижневе або щорічне повторення без виключення і з початковою датою."
 
-#: ../src/server/e-ews-camel-common.c:394
+#: ../src/EWS/common/e-ews-camel-common.c:380
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Виклик CreateItem не повернув ідентифікатора нового повідомлення"
 
-#: ../src/server/e-ews-connection.c:824
+#: ../src/EWS/common/e-ews-connection.c:815
 msgid "Operation Cancelled"
 msgstr "Дію скасовано"
 
-#: ../src/server/e-ews-connection.c:994
+#: ../src/EWS/common/e-ews-connection.c:985
 msgid "Authentication failed"
 msgstr "Не вдалось пройти розпізнавання"
 
-#: ../src/server/e-ews-connection.c:1016
+#: ../src/EWS/common/e-ews-connection.c:1007
 #, c-format
 msgid "No response: %s"
 msgstr "Немає відповіді: %s"
 
-#: ../src/server/e-ews-connection.c:1079
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1355,7 +528,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Exchange зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/server/e-ews-connection.c:1085
+#: ../src/EWS/common/e-ews-connection.c:1076
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1364,79 +537,1184 @@ msgstr[1] "Сервер Exchange зайнято, очікуємо на повт�
 msgstr[2] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунд)"
 msgstr[3] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/server/e-ews-connection.c:3179
+#: ../src/EWS/common/e-ews-connection.c:3223
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Не вдалося обробити відповідь XML autodiscover"
 
-#: ../src/server/e-ews-connection.c:3186
+#: ../src/EWS/common/e-ews-connection.c:3230
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Не вдалося знайти елемент <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:3197
+#: ../src/EWS/common/e-ews-connection.c:3241
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Не вдалося знайти елемент <Response>"
 
-#: ../src/server/e-ews-connection.c:3208
+#: ../src/EWS/common/e-ews-connection.c:3252
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Не вдалося знайти елемент <Account>"
 
-#: ../src/server/e-ews-connection.c:3254
+#: ../src/EWS/common/e-ews-connection.c:3298
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Не вдалося знайти <ASUrl> у відповіді на автовиявлення"
 
-#: ../src/server/e-ews-connection.c:3440
+#: ../src/EWS/common/e-ews-connection.c:3484
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бути порожньою"
 
-#: ../src/server/e-ews-connection.c:3448
+#: ../src/EWS/common/e-ews-connection.c:3492
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Адреса «%s» є некоректною"
 
-#: ../src/server/e-ews-connection.c:3745
+#: ../src/EWS/common/e-ews-connection.c:3789
 msgid "Email address is missing a domain part"
 msgstr "У адресі електронної пошти пропущено частину домену"
 
-#: ../src/server/e-ews-connection.c:4054
+#: ../src/EWS/common/e-ews-connection.c:4098
 msgid "Failed to parse oab XML"
 msgstr "Не вдалося обробити XML oab"
 
-#: ../src/server/e-ews-connection.c:4062
+#: ../src/EWS/common/e-ews-connection.c:4106
 msgid "Failed to find <OAB> element\n"
 msgstr "Не вдалося знайти елемент <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:5345
+#: ../src/EWS/common/e-ews-connection.c:5395
 msgid "No items found"
 msgstr "Пункти не знайдено"
 
-#: ../src/server/e-ews-connection-utils.c:197
+#: ../src/EWS/common/e-ews-connection-utils.c:185
 #, c-format
 msgid "Password expired. Change password at “%s”."
 msgstr "Строк дії пароля вичерпано. Змініть пароль «%s»."
 
-#: ../src/server/e-ews-connection-utils.c:200
+#: ../src/EWS/common/e-ews-connection-utils.c:188
 msgid "Password expired."
 msgstr "Строк дії пароля вичерпано."
 
-#: ../src/server/e-ews-connection-utils.c:430
+#: ../src/EWS/common/e-ews-connection-utils.c:422
+#: ../src/Microsoft365/common/e-m365-connection.c:236
 msgid "Unknown error"
 msgstr "Невідома помилка"
 
-#: ../src/server/e-ews-folder.c:778
+#: ../src/EWS/common/e-ews-folder.c:782
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Не вдалося додати теку — непідтримуваний тип тек"
 
-#: ../src/server/e-ews-folder.c:783
+#: ../src/EWS/common/e-ews-folder.c:787
 msgid "Cannot add folder, master source not found"
 msgstr "Не вдалося додати теку — не знайдено базового джерела даних"
 
+#: ../src/EWS/common/e-ews-folder.c:827
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:86
+#, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "Не вдалося додати теку — тека вже існує як «%s»"
+
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/server/e-oauth2-service-office365.c:109
+#: ../src/EWS/common/e-oauth2-service-office365.c:99
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:88
+msgid "Use only _primary contact email address"
+msgstr "Лише _основна адреса електронної пошти контакту"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:89
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr ""
+"Якщо позначено, записи контактів із загального списку адрес у мережі "
+"міститимуться лише основні адреси електронної пошти"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:101
+msgid "_Fetch contact photos"
+msgstr "О_тримувати фотографії контактів"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:102
+msgid "Tries to look up for user photo"
+msgstr "Намагатися отримати фотографії користувачів"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:181
+msgid "Exchange Web Services autodiscovery"
+msgstr "Автовиявлення вебслужб Exchange"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:224
+#, c-format
+msgid "User: %s"
+msgstr "Користувач: %s"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:229
+#, c-format
+msgid "Host URL: %s"
+msgstr "Адреса вузла: %s"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:234
+#, c-format
+msgid "OAB URL: %s"
+msgstr "Адреса OAB: %s"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:311
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Потрібен пароль користувача для продовження"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:562
+msgid "Folder"
+msgstr "Тека"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:572
+msgid "Size"
+msgstr "Розмір"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:610
+#: ../src/EWS/evolution/e-ews-config-utils.c:615
+msgid "Unable to retrieve folder size information"
+msgstr "Не вдалося отримати інформацію про розмір теки"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:742
+msgid "Folder Sizes"
+msgstr "Розміри тек"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:745
+msgid "_Close"
+msgstr "З_акрити"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:759
+msgid "Fetching folder list…"
+msgstr "Отримання списку тек…"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:822
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:743
+msgid "Subscribe to folder of other EWS user…"
+msgstr "Підписатися на теку іншого користувача EWS…"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1009
+#, c-format
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr "Не можна редагувати права доступу до теки «%s». Виберіть іншу теку."
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1088
+msgid "Folder Sizes…"
+msgstr "Розміри тек…"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1095
+msgid "Subscribe to folder of other user…"
+msgstr "Підписатися на теку іншого користувача…"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1104
+#: ../src/EWS/evolution/e-ews-config-utils.c:1440
+#: ../src/EWS/evolution/e-ews-config-utils.c:1478
+#: ../src/EWS/evolution/e-ews-config-utils.c:1516
+#: ../src/EWS/evolution/e-ews-config-utils.c:1554
+msgid "Permissions…"
+msgstr "Права доступу…"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1106
+msgid "Edit EWS folder permissions"
+msgstr "Редагувати права доступу до теки EWS"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1442
+msgid "Edit EWS calendar permissions"
+msgstr "Редагувати права доступу до календаря EWS"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1480
+msgid "Edit EWS tasks permissions"
+msgstr "Редагувати права доступу до завдань EWS"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1518
+msgid "Edit EWS memos permissions"
+msgstr "Редагувати права доступу до приміток EWS"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1556
+msgid "Edit EWS contacts permissions"
+msgstr "Редагувати права доступу до контактів EWS"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:68
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:404
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Немає"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:69
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Власник"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:79
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Редактор з правами оприлюднення"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Редактор"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:96
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Автор із правами оприлюднення"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:103
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Автор"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:109
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Автор без права редагування"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:114
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Рецензент"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:117
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Учасник"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:120
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "Зайнятий/вільний час"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "Зайнятий/вільний час, тема, місце"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:124
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:427
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Нетиповий"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:248
+msgid "Writing folder permissions, please wait…"
+msgstr "Записуємо права доступу до теки. Будь ласка, зачекайте…"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:762
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Анонімний"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:765
+msgctxt "User"
+msgid "Default"
+msgstr "Типовий"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:771
+msgctxt "User"
+msgid "Unknown"
+msgstr "Невідомий"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
+#: ../src/EWS/evolution/e-ews-search-user.c:414
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:983
+msgid "Name"
+msgstr "Ім'я"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:860
+msgid "Permission level"
+msgstr "Рівень доступу"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:912
+msgid "Edit EWS folder permissions…"
+msgstr "Редагувати права доступу до теки EWS…"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
+msgid "Account:"
+msgstr "Обліковий запис:"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:965
+msgid "Folder name:"
+msgstr "Назва теки:"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:989
+msgid "Folder ID:"
+msgstr "Ід. теки:"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1054
+msgid "Permissions"
+msgstr "Права доступу"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1076
+msgid "Permi_ssion level:"
+msgstr "Р_івень доступу:"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1110
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Читання"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1122
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1189
+msgctxt "Permissions"
+msgid "None"
+msgstr "Немає"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1128
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "Зайнятий/вільний час"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1133
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "Зайнятий/вільний час, тема, місце"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Усі подробиці"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1145
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Запис"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1157
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Створення записів"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1161
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Створення підтек"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1165
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Редагування свого"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1169
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Редагування всього"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1177
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Вилучення записів"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Власність"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1199
+msgctxt "Permissions"
+msgid "All"
+msgstr "Усі"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Інше"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1217
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Власник теки"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1221
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Контакт теки"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1225
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Перегляд тек"
+
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1298
+msgid "Reading folder permissions, please wait…"
+msgstr "Читаємо права доступу до тек. Будь ласка, зачекайте…"
+
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:170
+msgid "Unset on Server"
+msgstr "Скасувати на сервері"
+
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:171
+msgid "Unset the “Out of Office” status"
+msgstr "Скасувати стан «За межами офісу»"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:189
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "Користувачів не знайдено, лише %d контакт"
+msgstr[1] "Користувачів не знайдено, лише %d контакти"
+msgstr[2] "Користувачів не знайдено, лише %d контактів"
+msgstr[3] "Користувачів не знайдено, лише один контакт"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:194
+msgid "No users found"
+msgstr "Не знайдено жодного користувача"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:198
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "Знайдено %d користувача"
+msgstr[1] "Знайдено %d користувачів"
+msgstr[2] "Знайдено %d користувачів"
+msgstr[3] "Знайдено одного користувача"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:204
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] "Знайдено понад 100 користувачів, але показано лише %d першого"
+msgstr[1] "Знайдено понад 100 користувачів, але показано лише %d перших"
+msgstr[2] "Знайдено понад 100 користувачів, але показано лише %d перших"
+msgstr[3] "Знайдено понад 100 користувачів, але показано лише першого"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:338
+#: ../src/EWS/evolution/e-ews-search-user.c:523
+msgid "Search for a user"
+msgstr "Пошук користувача"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:346
+msgid "Searching…"
+msgstr "Пошук…"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:420
+msgid "E-mail"
+msgstr "Ел. пошта"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:457
+msgid "Choose EWS user…"
+msgstr "Вибрати користувача EWS…"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:480
+msgid "_Search:"
+msgstr "З_найти:"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox — John Smith"
+#.
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:96
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox — %s"
+msgstr "Поштова скринька — %s"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:264
+msgid "Cannot test foreign folder availability when the account is offline"
+msgstr ""
+"Не можна перевірити доступність сторонньої теки при роботі облікового запису "
+"в автономному режимі"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr ""
+"Ім'я користувача «%s» є неоднозначним. Вкажіть його точніше, будь ласка"
+
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:365
+msgid "Availability"
+msgstr "Доступність"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:383
+#, c-format
+msgid ""
+"Folder “%s” not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Не знайдено теки «%s». Теки або не існує, або ви не маєте достатніх прав "
+"доступу до неї."
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:402
+msgid "Cannot add folder, cannot determine folder’s type"
+msgstr "Не вдалося додати теку — не вдалося визначити тип теки"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith — Calendar"
+#.
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:447
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s — %s"
+msgstr "%s — %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:560
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:844
+msgid "Inbox"
+msgstr "Вхідні"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:562
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:845
+msgid "Contacts"
+msgstr "Контакти"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:564
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:846
+msgid "Calendar"
+msgstr "Календар"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:566
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:847
+msgid "Free/Busy as Calendar"
+msgstr "Вільний/зайнятий як календар"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:568
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:848
+msgid "Memos"
+msgstr "Примітки"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:570
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:849
+msgid "Tasks"
+msgstr "Завдання"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:587
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr ""
+"Перевіряємо доступність теки «%s» користувача «%s». Будь ласка, зачекайте…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:626
+msgid "Cannot search for user when the account is offline"
+msgstr ""
+"Не можна шукати користувача, якщо обліковий запис працює у автономному режимі"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:789
+msgid "User"
+msgstr "Користувач"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:796
+msgid "_User:"
+msgstr "_Користувач:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:811
+msgid "C_hoose…"
+msgstr "Ви_брати…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:827
+msgid "_Folder name:"
+msgstr "Назва _теки:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:858
+msgid "Include _subfolders"
+msgstr "Вк_лючати підтеки"
+
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:270
+msgid "Querying Autodiscover service"
+msgstr "Опитування служби автовиявлення"
+
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:369
+msgid "Fetch _URL"
+msgstr "Отримати _адресу"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:166
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:107
+msgid "Configuration"
+msgstr "Налаштування"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:184
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:125
+msgid "User_name:"
+msgstr "_Користувач:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:198
+msgid "_Host URL:"
+msgstr "Адреса _вузла:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:217
+msgid "OAB U_RL:"
+msgstr "Ад_реса OAB:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:231
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:139
+msgid "Open _Mailbox of other user"
+msgstr "Відкрити по_штову скриньку іншого користувача"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:265
+msgid "S_earch…"
+msgstr "По_шук…"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:276
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:173
+msgid "Authentication"
+msgstr "Розпізнавання"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
+msgid "_Override Office365 OAuth2 settings"
+msgstr "П_еревизначити параметри OAuth2 Office365"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:307
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:198
+msgid "Help…"
+msgstr "Довідка…"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:207
+msgid "_Tenant:"
+msgstr "_Тенант:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:232
+msgid "Default tenant is “common“"
+msgstr "Типовим тенантом є «common»"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:235
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Типовим тенантом є «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
+msgid "Application I_D:"
+msgstr "_Ід. програми:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:369
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:260
+msgid "There is not set any default application ID"
+msgstr "Не встановлено жодного ідентифікатора типової програми"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:370
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:261
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "Ідентифікатором типової програми є «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:372
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
+msgid "_Redirect URI:"
+msgstr "Адреса переспр_ямовування:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:394
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:397
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:285
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:288
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "Типовою адресою переспрямовування є «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:580
+msgid "Host URL is not valid"
+msgstr "Адреса вузла є некоректною"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:584
+msgid "Host URL cannot be empty"
+msgstr "Адреса вузла не може бути порожньою"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:595
+msgid "OAB URL is not valid"
+msgstr "Адреса OAB є некоректною"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:605
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:409
+msgid "User name cannot be empty"
+msgstr "Обов'язково вкажіть користувача"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:619
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:424
+msgid "Application ID cannot be empty"
+msgstr "Ідентифікатор програми не може бути порожнім"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:405
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "Рецензент (може читати записи)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:406
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "Автор (може читати і створювати записи)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:407
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "Редактор (може читати, створювати і змінювати записи)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:512
+msgid "Delegate permissions"
+msgstr "Делегування прав доступу"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:530
+msgid "C_alendar"
+msgstr "К_алендар"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:533
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+"Де_легат отримує копію пов'язаних із зустріччю повідомлень, які надіслано вам"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:538
+msgid "_Tasks"
+msgstr "_Завдання"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:541
+msgid "_Inbox"
+msgstr "В_хідні"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:544
+msgid "C_ontacts"
+msgstr "_Контакти"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:547
+msgid "_Notes"
+msgstr "_Примітки"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:550
+msgid "_Journal"
+msgstr "_Журнал"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:553
+#, c-format
+msgid "Delegate “%s” has the following permissions"
+msgstr "Делегат «%s» має такі права доступу"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:571
+msgid "Delegate can see my _private items"
+msgstr "Делегат може бачити ва_ші конфіденційні записи"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:893
+msgid "Retrieving current user permissions, please wait…"
+msgstr "Отримуємо права доступу поточного користувача, будь ласка, зачекайте…"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1016
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1641
+msgid "Delegates"
+msgstr "Делегати"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1040
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"Делегати можуть надсилати записи від вашого імені, зможуть створювати і "
+"відповідати на запити щодо зустрічі. Якщо ви хочете надати права доступу до "
+"тек без надання прав надсилання від вашого імені, закрийте це діалогове "
+"вікно, клацніть правою кнопкою миші на теці, виберіть «Права доступу» і "
+"змініть відповідні параметри."
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1091
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"Доставляти запити щодо зустрічі, які адресовано вам і відповіді за запити "
+"щодо зустрічі, де ви є організатором:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1102
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"Лише ваші делегати, але _надсилати копію запитів щодо зустрічі\n"
+"та відповіді вам (рекомендовано)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1109
+msgid "My d_elegates only"
+msgstr "Лише ва_ші делегати"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1116
+msgid "My delegates a_nd me"
+msgstr "Ваші деле_гати і ви"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1713
+msgid "Retrieving “Delegates” settings"
+msgstr "Отримуємо параметри «Делегатів»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:181
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:245
+msgid "EWS Settings"
+msgstr "Параметри EWS"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:188
+msgid "View the size of all Exchange folders"
+msgstr "Переглянути розмір усіх тек Exchange"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:192
+msgid "Folder _Sizes"
+msgstr "_Розміри тек"
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:210
+msgid "Locating offline address books"
+msgstr "Встановлення розташування автономних адресних книг"
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:262
+#: ../src/EWS/registry/e-ews-backend.c:493
+msgid "Global Address List"
+msgstr "Загальний список адрес"
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:289
+msgid "Cache o_ffline address book"
+msgstr "_Кешувати автономну адресну книгу"
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:315
+msgid "Select ad_dress list:"
+msgstr "Ви_беріть список адрес:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:339
+msgid "Fetch List"
+msgstr "Отримати список"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:922
+msgid "Out of Office"
+msgstr "За межами офісу"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:400
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"Вказані нижче повідомлення буде автоматично надіслано до усіх внутрішніх і "
+"зовнішніх осіб, які надсилають вам поштові повідомлення."
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+msgid "Do _not send Out of Office replies"
+msgstr "Н_е надсилати назовні відповіді «За межами офісу»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:418
+msgid "_Send Out of Office replies"
+msgstr "_Надсилати назовні відповіді «За межами офісу»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:426
+msgid "Send Out of Office replies only _during this time period:"
+msgstr ""
+"Надсилати назовні відповіді «За межами офісу» лише під _час цього інтервалу "
+"часу:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:446
+msgid "_From:"
+msgstr "_Від:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:471
+msgid "_To:"
+msgstr "_Кому:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:496
+msgid "I_nternal:"
+msgstr "В_нутрішнє:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:505
+msgid "Message to be sent within the organization"
+msgstr "Повідомлення, яке буде надіслано у межах організації"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:533
+msgid "E_xternal:"
+msgstr "Зовн_ішнє:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+msgid "Message to be sent outside the organization"
+msgstr "Повідомлення, яке буде надіслано за межі організації"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:551
+msgid "Do not reply to senders outside the organization"
+msgstr "Не відповідати відправникам поза організацією"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:554
+msgid "Reply only to known senders outside the organization"
+msgstr "Відповідати лише відомим відправникам поза організацією"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:557
+msgid "Reply to any sender outside the organization"
+msgstr "Відповідати будь-яким відправникам поза організацією"
+
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:994
+msgid "Retrieving “Out of Office” settings"
+msgstr "Параметри отримання «За межами офісу»"
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Помилка запиту щодо автоматично виявлення."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:2
+msgid "The reported error was “{0}”."
+msgstr "Повідомлено про помилку «{0}»."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "Не вдалося визначити місце зберігання автономних адресних книг."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve “Out of Office” settings."
+msgstr "Не вдалося отримати параметри обробки «За межами офісу»."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve “Delegates” settings."
+msgstr "Не вдалося отримати параметри обробки «Делегати»."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
+msgstr ""
+"Для вашого облікового запису Exchange «{0}» встановлено стан «За межами "
+"офісу»."
+
+#: ../src/EWS/registry/e-ews-backend.c:947
+#: ../src/Microsoft365/registry/e-m365-backend.c:679
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
+msgstr "Не вдалося визначити належний клас тек для нової теки із назвою «%s»"
+
+#: ../src/EWS/registry/e-ews-backend.c:1035
+#, c-format
+msgid "Data source “%s” does not represent an Exchange Web Services folder"
+msgstr "Джерело даних «%s» не є відповідником теки веб служб Exchange"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
+#| msgid "Folder does not exist"
+msgid "Folder ID is not set"
+msgstr "Не встановлено ідентифікатор теки"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+msgid "Cannot save contact list into a Microsoft 365 address book"
+msgstr "Не вдалося зберегти список контактів до адресної книги Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1663
+msgid "Microsoft 365 calendar cannot store more than one recurrence"
+msgstr ""
+"У календарі Microsoft 365 не може бути збережено більше одного повторення"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1672
+msgid ""
+"Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
+"properties"
+msgstr ""
+"У календарі Microsoft 365 не може бути збережено компоненти із властивостями"
+" RDATE, EXDATE або RRULE"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
+#, c-format
+msgid "Unknown recurrence frequency (%d)"
+msgstr "Невідома частота повторення (%d)"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1927
+msgid "Microsoft 365 calendar cannot store more that one event reminder"
+msgstr ""
+"У календарі Microsoft 365 не може бути збережено більше одного нагадування"
+" про подію"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1960
+msgid "Microsoft 365 event can have only a reminder before event start"
+msgstr "Подія Microsoft 365 може мати лише одне нагадування перед початком"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
+msgid "Microsoft 365 task can have only a reminder with absolute time"
+msgstr ""
+"Завдання Microsoft 365 може мати лише одне нагадування в абсолютному часі"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
+#, c-format
+msgid "Cannot store attachment with URI “%s”"
+msgstr "Неможливо зберегти долучення із адресою «%s»"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
+#| msgid "Failed to read From address"
+msgid "Failed to read attachment URI"
+msgstr "Не вдалося прочитати адресу долучення"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
+#| msgid "Failed to set contact photo:"
+msgid "Failed to get inline attachment data"
+msgstr "Не вдалося отримати дані вбудованого долучення"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr "У календарі Microsoft 365 можна зберігати лише прості події"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3226
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr "У теці завдань Microsoft 365 можна зберігати лише прості завдання"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:491
+#: ../src/Microsoft365/camel/camel-m365-folder.c:610
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+msgid "Invalid folder state (missing parent store)"
+msgstr "Некоректний стан теки (пропущено батьківське сховище)"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:633
+msgid ""
+"Cannot add messages into an Microsoft 365 account from another account. Only "
+"messages from the same account can be moved/copied between the Microsoft 365 "
+"folders."
+msgstr ""
+"Не можна додавати повідомлення до облікового запису Microsoft 365 з іншого"
+" облікового запису. Копіювання або пересування повідомлень між теками"
+" Microsoft 365 можливе лише у межах одного облікового запису."
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#, c-format
+msgid "Folder “%s” doesn't correspond to any known folder"
+msgstr "Тека «%s» не відповідає жодній відомій теці"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#, c-format
+#| msgid "Could not load summary for %s"
+msgid "Could not load summary for “%s”"
+msgstr "Не вдалося завантажити резюме щодо «%s»"
+
+#: ../src/Microsoft365/camel/camel-m365-provider.c:56
+msgid "Microsoft 365"
+msgstr "Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-provider.c:58
+msgid "For accessing Microsoft 365 server"
+msgstr "Для доступу до сервера Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-transport.c:257
+msgid "Microsoft 365 server"
+msgstr "Сервер Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:145
+msgid "Mail receive via Microsoft 365"
+msgstr "Отримання пошти за допомогою Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:200
+#: ../src/Microsoft365/common/e-m365-connection.c:1521
+#, c-format
+#| msgid "Default redirect URI is “%s”"
+msgid "Malformed URI: “%s”"
+msgstr "Помилкове форматування адреси: «%s»"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:533
+#| msgid "Look up Exchange server categories"
+msgid "Look up Microsoft 365 categories"
+msgstr "Пошук у категоріях Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:542
+#: ../src/Microsoft365/camel/camel-m365-transport.c:183
+#| msgid "Failed to set contact photo:"
+msgid "Failed to create connection"
+msgstr "Не вдалося створити з'єднання"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:707
+#, c-format
+#| msgid "Parent folder %s does not exist"
+msgid "Parent folder “%s” does not exist"
+msgstr "Батьківської теки «%s» не існує"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:894
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot find “Deleted Items” folder"
+msgstr "Не вдалося знайти теку «Вилучені записи»"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:985
+#: ../src/Microsoft365/camel/camel-m365-store.c:1023
+#, c-format
+#| msgid "Folder %s does not exist"
+msgid "Folder “%s” does not exist"
+msgstr "Теки «%s» не існує"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:259
+#| msgid "Exchange mail delivery via %s"
+msgid "Mail delivery via Microsoft 365"
+msgstr "Доставлення пошти за допомогою Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:297
+#| msgid "Exchange server cannot send message with multiple From addresses"
+msgid "Microsoft 365 server cannot send message with multiple From addresses"
+msgstr ""
+"Сервер Microsoft 365 не може надсилати повідомлення із декількома адресами"
+" «Від»"
+
+#: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
+#| msgid "OAuth2 (Office365)"
+msgid "OAuth2 (Microsoft 365)"
+msgstr "OAuth2 (Microsoft 365)"
+
+#: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:15
+#| msgid ""
+#| "This option will use an OAuth 2.0 access token to connect to the "
+#| "Office365.com server"
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Microsoft "
+"365 server"
+msgstr ""
+"Цей параметр використовуватиме ключ доступу OAuth 2.0 для з'єднання із "
+"сервером Microsoft 365"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:114
+msgctxt "OAuth2Service"
+msgid "Microsoft365"
+msgstr "Microsoft365"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1179
+#, c-format
+#| msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+#| msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
+msgstr[1] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилини)"
+msgstr[2] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилин)"
+msgstr[3] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1185
+#, c-format
+#| msgid "Exchange server is busy, waiting to retry (%d second)"
+#| msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
+msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
+msgstr[0] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
+msgstr[1] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунди)"
+msgstr[2] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунд)"
+msgstr[3] ""
+"Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:2037
+#| msgid "Failed to parse oab XML"
+msgid "Failed to parse own Json data"
+msgstr "Не вдалося обробити власні дані JSON"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
+#| msgid "_Override Office365 OAuth2 settings"
+msgid "_Override Microsoft 365 OAuth2 settings"
+msgstr "П_еревизначити параметри OAuth2 Microsoft 365"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:770
+#, c-format
+#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
+msgid "Data source “%s” does not represent a Microsoft 365 folder"
+msgstr "Джерело даних «%s» не є відповідником теки Microsoft 365"
+
+#~ msgid "User “%s” was not found on the server"
+#~ msgstr "Користувача «%s» на сервері не виявлено"
