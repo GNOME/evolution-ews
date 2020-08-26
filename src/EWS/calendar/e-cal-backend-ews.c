@@ -547,7 +547,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			has_this_date = FALSE;
 			e_ews_item_task_has_complete_date (item, &has_this_date);
 			if (has_this_date) {
-				itt = i_cal_time_new_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, user_timezone);
+				itt = i_cal_time_new_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, utc_zone);
 				prop = i_cal_property_new_completed (itt);
 				i_cal_component_take_property (icomp, prop);
 				g_clear_object (&itt);
