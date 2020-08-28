@@ -89,10 +89,17 @@ m365_backend_populate (ECollectionBackend *backend)
 	if (!e_source_get_enabled (source))
 		return;
 
+	if (!e_collection_backend_freeze_populate (backend)) {
+		e_collection_backend_thaw_populate (backend);
+		return;
+	}
+
 	m365_backend_claim_old_resources (backend);
 
 	if (e_backend_get_online (E_BACKEND (backend)))
 		e_backend_schedule_authenticate (E_BACKEND (backend), NULL);
+
+	e_collection_backend_thaw_populate (backend);
 }
 
 static void
@@ -516,6 +523,8 @@ m365_backend_sync_folders_thread (GTask *task,
 		m365_backend_sync_task_folders_sync (m365_backend, cnc, cancellable);
 #endif
 	}
+
+	e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (m365_backend));
 }
 
 static void
@@ -826,8 +835,11 @@ m365_backend_authenticate_sync (EBackend *backend,
 	CamelM365Settings *m365_settings;
 	EM365Connection *cnc;
 	ESourceAuthenticationResult result;
+	gboolean in_sync_folders = FALSE;
 
 	g_return_val_if_fail (E_IS_M365_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
+
+	e_collection_backend_freeze_populate (E_COLLECTION_BACKEND (backend));
 
 	m365_settings = camel_m365_settings_get_from_backend (backend, NULL);
 	g_return_val_if_fail (m365_settings != NULL, E_SOURCE_AUTHENTICATION_ERROR);
@@ -839,12 +851,17 @@ m365_backend_authenticate_sync (EBackend *backend,
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
 		m365_backend_sync_folders (E_M365_BACKEND (backend), cnc, NULL, NULL, NULL);
+
+		in_sync_folders = TRUE;
 	} else if (result == E_SOURCE_AUTHENTICATION_REJECTED &&
 		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
 		result = E_SOURCE_AUTHENTICATION_REQUIRED;
 	}
 
 	g_clear_object (&cnc);
+
+	if (!in_sync_folders)
+		e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (backend));
 
 	return result;
 }

@@ -751,6 +751,8 @@ ews_backend_folders_synced_cb (GObject *source,
 
 	if (!e_ews_backend_sync_folders_finish (ews_backend, result, NULL))
 		ews_backend_claim_old_resources (E_COLLECTION_BACKEND (ews_backend));
+
+	e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (ews_backend));
 }
 
 static void
@@ -773,6 +775,11 @@ ews_backend_populate (ECollectionBackend *backend)
 	if (!e_source_get_enabled (source))
 		return;
 
+	if (!e_collection_backend_freeze_populate (backend)) {
+		e_collection_backend_thaw_populate (backend);
+		return;
+	}
+
 	ews_backend_add_gal_source (ews_backend);
 	ews_backend_claim_old_resources (backend);
 
@@ -789,6 +796,8 @@ ews_backend_populate (ECollectionBackend *backend)
 				NULL, NULL);
 		}
 	}
+
+	e_collection_backend_thaw_populate (backend);
 }
 
 static gchar *
@@ -1115,12 +1124,15 @@ ews_backend_authenticate_sync (EBackend *backend,
 	EEwsConnection *connection;
 	CamelEwsSettings *ews_settings;
 	ESourceAuthenticationResult result = E_SOURCE_AUTHENTICATION_ERROR;
+	gboolean in_sync_folders = FALSE;
 
 	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
 
 	ews_backend = E_EWS_BACKEND (backend);
 	ews_settings = ews_backend_get_settings (ews_backend);
 	g_return_val_if_fail (ews_settings != NULL, E_SOURCE_AUTHENTICATION_ERROR);
+
+	e_collection_backend_freeze_populate (E_COLLECTION_BACKEND (backend));
 
 	g_mutex_lock (&ews_backend->priv->connection_lock);
 	g_clear_object (&ews_backend->priv->connection);
@@ -1135,12 +1147,17 @@ ews_backend_authenticate_sync (EBackend *backend,
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
 
 		e_ews_backend_sync_folders (ews_backend, NULL, ews_backend_folders_synced_cb, NULL);
+
+		in_sync_folders = TRUE;
 	} else if (e_ews_connection_utils_get_without_password (ews_settings) &&
 		   result == E_SOURCE_AUTHENTICATION_REJECTED &&
 		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
 		e_ews_connection_utils_force_off_ntlm_auth_check ();
 		result = E_SOURCE_AUTHENTICATION_REQUIRED;
 	}
+
+	if (!in_sync_folders)
+		e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (backend));
 
 	return result;
 }
