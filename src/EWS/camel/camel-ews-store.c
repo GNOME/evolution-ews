@@ -3895,9 +3895,10 @@ camel_ews_store_connected (CamelEwsStore *ews_store,
 
 void
 camel_ews_store_maybe_disconnect (CamelEwsStore *store,
-                                  const GError *error)
+                                  GError *error)
 {
 	CamelService *service;
+	gboolean is_auth_failed;
 
 	g_return_if_fail (store != NULL);
 
@@ -3909,9 +3910,41 @@ camel_ews_store_maybe_disconnect (CamelEwsStore *store,
 	if (camel_service_get_connection_status (service) != CAMEL_SERVICE_CONNECTED)
 		return;
 
-	if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NORESPONSE) ||
-	    g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
+	is_auth_failed = g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
+
+	if (is_auth_failed || g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NORESPONSE))
 		camel_service_disconnect_sync (service, FALSE, NULL, NULL);
+
+	if (is_auth_failed) {
+		CamelSession *session;
+		ESourceRegistry *registry = NULL;
+
+		error->domain = CAMEL_SERVICE_ERROR;
+		error->code = CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE;
+
+		session = camel_service_ref_session (service);
+
+		if (E_IS_MAIL_SESSION (session))
+			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+
+		if (registry) {
+			ESource *source, *collection = NULL;
+
+			source = e_source_registry_ref_source (registry, camel_service_get_uid (service));
+
+			if (source) {
+				collection = e_source_registry_find_extension (registry, source, E_SOURCE_EXTENSION_COLLECTION);
+
+				if (collection)
+					e_source_emit_credentials_required (collection, E_SOURCE_CREDENTIALS_REASON_REJECTED, NULL, 0, error);
+			}
+
+			g_clear_object (&collection);
+			g_clear_object (&source);
+		}
+
+		g_clear_object (&session);
+	}
 }
 
 static void

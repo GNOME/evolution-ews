@@ -69,7 +69,7 @@ gboolean	camel_ews_store_connected	(CamelEwsStore *store,
 						 GError **error);
 void		camel_ews_store_maybe_disconnect
 						(CamelEwsStore *store,
-						 const GError *error);
+						 GError *error);
 void		camel_ews_store_ensure_virtual_folders
 						(CamelEwsStore *ews_store);
 void		camel_ews_store_ensure_unique_path

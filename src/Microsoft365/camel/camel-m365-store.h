@@ -60,7 +60,7 @@ gboolean	camel_m365_store_ensure_connected
 						 GError **error);
 void		camel_m365_store_maybe_disconnect
 						(CamelM365Store *m365_store,
-						 const GError *error);
+						 GError *error);
 void		camel_m365_store_connect_folder_summary
 						(CamelM365Store *m365_store,
 						 CamelFolderSummary *folder_summary);

@@ -9,6 +9,7 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
+#include <libemail-engine/libemail-engine.h>
 #include <e-util/e-util.h>
 
 #include "common/camel-m365-settings.h"
@@ -1794,7 +1795,7 @@ camel_m365_store_ensure_connected (CamelM365Store *m365_store,
 
 void
 camel_m365_store_maybe_disconnect (CamelM365Store *m365_store,
-				   const GError *error)
+				   GError *error)
 {
 	CamelService *service;
 
@@ -1808,11 +1809,38 @@ camel_m365_store_maybe_disconnect (CamelM365Store *m365_store,
 	if (camel_service_get_connection_status (service) != CAMEL_SERVICE_CONNECTED)
 		return;
 
-#if 0
-	if (g_error_matches (error, M365_CONNECTION_ERROR, M365_CONNECTION_ERROR_NORESPONSE) ||
-	    g_error_matches (error, M365_CONNECTION_ERROR, M365_CONNECTION_ERROR_AUTHENTICATION_FAILED))
+	if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		CamelSession *session;
+		ESourceRegistry *registry = NULL;
+
 		camel_service_disconnect_sync (service, FALSE, NULL, NULL);
-#endif
+
+		error->domain = CAMEL_SERVICE_ERROR;
+		error->code = CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE;
+
+		session = camel_service_ref_session (service);
+
+		if (E_IS_MAIL_SESSION (session))
+			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+
+		if (registry) {
+			ESource *source, *collection = NULL;
+
+			source = e_source_registry_ref_source (registry, camel_service_get_uid (service));
+
+			if (source) {
+				collection = e_source_registry_find_extension (registry, source, E_SOURCE_EXTENSION_COLLECTION);
+
+				if (collection)
+					e_source_emit_credentials_required (collection, E_SOURCE_CREDENTIALS_REASON_REJECTED, NULL, 0, error);
+			}
+
+			g_clear_object (&collection);
+			g_clear_object (&source);
+		}
+
+		g_clear_object (&session);
+	}
 }
 
 void
