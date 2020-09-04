@@ -1,3 +1,18 @@
+Evolution-EWS 3.37.92 2020-09-04
+--------------------------------
+
+Bug Fixes:
+	I#117 - Task completion date shifted by user's zone UTC offset (Milan Crha)
+	I#118 - Camel: Claim required credentials when authentication fails (Milan Crha)
+	eds-I#208 - Avoid race condition when refreshing collection backend (Milan Crha)
+
+Translations:
+	Yuri Chornoivan (uk)
+	Zander Brown (en_GB)
+	Piotr Drąg (pl)
+	Daniel Mustieles (es)
+	Rafael Fontenelle (pt_BR)
+
 Evolution-EWS 3.37.90 2020-08-07
 --------------------------------
 
