@@ -2877,7 +2877,7 @@ ews_create_folder_sync (CamelStore *store,
 	EwsFolderId *folder_id;
 	EEwsConnection *connection;
 	CamelFolderInfo *fi = NULL;
-	gboolean success;
+	gboolean success, is_foreign = FALSE, is_public = FALSE;
 	GError *local_error = NULL;
 
 	if (parent_name && *parent_name)
@@ -2929,6 +2929,9 @@ ews_create_folder_sync (CamelStore *store,
 				parent_name);
 			return NULL;
 		}
+
+		is_foreign = camel_ews_store_summary_get_foreign (ews_summary, fid, NULL);
+		is_public = camel_ews_store_summary_get_public (ews_summary, fid, NULL);
 	}
 
 	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
@@ -2964,7 +2967,7 @@ ews_create_folder_sync (CamelStore *store,
 		fid, folder_id->change_key,
 		folder_name,
 		E_EWS_FOLDER_TYPE_MAILBOX,
-		0, 0, FALSE, FALSE);
+		0, 0, is_foreign, is_public);
 	fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
 	e_ews_folder_id_free (folder_id);
 
