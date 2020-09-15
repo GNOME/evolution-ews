@@ -308,7 +308,7 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 	if (!e_named_parameters_exists (params, E_CONFIG_LOOKUP_PARAM_PASSWORD)) {
 		g_set_error (error, E_CONFIG_LOOKUP_WORKER_ERROR, E_CONFIG_LOOKUP_WORKER_ERROR_REQUIRES_PASSWORD,
-			_("Requires user password to continue"));
+			_("Requires password to continue."));
 		return;
 	}
 
