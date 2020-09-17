@@ -99,13 +99,6 @@ typedef enum {
 } EwsAffectedTaskOccurrencesType;
 
 typedef enum {
-	E_EWS_BODY_TYPE_ANY,
-	E_EWS_BODY_TYPE_BEST,
-	E_EWS_BODY_TYPE_HTML,
-	E_EWS_BODY_TYPE_TEXT
-} EEwsBodyType;
-
-typedef enum {
 	E_EWS_SIZE_REQUESTED_UNKNOWN = 0,
 	E_EWS_SIZE_REQUESTED_48X48 = 48,
 	E_EWS_SIZE_REQUESTED_64X64 = 64,

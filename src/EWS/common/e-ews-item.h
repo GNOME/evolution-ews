@@ -24,6 +24,13 @@ typedef struct _EEwsItemClass   EEwsItemClass;
 typedef struct _EEwsItemPrivate EEwsItemPrivate;
 
 typedef enum {
+	E_EWS_BODY_TYPE_ANY,
+	E_EWS_BODY_TYPE_BEST,
+	E_EWS_BODY_TYPE_HTML,
+	E_EWS_BODY_TYPE_TEXT
+} EEwsBodyType;
+
+typedef enum {
 	E_EWS_ITEM_TYPE_UNKNOWN,
 	E_EWS_ITEM_TYPE_MESSAGE,
 	E_EWS_ITEM_TYPE_POST_ITEM,
@@ -418,6 +425,7 @@ const gchar *	e_ews_item_get_status		(EEwsItem *item);
 const gchar *	e_ews_item_get_percent_complete (EEwsItem *item);
 const gchar *	e_ews_item_get_sensitivity	(EEwsItem *item);
 const gchar *	e_ews_item_get_body		(EEwsItem *item);
+EEwsBodyType	e_ews_item_get_body_type	(EEwsItem *item);
 const gchar *	e_ews_item_get_owner		(EEwsItem *item);
 const gchar *	e_ews_item_get_delegator	(EEwsItem *item);
 time_t		e_ews_item_get_due_date		(EEwsItem *item);

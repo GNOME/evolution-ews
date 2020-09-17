@@ -95,6 +95,7 @@ struct _EEwsItemPrivate {
 	gchar *subject;
 	gchar *mime_content;
 	gchar *body;
+	EEwsBodyType body_type;
 
 	gchar *date_header;
 	time_t date_received;
@@ -276,6 +277,7 @@ e_ews_item_init (EEwsItem *item)
 	item->priv = G_TYPE_INSTANCE_GET_PRIVATE (item, E_TYPE_EWS_ITEM, EEwsItemPrivate);
 
 	item->priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
+	item->priv->body_type = E_EWS_BODY_TYPE_ANY;
 	item->priv->is_meeting = FALSE;
 	item->priv->is_response_requested = FALSE;
 
@@ -1645,7 +1647,18 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 		} else if (!g_ascii_strcasecmp (name, "EndTimeZone")) {
 			priv->end_timezone = e_soap_parameter_get_property (subparam, "Id");
 		} else if (!g_ascii_strcasecmp (name, "Body")) {
+			const gchar *body_type;
+
 			priv->body = e_soap_parameter_get_string_value (subparam);
+
+			body_type = e_soap_parameter_get_property (subparam, "BodyType");
+
+			if (g_strcmp0 (body_type, "HTML") == 0)
+				priv->body_type = E_EWS_BODY_TYPE_HTML;
+			else if (g_strcmp0 (body_type, "Text") == 0)
+				priv->body_type = E_EWS_BODY_TYPE_TEXT;
+			else
+				priv->body_type = E_EWS_BODY_TYPE_ANY;
 		}
 	}
 
@@ -2766,6 +2779,17 @@ e_ews_item_get_body (EEwsItem *item)
 		return item->priv->body;
 
 	return item->priv->task_fields ? item->priv->task_fields->body : NULL;
+}
+
+EEwsBodyType
+e_ews_item_get_body_type (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), E_EWS_BODY_TYPE_ANY);
+
+	if (item->priv->body)
+		return item->priv->body_type;
+
+	return E_EWS_BODY_TYPE_ANY;
 }
 
 const gchar *

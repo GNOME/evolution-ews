@@ -340,6 +340,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
                                             const EwsId *calendar_item_id,
                                             gboolean is_calendar_UID,
 					    const EwsId *mail_item_id,
+					    const gchar *html_body,
                                             GError **error)
 {
 	CamelMimeParser *mimeparser;
@@ -417,6 +418,21 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 			prop = i_cal_property_new_x (mail_item_id->id);
 			i_cal_property_set_x_name (prop, "X-EVOLUTION-ACCEPT-ID");
 			i_cal_component_take_property (subcomp, prop);
+
+			if (html_body && *html_body) {
+				prop = i_cal_component_get_first_property (subcomp, I_CAL_DESCRIPTION_PROPERTY);
+
+				/* The server can return empty HTML (with "<html><body></body></html>" only),
+				   thus add it only if there was any DESCRIPTION provided as well. */
+				if (prop) {
+					g_clear_object (&prop);
+
+					prop = i_cal_property_new_x (html_body);
+					i_cal_property_set_x_name (prop, "X-ALT-DESC");
+					i_cal_property_set_parameter_from_string (prop, "FMTTYPE", "text/html");
+					i_cal_component_take_property (subcomp, prop);
+				}
+			}
 
 			calstring_new = i_cal_component_as_ical_string (icomp);
 			if (calstring_new) {
@@ -832,14 +848,16 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_CANCELLATION ||
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_RESPONSE) {
-		GSList *items_req = NULL;
+		GSList *items_req = NULL, *html_body_resp = NULL;
+		GSList *html_body_ids;
 		const EwsId *calendar_item_accept_id = NULL;
+		const gchar *html_body = NULL;
 		gboolean is_calendar_UID = TRUE;
 
 		add_props = e_ews_additional_props_new ();
 		add_props->field_uri = g_strdup ("meeting:AssociatedCalendarItemId");
 
-		// Get AssociatedCalendarItemId with second get_items call
+		/* Get AssociatedCalendarItemId with second get_items call */
 		res = e_ews_connection_get_items_sync (
 			cnc, pri, ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY,
@@ -870,14 +888,35 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			calendar_item_accept_id = e_ews_item_get_id (items->data);
 			is_calendar_UID = FALSE;
 		}
-		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, e_ews_item_get_id (items->data), error);
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup ("item:Body");
+
+		html_body_ids = g_slist_prepend (NULL, calendar_item_accept_id->id);
+
+		if (e_ews_connection_get_items_sync (
+			cnc, pri, html_body_ids, "IdOnly", add_props,
+			FALSE, NULL, E_EWS_BODY_TYPE_BEST,
+			&html_body_resp,
+			(ESoapProgressFn) camel_operation_progress,
+			(gpointer) cancellable,
+			cancellable, NULL) && html_body_resp && e_ews_item_get_item_type (html_body_resp->data) != E_EWS_ITEM_TYPE_ERROR) {
+			EEwsItem *item = html_body_resp->data;
+
+			if (e_ews_item_get_body_type (item) == E_EWS_BODY_TYPE_HTML) {
+				html_body = e_ews_item_get_body (item);
+			}
+		}
+
+		e_ews_additional_props_free (add_props);
+		g_slist_free (html_body_ids);
+
+		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, e_ews_item_get_id (items->data), html_body, error);
 		if (mime_fname_new)
 			mime_content = (const gchar *) mime_fname_new;
 
-		if (items_req != NULL) {
-			g_object_unref (items_req->data);
-			g_slist_free (items_req);
-		}
+		g_slist_free_full (html_body_resp, g_object_unref);
+		g_slist_free_full (items_req, g_object_unref);
 	}
 
 	cache_file = ews_data_cache_get_filename (
