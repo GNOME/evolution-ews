@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-08-05 06:58+0000\n"
-"PO-Revision-Date: 2020-09-13 16:21+0200\n"
+"POT-Creation-Date: 2020-09-17 10:45+0000\n"
+"PO-Revision-Date: 2020-09-17 20:08+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
@@ -88,29 +88,29 @@ msgstr "Nemoguć pronalazak korisnika “%s” među sudionicima"
 msgid "Invalid occurrence ID"
 msgstr "Nevaljani ID pojave"
 
-#: ../src/EWS/camel/camel-ews-folder.c:356
+#: ../src/EWS/camel/camel-ews-folder.c:357
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Nemoguće otvaranje privremene datoteke mime sadržaja!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Nemoguće stvaranje obrađivača iz mime sadržaja!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:373
+#: ../src/EWS/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nemoguća obrada mime sadržaja zahtjeva za sastankom!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:442
-#: ../src/EWS/camel/camel-ews-folder.c:652
+#: ../src/EWS/camel/camel-ews-folder.c:458
+#: ../src/EWS/camel/camel-ews-folder.c:668
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nemoguće stvaranje datoteke predmemorije"
 
-#: ../src/EWS/camel/camel-ews-folder.c:769
-#: ../src/EWS/camel/camel-ews-folder.c:890
+#: ../src/EWS/camel/camel-ews-folder.c:785
+#: ../src/EWS/camel/camel-ews-folder.c:929
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Neuspjelo stvaranje putanje predmemorije “%s”: %s"
@@ -118,22 +118,22 @@ msgstr "Neuspjelo stvaranje putanje predmemorije “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:904
+#: ../src/EWS/camel/camel-ews-folder.c:943
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Neuspjelo premještanje datoteke predmemorije iz “%s” u “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1843
+#: ../src/EWS/camel/camel-ews-folder.c:1882
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Neuspjelo učitavanje sažetka za %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2314
+#: ../src/EWS/camel/camel-ews-folder.c:2353
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Osvježavanje mape “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2498
+#: ../src/EWS/camel/camel-ews-folder.c:2537
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nemoguće izvođenje radnji na mapi u izvanmrežnom načinu rada"
@@ -241,7 +241,7 @@ msgstr ""
 "GSSAPI ovjeru."
 
 #: ../src/EWS/camel/camel-ews-store.c:323
-#: ../src/Microsoft365/camel/camel-m365-store.c:75
+#: ../src/Microsoft365/camel/camel-m365-store.c:76
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesija nema putanju spremišta"
@@ -301,7 +301,7 @@ msgid "Updating foreign folders"
 msgstr "Nadopuna strane mape"
 
 #: ../src/EWS/camel/camel-ews-store.c:2354
-#: ../src/Microsoft365/camel/camel-m365-store.c:630
+#: ../src/Microsoft365/camel/camel-m365-store.c:631
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nema takve mape: %s"
@@ -315,7 +315,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Nemoguć pronalazak bilo kakvih EWU javnih mapa"
 
 #: ../src/EWS/camel/camel-ews-store.c:2893
-#: ../src/Microsoft365/camel/camel-m365-store.c:693
+#: ../src/Microsoft365/camel/camel-m365-store.c:694
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nemoguće stvaranje mape “%s”, mapa već postoji"
@@ -337,93 +337,93 @@ msgstr ""
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Nemoguće stvaranje mape u “%s”, koristi se samo za javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/EWS/camel/camel-ews-store.c:3035
+#: ../src/Microsoft365/camel/camel-m365-store.c:882
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne postoji"
 
-#: ../src/EWS/camel/camel-ews-store.c:3042
+#: ../src/EWS/camel/camel-ews-store.c:3045
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nemoguće uklanjanje mape u “%s”, koristi se samo za mape drugih korisnika"
 
-#: ../src/EWS/camel/camel-ews-store.c:3053
+#: ../src/EWS/camel/camel-ews-store.c:3056
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Nemoguće uklanjanje mape u “%s”, koristi se samo za javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3212
+#: ../src/EWS/camel/camel-ews-store.c:3215
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne postoji"
 
-#: ../src/EWS/camel/camel-ews-store.c:3221
+#: ../src/EWS/camel/camel-ews-store.c:3224
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nema zapisa promjene ključa za mapu %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3264
+#: ../src/EWS/camel/camel-ews-store.c:3267
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nemoguće je preimenovanje i premještanje mape u isto vrijeme"
 
-#: ../src/EWS/camel/camel-ews-store.c:3295
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nemoguć pronalazak ID-a mape za sadržajnu mapu %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3347
+#: ../src/EWS/camel/camel-ews-store.c:3350
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange poslužitelj %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3350
+#: ../src/EWS/camel/camel-ews-store.c:3353
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange usluga za %s na %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3394
-#: ../src/Microsoft365/camel/camel-m365-store.c:1455
+#: ../src/EWS/camel/camel-ews-store.c:3397
+#: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nemoguće lociranje mape smeća"
 
-#: ../src/EWS/camel/camel-ews-store.c:3454
-#: ../src/Microsoft365/camel/camel-m365-store.c:1513
+#: ../src/EWS/camel/camel-ews-store.c:3457
+#: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nemoguće lociranje mape neželjene pošte"
 
-#: ../src/EWS/camel/camel-ews-store.c:3645
+#: ../src/EWS/camel/camel-ews-store.c:3648
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nemoguća pretplata na EWU mape u izvanmrežnom načinu rada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3668
+#: ../src/EWS/camel/camel-ews-store.c:3671
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Nemoguća pretplata na mapu “%s”, nema dostupne javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3678
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nemoguća pretplata na mapu “%s”, mape nije pronađena"
 
-#: ../src/EWS/camel/camel-ews-store.c:3769
+#: ../src/EWS/camel/camel-ews-store.c:3772
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nemoguć je prekinuti pretplatu na EWU mape u izvanmrežnom načinu rada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3886
-#: ../src/Microsoft365/camel/camel-m365-store.c:1773
-#: ../src/Microsoft365/camel/camel-m365-store.c:1786
+#: ../src/EWS/camel/camel-ews-store.c:3889
+#: ../src/Microsoft365/camel/camel-m365-store.c:1774
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Morate biti u mrežnom načinu rada za završetak ove radnje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3930
-#: ../src/EWS/camel/camel-ews-store.c:3967
+#: ../src/EWS/camel/camel-ews-store.c:3966
+#: ../src/EWS/camel/camel-ews-store.c:4003
 msgid "Unsetting the “Out of Office” status"
 msgstr "Uklanjanje “Izvan ureda” stanja"
 
@@ -649,8 +649,8 @@ msgstr "OAB URL: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
-msgid "Requires user password to continue"
-msgstr "Potrebna je korisnička lozinka za nastavak"
+msgid "Requires password to continue."
+msgstr "Potrebna je lozinka za nastavak."
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:562
 msgid "Folder"
@@ -1452,13 +1452,13 @@ msgstr "Neuspjelo primanje \"Delegati\" postavki."
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Vaš Exchange \"{0}\" račun ima stanje postavljeno na \"Izvan ureda\"."
 
-#: ../src/EWS/registry/e-ews-backend.c:947
-#: ../src/Microsoft365/registry/e-m365-backend.c:679
+#: ../src/EWS/registry/e-ews-backend.c:956
+#: ../src/Microsoft365/registry/e-m365-backend.c:688
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nemoguće otkrivanje prikladne klase mape za novu mapu naziva “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1035
+#: ../src/EWS/registry/e-ews-backend.c:1044
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Izvor podataka “%s” ne predstavlja mapu Exchange web usluge"
@@ -1515,7 +1515,7 @@ msgstr "Neuspjelo čitanje URI-ja privitka"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
 msgid "Failed to get inline attachment data"
-msgstr "Neuspjelo dobivanje podataka privitka:"
+msgstr "Neuspjelo dobivanje podataka privitka"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
 msgid "Can store only simple events into Microsoft 365 calendar"
@@ -1560,41 +1560,41 @@ msgstr "Microsoft 365"
 msgid "For accessing Microsoft 365 server"
 msgstr "Za pristupanje Microsoft 365 poslužitelju"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-store.c:144
 #: ../src/Microsoft365/camel/camel-m365-transport.c:257
 msgid "Microsoft 365 server"
 msgstr "Microsoft 365 poslužitelj"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:145
+#: ../src/Microsoft365/camel/camel-m365-store.c:146
 msgid "Mail receive via Microsoft 365"
 msgstr "Pošta primljena putem Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:200
+#: ../src/Microsoft365/camel/camel-m365-store.c:201
 #: ../src/Microsoft365/common/e-m365-connection.c:1521
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Oštećeni URI: “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:533
+#: ../src/Microsoft365/camel/camel-m365-store.c:534
 msgid "Look up Microsoft 365 categories"
 msgstr "Pretraga kategorija Microsoft 365 poslužitelja"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:542
+#: ../src/Microsoft365/camel/camel-m365-store.c:543
 #: ../src/Microsoft365/camel/camel-m365-transport.c:183
 msgid "Failed to create connection"
 msgstr "Neuspjelo stvaranje povezivanja"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:707
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Sadržajna mapa “%s” ne postoji"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:894
+#: ../src/Microsoft365/camel/camel-m365-store.c:895
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Nemoguć pronalazak “Obrisane stavke” mape"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:985
-#: ../src/Microsoft365/camel/camel-m365-store.c:1023
+#: ../src/Microsoft365/camel/camel-m365-store.c:986
+#: ../src/Microsoft365/camel/camel-m365-store.c:1024
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Mapa “%s” ne postoji"
@@ -1660,7 +1660,7 @@ msgstr "Neuspjela obrada vlastitog Json podatka"
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Zaobiđi Microsoft 365 OAuth2 postavke"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:770
+#: ../src/Microsoft365/registry/e-m365-backend.c:779
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Izvor podataka “%s” ne predstavlja Microsoft 365 mapu"
