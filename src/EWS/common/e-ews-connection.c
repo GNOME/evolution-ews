@@ -10403,13 +10403,7 @@ ews_connection_gather_auth_methods_cb (SoupMessage *message,
 
 	if (!has_bearer) {
 		/* Special-case Office365 OAuth2, because outlook.office365.com doesn't advertise Bearer */
-		SoupURI *suri;
-
-		suri = soup_message_get_uri (message);
-		if (suri && soup_uri_get_host (suri) &&
-		    g_ascii_strcasecmp (soup_uri_get_host (suri), "outlook.office365.com") == 0) {
-			async_data->items = g_slist_prepend (async_data->items, g_strdup ("Bearer"));
-		}
+		async_data->items = g_slist_prepend (async_data->items, g_strdup ("Bearer"));
 	}
 
 	g_object_set_data (G_OBJECT (simple), EWS_OBJECT_KEY_AUTHS_GATHERED, GINT_TO_POINTER (1));
