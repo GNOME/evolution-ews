@@ -74,6 +74,7 @@ struct _ECalBackendEwsPrivate {
 
 #define GET_ITEMS_SYNC_PROPERTIES \
 	"item:Attachments" \
+	" item:Body" \
 	" item:Categories" \
 	" item:HasAttachments" \
 	" item:MimeContent" \
@@ -989,6 +990,25 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		e_cal_util_component_set_x_property (icomp, "X-EVOLUTION-ITEMID", item_id->id);
 		e_cal_util_component_set_x_property (icomp, "X-EVOLUTION-CHANGEKEY", item_id->change_key);
 
+		if (e_ews_item_get_body_type (item) == E_EWS_BODY_TYPE_HTML) {
+			const gchar *html_body = e_ews_item_get_body (item);
+
+			if (html_body && *html_body) {
+				prop = i_cal_component_get_first_property (icomp, I_CAL_DESCRIPTION_PROPERTY);
+
+				/* The server can return empty HTML (with "<html><body></body></html>" only),
+				   thus add it only if there was any DESCRIPTION provided as well. */
+				if (prop) {
+					g_clear_object (&prop);
+
+					prop = i_cal_property_new_x (html_body);
+					i_cal_property_set_x_name (prop, "X-ALT-DESC");
+					i_cal_property_set_parameter_from_string (prop, "FMTTYPE", "text/html");
+					i_cal_component_take_property (icomp, prop);
+				}
+			}
+		}
+
 		res_component = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
 
 		/* Categories */
@@ -1183,7 +1203,7 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 			add_props,
 			FALSE,
 			NULL,
-			E_EWS_BODY_TYPE_TEXT,
+			E_EWS_BODY_TYPE_BEST,
 			&received,
 			NULL, NULL,
 			cancellable,
