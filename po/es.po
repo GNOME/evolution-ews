@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-08-05 06:58+0000\n"
-"PO-Revision-Date: 2020-08-24 12:51+0200\n"
+"POT-Creation-Date: 2020-09-17 10:12+0000\n"
+"PO-Revision-Date: 2020-09-23 09:16+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 3.36.0\n"
+"X-Generator: Gtranslator 3.38.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -93,29 +93,29 @@ msgstr "No se puede encontrar al usuario «%s» entre los asistentes"
 msgid "Invalid occurrence ID"
 msgstr "ID de ocurrencia no válido"
 
-#: ../src/EWS/camel/camel-ews-folder.c:356
+#: ../src/EWS/camel/camel-ews-folder.c:357
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "No se pudo abrir el archivo temporal de contenido MIME."
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "No se pudo generar analizador desde el contenido MIME."
 
-#: ../src/EWS/camel/camel-ews-folder.c:373
+#: ../src/EWS/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "No se pudo analizar el contenido MIME de la petición de encuentro."
 
-#: ../src/EWS/camel/camel-ews-folder.c:442
-#: ../src/EWS/camel/camel-ews-folder.c:652
+#: ../src/EWS/camel/camel-ews-folder.c:458
+#: ../src/EWS/camel/camel-ews-folder.c:668
 #, c-format
 msgid "Unable to create cache file"
 msgstr "No se pudo crear el archivo de la caché"
 
-#: ../src/EWS/camel/camel-ews-folder.c:769
-#: ../src/EWS/camel/camel-ews-folder.c:890
+#: ../src/EWS/camel/camel-ews-folder.c:785
+#: ../src/EWS/camel/camel-ews-folder.c:929
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "No se pudo crear la ruta de la caché «%s»: %s"
@@ -123,22 +123,22 @@ msgstr "No se pudo crear la ruta de la caché «%s»: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:904
+#: ../src/EWS/camel/camel-ews-folder.c:943
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Falló al mover el archivo de la caché de mensajes de «%s» a «%s»: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1843
+#: ../src/EWS/camel/camel-ews-folder.c:1882
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2314
+#: ../src/EWS/camel/camel-ews-folder.c:2353
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Actualizando carpeta «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2498
+#: ../src/EWS/camel/camel-ews-folder.c:2537
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
@@ -249,7 +249,7 @@ msgstr ""
 "GSSAPI."
 
 #: ../src/EWS/camel/camel-ews-store.c:323
-#: ../src/Microsoft365/camel/camel-m365-store.c:75
+#: ../src/Microsoft365/camel/camel-m365-store.c:76
 #, c-format
 msgid "Session has no storage path"
 msgstr "La sesión no tiene ruta de almacenamiento"
@@ -307,7 +307,7 @@ msgid "Updating foreign folders"
 msgstr "Actualizando carpetas externas"
 
 #: ../src/EWS/camel/camel-ews-store.c:2354
-#: ../src/Microsoft365/camel/camel-m365-store.c:630
+#: ../src/Microsoft365/camel/camel-m365-store.c:631
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
@@ -321,7 +321,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "No se puede encontrar ninguna carpeta EWS pública"
 
 #: ../src/EWS/camel/camel-ews-store.c:2893
-#: ../src/Microsoft365/camel/camel-m365-store.c:693
+#: ../src/Microsoft365/camel/camel-m365-store.c:694
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "No se puede crear la carpeta «%s», la carpeta ya existe"
@@ -345,96 +345,96 @@ msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "No se puede crear la carpeta bajo «%s», se usa sólo para carpetas públicas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/EWS/camel/camel-ews-store.c:3035
+#: ../src/Microsoft365/camel/camel-m365-store.c:882
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/EWS/camel/camel-ews-store.c:3042
+#: ../src/EWS/camel/camel-ews-store.c:3045
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "No se puede eliminar la carpeta «%s», sólo la usan carpetas de otros usuarios"
 
-#: ../src/EWS/camel/camel-ews-store.c:3053
+#: ../src/EWS/camel/camel-ews-store.c:3056
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "No se puede quitar la carpeta «%s», se usa sólo para carpetas públicas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3212
+#: ../src/EWS/camel/camel-ews-store.c:3215
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/EWS/camel/camel-ews-store.c:3221
+#: ../src/EWS/camel/camel-ews-store.c:3224
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "No hay cambios en registros clave de la carpeta %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3264
+#: ../src/EWS/camel/camel-ews-store.c:3267
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3295
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "No se puede encontrar el ID de carpeta para la carpeta padre %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3347
+#: ../src/EWS/camel/camel-ews-store.c:3350
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3350
+#: ../src/EWS/camel/camel-ews-store.c:3353
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Servicio Exchange para %s en %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3394
-#: ../src/Microsoft365/camel/camel-m365-store.c:1455
+#: ../src/EWS/camel/camel-ews-store.c:3397
+#: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "No se pudo localizar la carpeta de la Papelera"
 
-#: ../src/EWS/camel/camel-ews-store.c:3454
-#: ../src/Microsoft365/camel/camel-m365-store.c:1513
+#: ../src/EWS/camel/camel-ews-store.c:3457
+#: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "No se puedo encontrar la carpeta de Correo no deseado"
 
-#: ../src/EWS/camel/camel-ews-store.c:3645
+#: ../src/EWS/camel/camel-ews-store.c:3648
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "No se puede suscribir a las carpetas EWS en modo desconectado"
 
-#: ../src/EWS/camel/camel-ews-store.c:3668
+#: ../src/EWS/camel/camel-ews-store.c:3671
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no hay ninguna carpeta pública "
 "disponible"
 
-#: ../src/EWS/camel/camel-ews-store.c:3678
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no se ha encontrado la carpeta"
 
-#: ../src/EWS/camel/camel-ews-store.c:3769
+#: ../src/EWS/camel/camel-ews-store.c:3772
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "No se puede desuscribir de las carpetas EWS en modo desconectado"
 
-#: ../src/EWS/camel/camel-ews-store.c:3886
-#: ../src/Microsoft365/camel/camel-m365-store.c:1773
-#: ../src/Microsoft365/camel/camel-m365-store.c:1786
+#: ../src/EWS/camel/camel-ews-store.c:3889
+#: ../src/Microsoft365/camel/camel-m365-store.c:1774
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
 
-#: ../src/EWS/camel/camel-ews-store.c:3930
-#: ../src/EWS/camel/camel-ews-store.c:3967
+#: ../src/EWS/camel/camel-ews-store.c:3966
+#: ../src/EWS/camel/camel-ews-store.c:4003
 msgid "Unsetting the “Out of Office” status"
 msgstr "Quitando el estado de «Estoy fuera de la oficina»."
 
@@ -656,8 +656,9 @@ msgstr "URL OAB: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
-msgid "Requires user password to continue"
-msgstr "Debe cambiar la contraseña para continuar"
+#| msgid "Requires user password to continue"
+msgid "Requires password to continue."
+msgstr "Se necesita una contraseña para continuar"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:562
 msgid "Folder"
@@ -1471,15 +1472,15 @@ msgstr ""
 "Su cuenta de Exchange «{0}» tiene establecido el estado de «Estoy fuera de "
 "la oficina»."
 
-#: ../src/EWS/registry/e-ews-backend.c:947
-#: ../src/Microsoft365/registry/e-m365-backend.c:679
+#: ../src/EWS/registry/e-ews-backend.c:956
+#: ../src/Microsoft365/registry/e-m365-backend.c:688
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "No se pudo determinar una clase de carpeta apropiada para una nueva carpeta "
 "llamada «%s»"
 
-#: ../src/EWS/registry/e-ews-backend.c:1035
+#: ../src/EWS/registry/e-ews-backend.c:1044
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -1488,7 +1489,6 @@ msgstr ""
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
-#| msgid "Folder does not exist"
 msgid "Folder ID is not set"
 msgstr "El ID de la carpeta no existe"
 
@@ -1539,12 +1539,10 @@ msgid "Cannot store attachment with URI “%s”"
 msgstr "No se puede almacenar el elemento con URI «%s»"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
-#| msgid "Failed to read From address"
 msgid "Failed to read attachment URI"
 msgstr "Falló al leer el URI del adjunto"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
-#| msgid "Failed to set contact photo:"
 msgid "Failed to get inline attachment data"
 msgstr "Falló al obtener los datos adjuntos en línea"
 
@@ -1582,7 +1580,6 @@ msgstr "La carpeta «%s» no corresponde a ninguna carpeta conocida"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1765
 #, c-format
-#| msgid "Could not load summary for %s"
 msgid "Could not load summary for “%s”"
 msgstr "No se pudo cargar el resumen para «%s»"
 
@@ -1594,72 +1591,60 @@ msgstr "Microsoft 365"
 msgid "For accessing Microsoft 365 server"
 msgstr "Para acceder al servidor de Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-store.c:144
 #: ../src/Microsoft365/camel/camel-m365-transport.c:257
 msgid "Microsoft 365 server"
 msgstr "Servidor de Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:145
+#: ../src/Microsoft365/camel/camel-m365-store.c:146
 msgid "Mail receive via Microsoft 365"
 msgstr "Recibir correo mediante Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:200
+#: ../src/Microsoft365/camel/camel-m365-store.c:201
 #: ../src/Microsoft365/common/e-m365-connection.c:1521
 #, c-format
-#| msgid "Default redirect URI is “%s”"
 msgid "Malformed URI: “%s”"
 msgstr "URI malformado: «%s»"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:533
-#| msgid "Look up Exchange server categories"
+#: ../src/Microsoft365/camel/camel-m365-store.c:534
 msgid "Look up Microsoft 365 categories"
 msgstr "Buscar categorías de v"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:542
+#: ../src/Microsoft365/camel/camel-m365-store.c:543
 #: ../src/Microsoft365/camel/camel-m365-transport.c:183
-#| msgid "Failed to set contact photo:"
 msgid "Failed to create connection"
 msgstr "Falló al crear la conexión"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:707
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
-#| msgid "Parent folder %s does not exist"
 msgid "Parent folder “%s” does not exist"
 msgstr "La carpeta padre «%s» no existe"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:894
-#| msgid "Cannot find folder ID for parent folder %s"
+#: ../src/Microsoft365/camel/camel-m365-store.c:895
 msgid "Cannot find “Deleted Items” folder"
 msgstr "No se puede encontrar la carpeta «Elementos eliminados»"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:985
-#: ../src/Microsoft365/camel/camel-m365-store.c:1023
+#: ../src/Microsoft365/camel/camel-m365-store.c:986
+#: ../src/Microsoft365/camel/camel-m365-store.c:1024
 #, c-format
-#| msgid "Folder %s does not exist"
 msgid "Folder “%s” does not exist"
 msgstr "La carpeta «%s» no existe"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:259
-#| msgid "Exchange mail delivery via %s"
 msgid "Mail delivery via Microsoft 365"
 msgstr "Envía de correo con Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:297
-#| msgid "Exchange server cannot send message with multiple From addresses"
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr ""
 "El servidor de Microsoft 365 no puede enviar un mensaje con varias "
 "direcciones «Para»"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
-#| msgid "OAuth2 (Office365)"
 msgid "OAuth2 (Microsoft 365)"
 msgstr "OAuth2 (Microsoft 365)"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:15
-#| msgid ""
-#| "This option will use an OAuth 2.0 access token to connect to the "
-#| "Office365.com server"
 msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Microsoft "
 "365 server"
@@ -1675,8 +1660,6 @@ msgstr "Microsoft365"
 
 #: ../src/Microsoft365/common/e-m365-connection.c:1179
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
@@ -1688,8 +1671,6 @@ msgstr[1] ""
 
 #: ../src/Microsoft365/common/e-m365-connection.c:1185
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d second)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
@@ -1700,18 +1681,15 @@ msgstr[1] ""
 "segundos)"
 
 #: ../src/Microsoft365/common/e-m365-connection.c:2037
-#| msgid "Failed to parse oab XML"
 msgid "Failed to parse own Json data"
 msgstr "Falló al analizar el los datos Json"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
-#| msgid "_Override Office365 OAuth2 settings"
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Omitir configuración OAuth2 de Microsoft 365"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:770
+#: ../src/Microsoft365/registry/e-m365-backend.c:779
 #, c-format
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "El origen de los datos «%s» no representa una carpeta de Microsoft 365"
 
