@@ -25,4 +25,14 @@
     <_primary>Your Exchange account “{0}” has the status set as “Out of Office”.</_primary>
   </error>
 
+  <error type="error" id="folder-subscribe-error">
+    <_primary>Failed to subscribe user folder.</_primary>
+    <_secondary>The reported error was “{0}”.</_secondary>
+  </error>
+
+  <error type="info" id="folder-subscribe-info">
+    <_primary>Folder had been subscribed.</_primary>
+    <_secondary>Folder of user “{0}” had been subscribed successfully.</_secondary>
+  </error>
+
 </error-list>

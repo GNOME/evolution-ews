@@ -27,6 +27,14 @@ set(sources
 	e-mail-config-ews-offline-options.h
 	e-mail-config-ews-ooo-page.c
 	e-mail-config-ews-ooo-page.h
+	e-mail-formatter-ews-sharing-metadata.c
+	e-mail-formatter-ews-sharing-metadata.h
+	e-mail-parser-ews-multipart-mixed.c
+	e-mail-parser-ews-multipart-mixed.h
+	e-mail-parser-ews-sharing-metadata.c
+	e-mail-parser-ews-sharing-metadata.h
+	e-mail-part-ews-sharing-metadata.c
+	e-mail-part-ews-sharing-metadata.h
 	e-ews-config-lookup.c
 	e-ews-config-lookup.h
 	e-ews-config-ui-extension.c

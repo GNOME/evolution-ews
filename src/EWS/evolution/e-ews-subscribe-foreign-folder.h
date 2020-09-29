@@ -9,9 +9,34 @@
 
 #include <e-util/e-util.h>
 
-void	e_ews_subscribe_foreign_folder	(GtkWindow *parent,
-					 CamelSession *session,
-					 CamelStore *store,
-					 EClientCache *client_cache);
+#include "camel/camel-ews-store.h"
+#include "common/e-ews-connection.h"
+#include "common/e-ews-folder.h"
+
+G_BEGIN_DECLS
+
+void		e_ews_subscribe_foreign_folder	(GtkWindow *parent,
+						 CamelSession *session,
+						 CamelStore *store,
+						 EClientCache *client_cache);
+
+gboolean	e_ews_subscribe_foreign_folder_resolve_name_sync
+						(EEwsConnection *cnc,
+						 const gchar *name,
+						 gchar **out_display_name,
+						 gchar **out_email_address,
+						 GCancellable *cancellable,
+						 GError **error);
+
+gboolean	e_ews_subscrive_foreign_folder_subscribe_sync
+						(CamelEwsStore *ews_store,
+						 EEwsFolder *folder,
+						 const gchar *user_display_name,
+						 const gchar *user_email,
+						 const gchar *fallback_folder_name,
+						 gboolean include_subfolders,
+						 GCancellable *cancellable,
+						 GError **error);
+G_END_DECLS
 
 #endif /* E_EWS_SUBSCRIBE_FOREIGN_FOLDER_H */

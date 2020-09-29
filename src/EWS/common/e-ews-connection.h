@@ -1398,6 +1398,29 @@ gboolean	e_ews_connection_get_user_configuration_sync
 						 gchar **out_properties,
 						 GCancellable *cancellable,
 						 GError **error);
+void		e_ews_connection_convert_id	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *email,
+						 const gchar *folder_id,
+						 const gchar *from_format,
+						 const gchar *to_format,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_convert_id_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gchar **out_converted_id,
+						 GError **error);
+gboolean	e_ews_connection_convert_id_sync(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *email,
+						 const gchar *folder_id,
+						 const gchar *from_format,
+						 const gchar *to_format,
+						 gchar **out_converted_id,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

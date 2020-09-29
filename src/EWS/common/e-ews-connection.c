@@ -11771,3 +11771,170 @@ e_ews_connection_get_user_configuration_sync (EEwsConnection *cnc,
 
 	return success;
 }
+
+static void
+convert_id_response_cb (ESoapResponse *response,
+			GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
+
+	if (param) {
+		param = e_soap_parameter_get_first_child_by_name (param, "ConvertIdResponseMessage");
+		if (!param) {
+			g_set_error (&error,
+				SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
+				"Missing <%s> in SOAP response", "ConvertIdResponseMessage");
+		}
+	}
+
+	if (param) {
+		param = e_soap_parameter_get_first_child_by_name (param, "AlternateId");
+		if (!param) {
+			g_set_error (&error,
+				SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
+				"Missing <%s> in SOAP response", "AlternateId");
+		}
+	}
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	async_data->custom_data = e_soap_parameter_get_property (param, "Id");
+}
+
+void
+e_ews_connection_convert_id (EEwsConnection *cnc,
+			     gint pri,
+			     const gchar *email,
+			     const gchar *folder_id,
+			     const gchar *from_format,
+			     const gchar *to_format,
+			     GCancellable *cancellable,
+			     GAsyncReadyCallback callback,
+			     gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
+	g_return_if_fail (email != NULL);
+	g_return_if_fail (folder_id != NULL);
+	g_return_if_fail (from_format != NULL);
+	g_return_if_fail (to_format != NULL);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc), callback, user_data, e_ews_connection_convert_id);
+	async_data = g_slice_new0 (EwsAsyncData);
+	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
+
+	/* EWS server version earlier than 2007 SP1 doesn't support it. */
+	if (!e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2007_SP1)) {
+		g_simple_async_result_set_error (simple, G_IO_ERROR, G_IO_ERROR, "%s", _("Requires at least Microsoft Exchange 2007 SP1 server"));
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
+	msg = e_ews_message_new_with_header (
+		cnc->priv->settings,
+		cnc->priv->uri,
+		cnc->priv->impersonate_user,
+		"ConvertId",
+		"DestinationFormat",
+		to_format,
+		cnc->priv->version,
+		E_EWS_EXCHANGE_2007_SP1,
+		FALSE,
+		TRUE);
+
+	e_soap_message_start_element (msg, "SourceIds", "messages", NULL);
+	e_soap_message_start_element (msg, "AlternateId", NULL, NULL);
+
+	e_soap_message_add_attribute (msg, "Id", folder_id, NULL, NULL);
+	e_soap_message_add_attribute (msg, "Format", from_format, NULL, NULL);
+	e_soap_message_add_attribute (msg, "Mailbox", email, NULL, NULL);
+
+	e_soap_message_end_element (msg); /* AlternateId */
+	e_soap_message_end_element (msg); /* SourceIds */
+
+	e_ews_message_write_footer (msg);
+
+	e_ews_connection_queue_request (cnc, msg, convert_id_response_cb, pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_convert_id_finish (EEwsConnection *cnc,
+				    GAsyncResult *result,
+				    gchar **out_converted_id,
+				    GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (result, G_OBJECT (cnc), e_ews_connection_convert_id),
+		FALSE);
+	g_return_val_if_fail (out_converted_id != NULL, FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (!async_data->custom_data)
+		return FALSE;
+
+	*out_converted_id = async_data->custom_data;
+	async_data->custom_data = NULL;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_convert_id_sync (EEwsConnection *cnc,
+				  gint pri,
+				  const gchar *email,
+				  const gchar *folder_id,
+				  const gchar *from_format,
+				  const gchar *to_format,
+				  gchar **out_converted_id,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_convert_id (
+		cnc, pri, email, folder_id, from_format, to_format, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_convert_id_finish (cnc, result, out_converted_id, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}

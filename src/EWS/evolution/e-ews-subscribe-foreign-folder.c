@@ -271,62 +271,11 @@ check_foreign_folder_thread (GObject *with_object,
 		cffd->user_displayname = cffd->email;
 		cffd->email = g_strdup (cffd->direct_email);
 	} else {
-		GSList *mailboxes = NULL;
-		EwsMailbox *mailbox = NULL;
-		gboolean includes_last_item = FALSE;
+		gchar *display_name = NULL, *email_address = NULL;
 
-		if (!e_ews_connection_resolve_names_sync (conn, G_PRIORITY_DEFAULT,
-			cffd->email, EWS_SEARCH_AD, NULL, FALSE,
-			&mailboxes, NULL, &includes_last_item,
-			cancellable, &local_error)) {
-			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS) ||
-			    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNOMAILBOX)) {
-				g_clear_error (&local_error);
-				mailboxes = NULL;
-			} else {
-				if (local_error)
-					g_propagate_error (perror, local_error);
-				g_object_unref (conn);
-				return;
-			}
-		}
-
-		if (mailboxes) {
-			/* is there only one result? */
-			if (!mailboxes->next) {
-				mailbox = mailboxes->data;
-			} else {
-				GSList *iter;
-
-				for (iter = mailboxes; iter; iter = iter->next) {
-					EwsMailbox *mb = iter->data;
-
-					if (!mb)
-						continue;
-
-					if (mb->name && g_utf8_collate (mb->name, cffd->email) == 0) {
-						mailbox = mb;
-						break;
-					}
-				}
-			}
-
-			if (mailbox) {
-				g_free (cffd->user_displayname);
-				cffd->user_displayname = g_strdup (mailbox->name);
-				g_free (cffd->email);
-				cffd->email = g_strdup (mailbox->email);
-			}
-
-			g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-
-			if (!mailbox) {
-				g_set_error (
-					perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND,
-					_("User name “%s” is ambiguous, specify it more precisely, please"), cffd->email);
-				g_object_unref (conn);
-				return;
-			}
+		if (!e_ews_subscribe_foreign_folder_resolve_name_sync (conn, cffd->email, &display_name, &email_address, cancellable, perror)) {
+			g_object_unref (conn);
+			return;
 		}
 	}
 
@@ -418,14 +367,6 @@ check_foreign_folder_idle (GObject *with_object,
                            GError **perror)
 {
 	struct EEwsCheckForeignFolderData *cffd = user_data;
-	gchar *folder_name;
-	const gchar *base_username, *base_foldername;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
-	CamelEwsStore *ews_store;
-	ESourceRegistry *registry = NULL;
-	CamelSession *session;
-	EEwsFolderType folder_type;
 
 	g_return_if_fail (with_object != NULL);
 	g_return_if_fail (CAMEL_IS_EWS_STORE (with_object));
@@ -435,51 +376,13 @@ check_foreign_folder_idle (GObject *with_object,
 	if (!cffd->folder)
 		return;
 
-	folder_type = e_ews_folder_get_folder_type (cffd->folder);
-	base_username = cffd->user_displayname ? cffd->user_displayname : cffd->email;
-	base_foldername = e_ews_folder_get_name (cffd->folder) ? e_ews_folder_get_name (cffd->folder) : cffd->orig_foldername;
-
-	/* Translators: This is used to name foreign folder.
-	 * The first '%s' is replaced with user name to whom the folder belongs,
-	 * the second '%s' is replaced with folder name.
-	 * Example result: "John Smith — Calendar"
-	*/
-	folder_name = g_strdup_printf (C_("ForeignFolder", "%s — %s"), base_username, base_foldername);
-	if (folder_type != E_EWS_FOLDER_TYPE_MAILBOX)
-		e_ews_folder_set_name (cffd->folder, folder_name);
-
-	ews_store = CAMEL_EWS_STORE (with_object);
-	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
-	if (E_IS_MAIL_SESSION (session))
-		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
-
-	if ((folder_type == E_EWS_FOLDER_TYPE_MAILBOX &&
-	     !add_foreign_folder_to_camel (ews_store,
-		cffd->email,
-		cffd->folder,
-		cffd->include_subfolders,
-		base_username,
-		base_foldername,
-		perror)) ||
-	    (folder_type != E_EWS_FOLDER_TYPE_MAILBOX && !e_ews_folder_utils_add_as_esource (registry,
-		camel_ews_settings_get_hosturl (ews_settings),
-		camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
-		cffd->folder,
-		(cffd->include_subfolders ? E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS : 0) | E_EWS_ESOURCE_FLAG_OFFLINE_SYNC,
-		0,
-		cancellable,
-		perror))
-	) {
+	if (!e_ews_subscrive_foreign_folder_subscribe_sync (CAMEL_EWS_STORE (with_object),
+		cffd->folder, cffd->user_displayname, cffd->email, cffd->orig_foldername,
+		cffd->include_subfolders, cancellable, perror)) {
 		/* to not destroy the dialog on error */
 		g_object_unref (cffd->folder);
 		cffd->folder = NULL;
 	}
-
-	g_free (folder_name);
-	g_object_unref (session);
-	g_object_unref (settings);
 }
 
 static gpointer
@@ -874,4 +777,135 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 
 	gtk_widget_show_all (content);
 	gtk_widget_show (GTK_WIDGET (dialog));
+}
+
+gboolean
+e_ews_subscribe_foreign_folder_resolve_name_sync (EEwsConnection *cnc,
+						  const gchar *name,
+						  gchar **out_display_name,
+						  gchar **out_email_address,
+						  GCancellable *cancellable,
+						  GError **error)
+{
+	GSList *mailboxes = NULL;
+	EwsMailbox *mailbox = NULL;
+	gboolean includes_last_item = FALSE;
+	GError *local_error = NULL;
+
+	if (!e_ews_connection_resolve_names_sync (cnc, G_PRIORITY_DEFAULT,
+		name, EWS_SEARCH_AD, NULL, FALSE,
+		&mailboxes, NULL, &includes_last_item,
+		cancellable, &local_error)) {
+		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS) ||
+		    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNOMAILBOX)) {
+			g_clear_error (&local_error);
+			mailboxes = NULL;
+		} else {
+			if (local_error)
+				g_propagate_error (error, local_error);
+			return FALSE;
+		}
+	}
+
+	if (mailboxes) {
+		/* is there only one result? */
+		if (!mailboxes->next) {
+			mailbox = mailboxes->data;
+		} else {
+			GSList *iter;
+
+			for (iter = mailboxes; iter; iter = iter->next) {
+				EwsMailbox *mb = iter->data;
+
+				if (!mb)
+					continue;
+
+				if (mb->name && g_utf8_collate (mb->name, name) == 0) {
+					mailbox = mb;
+					break;
+				}
+			}
+		}
+
+		if (mailbox) {
+			if (out_display_name)
+				*out_display_name = g_strdup (mailbox->name);
+
+			if (out_email_address)
+				*out_email_address = g_strdup (mailbox->email);
+		}
+
+		g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+
+		if (!mailbox) {
+			g_set_error (
+				error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND,
+				_("User name “%s” is ambiguous, specify it more precisely, please"), name);
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+gboolean
+e_ews_subscrive_foreign_folder_subscribe_sync (CamelEwsStore *ews_store,
+					       EEwsFolder *folder,
+					       const gchar *user_display_name,
+					       const gchar *user_email,
+					       const gchar *fallback_folder_name,
+					       gboolean include_subfolders,
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	gchar *folder_name;
+	const gchar *base_username, *base_foldername;
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+	ESourceRegistry *registry = NULL;
+	CamelSession *session;
+	EEwsFolderType folder_type;
+	gboolean success;
+
+	folder_type = e_ews_folder_get_folder_type (folder);
+	base_username = user_display_name ? user_display_name : user_email;
+	base_foldername = e_ews_folder_get_name (folder) ? e_ews_folder_get_name (folder) : fallback_folder_name;
+
+	/* Translators: This is used to name foreign folder.
+	 * The first '%s' is replaced with user name to whom the folder belongs,
+	 * the second '%s' is replaced with folder name.
+	 * Example result: "John Smith — Calendar"
+	*/
+	folder_name = g_strdup_printf (C_("ForeignFolder", "%s — %s"), base_username, base_foldername);
+	if (folder_type != E_EWS_FOLDER_TYPE_MAILBOX)
+		e_ews_folder_set_name (folder, folder_name);
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
+	if (E_IS_MAIL_SESSION (session))
+		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+
+	success = (folder_type == E_EWS_FOLDER_TYPE_MAILBOX &&
+	     !add_foreign_folder_to_camel (ews_store,
+		user_email,
+		folder,
+		include_subfolders,
+		base_username,
+		base_foldername,
+		error)) ||
+	    (folder_type != E_EWS_FOLDER_TYPE_MAILBOX && !e_ews_folder_utils_add_as_esource (registry,
+		camel_ews_settings_get_hosturl (ews_settings),
+		camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
+		folder,
+		(include_subfolders ? E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS : 0) | E_EWS_ESOURCE_FLAG_OFFLINE_SYNC,
+		0,
+		cancellable,
+		error));
+
+	g_free (folder_name);
+	g_object_unref (session);
+	g_object_unref (settings);
+
+	return success;
 }

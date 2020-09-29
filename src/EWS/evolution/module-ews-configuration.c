@@ -19,6 +19,10 @@
 #include "e-mail-config-ews-offline-options.h"
 #include "e-mail-config-ews-ooo-page.h"
 #include "e-mail-config-ews-folder-sizes-page.h"
+#include "e-mail-formatter-ews-sharing-metadata.h"
+#include "e-mail-parser-ews-multipart-mixed.h"
+#include "e-mail-parser-ews-sharing-metadata.h"
+#include "e-mail-part-ews-sharing-metadata.h"
 #include "e-ews-ooo-notificator.h"
 #include "e-ews-config-lookup.h"
 #include "e-ews-photo-source.h"
@@ -49,6 +53,10 @@ e_module_load (GTypeModule *type_module)
 	e_mail_config_ews_delegates_page_type_register (type_module);
 	e_mail_config_ews_ooo_page_type_register (type_module);
 	e_mail_config_ews_folder_sizes_page_type_register (type_module);
+	e_mail_formatter_ews_sharing_metadata_type_register (type_module);
+	e_mail_parser_ews_multipart_mixed_type_register (type_module);
+	e_mail_parser_ews_sharing_metadata_type_register (type_module);
+	e_mail_part_ews_sharing_metadata_type_register (type_module);
 	e_ews_config_lookup_type_register (type_module);
 	e_ews_config_ui_extension_type_register (type_module);
 	e_ews_ooo_notificator_type_register (type_module);
