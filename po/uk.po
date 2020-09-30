@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-09-17 10:12+0000\n"
-"PO-Revision-Date: 2020-09-17 13:43+0300\n"
+"POT-Creation-Date: 2020-09-29 12:10+0000\n"
+"PO-Revision-Date: 2020-09-30 14:35+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -46,32 +46,32 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1921
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1941
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1924
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1944
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1926
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1928
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2504
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2683
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2524
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2703
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2974
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2994
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -79,7 +79,7 @@ msgstr ""
 "Неможливо створити зустрічі, які організовано іншими користувачами, у "
 "календарі вебслужб Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3684
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3704
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
@@ -587,6 +587,10 @@ msgstr "Не вдалося знайти елемент <OAB>\n"
 msgid "No items found"
 msgstr "Пункти не знайдено"
 
+#: ../src/EWS/common/e-ews-connection.c:11846
+msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgstr "Потребує принаймні сервера Microsoft Exchange 2007 SP1"
+
 #: ../src/EWS/common/e-ews-connection-utils.c:185
 #, c-format
 msgid "Password expired. Change password at “%s”."
@@ -616,7 +620,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Не вдалося додати теку — тека вже існує як «%s»"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:99
+#: ../src/EWS/common/e-oauth2-service-office365.c:98
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -662,7 +666,6 @@ msgstr "Адреса OAB: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
-#| msgid "Requires user password to continue"
 msgid "Requires password to continue."
 msgstr "Для продовження потрібен пароль."
 
@@ -692,7 +695,7 @@ msgid "Fetching folder list…"
 msgstr "Отримання списку тек…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:822
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:743
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:646
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Підписатися на теку іншого користувача EWS…"
 
@@ -833,7 +836,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "Редагувати права доступу до теки EWS…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:667
 msgid "Account:"
 msgstr "Обліковий запис:"
 
@@ -1018,18 +1021,12 @@ msgstr ""
 "Не можна перевірити доступність сторонньої теки при роботі облікового запису "
 "в автономному режимі"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
-#, c-format
-msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr ""
-"Ім'я користувача «%s» є неоднозначним. Вкажіть його точніше, будь ласка"
-
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:365
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:314
 msgid "Availability"
 msgstr "Доступність"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:383
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:332
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -1038,82 +1035,88 @@ msgstr ""
 "Не знайдено теки «%s». Теки або не існує, або ви не маєте достатніх прав "
 "доступу до неї."
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:402
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Не вдалося додати теку — не вдалося визначити тип теки"
+
+#. convert well-known names to their non-localized form
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Вхідні"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
+msgid "Contacts"
+msgstr "Контакти"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:467
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:749
+msgid "Calendar"
+msgstr "Календар"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:469
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:750
+msgid "Free/Busy as Calendar"
+msgstr "Вільний/зайнятий як календар"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:471
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:751
+msgid "Memos"
+msgstr "Примітки"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:473
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:752
+msgid "Tasks"
+msgstr "Завдання"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:490
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr ""
+"Перевіряємо доступність теки «%s» користувача «%s». Будь ласка, зачекайте…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:529
+msgid "Cannot search for user when the account is offline"
+msgstr ""
+"Не можна шукати користувача, якщо обліковий запис працює у автономному режимі"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:692
+msgid "User"
+msgstr "Користувач"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:699
+msgid "_User:"
+msgstr "_Користувач:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:714
+msgid "C_hoose…"
+msgstr "Ви_брати…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:730
+msgid "_Folder name:"
+msgstr "Назва _теки:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
+msgid "Include _subfolders"
+msgstr "Вк_лючати підтеки"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:843
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr ""
+"Ім'я користувача «%s» є неоднозначним. Вкажіть його точніше, будь ласка"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:447
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:879
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
-
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:560
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:844
-msgid "Inbox"
-msgstr "Вхідні"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:562
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:845
-msgid "Contacts"
-msgstr "Контакти"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:564
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:846
-msgid "Calendar"
-msgstr "Календар"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:566
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:847
-msgid "Free/Busy as Calendar"
-msgstr "Вільний/зайнятий як календар"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:568
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:848
-msgid "Memos"
-msgstr "Примітки"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:570
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:849
-msgid "Tasks"
-msgstr "Завдання"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:587
-#, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait…"
-msgstr ""
-"Перевіряємо доступність теки «%s» користувача «%s». Будь ласка, зачекайте…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:626
-msgid "Cannot search for user when the account is offline"
-msgstr ""
-"Не можна шукати користувача, якщо обліковий запис працює у автономному режимі"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:789
-msgid "User"
-msgstr "Користувач"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:796
-msgid "_User:"
-msgstr "_Користувач:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:811
-msgid "C_hoose…"
-msgstr "Ви_брати…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:827
-msgid "_Folder name:"
-msgstr "Назва _теки:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:858
-msgid "Include _subfolders"
-msgstr "Вк_лючати підтеки"
 
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:270
 msgid "Querying Autodiscover service"
@@ -1477,6 +1480,18 @@ msgid "Your Exchange account “{0}” has the status set as “Out of Office”
 msgstr ""
 "Для вашого облікового запису Exchange «{0}» встановлено стан «За межами "
 "офісу»."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
+msgid "Failed to subscribe user folder."
+msgstr "Не вдалося підписатися на теку користувача."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
+msgid "Folder had been subscribed."
+msgstr "Підписку на теку оформлено."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:9
+msgid "Folder of user “{0}” had been subscribed successfully."
+msgstr "Успішно оформлено підписку на теку користувача «{0}»."
 
 #: ../src/EWS/registry/e-ews-backend.c:956
 #: ../src/Microsoft365/registry/e-m365-backend.c:688
