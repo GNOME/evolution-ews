@@ -31,6 +31,8 @@ src/EWS/evolution/e-mail-config-ews-delegates-page.c
 src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c
 src/EWS/evolution/e-mail-config-ews-gal.c
 src/EWS/evolution/e-mail-config-ews-ooo-page.c
+src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c
+src/EWS/evolution/e-mail-part-ews-sharing-metadata.c
 src/EWS/evolution/module-ews-configuration.error.xml
 src/EWS/registry/e-ews-backend.c
 src/EWS/registry/module-ews-backend.c
