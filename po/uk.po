@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-09-29 12:10+0000\n"
-"PO-Revision-Date: 2020-09-30 14:35+0300\n"
+"POT-Creation-Date: 2020-09-30 13:50+0000\n"
+"PO-Revision-Date: 2020-10-01 19:41+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -413,6 +413,7 @@ msgid "Could not locate Junk folder"
 msgstr "Не вдалося знайти теку «Спам»"
 
 #: ../src/EWS/camel/camel-ews-store.c:3648
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Не можна підписуватися на теки EWS в автономному режимі"
 
@@ -670,6 +671,7 @@ msgid "Requires password to continue."
 msgstr "Для продовження потрібен пароль."
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Тека"
 
@@ -1027,6 +1029,7 @@ msgid "Availability"
 msgstr "Доступність"
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:332
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:96
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -1036,6 +1039,7 @@ msgstr ""
 "доступу до неї."
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Не вдалося додати теку — не вдалося визначити тип теки"
 
@@ -1454,6 +1458,47 @@ msgstr "Відповідати будь-яким відправникам поз
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:994
 msgid "Retrieving “Out of Office” settings"
 msgstr "Параметри отримання «За межами офісу»"
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgstr ""
+"Надійшло запрошення від %s (%s) щодо перегляду його або її календаря"
+" Microsoft Exchange."
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
+msgstr ""
+"Надійшло запрошення від %s (%s) щодо перегляду його або її теки Microsoft"
+" Exchange."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
+msgid "Click the Subscribe button to add it to Evolution."
+msgstr "Натисніть кнопку «Підписатися», щоб додати її до Evolution."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:125
+msgid "Subscribe"
+msgstr "Підписатися"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:134
+msgid "Failed to extract sharing information from provided data."
+msgstr "Не вдалося видобути дані щодо спільного користування з наданих даних."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:203
+msgid "EWS Sharing Metadata"
+msgstr "Спільні метадані EWS"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:204
+msgid "Display part as EWS sharing metadata"
+msgstr "Показати частину як спільні метадані EWS"
+
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
+#| msgid "Subscribe to folder of other user…"
+msgid "Subscribing EWS folder…"
+msgstr "Підписуємося на теку EWS…"
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
