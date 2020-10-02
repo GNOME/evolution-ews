@@ -1,3 +1,17 @@
+Evolution-EWS 3.38.1 2020-10-02
+-------------------------------
+
+Bug Fixes:
+	I#120 - Created public folder not visible after restart (Milan Crha)
+	I#123 - Show HTML Description in calendar entries, when available (Milan Crha)
+	evo-I#1097 - Provide HTML invitation description, when available (Milan Crha)
+
+Miscellaneous:
+	Allow OAuth2 for any server, not only for outlook.office365.com (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+
 Evolution-EWS 3.38.0 2020-09-11
 -------------------------------
 
