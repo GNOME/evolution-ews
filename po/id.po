@@ -5,10 +5,10 @@
 # Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017-2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-ews gnome-3-38\n"
+"Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-09-11 07:13+0000\n"
-"PO-Revision-Date: 2020-10-04 15:45+0700\n"
+"POT-Creation-Date: 2020-10-04 08:46+0000\n"
+"PO-Revision-Date: 2020-10-04 16:53+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -45,32 +45,32 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1921
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1941
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Luang"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1924
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1944
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Sibuk"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1926
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1928
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Sementara"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2504
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2683
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2524
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2703
 msgid "Cannot determine EWS ItemId"
 msgstr "Tidak dapat menentukan ItemId EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2974
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2994
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -78,7 +78,7 @@ msgstr ""
 "Tidak bisa membuat pertemuan yang diorganisasi oleh pengguna lain dalam "
 "kalender Exchange Web Services."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3684
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3704
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
@@ -87,29 +87,29 @@ msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
 msgid "Invalid occurrence ID"
 msgstr "ID kejadian tidak valid"
 
-#: ../src/EWS/camel/camel-ews-folder.c:356
+#: ../src/EWS/camel/camel-ews-folder.c:357
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Tak bisa membuka berkas temporer mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Tak bisa menghasilkan pengurai dari mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:373
+#: ../src/EWS/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Tak bisa mengura mimecontent permintaan rapat!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:442
-#: ../src/EWS/camel/camel-ews-folder.c:652
+#: ../src/EWS/camel/camel-ews-folder.c:458
+#: ../src/EWS/camel/camel-ews-folder.c:668
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Tak bisa membuat berkas singgahan"
 
-#: ../src/EWS/camel/camel-ews-folder.c:769
-#: ../src/EWS/camel/camel-ews-folder.c:890
+#: ../src/EWS/camel/camel-ews-folder.c:785
+#: ../src/EWS/camel/camel-ews-folder.c:929
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Tak bisa membuat path singgahan “%s”: %s"
@@ -117,22 +117,22 @@ msgstr "Tak bisa membuat path singgahan “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:904
+#: ../src/EWS/camel/camel-ews-folder.c:943
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Gagal memindah berkas singgahan pesan dari “%s” to “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1843
+#: ../src/EWS/camel/camel-ews-folder.c:1882
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Tak bisa memuat ringkasan untuk %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2314
+#: ../src/EWS/camel/camel-ews-folder.c:2353
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Menyegarkan folder “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2498
+#: ../src/EWS/camel/camel-ews-folder.c:2537
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Tak bisa melakukan aksi pada folder ketika dalam mode luring"
@@ -337,93 +337,94 @@ msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3035
 #: ../src/Microsoft365/camel/camel-m365-store.c:882
 #, c-format
 msgid "Folder does not exist"
 msgstr "Folder tidak ada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3042
+#: ../src/EWS/camel/camel-ews-store.c:3045
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder pengguna lain"
 
-#: ../src/EWS/camel/camel-ews-store.c:3053
+#: ../src/EWS/camel/camel-ews-store.c:3056
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3212
+#: ../src/EWS/camel/camel-ews-store.c:3215
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Folder %s tidak ada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3221
+#: ../src/EWS/camel/camel-ews-store.c:3224
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Tidak ada catatan kunci perubahan bagi folder %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3264
+#: ../src/EWS/camel/camel-ews-store.c:3267
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Tak bisa sekaligus mengubah nama dan memindah folder di saat yang sama"
 
-#: ../src/EWS/camel/camel-ews-store.c:3295
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Tak bisa temukan ID folder bagi folder induk %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3347
+#: ../src/EWS/camel/camel-ews-store.c:3350
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3350
+#: ../src/EWS/camel/camel-ews-store.c:3353
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Layanan Exchange untuk %s pada %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3394
+#: ../src/EWS/camel/camel-ews-store.c:3397
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Tak bisa temukan folder Tong Sampah"
 
-#: ../src/EWS/camel/camel-ews-store.c:3454
+#: ../src/EWS/camel/camel-ews-store.c:3457
 #: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Tak bisa temukan folder Sampah"
 
-#: ../src/EWS/camel/camel-ews-store.c:3645
+#: ../src/EWS/camel/camel-ews-store.c:3648
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Tak bisa berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3668
+#: ../src/EWS/camel/camel-ews-store.c:3671
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersedia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3678
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3769
+#: ../src/EWS/camel/camel-ews-store.c:3772
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3886
+#: ../src/EWS/camel/camel-ews-store.c:3889
 #: ../src/Microsoft365/camel/camel-m365-store.c:1774
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/EWS/camel/camel-ews-store.c:3963
-#: ../src/EWS/camel/camel-ews-store.c:4000
+#: ../src/EWS/camel/camel-ews-store.c:3966
+#: ../src/EWS/camel/camel-ews-store.c:4003
 msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
@@ -568,6 +569,10 @@ msgstr "Gagal menemukan elemen <OAB>\n"
 msgid "No items found"
 msgstr "Tak temukan butir"
 
+#: ../src/EWS/common/e-ews-connection.c:11846
+msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgstr "Memerlukan setidaknya server Microsoft Exchange 2007 SP1"
+
 #: ../src/EWS/common/e-ews-connection-utils.c:185
 #, c-format
 msgid "Password expired. Change password at “%s”."
@@ -597,7 +602,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Tak bisa menambah folder, folder telah ada sebagai “%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:99
+#: ../src/EWS/common/e-oauth2-service-office365.c:98
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -643,10 +648,11 @@ msgstr "URL OAB: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
-msgid "Requires user password to continue"
-msgstr "Memerlukan kata sandi untuk melanjutkan"
+msgid "Requires password to continue."
+msgstr "Memerlukan kata sandi untuk melanjutkan."
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Folder"
 
@@ -672,7 +678,7 @@ msgid "Fetching folder list…"
 msgstr "Mengambil daftar folder…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:822
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:743
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:646
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Berlangganan ke folder pengguna EWS lain…"
 
@@ -813,7 +819,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "Sunting hak akses folder EWS…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:667
 msgid "Account:"
 msgstr "Akun:"
 
@@ -992,17 +998,13 @@ msgstr "Kotak surat — %s"
 msgid "Cannot test foreign folder availability when the account is offline"
 msgstr "Tak bisa menguji ketersediaan folder asing ketika dalam mode luring"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
-#, c-format
-msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr "Nama pengguna “%s” ambigu, harap nyatakan secara lebih presisi"
-
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:365
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:314
 msgid "Availability"
 msgstr "Ketersediaan"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:383
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:332
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:96
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -1011,80 +1013,86 @@ msgstr ""
 "Folder “%s” tak ditemukan. Entah itu tak ada atau Anda tak punya hak untuk "
 "mengaksesnya."
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:402
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Tak bisa menambah folder, tak bisa menentukan tipe folder"
+
+#. convert well-known names to their non-localized form
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Inbox"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
+msgid "Contacts"
+msgstr "Kontak"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:467
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:749
+msgid "Calendar"
+msgstr "Kalender"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:469
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:750
+msgid "Free/Busy as Calendar"
+msgstr "Waktu luang/sibuk sebagai Kalendar"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:471
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:751
+msgid "Memos"
+msgstr "Memo"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:473
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:752
+msgid "Tasks"
+msgstr "Tugas"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:490
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr "Menguji ketersediaan folder “%s” dari pengguna “%s”, silakan tunggu…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:529
+msgid "Cannot search for user when the account is offline"
+msgstr "Tidak dapat mencari pengguna saat akun luring"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:692
+msgid "User"
+msgstr "Pengguna"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:699
+msgid "_User:"
+msgstr "Pengg_una:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:714
+msgid "C_hoose…"
+msgstr "_Pilih…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:730
+msgid "_Folder name:"
+msgstr "Nama _folder:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
+msgid "Include _subfolders"
+msgstr "Sertakan _subfolder"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:843
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "Nama pengguna “%s” ambigu, harap nyatakan secara lebih presisi"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:447
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:879
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
-
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:560
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:844
-msgid "Inbox"
-msgstr "Inbox"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:562
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:845
-msgid "Contacts"
-msgstr "Kontak"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:564
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:846
-msgid "Calendar"
-msgstr "Kalender"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:566
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:847
-msgid "Free/Busy as Calendar"
-msgstr "Waktu luang/sibuk sebagai Kalendar"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:568
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:848
-msgid "Memos"
-msgstr "Memo"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:570
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:849
-msgid "Tasks"
-msgstr "Tugas"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:587
-#, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait…"
-msgstr "Menguji ketersediaan folder “%s” dari pengguna “%s”, silakan tunggu…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:626
-msgid "Cannot search for user when the account is offline"
-msgstr "Tidak dapat mencari pengguna saat akun luring"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:789
-msgid "User"
-msgstr "Pengguna"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:796
-msgid "_User:"
-msgstr "Pengg_una:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:811
-msgid "C_hoose…"
-msgstr "_Pilih…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:827
-msgid "_Folder name:"
-msgstr "Nama _folder:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:858
-msgid "Include _subfolders"
-msgstr "Sertakan _subfolder"
 
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:270
 msgid "Querying Autodiscover service"
@@ -1420,6 +1428,45 @@ msgstr "Balas ke pengirim manapun di luar organisasi"
 msgid "Retrieving “Out of Office” settings"
 msgstr "Mengambail pengaturan \"Di Luar Kantor\""
 
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgstr ""
+"%s (%s) telah mengundang Anda untuk melihat kalender Microsoft Exchange-nya."
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
+msgstr ""
+"%s (%s) telah mengundang Anda untuk melihat folder Microsoft Exchange "
+"miliknya."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
+msgid "Click the Subscribe button to add it to Evolution."
+msgstr "Klik tombol Berlangganan untuk menambahkannya ke Evolution."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:125
+msgid "Subscribe"
+msgstr "Berlangganan"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:134
+msgid "Failed to extract sharing information from provided data."
+msgstr "Gagal mengekstrak informasi bersama dari data yang disediakan."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:203
+msgid "EWS Sharing Metadata"
+msgstr "Metadata Bersama EWS"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:204
+msgid "Display part as EWS sharing metadata"
+msgstr "Tampilkan bagian sebagai metadata bersama EWS"
+
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
+msgid "Subscribing EWS folder…"
+msgstr "Berlangganan ke folder EWS…"
+
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
 msgstr "Query penemuan otomatis gagal."
@@ -1443,6 +1490,18 @@ msgstr "Gagal mengambil pengaturan \"Delegasi\"."
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Akun Exchange \"{0}\" memiliki status \"Di Luar Kantor\"."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
+msgid "Failed to subscribe user folder."
+msgstr "Gagal berlangganan folder pengguna."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
+msgid "Folder had been subscribed."
+msgstr "Folder telah dilanggani."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:9
+msgid "Folder of user “{0}” had been subscribed successfully."
+msgstr "Folder pengguna \"{0}\" telah berhasil dilanggani."
 
 #: ../src/EWS/registry/e-ews-backend.c:956
 #: ../src/Microsoft365/registry/e-m365-backend.c:688
