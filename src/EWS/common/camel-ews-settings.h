@@ -158,6 +158,20 @@ gchar *		camel_ews_settings_dup_oauth2_redirect_uri
 void		camel_ews_settings_set_oauth2_redirect_uri
 						(CamelEwsSettings *settings,
 						 const gchar *redirect_uri);
+const gchar *	camel_ews_settings_get_oauth2_resource_uri
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oauth2_resource_uri
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oauth2_resource_uri
+						(CamelEwsSettings *settings,
+						 const gchar *resource_uri);
+const gchar *	camel_ews_settings_get_oauth2_endpoint_host
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oauth2_endpoint_host
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oauth2_endpoint_host
+						(CamelEwsSettings *settings,
+						 const gchar *endpoint_host);
 gboolean	camel_ews_settings_get_show_public_folders
 						(CamelEwsSettings *settings);
 void		camel_ews_settings_set_show_public_folders

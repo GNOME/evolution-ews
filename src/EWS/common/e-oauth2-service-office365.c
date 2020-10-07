@@ -18,8 +18,6 @@
    https://tsmatz.wordpress.com/2016/10/07/application-permission-with-v2-endpoint-and-microsoft-graph/
 */
 
-#define OFFICE365_RESOURCE "https://outlook.office.com"
-
 struct _EOAuth2ServiceOffice365Private
 {
 	GMutex string_cache_lock;
@@ -43,8 +41,10 @@ eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
 	if (!str)
 		return NULL;
 
-	if (!*str)
+	if (!*str) {
+		g_free (str);
 		return "";
+	}
 
 	g_mutex_lock (&oauth2_office365->priv->string_cache_lock);
 
@@ -59,6 +59,24 @@ eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
 	g_mutex_unlock (&oauth2_office365->priv->string_cache_lock);
 
 	return cached_str;
+}
+
+static const gchar *
+eos_office365_get_endpoint_host (EOAuth2ServiceOffice365 *oauth2_office365,
+				 CamelEwsSettings *ews_settings)
+{
+	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
+		gchar *endpoint_host;
+
+		endpoint_host = camel_ews_settings_dup_oauth2_endpoint_host (ews_settings);
+
+		if (endpoint_host && *endpoint_host)
+			return eos_office365_cache_string (oauth2_office365, endpoint_host);
+
+		g_free (endpoint_host);
+	}
+
+	return OFFICE365_ENDPOINT_HOST;
 }
 
 static CamelEwsSettings *
@@ -147,7 +165,8 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 		}
 
 		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/authorize",
+			g_strdup_printf ("https://%s/%s/oauth2/authorize",
+				eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
 				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
@@ -155,7 +174,10 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/authorize";
+	return eos_office365_cache_string (oauth2_office365,
+		g_strdup_printf ("https://%s/%s/oauth2/authorize",
+			eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
+			OFFICE365_TENANT));
 }
 
 static const gchar *
@@ -177,7 +199,8 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 		}
 
 		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/token",
+			g_strdup_printf ("https://%s/%s/oauth2/token",
+				eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
 				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
@@ -185,7 +208,10 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/token";
+	return eos_office365_cache_string (oauth2_office365,
+		g_strdup_printf ("https://%s/%s/oauth2/token",
+			eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
+			OFFICE365_TENANT));
 }
 
 static const gchar *
@@ -209,13 +235,67 @@ eos_office365_get_redirect_uri (EOAuth2Service *service,
 
 		if (redirect_uri)
 			return eos_office365_cache_string (oauth2_office365, redirect_uri);
+
+		if (e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), NULL) != 0) {
+			return eos_office365_cache_string (oauth2_office365,
+				g_strdup_printf ("https://%s/common/oauth2/nativeclient",
+					eos_office365_get_endpoint_host (oauth2_office365, ews_settings)));
+		}
 	}
 
 	res = OFFICE365_REDIRECT_URI;
 	if (res && *res)
 		return res;
 
-	return "https://login.microsoftonline.com/common/oauth2/nativeclient";
+	return eos_office365_cache_string (oauth2_office365,
+		g_strdup_printf ("https://%s/common/oauth2/nativeclient",
+			eos_office365_get_endpoint_host (oauth2_office365, ews_settings)));
+}
+
+static const gchar *
+eos_office365_get_resource_uri (EOAuth2Service *service,
+				ESource *source)
+{
+	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
+	CamelEwsSettings *ews_settings;
+
+	ews_settings = eos_office365_get_camel_settings (source);
+	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
+		gchar *resource_uri;
+
+		resource_uri = camel_ews_settings_dup_oauth2_resource_uri (ews_settings);
+
+		if (resource_uri && !*resource_uri) {
+			g_free (resource_uri);
+			resource_uri = NULL;
+		}
+
+		if (resource_uri)
+			return eos_office365_cache_string (oauth2_office365, resource_uri);
+	}
+
+	if (ews_settings) {
+		gchar *host_url;
+
+		host_url = camel_ews_settings_dup_hosturl (ews_settings);
+
+		if (host_url && *host_url) {
+			gchar *ptr;
+
+			ptr = strstr (host_url, "://");
+			ptr = ptr ? strchr (ptr + 3, '/') : NULL;
+
+			if (ptr) {
+				*ptr = '\0';
+
+				return eos_office365_cache_string (oauth2_office365, host_url);
+			}
+		}
+
+		g_free (host_url);
+	}
+
+	return OFFICE365_FALLBACK_RESOURCE_URI;
 }
 
 static void
@@ -227,7 +307,7 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 
 	e_oauth2_service_util_set_to_form (uri_query, "response_mode", "query");
 	e_oauth2_service_util_set_to_form (uri_query, "prompt", "login");
-	e_oauth2_service_util_set_to_form (uri_query, "resource", OFFICE365_RESOURCE);
+	e_oauth2_service_util_set_to_form (uri_query, "resource", eos_office365_get_resource_uri (service, source));
 }
 
 static gboolean
@@ -294,7 +374,7 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 {
 	g_return_if_fail (form != NULL);
 
-	e_oauth2_service_util_set_to_form (form, "resource", OFFICE365_RESOURCE);
+	e_oauth2_service_util_set_to_form (form, "resource", eos_office365_get_resource_uri (service, source));
 	e_oauth2_service_util_set_to_form (form, "redirect_uri", e_oauth2_service_get_redirect_uri (service, source));
 }
 

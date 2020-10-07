@@ -59,8 +59,10 @@ eos_microsoft365_cache_string (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
 	if (!str)
 		return NULL;
 
-	if (!*str)
+	if (!*str) {
+		g_free (str);
 		return "";
+	}
 
 	g_mutex_lock (&oauth2_microsoft365->priv->string_cache_lock);
 
@@ -75,6 +77,24 @@ eos_microsoft365_cache_string (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
 	g_mutex_unlock (&oauth2_microsoft365->priv->string_cache_lock);
 
 	return cached_str;
+}
+
+static const gchar *
+eos_microsoft365_get_endpoint_host (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
+				    CamelM365Settings *m365_settings)
+{
+	if (m365_settings && camel_m365_settings_get_override_oauth2 (m365_settings)) {
+		gchar *endpoint_host;
+
+		endpoint_host = camel_m365_settings_dup_oauth2_endpoint_host (m365_settings);
+
+		if (endpoint_host && *endpoint_host)
+			return eos_microsoft365_cache_string (oauth2_microsoft365, endpoint_host);
+
+		g_free (endpoint_host);
+	}
+
+	return MICROSOFT365_ENDPOINT_HOST;
 }
 
 static CamelM365Settings *
@@ -163,7 +183,8 @@ eos_microsoft365_get_authentication_uri (EOAuth2Service *service,
 		}
 
 		res = eos_microsoft365_cache_string (oauth2_microsoft365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/v2.0/authorize",
+			g_strdup_printf ("https://%s/%s/oauth2/v2.0/authorize",
+				eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
 				tenant ? tenant : MICROSOFT365_TENANT));
 
 		g_free (tenant);
@@ -171,7 +192,10 @@ eos_microsoft365_get_authentication_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" MICROSOFT365_TENANT "/oauth2/v2.0/authorize";
+	return eos_microsoft365_cache_string (oauth2_microsoft365,
+		g_strdup_printf ("https://%s/%s/oauth2/v2.0/authorize",
+			eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
+			MICROSOFT365_TENANT));
 }
 
 static const gchar *
@@ -193,7 +217,8 @@ eos_microsoft365_get_refresh_uri (EOAuth2Service *service,
 		}
 
 		res = eos_microsoft365_cache_string (oauth2_microsoft365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/v2.0/token",
+			g_strdup_printf ("https://%s/%s/oauth2/v2.0/token",
+				eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
 				tenant ? tenant : MICROSOFT365_TENANT));
 
 		g_free (tenant);
@@ -201,7 +226,10 @@ eos_microsoft365_get_refresh_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" MICROSOFT365_TENANT "/oauth2/v2.0/token";
+	return eos_microsoft365_cache_string (oauth2_microsoft365,
+		g_strdup_printf ("https://%s/%s/oauth2/v2.0/token",
+			eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
+			MICROSOFT365_TENANT));
 }
 
 static const gchar *
@@ -225,13 +253,21 @@ eos_microsoft365_get_redirect_uri (EOAuth2Service *service,
 
 		if (redirect_uri)
 			return eos_microsoft365_cache_string (oauth2_microsoft365, redirect_uri);
+
+		if (e_util_strcmp0 (camel_m365_settings_get_oauth2_endpoint_host (m365_settings), NULL) != 0) {
+			return eos_microsoft365_cache_string (oauth2_microsoft365,
+				g_strdup_printf ("https://%s/common/oauth2/nativeclient",
+					eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings)));
+		}
 	}
 
 	res = MICROSOFT365_REDIRECT_URI;
 	if (res && *res)
 		return res;
 
-	return "https://login.microsoftonline.com/common/oauth2/nativeclient";
+	return eos_microsoft365_cache_string (oauth2_microsoft365,
+		g_strdup_printf ("https://%s/common/oauth2/nativeclient",
+			eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings)));
 }
 
 static void

@@ -25,6 +25,7 @@ struct _CamelM365SettingsPrivate {
 	gchar *oauth2_tenant;
 	gchar *oauth2_client_id;
 	gchar *oauth2_redirect_uri;
+	gchar *oauth2_endpoint_host;
 };
 
 enum {
@@ -45,6 +46,7 @@ enum {
 	PROP_OAUTH2_TENANT,
 	PROP_OAUTH2_CLIENT_ID,
 	PROP_OAUTH2_REDIRECT_URI,
+	PROP_OAUTH2_ENDPOINT_HOST,
 	PROP_CONCURRENT_CONNECTIONS
 };
 
@@ -151,6 +153,12 @@ m365_settings_set_property (GObject *object,
 
 		case PROP_OAUTH2_REDIRECT_URI:
 			camel_m365_settings_set_oauth2_redirect_uri (
+				CAMEL_M365_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_OAUTH2_ENDPOINT_HOST:
+			camel_m365_settings_set_oauth2_endpoint_host (
 				CAMEL_M365_SETTINGS (object),
 				g_value_get_string (value));
 			return;
@@ -284,6 +292,13 @@ m365_settings_get_property (GObject *object,
 				CAMEL_M365_SETTINGS (object)));
 			return;
 
+		case PROP_OAUTH2_ENDPOINT_HOST:
+			g_value_take_string (
+				value,
+				camel_m365_settings_dup_oauth2_endpoint_host (
+				CAMEL_M365_SETTINGS (object)));
+			return;
+
 		case PROP_CONCURRENT_CONNECTIONS:
 			g_value_set_uint (
 				value,
@@ -306,6 +321,7 @@ m365_settings_finalize (GObject *object)
 	g_free (m365_settings->priv->oauth2_tenant);
 	g_free (m365_settings->priv->oauth2_client_id);
 	g_free (m365_settings->priv->oauth2_redirect_uri);
+	g_free (m365_settings->priv->oauth2_endpoint_host);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (camel_m365_settings_parent_class)->finalize (object);
@@ -478,6 +494,18 @@ camel_m365_settings_class_init (CamelM365SettingsClass *class)
 			"oauth2-redirect-uri",
 			"OAuth2 Redirect URI",
 			"OAuth2 Redirect URI to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OAUTH2_ENDPOINT_HOST,
+		g_param_spec_string (
+			"oauth2-endpoint-host",
+			"OAuth2 Endpoint Host",
+			"OAuth2 endpoint host to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
 			NULL,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -908,6 +936,53 @@ camel_m365_settings_set_oauth2_redirect_uri (CamelM365Settings *settings,
 	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-redirect-uri");
+}
+
+const gchar *
+camel_m365_settings_get_oauth2_endpoint_host (CamelM365Settings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
+
+	return settings->priv->oauth2_endpoint_host;
+}
+
+gchar *
+camel_m365_settings_dup_oauth2_endpoint_host (CamelM365Settings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_m365_settings_get_oauth2_endpoint_host (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_m365_settings_set_oauth2_endpoint_host (CamelM365Settings *settings,
+					      const gchar *endpoint_host)
+{
+	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->oauth2_endpoint_host, endpoint_host) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->oauth2_endpoint_host);
+	settings->priv->oauth2_endpoint_host = e_util_strdup_strip (endpoint_host);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "oauth2-endpoint-host");
 }
 
 guint

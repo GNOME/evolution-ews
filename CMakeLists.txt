@@ -200,6 +200,12 @@ if(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
 	set(WITH_OFFICE365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
 endif(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
 
+add_printable_variable(WITH_OFFICE365_ENDPOINT_HOST "Office365.com OAuth 2.0 endpoint host" "")
+
+if(WITH_OFFICE365_ENDPOINT_HOST STREQUAL "")
+	set(WITH_OFFICE365_ENDPOINT_HOST "login.microsoftonline.com")
+endif(WITH_OFFICE365_ENDPOINT_HOST STREQUAL "")
+
 # ******************************
 # Microsoft365 OAuth2 support (v2.0)
 # ******************************
@@ -221,6 +227,12 @@ add_printable_variable(WITH_MICROSOFT365_REDIRECT_URI "Microsoft 365 OAuth 2.0 r
 if(WITH_MICROSOFT365_REDIRECT_URI STREQUAL "")
 	set(WITH_MICROSOFT365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
 endif(WITH_MICROSOFT365_REDIRECT_URI STREQUAL "")
+
+add_printable_variable(WITH_MICROSOFT365_ENDPOINT_HOST "Microsoft 365 OAuth 2.0 endpoint host" "")
+
+if(WITH_MICROSOFT365_ENDPOINT_HOST STREQUAL "")
+	set(WITH_MICROSOFT365_ENDPOINT_HOST "login.microsoftonline.com")
+endif(WITH_MICROSOFT365_ENDPOINT_HOST STREQUAL "")
 
 # ******************************
 # Special directories

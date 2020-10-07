@@ -17,6 +17,7 @@
 #include <mail/e-mail-config-receiving-page.h>
 
 #include "common/camel-ews-settings.h"
+#include "common/e-oauth2-service-office365.h"
 
 #include "e-mail-config-ews-autodiscover.h"
 #include "e-ews-config-utils.h"
@@ -38,6 +39,8 @@ struct _EMailConfigEwsBackendPrivate {
 	GtkWidget *oauth2_tenant_entry;
 	GtkWidget *oauth2_client_id_entry;
 	GtkWidget *oauth2_redirect_uri_entry;
+	GtkWidget *oauth2_resource_uri_entry;
+	GtkWidget *oauth2_endpoint_host_entry;
 };
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -144,6 +147,11 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	GtkLabel *label;
 	GtkWidget *widget;
 	GtkWidget *container;
+	GtkWidget *expander;
+	GtkWidget *advanced_help;
+	GtkWidget *endpoint_host_label;
+	GtkWidget *redirect_uri_label;
+	GtkWidget *resource_uri_label;
 	const gchar *extension_name;
 	const gchar *text;
 	gchar *markup;
@@ -369,11 +377,33 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		_("There is not set any default application ID"),
 		g_strdup_printf (_("Default application ID is “%s”"), OFFICE365_CLIENT_ID));
 
-	widget = gtk_label_new_with_mnemonic (_("_Redirect URI:"));
+	container = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+	gtk_grid_attach (priv->oauth2_settings_grid, container, 0, 3, 2, 1);
+
+	widget = gtk_expander_new_with_mnemonic (_("_Advanced Settings"));
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+	expander = widget;
+
+	e_binding_bind_property (
+		priv->oauth2_override_check, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	markup = g_markup_printf_escaped ("(<a href=\"https://wiki.gnome.org/Apps/Evolution/EWS/OAuth2#Alternative_endpoints\">%s</a>)", _("Help…"));
+	widget = gtk_label_new (markup);
+	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
+	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+	g_free (markup);
+	advanced_help = widget;
+
+	widget = gtk_label_new_with_mnemonic (_("_Endpoint host:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 3, 1, 1);
+	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 4, 1, 1);
 	label = GTK_LABEL (widget);
+	endpoint_host_label = widget;
 
 	e_binding_bind_property (
 		priv->oauth2_override_check, "active",
@@ -383,7 +413,36 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = gtk_entry_new ();
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 3, 1, 1);
+	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 4, 1, 1);
+	priv->oauth2_endpoint_host_entry = widget;
+
+	e_binding_bind_property (
+		priv->oauth2_override_check, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	markup = g_strdup_printf (_("Default endpoint host is “%s”"), "login.microsoftonline.com");
+	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_ENDPOINT_HOST,
+		markup,
+		g_strdup_printf (_("Default endpoint host is “%s”"), OFFICE365_ENDPOINT_HOST));
+	g_free (markup);
+
+	widget = gtk_label_new_with_mnemonic (_("Red_irect URI:"));
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
+	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 5, 1, 1);
+	label = GTK_LABEL (widget);
+	redirect_uri_label = widget;
+
+	e_binding_bind_property (
+		priv->oauth2_override_check, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	widget = gtk_entry_new ();
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_label_set_mnemonic_widget (label, widget);
+	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 5, 1, 1);
 	priv->oauth2_redirect_uri_entry = widget;
 
 	e_binding_bind_property (
@@ -397,7 +456,76 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		g_strdup_printf (_("Default redirect URI is “%s”"), OFFICE365_REDIRECT_URI));
 	g_free (markup);
 
+	widget = gtk_label_new_with_mnemonic (_("Re_source URI:"));
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
+	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 6, 1, 1);
+	label = GTK_LABEL (widget);
+	resource_uri_label = widget;
+
+	e_binding_bind_property (
+		priv->oauth2_override_check, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	widget = gtk_entry_new ();
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_label_set_mnemonic_widget (label, widget);
+	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 6, 1, 1);
+	priv->oauth2_resource_uri_entry = widget;
+
+	e_binding_bind_property (
+		priv->oauth2_override_check, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	markup = g_strdup_printf (_("Default resource URI is derived from the Host URL, or it can eventually fall back to “%s”."), OFFICE365_FALLBACK_RESOURCE_URI);
+	mail_config_ews_backend_set_oauth2_tooltip (widget, NULL,
+		markup,
+		NULL);
+	g_free (markup);
+
 	gtk_widget_show_all (GTK_WIDGET (priv->oauth2_settings_grid));
+
+	gtk_expander_set_expanded (GTK_EXPANDER (expander),
+		e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (CAMEL_EWS_SETTINGS (settings)), NULL) != 0 ||
+		e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (CAMEL_EWS_SETTINGS (settings)), NULL) != 0 ||
+		e_util_strcmp0 (camel_ews_settings_get_oauth2_resource_uri (CAMEL_EWS_SETTINGS (settings)), NULL) != 0);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		advanced_help, "visible",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		endpoint_host_label, "visible",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		priv->oauth2_endpoint_host_entry, "visible",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		redirect_uri_label, "visible",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		priv->oauth2_redirect_uri_entry, "visible",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		resource_uri_label, "visible",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		expander, "expanded",
+		priv->oauth2_resource_uri_entry, "visible",
+		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property_full (
 		priv->auth_check, "active-mechanism",
@@ -451,8 +579,20 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
-		settings, "oauth2-redirect_uri",
+		settings, "oauth2-redirect-uri",
 		priv->oauth2_redirect_uri_entry, "text",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_object_text_property (
+		settings, "oauth2-resource-uri",
+		priv->oauth2_resource_uri_entry, "text",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_object_text_property (
+		settings, "oauth2-endpoint-host",
+		priv->oauth2_endpoint_host_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 

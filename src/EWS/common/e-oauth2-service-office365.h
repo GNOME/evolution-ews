@@ -29,6 +29,8 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), E_TYPE_OAUTH2_SERVICE_OFFICE365, EOAuth2ServiceOffice365Class))
 
+#define OFFICE365_FALLBACK_RESOURCE_URI "https://outlook.office365.com"
+
 G_BEGIN_DECLS
 
 typedef struct _EOAuth2ServiceOffice365 EOAuth2ServiceOffice365;

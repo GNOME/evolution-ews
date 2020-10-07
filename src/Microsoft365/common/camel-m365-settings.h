@@ -115,6 +115,13 @@ gchar *		camel_m365_settings_dup_oauth2_redirect_uri
 void		camel_m365_settings_set_oauth2_redirect_uri
 						(CamelM365Settings *settings,
 						 const gchar *redirect_uri);
+const gchar *	camel_m365_settings_get_oauth2_endpoint_host
+						(CamelM365Settings *settings);
+gchar *		camel_m365_settings_dup_oauth2_endpoint_host
+						(CamelM365Settings *settings);
+void		camel_m365_settings_set_oauth2_endpoint_host
+						(CamelM365Settings *settings,
+						 const gchar *endpoint_host);
 guint		camel_m365_settings_get_concurrent_connections
 						(CamelM365Settings *settings);
 void		camel_m365_settings_set_concurrent_connections
