@@ -1732,7 +1732,9 @@ ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 
 		if (!cbews->priv->is_freebusy_calendar &&
 		    camel_ews_settings_get_listen_notifications (ews_settings) &&
-		    e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010_SP1)) {
+		    e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010_SP1) &&
+		    !e_source_ews_folder_get_foreign (ews_folder) &&
+		    !e_source_ews_folder_get_public (ews_folder)) {
 			GSList *folders = NULL;
 
 			folders = g_slist_prepend (folders, cbews->priv->folder_id);
