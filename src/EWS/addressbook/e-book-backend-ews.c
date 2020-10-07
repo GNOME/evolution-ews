@@ -3309,7 +3309,9 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 
 		if (!bbews->priv->is_gal &&
 		    camel_ews_settings_get_listen_notifications (ews_settings) &&
-		    e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2010_SP1)) {
+		    e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2010_SP1) &&
+		    !e_source_ews_folder_get_foreign (ews_folder) &&
+		    !e_source_ews_folder_get_public (ews_folder)) {
 			GSList *folders = NULL;
 
 			folders = g_slist_prepend (folders, bbews->priv->folder_id);
