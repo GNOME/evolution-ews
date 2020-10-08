@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-09-30 13:50+0000\n"
-"PO-Revision-Date: 2020-10-01 19:41+0300\n"
+"POT-Creation-Date: 2020-10-07 09:26+0000\n"
+"PO-Revision-Date: 2020-10-08 09:30+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -621,7 +621,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Не вдалося додати теку — тека вже існує як «%s»"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:98
+#: ../src/EWS/common/e-oauth2-service-office365.c:116
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -1130,44 +1130,46 @@ msgstr "Опитування служби автовиявлення"
 msgid "Fetch _URL"
 msgstr "Отримати _адресу"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:166
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:107
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:174
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:112
 msgid "Configuration"
 msgstr "Налаштування"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:184
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:125
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:192
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:130
 msgid "User_name:"
 msgstr "_Користувач:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:206
 msgid "_Host URL:"
 msgstr "Адреса _вузла:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "OAB U_RL:"
 msgstr "Ад_реса OAB:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:231
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:139
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:239
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:144
 msgid "Open _Mailbox of other user"
 msgstr "Відкрити по_штову скриньку іншого користувача"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:273
 msgid "S_earch…"
 msgstr "По_шук…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:276
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:173
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:284
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:178
 msgid "Authentication"
 msgstr "Розпізнавання"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:311
 msgid "_Override Office365 OAuth2 settings"
 msgstr "П_еревизначити параметри OAuth2 Office365"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:307
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:315
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:393
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:203
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:281
 msgid "Help…"
 msgstr "Довідка…"
 
@@ -1175,8 +1177,8 @@ msgstr "Довідка…"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:207
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:324
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:212
 msgid "_Tenant:"
 msgstr "_Тенант:"
 
@@ -1184,8 +1186,8 @@ msgstr "_Тенант:"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:232
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
 msgid "Default tenant is “common“"
 msgstr "Типовим тенантом є «common»"
 
@@ -1193,60 +1195,94 @@ msgstr "Типовим тенантом є «common»"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:235
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:240
 #, c-format
 msgid "Default tenant is “%s”"
 msgstr "Типовим тенантом є «%s»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:354
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:242
 msgid "Application I_D:"
 msgstr "_Ід. програми:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:369
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:260
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:377
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:265
 msgid "There is not set any default application ID"
 msgstr "Не встановлено жодного ідентифікатора типової програми"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:370
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:261
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Ідентифікатором типової програми є «%s»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:372
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
-msgid "_Redirect URI:"
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:271
+#| msgid "EWS Settings"
+msgid "_Advanced Settings"
+msgstr "_Додаткові параметри"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:401
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:289
+msgid "_Endpoint host:"
+msgstr "Вузол _кінцевої точки:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:312
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:315
+#, c-format
+#| msgid "Default tenant is “%s”"
+msgid "Default endpoint host is “%s”"
+msgstr "Типовим вузлом кінцевої точки є «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
+#| msgid "_Redirect URI:"
+msgid "Red_irect URI:"
 msgstr "Адреса переспр_ямовування:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:394
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:397
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:285
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:288
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:341
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:344
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Типовою адресою переспрямовування є «%s»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:580
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
+#| msgid "_Redirect URI:"
+msgid "Re_source URI:"
+msgstr "Адреса _ресурсу:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
+#, c-format
+msgid ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+msgstr ""
+"Типова адреса ресурсу є похідною від адреси вузла. Кінцевим резервним"
+" варіантом адреси може бути «%s»."
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:720
 msgid "Host URL is not valid"
 msgstr "Адреса вузла є некоректною"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:584
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:724
 msgid "Host URL cannot be empty"
 msgstr "Адреса вузла не може бути порожньою"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:595
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:735
 msgid "OAB URL is not valid"
 msgstr "Адреса OAB є некоректною"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:605
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:409
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:745
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:500
 msgid "User name cannot be empty"
 msgstr "Обов'язково вкажіть користувача"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:619
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
 msgid "Application ID cannot be empty"
 msgstr "Ідентифікатор програми не може бути порожнім"
 
@@ -1464,16 +1500,16 @@ msgstr "Параметри отримання «За межами офісу»"
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
 msgstr ""
-"Надійшло запрошення від %s (%s) щодо перегляду його або її календаря"
-" Microsoft Exchange."
+"Надійшло запрошення від %s (%s) щодо перегляду його або її календаря "
+"Microsoft Exchange."
 
 #. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
 msgstr ""
-"Надійшло запрошення від %s (%s) щодо перегляду його або її теки Microsoft"
-" Exchange."
+"Надійшло запрошення від %s (%s) щодо перегляду його або її теки Microsoft "
+"Exchange."
 
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
 msgid "Click the Subscribe button to add it to Evolution."
@@ -1496,7 +1532,6 @@ msgid "Display part as EWS sharing metadata"
 msgstr "Показати частину як спільні метадані EWS"
 
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
-#| msgid "Subscribe to folder of other user…"
 msgid "Subscribing EWS folder…"
 msgstr "Підписуємося на теку EWS…"
 
@@ -1710,7 +1745,7 @@ msgstr ""
 "сервером Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:114
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:134
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
@@ -1745,9 +1780,13 @@ msgstr[3] ""
 msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:199
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "П_еревизначити параметри OAuth2 Microsoft 365"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:318
+msgid "_Redirect URI:"
+msgstr "Адреса переспр_ямовування:"
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:779
 #, c-format
