@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-10-04 08:46+0000\n"
-"PO-Revision-Date: 2020-10-04 16:53+0700\n"
+"POT-Creation-Date: 2020-10-07 09:26+0000\n"
+"PO-Revision-Date: 2020-10-08 10:50+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -602,7 +602,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Tak bisa menambah folder, folder telah ada sebagai “%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:98
+#: ../src/EWS/common/e-oauth2-service-office365.c:116
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -1102,44 +1102,46 @@ msgstr "Mengquery layanan Autodiscover"
 msgid "Fetch _URL"
 msgstr "_URL Ambil"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:166
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:107
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:174
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:112
 msgid "Configuration"
 msgstr "Konfigurasi"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:184
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:125
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:192
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:130
 msgid "User_name:"
 msgstr "_Nama pengguna:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:206
 msgid "_Host URL:"
 msgstr "URL _Host:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "OAB U_RL:"
 msgstr "U_RL OAB:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:231
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:139
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:239
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:144
 msgid "Open _Mailbox of other user"
 msgstr "Buka _Kotak surat pengguna lain"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:273
 msgid "S_earch…"
 msgstr "_Cari…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:276
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:173
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:284
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:178
 msgid "Authentication"
 msgstr "Autentikasi"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:311
 msgid "_Override Office365 OAuth2 settings"
 msgstr "Timpa setelan _OAuth2 Office365"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:307
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:315
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:393
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:203
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:281
 msgid "Help…"
 msgstr "Bantuan…"
 
@@ -1147,8 +1149,8 @@ msgstr "Bantuan…"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:207
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:324
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:212
 msgid "_Tenant:"
 msgstr "_Tenant:"
 
@@ -1156,8 +1158,8 @@ msgstr "_Tenant:"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:232
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
 msgid "Default tenant is “common“"
 msgstr "Tenant baku adalah \"common\""
 
@@ -1165,60 +1167,90 @@ msgstr "Tenant baku adalah \"common\""
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:235
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:240
 #, c-format
 msgid "Default tenant is “%s”"
 msgstr "Tenant baku adalah \"%s\""
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:354
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:242
 msgid "Application I_D:"
 msgstr "I_D Aplikasi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:369
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:260
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:377
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:265
 msgid "There is not set any default application ID"
 msgstr "Tidak diatur ID aplikasi baku apapun"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:370
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:261
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "ID aplikasi baku adalah \"%s\""
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:372
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
-msgid "_Redirect URI:"
-msgstr "U_RI pengalihan:"
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:271
+msgid "_Advanced Settings"
+msgstr "Peng_aturan Lanjutan"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:394
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:397
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:285
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:288
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:401
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:289
+msgid "_Endpoint host:"
+msgstr "Host _endpoint:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:312
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:315
+#, c-format
+msgid "Default endpoint host is “%s”"
+msgstr "Host endpoint asali adalah \"%s\""
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
+msgid "Red_irect URI:"
+msgstr "URI Pengal_ihan:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:341
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:344
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "URI pengalihan baku adalah \"%s\""
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:580
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
+msgid "Re_source URI:"
+msgstr "URI _Sumber Daya:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
+#, c-format
+msgid ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+msgstr ""
+"URI sumber daya default berasal dari URL Host, atau akhirnya dapat jatuh "
+"kembali ke \"%s\"."
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:720
 msgid "Host URL is not valid"
 msgstr "URL host “%s” tak valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:584
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:724
 msgid "Host URL cannot be empty"
 msgstr "URL host tak boleh kosong"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:595
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:735
 msgid "OAB URL is not valid"
 msgstr "URL OAB “%s” tak valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:605
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:409
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:745
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:500
 msgid "User name cannot be empty"
 msgstr "Nama pengguna tak boleh kosong"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:619
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
 msgid "Application ID cannot be empty"
 msgstr "ID aplikasi tak boleh kosong"
 
@@ -1675,7 +1707,7 @@ msgstr ""
 "Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:114
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:134
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
@@ -1704,9 +1736,13 @@ msgstr[1] ""
 msgid "Failed to parse own Json data"
 msgstr "Gagal mengurai data Json sendiri"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:199
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "Timpa setelan _OAuth2 Microsoft 365"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:318
+msgid "_Redirect URI:"
+msgstr "U_RI pengalihan:"
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:779
 #, c-format
