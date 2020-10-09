@@ -319,9 +319,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
 	g_free (markup);
 
-	/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-	   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
-	widget = gtk_label_new_with_mnemonic (_("_Tenant:"));
+	widget = gtk_label_new_with_mnemonic (_("Application I_D:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
 	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 1, 1, 1);
@@ -336,22 +334,20 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
 	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 1, 1, 1);
-	priv->oauth2_tenant_entry = widget;
+	priv->oauth2_client_id_entry = widget;
 
 	e_binding_bind_property (
 		priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_TENANT,
-		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
-		_("Default tenant is “common“"),
-		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
-		g_strdup_printf (_("Default tenant is “%s”"), OFFICE365_TENANT));
+	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_CLIENT_ID,
+		_("There is not set any default application ID"),
+		g_strdup_printf (_("Default application ID is “%s”"), OFFICE365_CLIENT_ID));
 
-	widget = gtk_label_new_with_mnemonic (_("Application I_D:"));
+	/* Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+	   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
+	widget = gtk_label_new_with_mnemonic (_("_Tenant ID:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
 	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 2, 1, 1);
@@ -366,16 +362,20 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
 	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 2, 1, 1);
-	priv->oauth2_client_id_entry = widget;
+	priv->oauth2_tenant_entry = widget;
 
 	e_binding_bind_property (
 		priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_CLIENT_ID,
-		_("There is not set any default application ID"),
-		g_strdup_printf (_("Default application ID is “%s”"), OFFICE365_CLIENT_ID));
+	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_TENANT,
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
+		_("Default tenant ID is “common“"),
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
+		g_strdup_printf (_("Default tenant ID is “%s”"), OFFICE365_TENANT));
 
 	container = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 	gtk_grid_attach (priv->oauth2_settings_grid, container, 0, 3, 2, 1);
