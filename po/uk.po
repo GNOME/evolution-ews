@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-10-07 09:26+0000\n"
-"PO-Revision-Date: 2020-10-08 09:30+0300\n"
+"POT-Creation-Date: 2020-10-09 09:32+0000\n"
+"PO-Revision-Date: 2020-10-09 15:37+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -31,47 +31,47 @@ msgstr "Вебслужби Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3510
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
 msgid "Failed to update GAL:"
 msgstr "Не вдалося оновити GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3672
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Не вдалося зберегти список контактів, підтримку передбачено лише у EWS "
 "Server 2010 та новіших версіях"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3765
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1941
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1943
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1944
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1950
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2524
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2703
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2526
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2705
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2994
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2996
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -79,7 +79,7 @@ msgstr ""
 "Неможливо створити зустрічі, які організовано іншими користувачами, у "
 "календарі вебслужб Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3704
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3706
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
@@ -1173,53 +1173,49 @@ msgstr "П_еревизначити параметри OAuth2 Office365"
 msgid "Help…"
 msgstr "Довідка…"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:324
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:212
-msgid "_Tenant:"
-msgstr "_Тенант:"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
-msgid "Default tenant is “common“"
-msgstr "Типовим тенантом є «common»"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:240
-#, c-format
-msgid "Default tenant is “%s”"
-msgstr "Типовим тенантом є «%s»"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:354
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:242
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:322
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "Application I_D:"
 msgstr "_Ід. програми:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:377
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:233
 msgid "There is not set any default application ID"
 msgstr "Не встановлено жодного ідентифікатора типової програми"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:234
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Ідентифікатором типової програми є «%s»"
 
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:238
+#| msgid "_Tenant:"
+msgid "_Tenant ID:"
+msgstr "Ідентифікатор _тенанта:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#| msgid "Default tenant is “common“"
+msgid "Default tenant ID is “common“"
+msgstr "Типовим ідентифікатором тенанта є «common»"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#, c-format
+#| msgid "Default tenant is “%s”"
+msgid "Default tenant ID is “%s”"
+msgstr "Типовим ідентифікатор тенанта є «%s»"
+
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:271
-#| msgid "EWS Settings"
 msgid "_Advanced Settings"
 msgstr "_Додаткові параметри"
 
@@ -1233,12 +1229,10 @@ msgstr "Вузол _кінцевої точки:"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:312
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:315
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default endpoint host is “%s”"
 msgstr "Типовим вузлом кінцевої точки є «%s»"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
-#| msgid "_Redirect URI:"
 msgid "Red_irect URI:"
 msgstr "Адреса переспр_ямовування:"
 
@@ -1251,7 +1245,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "Типовою адресою переспрямовування є «%s»"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
-#| msgid "_Redirect URI:"
 msgid "Re_source URI:"
 msgstr "Адреса _ресурсу:"
 
@@ -1261,8 +1254,8 @@ msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
 "back to “%s”."
 msgstr ""
-"Типова адреса ресурсу є похідною від адреси вузла. Кінцевим резервним"
-" варіантом адреси може бути «%s»."
+"Типова адреса ресурсу є похідною від адреси вузла. Кінцевим резервним "
+"варіантом адреси може бути «%s»."
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:720
 msgid "Host URL is not valid"
@@ -1783,6 +1776,19 @@ msgstr "Не вдалося обробити власні дані JSON"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:199
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "П_еревизначити параметри OAuth2 Microsoft 365"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
+msgid "Default tenant is “common“"
+msgstr "Типовим тенантом є «common»"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Типовим тенантом є «%s»"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:318
 msgid "_Redirect URI:"
