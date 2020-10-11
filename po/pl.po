@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-04 13:32+0200\n"
-"PO-Revision-Date: 2020-10-04 13:35+0200\n"
+"POT-Creation-Date: 2020-10-11 11:04+0200\n"
+"PO-Revision-Date: 2020-10-11 11:05+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -31,47 +31,47 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3510
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
 msgid "Failed to update GAL:"
 msgstr "Zaktualizowanie GAL się nie powiodło:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3672
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub nowszym"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3765
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1941
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1943
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1944
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1950
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2524
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2703
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2526
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2705
 msgid "Cannot determine EWS ItemId"
 msgstr "Nie można ustalić ItemId EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2994
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2996
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -79,7 +79,7 @@ msgstr ""
 "Nie można utworzyć spotkań organizowanych przez innych użytkowników "
 "w kalendarzu Exchange Web Services."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3704
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3706
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
@@ -617,7 +617,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nie można dodać katalogu. Katalog już istnieje jako „%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:98
+#: ../src/EWS/common/e-oauth2-service-office365.c:116
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office 365"
@@ -1125,123 +1125,149 @@ msgstr "Odpytywanie usługi automatycznego wykrywania"
 msgid "Fetch _URL"
 msgstr "Pobierz adres _URL"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:166
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:107
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:174
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:112
 msgid "Configuration"
 msgstr "Konfiguracja"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:184
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:125
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:192
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:130
 msgid "User_name:"
 msgstr "_Nazwa użytkownika:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:206
 msgid "_Host URL:"
 msgstr "Adres URL _komputera:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "OAB U_RL:"
 msgstr "Adres U_RL OAB:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:231
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:139
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:239
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:144
 msgid "Open _Mailbox of other user"
 msgstr "Otwórz _skrzynkę pocztową innego użytkownika"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:273
 msgid "S_earch…"
 msgstr "Wysz_ukaj…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:276
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:173
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:284
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:178
 msgid "Authentication"
 msgstr "Uwierzytelnianie"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:311
 msgid "_Override Office365 OAuth2 settings"
 msgstr "_Zastępowanie ustawień OAuth2 usługi Office 365"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:307
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:315
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:393
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:203
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:281
 msgid "Help…"
 msgstr "Pomoc…"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:207
-msgid "_Tenant:"
-msgstr "_Dzierżawca:"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:232
-msgid "Default tenant is “common“"
-msgstr "Domyślny dzierżawca to „common”"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:235
-#, c-format
-msgid "Default tenant is “%s”"
-msgstr "Domyślny dzierżawca to „%s”"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:322
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "Application I_D:"
 msgstr "_Identyfikator programu:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:369
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:260
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:233
 msgid "There is not set any default application ID"
 msgstr "Nie ustawiono żadnego domyślnego identyfikatora programu"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:370
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:261
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:234
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Domyślny identyfikator programu to „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:372
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
-msgid "_Redirect URI:"
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:238
+msgid "_Tenant ID:"
+msgstr "I_dentyfikator dzierżawcy:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+msgid "Default tenant ID is “common“"
+msgstr "Domyślny identyfikator dzierżawcy to „common”"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#, c-format
+msgid "Default tenant ID is “%s”"
+msgstr "Domyślny identyfikator dzierżawcy to „%s”"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:271
+msgid "_Advanced Settings"
+msgstr "_Ustawienia zaawansowane"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:401
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:289
+msgid "_Endpoint host:"
+msgstr "_Serwer końcowy:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:312
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:315
+#, c-format
+msgid "Default endpoint host is “%s”"
+msgstr "Domyślny serwer końcowy to „%s”"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
+msgid "Red_irect URI:"
 msgstr "_Adres URI przekierowania:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:394
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:397
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:285
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:288
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:341
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:344
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Domyślny adres URI przekierowania to „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:580
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
+msgid "Re_source URI:"
+msgstr "A_dres URI zasobu:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
+#, c-format
+msgid ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+msgstr ""
+"Domyślny adres URI zasobu jest pochodną adresu URL komputera lub może "
+"zapasowo użyć „%s”."
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:720
 msgid "Host URL is not valid"
 msgstr "Adres URL komputera nie jest prawidłowy"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:584
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:724
 msgid "Host URL cannot be empty"
 msgstr "Adres URL komputera nie może być pusty"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:595
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:735
 msgid "OAB URL is not valid"
 msgstr "Adres URL OAB nie jest prawidłowy"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:605
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:409
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:745
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:500
 msgid "User name cannot be empty"
 msgstr "Nazwa użytkownika nie może być pusta"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:619
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
 msgid "Application ID cannot be empty"
 msgstr "Identyfikator programu nie może być pusty"
 
@@ -1706,7 +1732,7 @@ msgstr ""
 "z serwerem Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:114
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:134
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft 365"
@@ -1737,9 +1763,26 @@ msgstr[2] ""
 msgid "Failed to parse own Json data"
 msgstr "Przetworzenie własnych danych JSON się nie powiodło"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:199
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Zastępowanie ustawień OAuth2 usługi Microsoft 365"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
+msgid "Default tenant is “common“"
+msgstr "Domyślny dzierżawca to „common”"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Domyślny dzierżawca to „%s”"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:318
+msgid "_Redirect URI:"
+msgstr "_Adres URI przekierowania:"
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:779
 #, c-format
