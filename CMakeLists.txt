@@ -191,7 +191,7 @@ endif(WITH_OFFICE365_TENANT STREQUAL "")
 add_printable_variable(WITH_OFFICE365_CLIENT_ID "Office365.com OAuth 2.0 client ID" "")
 
 if(WITH_OFFICE365_CLIENT_ID STREQUAL "")
-	set(WITH_OFFICE365_CLIENT_ID "")
+	set(WITH_OFFICE365_CLIENT_ID "20460e5d-ce91-49af-a3a5-70b6be7486d1")
 endif(WITH_OFFICE365_CLIENT_ID STREQUAL "")
 
 add_printable_variable(WITH_OFFICE365_REDIRECT_URI "Office365.com OAuth 2.0 redirect URI" "")
