@@ -83,6 +83,7 @@ mail_config_m365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	ESourceExtension *extension;
 	ESourceAuthentication *auth_extension;
 	CamelSettings *settings;
+	CamelM365Settings *m365_settings;
 	GtkLabel *label;
 	GtkWidget *widget;
 	GtkWidget *container;
@@ -145,14 +146,24 @@ mail_config_m365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 1, 1, 1);
 	gtk_widget_show (widget);
 
-	if (camel_m365_settings_get_use_impersonation (CAMEL_M365_SETTINGS (settings))) {
-		const gchar *impersonate_user = camel_m365_settings_get_impersonate_user (CAMEL_M365_SETTINGS (settings));
+	m365_settings = CAMEL_M365_SETTINGS (settings);
+
+	camel_m365_settings_lock (m365_settings);
+
+	if (camel_m365_settings_get_use_impersonation (m365_settings)) {
+		const gchar *impersonate_user = camel_m365_settings_get_impersonate_user (m365_settings);
 
 		if (impersonate_user && !*impersonate_user) {
-			camel_m365_settings_set_impersonate_user (CAMEL_M365_SETTINGS (settings), NULL);
-			camel_m365_settings_set_use_impersonation (CAMEL_M365_SETTINGS (settings), FALSE);
+			camel_m365_settings_unlock (m365_settings);
+
+			camel_m365_settings_set_impersonate_user (m365_settings, NULL);
+			camel_m365_settings_set_use_impersonation (m365_settings, FALSE);
+
+			camel_m365_settings_lock (m365_settings);
 		}
 	}
+
+	camel_m365_settings_unlock (m365_settings);
 
 	e_binding_bind_property (
 		settings, "use-impersonation",
@@ -346,9 +357,13 @@ mail_config_m365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 
 	gtk_widget_show_all (GTK_WIDGET (m365_backend->priv->oauth2_settings_grid));
 
+	camel_m365_settings_lock (m365_settings);
+
 	gtk_expander_set_expanded (GTK_EXPANDER (expander),
-		e_util_strcmp0 (camel_m365_settings_get_oauth2_endpoint_host (CAMEL_M365_SETTINGS (settings)), NULL) != 0 ||
-		e_util_strcmp0 (camel_m365_settings_get_oauth2_redirect_uri (CAMEL_M365_SETTINGS (settings)), NULL) != 0);
+		e_util_strcmp0 (camel_m365_settings_get_oauth2_endpoint_host (m365_settings), NULL) != 0 ||
+		e_util_strcmp0 (camel_m365_settings_get_oauth2_redirect_uri (m365_settings), NULL) != 0);
+
+	camel_m365_settings_unlock (m365_settings);
 
 	e_binding_bind_property (
 		expander, "expanded",
@@ -503,14 +518,18 @@ mail_config_m365_backend_check_complete (EMailConfigServiceBackend *backend)
 		CamelM365Settings *m365_settings = CAMEL_M365_SETTINGS (settings);
 		const gchar *client_id;
 
+		camel_m365_settings_lock (m365_settings);
+
 		if (camel_m365_settings_get_override_oauth2 (m365_settings)) {
 			client_id = camel_m365_settings_get_oauth2_client_id (m365_settings);
 		} else {
 			client_id = MICROSOFT365_CLIENT_ID;
 		}
 
-		correct = client_id && *client_id;
+		correct = e_util_strcmp0 (client_id, NULL) != 0;
 		complete = complete && correct;
+
+		camel_m365_settings_unlock (m365_settings);
 
 		e_util_set_entry_issue_hint (m365_backend->priv->oauth2_client_id_entry, correct ? NULL : _("Application ID cannot be empty"));
 	}

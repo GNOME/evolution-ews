@@ -571,6 +571,22 @@ camel_m365_settings_get_from_backend (struct _EBackend *backend,
 	return CAMEL_M365_SETTINGS (settings);
 }
 
+void
+camel_m365_settings_lock (CamelM365Settings *settings)
+{
+	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+}
+
+void
+camel_m365_settings_unlock (CamelM365Settings *settings)
+{
+	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
+
+	g_mutex_unlock (&settings->priv->property_lock);
+}
+
 gboolean
 camel_m365_settings_get_use_impersonation (CamelM365Settings *settings)
 {
@@ -609,12 +625,12 @@ camel_m365_settings_dup_impersonate_user (CamelM365Settings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	protected = camel_m365_settings_get_impersonate_user (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -625,17 +641,17 @@ camel_m365_settings_set_impersonate_user (CamelM365Settings *settings,
 {
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->impersonate_user, impersonate_user) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_m365_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->impersonate_user);
 	settings->priv->impersonate_user = e_util_strdup_strip (impersonate_user);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "impersonate-user");
 }
@@ -678,12 +694,12 @@ camel_m365_settings_dup_email (CamelM365Settings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	protected = camel_m365_settings_get_email (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -694,17 +710,17 @@ camel_m365_settings_set_email (CamelM365Settings *settings,
 {
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->email, email) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_m365_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->email);
 	settings->priv->email = e_util_strdup_strip (email);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "email");
 }
@@ -813,12 +829,12 @@ camel_m365_settings_dup_oauth2_tenant (CamelM365Settings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	protected = camel_m365_settings_get_oauth2_tenant (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -829,17 +845,17 @@ camel_m365_settings_set_oauth2_tenant (CamelM365Settings *settings,
 {
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_tenant, tenant) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_m365_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_tenant);
 	settings->priv->oauth2_tenant = e_util_strdup_strip (tenant);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-tenant");
 }
@@ -860,12 +876,12 @@ camel_m365_settings_dup_oauth2_client_id (CamelM365Settings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	protected = camel_m365_settings_get_oauth2_client_id (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -876,17 +892,17 @@ camel_m365_settings_set_oauth2_client_id (CamelM365Settings *settings,
 {
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_client_id, client_id) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_m365_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_client_id);
 	settings->priv->oauth2_client_id = e_util_strdup_strip (client_id);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-client-id");
 }
@@ -907,12 +923,12 @@ camel_m365_settings_dup_oauth2_redirect_uri (CamelM365Settings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	protected = camel_m365_settings_get_oauth2_redirect_uri (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -923,17 +939,17 @@ camel_m365_settings_set_oauth2_redirect_uri (CamelM365Settings *settings,
 {
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_redirect_uri, redirect_uri) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_m365_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_redirect_uri);
 	settings->priv->oauth2_redirect_uri = e_util_strdup_strip (redirect_uri);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-redirect-uri");
 }
@@ -954,12 +970,12 @@ camel_m365_settings_dup_oauth2_endpoint_host (CamelM365Settings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	protected = camel_m365_settings_get_oauth2_endpoint_host (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -970,17 +986,17 @@ camel_m365_settings_set_oauth2_endpoint_host (CamelM365Settings *settings,
 {
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_m365_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_endpoint_host, endpoint_host) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_m365_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_endpoint_host);
 	settings->priv->oauth2_endpoint_host = e_util_strdup_strip (endpoint_host);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-endpoint-host");
 }

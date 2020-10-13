@@ -144,6 +144,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	ESource *source;
 	ESourceExtension *extension;
 	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
 	GtkLabel *label;
 	GtkWidget *widget;
 	GtkWidget *container;
@@ -240,14 +241,24 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 3, 1, 1);
 	gtk_widget_show (widget);
 
-	if (camel_ews_settings_get_use_impersonation (CAMEL_EWS_SETTINGS (settings))) {
-		const gchar *impersonate_user = camel_ews_settings_get_impersonate_user (CAMEL_EWS_SETTINGS (settings));
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+
+	camel_ews_settings_lock (ews_settings);
+
+	if (camel_ews_settings_get_use_impersonation (ews_settings)) {
+		const gchar *impersonate_user = camel_ews_settings_get_impersonate_user (ews_settings);
 
 		if (impersonate_user && !*impersonate_user) {
-			camel_ews_settings_set_impersonate_user (CAMEL_EWS_SETTINGS (settings), NULL);
-			camel_ews_settings_set_use_impersonation (CAMEL_EWS_SETTINGS (settings), FALSE);
+			camel_ews_settings_unlock (ews_settings);
+
+			camel_ews_settings_set_impersonate_user (ews_settings, NULL);
+			camel_ews_settings_set_use_impersonation (ews_settings, FALSE);
+
+			camel_ews_settings_lock (ews_settings);
 		}
 	}
+
+	camel_ews_settings_unlock (ews_settings);
 
 	e_binding_bind_property (
 		settings, "use-impersonation",
@@ -487,10 +498,14 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 
 	gtk_widget_show_all (GTK_WIDGET (priv->oauth2_settings_grid));
 
+	camel_ews_settings_lock (ews_settings);
+
 	gtk_expander_set_expanded (GTK_EXPANDER (expander),
-		e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (CAMEL_EWS_SETTINGS (settings)), NULL) != 0 ||
-		e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (CAMEL_EWS_SETTINGS (settings)), NULL) != 0 ||
-		e_util_strcmp0 (camel_ews_settings_get_oauth2_resource_uri (CAMEL_EWS_SETTINGS (settings)), NULL) != 0);
+		e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), NULL) != 0 ||
+		e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (ews_settings), NULL) != 0 ||
+		e_util_strcmp0 (camel_ews_settings_get_oauth2_resource_uri (ews_settings), NULL) != 0);
+
+	camel_ews_settings_unlock (ews_settings);
 
 	e_binding_bind_property (
 		expander, "expanded",
@@ -700,6 +715,9 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	settings = e_mail_config_service_backend_get_settings (backend);
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
+
+	camel_ews_settings_lock (ews_settings);
+
 	hosturl = camel_ews_settings_get_hosturl (ews_settings);
 	oaburl = camel_ews_settings_get_oaburl (ews_settings);
 
@@ -753,11 +771,13 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 			client_id = OFFICE365_CLIENT_ID;
 		}
 
-		correct = client_id && *client_id;
+		correct = e_util_strcmp0 (client_id, NULL) != 0;
 		complete = complete && correct;
 
 		e_util_set_entry_issue_hint (priv->oauth2_client_id_entry, correct ? NULL : _("Application ID cannot be empty"));
 	}
+
+	camel_ews_settings_unlock (ews_settings);
 
 	return complete;
 }

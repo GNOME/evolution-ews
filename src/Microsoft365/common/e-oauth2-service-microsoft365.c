@@ -49,8 +49,8 @@ G_DEFINE_DYNAMIC_TYPE_EXTENDED (EOAuth2ServiceMicrosoft365, e_oauth2_service_mic
 	G_ADD_PRIVATE_DYNAMIC (EOAuth2ServiceMicrosoft365))
 
 static const gchar *
-eos_microsoft365_cache_string (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
-			       gchar *str) /* takes ownership of the 'str' */
+eos_microsoft365_cache_string_take (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
+				    gchar *str) /* takes ownership of the 'str' */
 {
 	const gchar *cached_str;
 
@@ -79,22 +79,50 @@ eos_microsoft365_cache_string (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
 	return cached_str;
 }
 
+
 static const gchar *
-eos_microsoft365_get_endpoint_host (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
-				    CamelM365Settings *m365_settings)
+eos_microsoft365_cache_string (EOAuth2ServiceMicrosoft365 *oauth2_microsoft365,
+			       const gchar *str)
 {
-	if (m365_settings && camel_m365_settings_get_override_oauth2 (m365_settings)) {
-		gchar *endpoint_host;
+	gchar *cached_str;
 
-		endpoint_host = camel_m365_settings_dup_oauth2_endpoint_host (m365_settings);
+	g_return_val_if_fail (E_IS_OAUTH2_SERVICE_MICROSOFT365 (oauth2_microsoft365), NULL);
 
-		if (endpoint_host && *endpoint_host)
-			return eos_microsoft365_cache_string (oauth2_microsoft365, endpoint_host);
+	if (!str || !*str)
+		return str;
 
-		g_free (endpoint_host);
+	g_mutex_lock (&oauth2_microsoft365->priv->string_cache_lock);
+
+	cached_str = g_hash_table_lookup (oauth2_microsoft365->priv->string_cache, str);
+
+	if (!cached_str) {
+		cached_str = g_strdup (str);
+		g_hash_table_insert (oauth2_microsoft365->priv->string_cache, cached_str, cached_str);
 	}
 
-	return MICROSOFT365_ENDPOINT_HOST;
+	g_mutex_unlock (&oauth2_microsoft365->priv->string_cache_lock);
+
+	return cached_str;
+}
+
+static void
+eos_microsoft365_get_endpoint_host_and_tenant_locked (CamelM365Settings *m365_settings,
+						      const gchar **out_endpoint_host,
+						      const gchar **out_tenant)
+{
+	if (out_endpoint_host) {
+		*out_endpoint_host = camel_m365_settings_get_oauth2_endpoint_host (m365_settings);
+
+		if (e_util_strcmp0 (*out_endpoint_host, NULL) == 0)
+			*out_endpoint_host = MICROSOFT365_ENDPOINT_HOST;
+	}
+
+	if (out_tenant) {
+		*out_tenant = camel_m365_settings_get_oauth2_tenant (m365_settings);
+
+		if (e_util_strcmp0 (*out_tenant, NULL) == 0)
+			*out_tenant = MICROSOFT365_TENANT;
+	}
 }
 
 static CamelM365Settings *
@@ -142,16 +170,25 @@ eos_microsoft365_get_client_id (EOAuth2Service *service,
 	CamelM365Settings *m365_settings;
 
 	m365_settings = eos_microsoft365_get_camel_settings (source);
-	if (m365_settings && camel_m365_settings_get_override_oauth2 (m365_settings)) {
-		gchar *client_id = camel_m365_settings_dup_oauth2_client_id (m365_settings);
 
-		if (client_id && !*client_id) {
-			g_free (client_id);
-			client_id = NULL;
+	if (m365_settings) {
+		const gchar *res = NULL;
+
+		camel_m365_settings_lock (m365_settings);
+
+		if (camel_m365_settings_get_override_oauth2 (m365_settings)) {
+			const gchar *client_id;
+
+			client_id = camel_m365_settings_get_oauth2_client_id (m365_settings);
+
+			if (e_util_strcmp0 (client_id, NULL) != 0)
+				res = eos_microsoft365_cache_string (oauth2_microsoft365, client_id);
 		}
 
-		if (client_id)
-			return eos_microsoft365_cache_string (oauth2_microsoft365, client_id);
+		camel_m365_settings_unlock (m365_settings);
+
+		if (res)
+			return res;
 	}
 
 	return MICROSOFT365_CLIENT_ID;
@@ -172,30 +209,29 @@ eos_microsoft365_get_authentication_uri (EOAuth2Service *service,
 	CamelM365Settings *m365_settings;
 
 	m365_settings = eos_microsoft365_get_camel_settings (source);
-	if (m365_settings && camel_m365_settings_get_override_oauth2 (m365_settings)) {
-		gchar *tenant;
-		const gchar *res;
 
-		tenant = camel_m365_settings_dup_oauth2_tenant (m365_settings);
-		if (tenant && !*tenant) {
-			g_free (tenant);
-			tenant = NULL;
+	if (m365_settings) {
+		const gchar *res = NULL;
+
+		camel_m365_settings_lock (m365_settings);
+
+		if (camel_m365_settings_get_override_oauth2 (m365_settings)) {
+			const gchar *endpoint_host = NULL;
+			const gchar *tenant = NULL;
+
+			eos_microsoft365_get_endpoint_host_and_tenant_locked (m365_settings, &endpoint_host, &tenant);
+
+			res = eos_microsoft365_cache_string_take (oauth2_microsoft365,
+				g_strdup_printf ("https://%s/%s/oauth2/v2.0/authorize", endpoint_host, tenant));
 		}
 
-		res = eos_microsoft365_cache_string (oauth2_microsoft365,
-			g_strdup_printf ("https://%s/%s/oauth2/v2.0/authorize",
-				eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
-				tenant ? tenant : MICROSOFT365_TENANT));
+		camel_m365_settings_unlock (m365_settings);
 
-		g_free (tenant);
-
-		return res;
+		if (res)
+			return res;
 	}
 
-	return eos_microsoft365_cache_string (oauth2_microsoft365,
-		g_strdup_printf ("https://%s/%s/oauth2/v2.0/authorize",
-			eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
-			MICROSOFT365_TENANT));
+	return "https://" MICROSOFT365_ENDPOINT_HOST "/" MICROSOFT365_TENANT "/oauth2/v2.0/authorize";
 }
 
 static const gchar *
@@ -206,30 +242,29 @@ eos_microsoft365_get_refresh_uri (EOAuth2Service *service,
 	CamelM365Settings *m365_settings;
 
 	m365_settings = eos_microsoft365_get_camel_settings (source);
-	if (m365_settings && camel_m365_settings_get_override_oauth2 (m365_settings)) {
-		gchar *tenant;
-		const gchar *res;
 
-		tenant = camel_m365_settings_dup_oauth2_tenant (m365_settings);
-		if (tenant && !*tenant) {
-			g_free (tenant);
-			tenant = NULL;
+	if (m365_settings) {
+		const gchar *res = NULL;
+
+		camel_m365_settings_lock (m365_settings);
+
+		if (camel_m365_settings_get_override_oauth2 (m365_settings)) {
+			const gchar *endpoint_host = NULL;
+			const gchar *tenant = NULL;
+
+			eos_microsoft365_get_endpoint_host_and_tenant_locked (m365_settings, &endpoint_host, &tenant);
+
+			res = eos_microsoft365_cache_string_take (oauth2_microsoft365,
+				g_strdup_printf ("https://%s/%s/oauth2/v2.0/token", endpoint_host, tenant));
 		}
 
-		res = eos_microsoft365_cache_string (oauth2_microsoft365,
-			g_strdup_printf ("https://%s/%s/oauth2/v2.0/token",
-				eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
-				tenant ? tenant : MICROSOFT365_TENANT));
+		camel_m365_settings_unlock (m365_settings);
 
-		g_free (tenant);
-
-		return res;
+		if (res)
+			return res;
 	}
 
-	return eos_microsoft365_cache_string (oauth2_microsoft365,
-		g_strdup_printf ("https://%s/%s/oauth2/v2.0/token",
-			eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings),
-			MICROSOFT365_TENANT));
+	return "https://" MICROSOFT365_ENDPOINT_HOST "/" MICROSOFT365_TENANT "/oauth2/v2.0/token";
 }
 
 static const gchar *
@@ -238,36 +273,44 @@ eos_microsoft365_get_redirect_uri (EOAuth2Service *service,
 {
 	EOAuth2ServiceMicrosoft365 *oauth2_microsoft365 = E_OAUTH2_SERVICE_MICROSOFT365 (service);
 	CamelM365Settings *m365_settings;
-	const gchar *res;
 
 	m365_settings = eos_microsoft365_get_camel_settings (source);
-	if (m365_settings && camel_m365_settings_get_override_oauth2 (m365_settings)) {
-		gchar *redirect_uri;
 
-		redirect_uri = camel_m365_settings_dup_oauth2_redirect_uri (m365_settings);
+	if (m365_settings) {
+		const gchar *res = NULL;
 
-		if (redirect_uri && !*redirect_uri) {
-			g_free (redirect_uri);
-			redirect_uri = NULL;
+		camel_m365_settings_lock (m365_settings);
+
+		if (camel_m365_settings_get_override_oauth2 (m365_settings)) {
+			const gchar *redirect_uri;
+
+			redirect_uri = camel_m365_settings_get_oauth2_redirect_uri (m365_settings);
+
+			if (e_util_strcmp0 (redirect_uri, NULL) != 0)
+				res = eos_microsoft365_cache_string (oauth2_microsoft365, redirect_uri);
+
+			if (!res) {
+				const gchar *endpoint_host = NULL;
+
+				eos_microsoft365_get_endpoint_host_and_tenant_locked (m365_settings, &endpoint_host, NULL);
+
+				if (endpoint_host && g_strcmp0 (endpoint_host, MICROSOFT365_ENDPOINT_HOST) != 0) {
+					res = eos_microsoft365_cache_string_take (oauth2_microsoft365,
+						g_strdup_printf ("https://%s/common/oauth2/nativeclient", endpoint_host));
+				}
+			}
 		}
 
-		if (redirect_uri)
-			return eos_microsoft365_cache_string (oauth2_microsoft365, redirect_uri);
+		camel_m365_settings_unlock (m365_settings);
 
-		if (e_util_strcmp0 (camel_m365_settings_get_oauth2_endpoint_host (m365_settings), NULL) != 0) {
-			return eos_microsoft365_cache_string (oauth2_microsoft365,
-				g_strdup_printf ("https://%s/common/oauth2/nativeclient",
-					eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings)));
-		}
+		if (res)
+			return res;
 	}
 
-	res = MICROSOFT365_REDIRECT_URI;
-	if (res && *res)
-		return res;
+	if (e_util_strcmp0 (MICROSOFT365_REDIRECT_URI, NULL) != 0)
+		return MICROSOFT365_REDIRECT_URI;
 
-	return eos_microsoft365_cache_string (oauth2_microsoft365,
-		g_strdup_printf ("https://%s/common/oauth2/nativeclient",
-			eos_microsoft365_get_endpoint_host (oauth2_microsoft365, m365_settings)));
+	return "https://" MICROSOFT365_ENDPOINT_HOST "/common/oauth2/nativeclient";
 }
 
 static void

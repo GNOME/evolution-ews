@@ -55,6 +55,8 @@ CamelM365Settings *
 		camel_m365_settings_get_from_backend
 						(struct _EBackend *backend,
 						 struct _ESourceRegistry *registry);
+void		camel_m365_settings_lock	(CamelM365Settings *settings);
+void		camel_m365_settings_unlock	(CamelM365Settings *settings);
 gboolean	camel_m365_settings_get_use_impersonation
 						(CamelM365Settings *settings);
 void		camel_m365_settings_set_use_impersonation

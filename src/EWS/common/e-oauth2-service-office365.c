@@ -31,8 +31,8 @@ G_DEFINE_DYNAMIC_TYPE_EXTENDED (EOAuth2ServiceOffice365, e_oauth2_service_office
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_OAUTH2_SERVICE, e_oauth2_service_office365_oauth2_service_init))
 
 static const gchar *
-eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
-			    gchar *str) /* takes ownership of the 'str' */
+eos_office365_cache_string_take (EOAuth2ServiceOffice365 *oauth2_office365,
+				 gchar *str) /* takes ownership of the 'str' */
 {
 	const gchar *cached_str;
 
@@ -62,21 +62,48 @@ eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
 }
 
 static const gchar *
-eos_office365_get_endpoint_host (EOAuth2ServiceOffice365 *oauth2_office365,
-				 CamelEwsSettings *ews_settings)
+eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
+			    const gchar *str)
 {
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *endpoint_host;
+	gchar *cached_str;
 
-		endpoint_host = camel_ews_settings_dup_oauth2_endpoint_host (ews_settings);
+	g_return_val_if_fail (E_IS_OAUTH2_SERVICE_OFFICE365 (oauth2_office365), NULL);
 
-		if (endpoint_host && *endpoint_host)
-			return eos_office365_cache_string (oauth2_office365, endpoint_host);
+	if (!str || !*str)
+		return str;
 
-		g_free (endpoint_host);
+	g_mutex_lock (&oauth2_office365->priv->string_cache_lock);
+
+	cached_str = g_hash_table_lookup (oauth2_office365->priv->string_cache, str);
+
+	if (!cached_str) {
+		cached_str = g_strdup (str);
+		g_hash_table_insert (oauth2_office365->priv->string_cache, cached_str, cached_str);
 	}
 
-	return OFFICE365_ENDPOINT_HOST;
+	g_mutex_unlock (&oauth2_office365->priv->string_cache_lock);
+
+	return cached_str;
+}
+
+static void
+eos_office365_get_endpoint_host_and_tenant_locked (CamelEwsSettings *ews_settings,
+						   const gchar **out_endpoint_host,
+						   const gchar **out_tenant)
+{
+	if (out_endpoint_host) {
+		*out_endpoint_host = camel_ews_settings_get_oauth2_endpoint_host (ews_settings);
+
+		if (e_util_strcmp0 (*out_endpoint_host, NULL) == 0)
+			*out_endpoint_host = OFFICE365_ENDPOINT_HOST;
+	}
+
+	if (out_tenant) {
+		*out_tenant = camel_ews_settings_get_oauth2_tenant (ews_settings);
+
+		if (e_util_strcmp0 (*out_tenant, NULL) == 0)
+			*out_tenant = OFFICE365_TENANT;
+	}
 }
 
 static CamelEwsSettings *
@@ -124,16 +151,25 @@ eos_office365_get_client_id (EOAuth2Service *service,
 	CamelEwsSettings *ews_settings;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *client_id = camel_ews_settings_dup_oauth2_client_id (ews_settings);
 
-		if (client_id && !*client_id) {
-			g_free (client_id);
-			client_id = NULL;
+	if (ews_settings) {
+		const gchar *res = NULL;
+
+		camel_ews_settings_lock (ews_settings);
+
+		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
+			const gchar *client_id;
+
+			client_id = camel_ews_settings_get_oauth2_client_id (ews_settings);
+
+			if (e_util_strcmp0 (client_id, NULL) != 0)
+				res = eos_office365_cache_string (oauth2_office365, client_id);
 		}
 
-		if (client_id)
-			return eos_office365_cache_string (oauth2_office365, client_id);
+		camel_ews_settings_unlock (ews_settings);
+
+		if (res)
+			return res;
 	}
 
 	return OFFICE365_CLIENT_ID;
@@ -154,30 +190,29 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 	CamelEwsSettings *ews_settings;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *tenant;
-		const gchar *res;
 
-		tenant = camel_ews_settings_dup_oauth2_tenant (ews_settings);
-		if (tenant && !*tenant) {
-			g_free (tenant);
-			tenant = NULL;
+	if (ews_settings) {
+		const gchar *res = NULL;
+
+		camel_ews_settings_lock (ews_settings);
+
+		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
+			const gchar *endpoint_host = NULL;
+			const gchar *tenant = NULL;
+
+			eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, &tenant);
+
+			res = eos_office365_cache_string_take (oauth2_office365,
+				g_strdup_printf ("https://%s/%s/oauth2/authorize", endpoint_host, tenant));
 		}
 
-		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://%s/%s/oauth2/authorize",
-				eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
-				tenant ? tenant : OFFICE365_TENANT));
+		camel_ews_settings_unlock (ews_settings);
 
-		g_free (tenant);
-
-		return res;
+		if (res)
+			return res;
 	}
 
-	return eos_office365_cache_string (oauth2_office365,
-		g_strdup_printf ("https://%s/%s/oauth2/authorize",
-			eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
-			OFFICE365_TENANT));
+	return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/oauth2/authorize";
 }
 
 static const gchar *
@@ -188,30 +223,29 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 	CamelEwsSettings *ews_settings;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *tenant;
-		const gchar *res;
 
-		tenant = camel_ews_settings_dup_oauth2_tenant (ews_settings);
-		if (tenant && !*tenant) {
-			g_free (tenant);
-			tenant = NULL;
+	if (ews_settings) {
+		const gchar *res = NULL;
+
+		camel_ews_settings_lock (ews_settings);
+
+		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
+			const gchar *endpoint_host = NULL;
+			const gchar *tenant = NULL;
+
+			eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, &tenant);
+
+			res = eos_office365_cache_string_take (oauth2_office365,
+				g_strdup_printf ("https://%s/%s/oauth2/token", endpoint_host, tenant));
 		}
 
-		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://%s/%s/oauth2/token",
-				eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
-				tenant ? tenant : OFFICE365_TENANT));
+		camel_ews_settings_unlock (ews_settings);
 
-		g_free (tenant);
-
-		return res;
+		if (res)
+			return res;
 	}
 
-	return eos_office365_cache_string (oauth2_office365,
-		g_strdup_printf ("https://%s/%s/oauth2/token",
-			eos_office365_get_endpoint_host (oauth2_office365, ews_settings),
-			OFFICE365_TENANT));
+	return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/oauth2/token";
 }
 
 static const gchar *
@@ -220,36 +254,52 @@ eos_office365_get_redirect_uri (EOAuth2Service *service,
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
 	CamelEwsSettings *ews_settings;
-	const gchar *res;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *redirect_uri;
 
-		redirect_uri = camel_ews_settings_dup_oauth2_redirect_uri (ews_settings);
+	if (ews_settings) {
+		const gchar *res = NULL;
 
-		if (redirect_uri && !*redirect_uri) {
-			g_free (redirect_uri);
-			redirect_uri = NULL;
+		camel_ews_settings_lock (ews_settings);
+
+		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
+			const gchar *redirect_uri;
+
+			redirect_uri = camel_ews_settings_get_oauth2_redirect_uri (ews_settings);
+
+			if (e_util_strcmp0 (redirect_uri, NULL) != 0)
+				res = eos_office365_cache_string (oauth2_office365, redirect_uri);
+
+			if (!res) {
+				const gchar *endpoint_host = NULL;
+
+				eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, NULL);
+
+				if (endpoint_host && g_strcmp0 (endpoint_host, OFFICE365_ENDPOINT_HOST) != 0) {
+					res = eos_office365_cache_string_take (oauth2_office365,
+						g_strdup_printf ("https://%s/common/oauth2/nativeclient", endpoint_host));
+				}
+			}
 		}
 
-		if (redirect_uri)
-			return eos_office365_cache_string (oauth2_office365, redirect_uri);
+		camel_ews_settings_unlock (ews_settings);
 
-		if (e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), NULL) != 0) {
-			return eos_office365_cache_string (oauth2_office365,
-				g_strdup_printf ("https://%s/common/oauth2/nativeclient",
-					eos_office365_get_endpoint_host (oauth2_office365, ews_settings)));
-		}
+		if (res)
+			return res;
 	}
 
-	res = OFFICE365_REDIRECT_URI;
-	if (res && *res)
-		return res;
+	if (e_util_strcmp0 (OFFICE365_REDIRECT_URI, NULL) != 0)
+		return OFFICE365_REDIRECT_URI;
 
-	return eos_office365_cache_string (oauth2_office365,
-		g_strdup_printf ("https://%s/common/oauth2/nativeclient",
-			eos_office365_get_endpoint_host (oauth2_office365, ews_settings)));
+	return "https://" OFFICE365_ENDPOINT_HOST "/common/oauth2/nativeclient";
+}
+
+static gboolean
+eos_office365_matches_fallback_resource_uri (const gchar *uri,
+					     guint len)
+{
+	return uri && strlen (OFFICE365_FALLBACK_RESOURCE_URI) == len &&
+		strncmp (uri, OFFICE365_FALLBACK_RESOURCE_URI, len) == 0;
 }
 
 static const gchar *
@@ -260,39 +310,47 @@ eos_office365_get_resource_uri (EOAuth2Service *service,
 	CamelEwsSettings *ews_settings;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *resource_uri;
-
-		resource_uri = camel_ews_settings_dup_oauth2_resource_uri (ews_settings);
-
-		if (resource_uri && !*resource_uri) {
-			g_free (resource_uri);
-			resource_uri = NULL;
-		}
-
-		if (resource_uri)
-			return eos_office365_cache_string (oauth2_office365, resource_uri);
-	}
 
 	if (ews_settings) {
-		gchar *host_url;
+		const gchar *res = NULL;
 
-		host_url = camel_ews_settings_dup_hosturl (ews_settings);
+		camel_ews_settings_lock (ews_settings);
 
-		if (host_url && *host_url) {
-			gchar *ptr;
+		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
+			const gchar *resource_uri;
 
-			ptr = strstr (host_url, "://");
-			ptr = ptr ? strchr (ptr + 3, '/') : NULL;
+			resource_uri = camel_ews_settings_get_oauth2_resource_uri (ews_settings);
 
-			if (ptr) {
-				*ptr = '\0';
+			if (e_util_strcmp0 (resource_uri, NULL) != 0)
+				res = eos_office365_cache_string (oauth2_office365, resource_uri);
 
-				return eos_office365_cache_string (oauth2_office365, host_url);
+		}
+
+		if (!res) {
+			const gchar *host_url;
+
+			host_url = camel_ews_settings_get_hosturl (ews_settings);
+
+			if (host_url && *host_url) {
+				const gchar *ptr;
+
+				ptr = strstr (host_url, "://");
+				ptr = ptr ? strchr (ptr + 3, '/') : NULL;
+
+				if (ptr && !eos_office365_matches_fallback_resource_uri (host_url, ptr - host_url)) {
+					gchar *resource_uri;
+
+					resource_uri = g_strndup (host_url, ptr - host_url);
+
+					res = eos_office365_cache_string_take (oauth2_office365, resource_uri);
+				}
 			}
 		}
 
-		g_free (host_url);
+		camel_ews_settings_unlock (ews_settings);
+
+		if (res)
+			return res;
 	}
 
 	return OFFICE365_FALLBACK_RESOURCE_URI;

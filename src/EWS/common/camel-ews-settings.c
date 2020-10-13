@@ -858,6 +858,22 @@ camel_ews_settings_init (CamelEwsSettings *settings)
 				     NULL);
 }
 
+void
+camel_ews_settings_lock (CamelEwsSettings *settings)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+}
+
+void
+camel_ews_settings_unlock (CamelEwsSettings *settings)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_unlock (&settings->priv->property_lock);
+}
+
 /**
  * camel_ews_settings_get_auth_mechanism:
  * @settings: a #CamelEwsSettings
@@ -995,12 +1011,12 @@ camel_ews_settings_dup_email (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_email (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1011,17 +1027,17 @@ camel_ews_settings_set_email (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->email, email) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->email);
 	settings->priv->email = e_util_strdup_strip (email);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "email");
 }
@@ -1128,12 +1144,12 @@ camel_ews_settings_dup_gal_uid (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_gal_uid (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1144,17 +1160,17 @@ camel_ews_settings_set_gal_uid (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->gal_uid, gal_uid) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->gal_uid);
 	settings->priv->gal_uid = e_util_strdup_strip (gal_uid);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "gal-uid");
 }
@@ -1175,12 +1191,12 @@ camel_ews_settings_dup_hosturl (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_hosturl (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1191,17 +1207,17 @@ camel_ews_settings_set_hosturl (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->hosturl, hosturl) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->hosturl);
 	settings->priv->hosturl = e_util_strdup_strip (hosturl);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "hosturl");
 }
@@ -1222,12 +1238,12 @@ camel_ews_settings_dup_oaburl (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oaburl (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1238,17 +1254,17 @@ camel_ews_settings_set_oaburl (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oaburl, oaburl) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oaburl);
 	settings->priv->oaburl = e_util_strdup_strip (oaburl);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oaburl");
 }
@@ -1291,12 +1307,12 @@ camel_ews_settings_dup_oal_selected (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oal_selected (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1307,17 +1323,17 @@ camel_ews_settings_set_oal_selected (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oal_selected, oal_selected) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oal_selected);
 	settings->priv->oal_selected = e_util_strdup_strip (oal_selected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oal-selected");
 }
@@ -1382,12 +1398,12 @@ camel_ews_settings_dup_impersonate_user (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_impersonate_user (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1398,17 +1414,17 @@ camel_ews_settings_set_impersonate_user (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->impersonate_user, impersonate_user) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->impersonate_user);
 	settings->priv->impersonate_user = e_util_strdup_strip (impersonate_user);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "impersonate-user");
 }
@@ -1451,12 +1467,12 @@ camel_ews_settings_dup_user_agent (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_user_agent (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1467,17 +1483,17 @@ camel_ews_settings_set_user_agent (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->user_agent, user_agent) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->user_agent);
 	settings->priv->user_agent = e_util_strdup_strip (user_agent);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "user-agent");
 }
@@ -1520,12 +1536,12 @@ camel_ews_settings_dup_oauth2_tenant (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oauth2_tenant (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1536,17 +1552,17 @@ camel_ews_settings_set_oauth2_tenant (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_tenant, tenant) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_tenant);
 	settings->priv->oauth2_tenant = e_util_strdup_strip (tenant);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-tenant");
 }
@@ -1567,12 +1583,12 @@ camel_ews_settings_dup_oauth2_client_id (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oauth2_client_id (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1583,17 +1599,17 @@ camel_ews_settings_set_oauth2_client_id (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_client_id, client_id) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_client_id);
 	settings->priv->oauth2_client_id = e_util_strdup_strip (client_id);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-client-id");
 }
@@ -1614,12 +1630,12 @@ camel_ews_settings_dup_oauth2_redirect_uri (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oauth2_redirect_uri (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1630,17 +1646,17 @@ camel_ews_settings_set_oauth2_redirect_uri (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_redirect_uri, redirect_uri) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_redirect_uri);
 	settings->priv->oauth2_redirect_uri = e_util_strdup_strip (redirect_uri);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-redirect-uri");
 }
@@ -1661,12 +1677,12 @@ camel_ews_settings_dup_oauth2_resource_uri (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oauth2_resource_uri (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1677,17 +1693,17 @@ camel_ews_settings_set_oauth2_resource_uri (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_resource_uri, resource_uri) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_resource_uri);
 	settings->priv->oauth2_resource_uri = e_util_strdup_strip (resource_uri);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-resource-uri");
 }
@@ -1708,12 +1724,12 @@ camel_ews_settings_dup_oauth2_endpoint_host (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	protected = camel_ews_settings_get_oauth2_endpoint_host (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	return duplicate;
 }
@@ -1724,17 +1740,17 @@ camel_ews_settings_set_oauth2_endpoint_host (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (&settings->priv->property_lock);
+	camel_ews_settings_lock (settings);
 
 	if (g_strcmp0 (settings->priv->oauth2_endpoint_host, endpoint_host) == 0) {
-		g_mutex_unlock (&settings->priv->property_lock);
+		camel_ews_settings_unlock (settings);
 		return;
 	}
 
 	g_free (settings->priv->oauth2_endpoint_host);
 	settings->priv->oauth2_endpoint_host = e_util_strdup_strip (endpoint_host);
 
-	g_mutex_unlock (&settings->priv->property_lock);
+	camel_ews_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-endpoint-host");
 }
