@@ -1,14 +1,14 @@
 # Indonesian translation for evolution-ews.
 # Copyright (C) 2012 evolution-ews' COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
-# Andika Triwidada <andika@gmail.com>, 2012, 2013, 2014, 2018.
+# Andika Triwidada <andika@gmail.com>, 2012-2014, 2018, 2020.
 # Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017-2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-10-07 09:26+0000\n"
-"PO-Revision-Date: 2020-10-08 10:50+0700\n"
+"POT-Creation-Date: 2020-10-11 11:10+0000\n"
+"PO-Revision-Date: 2020-11-02 08:27+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -30,47 +30,47 @@ msgstr "Layanan Web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses server Exchange memakai Layanan Web"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3510
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
 msgid "Failed to update GAL:"
 msgstr "Failed to update GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3672
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Tak bisa menyimpan daftar kontak, itu hanya didukung pada EWS Server 2010 "
 "atau setelahnya"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3765
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1941
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1943
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Luang"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1944
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Sibuk"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1950
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Sementara"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2524
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2703
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2526
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2705
 msgid "Cannot determine EWS ItemId"
 msgstr "Tidak dapat menentukan ItemId EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2994
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2996
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -78,7 +78,7 @@ msgstr ""
 "Tidak bisa membuat pertemuan yang diorganisasi oleh pengguna lain dalam "
 "kalender Exchange Web Services."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3704
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3706
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
@@ -1145,49 +1145,43 @@ msgstr "Timpa setelan _OAuth2 Office365"
 msgid "Help…"
 msgstr "Bantuan…"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:324
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:212
-msgid "_Tenant:"
-msgstr "_Tenant:"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
-msgid "Default tenant is “common“"
-msgstr "Tenant baku adalah \"common\""
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:240
-#, c-format
-msgid "Default tenant is “%s”"
-msgstr "Tenant baku adalah \"%s\""
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:354
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:242
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:322
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "Application I_D:"
 msgstr "I_D Aplikasi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:377
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:233
 msgid "There is not set any default application ID"
 msgstr "Tidak diatur ID aplikasi baku apapun"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:234
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "ID aplikasi baku adalah \"%s\""
+
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:238
+msgid "_Tenant ID:"
+msgstr "ID _Tenant:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+msgid "Default tenant ID is “common“"
+msgstr "ID tenant baku adalah \"common\""
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#, c-format
+msgid "Default tenant ID is “%s”"
+msgstr "ID tenant baku adalah \"%s\""
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:271
@@ -1739,6 +1733,19 @@ msgstr "Gagal mengurai data Json sendiri"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:199
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "Timpa setelan _OAuth2 Microsoft 365"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
+msgid "Default tenant is “common“"
+msgstr "Tenant baku adalah \"common\""
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Tenant baku adalah \"%s\""
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:318
 msgid "_Redirect URI:"
