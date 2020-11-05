@@ -949,6 +949,20 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		}
 		g_free (xvalue);
 
+		/* Present the online meeting URL as the 'URL' property, thus it can be found in the UI */
+		xvalue = e_cal_util_component_dup_x_property (icomp, "X-MICROSOFT-SKYPETEAMSMEETINGURL");
+		if (xvalue && *xvalue) {
+			prop = i_cal_component_get_first_property (icomp, I_CAL_URL_PROPERTY);
+			if (prop) {
+				/* Do not overwrite existing property. */
+				g_object_unref (prop);
+			} else {
+				prop = i_cal_property_new_url (xvalue);
+				i_cal_component_take_property (icomp, prop);
+			}
+		}
+		g_free (xvalue);
+
 		if (e_cal_util_component_has_property (icomp, I_CAL_RECURRENCEID_PROPERTY)) {
 			/* Exchange sets RRULE even on the children, which is broken */
 			e_cal_util_component_remove_property_by_kind (icomp, I_CAL_RRULE_PROPERTY, TRUE);
