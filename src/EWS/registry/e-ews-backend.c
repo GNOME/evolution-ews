@@ -20,6 +20,7 @@
 typedef struct _SyncFoldersClosure SyncFoldersClosure;
 
 struct _EEwsBackendPrivate {
+	gchar *deleted_items_folder_id;
 	/* Folder ID -> ESource */
 	GHashTable *folders;
 	GMutex folders_lock;
@@ -71,26 +72,9 @@ sync_folders_closure_free (SyncFoldersClosure *closure)
 	g_slice_free (SyncFoldersClosure, closure);
 }
 
-static gboolean
-ews_backend_folders_contains (EEwsBackend *backend,
-                              const gchar *folder_id)
-{
-	gboolean contains;
-
-	g_return_val_if_fail (folder_id != NULL, FALSE);
-
-	g_mutex_lock (&backend->priv->folders_lock);
-
-	contains = g_hash_table_contains (backend->priv->folders, folder_id);
-
-	g_mutex_unlock (&backend->priv->folders_lock);
-
-	return contains;
-}
-
 static void
 ews_backend_folders_insert (EEwsBackend *backend,
-                            const gchar *folder_id,
+                            gchar *folder_id, /* assumes ownership */
                             ESource *source)
 {
 	g_return_if_fail (folder_id != NULL);
@@ -100,7 +84,7 @@ ews_backend_folders_insert (EEwsBackend *backend,
 
 	g_hash_table_insert (
 		backend->priv->folders,
-		g_strdup (folder_id),
+		folder_id,
 		g_object_ref (source));
 
 	g_mutex_unlock (&backend->priv->folders_lock);
@@ -290,6 +274,7 @@ ews_backend_new_child (EEwsBackend *backend,
 		E_SOURCE_EWS_FOLDER (extension), fid->id);
 	e_source_ews_folder_set_change_key (
 		E_SOURCE_EWS_FOLDER (extension), fid->change_key);
+	e_source_ews_folder_set_name (E_SOURCE_EWS_FOLDER (extension), e_ews_folder_get_name (folder));
 
 	extension_name = E_SOURCE_EXTENSION_OFFLINE;
 	extension = e_source_get_extension (source, extension_name);
@@ -335,6 +320,26 @@ ews_backend_new_address_book (EEwsBackend *backend,
 }
 
 static void
+ews_backend_update_folder_name (ESource *source,
+				EEwsFolder *folder)
+{
+	if (folder && source && e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER)) {
+		ESourceEwsFolder *folder_extension;
+
+		folder_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+
+		/* The user did not change the folder name (old sources have stored NULL), but it changed on the server */
+		if ((!e_source_ews_folder_get_name (folder_extension) ||
+		    g_strcmp0 (e_source_ews_folder_get_name (folder_extension), e_source_get_display_name (source)) == 0) &&
+		    g_strcmp0 (e_source_get_display_name (source), e_ews_folder_get_name (folder)) != 0) {
+			e_source_set_display_name (source, e_ews_folder_get_name (folder));
+		}
+
+		e_source_ews_folder_set_name (folder_extension, e_ews_folder_get_name (folder));
+	}
+}
+
+static void
 ews_backend_sync_created_folders (EEwsBackend *backend,
 				  GSList *list,
 				  GHashTable *old_sources)
@@ -348,15 +353,25 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 
 	for (link = list; link != NULL; link = g_slist_next (link)) {
 		EEwsFolder *folder = E_EWS_FOLDER (link->data);
-		const EwsFolderId *fid;
-		ESource *source = NULL;
+		const EwsFolderId *fid, *parent_fid;
+		ESource *source;
 
-		/* If we already know about this folder, skip it. */
 		fid = e_ews_folder_get_id (folder);
 		if (!fid || !fid->id)
-			continue;  /* not a valid ID anyway */
-		if (ews_backend_folders_contains (backend, fid->id)) {
+			continue;
+
+		/* Skip those under 'Deleted Items' */
+		parent_fid = e_ews_folder_get_parent_id (folder);
+		if (parent_fid && parent_fid->id && g_strcmp0 (parent_fid->id, backend->priv->deleted_items_folder_id) == 0)
+			continue;
+
+		source = ews_backend_folders_lookup (backend, fid->id);
+
+		/* If we already know about this folder, skip it. */
+		if (source) {
+			ews_backend_update_folder_name (source, folder);
 			g_hash_table_remove (old_sources, fid->id);
+			g_clear_object (&source);
 			continue;
 		}
 
@@ -394,6 +409,27 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 }
 
 static void
+ews_backend_delete_folder (EEwsBackend *backend,
+			   const gchar *folder_id,
+			   GHashTable *old_sources)
+{
+	ESource *source = NULL;
+
+	if (folder_id) {
+		source = ews_backend_folders_lookup (backend, folder_id);
+		g_hash_table_remove (old_sources, folder_id);
+	}
+
+	if (source) {
+		/* This will trigger a "child-removed" signal and
+		 * our handler will remove the hash table entry. */
+		e_source_remove_sync (source, NULL, NULL);
+
+		g_object_unref (source);
+	}
+}
+
+static void
 ews_backend_sync_deleted_folders (EEwsBackend *backend,
 				  GSList *list,
 				  GHashTable *old_sources)
@@ -402,21 +438,44 @@ ews_backend_sync_deleted_folders (EEwsBackend *backend,
 
 	for (link = list; link != NULL; link = g_slist_next (link)) {
 		const gchar *folder_id = link->data;
-		ESource *source = NULL;
 
-		if (folder_id) {
-			source = ews_backend_folders_lookup (backend, folder_id);
-			g_hash_table_remove (old_sources, folder_id);
-		}
+		ews_backend_delete_folder (backend, folder_id, old_sources);
+	}
+}
 
-		if (source == NULL)
+static void
+ews_backend_sync_updated_folders (EEwsBackend *backend,
+				  GSList *list,
+				  GHashTable *old_sources)
+{
+	GSList *link;
+
+	for (link = list; link != NULL; link = g_slist_next (link)) {
+		EEwsFolder *folder = link->data;
+		const EwsFolderId *id, *parent_id;
+
+		if (!folder)
 			continue;
 
-		/* This will trigger a "child-removed" signal and
-		 * our handler will remove the hash table entry. */
-		e_source_remove_sync (source, NULL, NULL);
+		id = e_ews_folder_get_id (folder);
+		parent_id = e_ews_folder_get_parent_id (folder);
 
-		g_object_unref (source);
+		if (id && parent_id) {
+			/* Deleted calendars are under 'Deleted Items', even they are not visible in the OWA */
+			if (backend->priv->deleted_items_folder_id &&
+			    g_strcmp0 (parent_id->id, backend->priv->deleted_items_folder_id) == 0) {
+				ews_backend_delete_folder (backend, id->id, old_sources);
+			} else {
+				ESource *source;
+
+				source = ews_backend_folders_lookup (backend, id->id);
+
+				if (source) {
+					ews_backend_update_folder_name (source, folder);
+					g_object_unref (source);
+				}
+			}
+		}
 	}
 }
 
@@ -518,6 +577,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 		extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 		folder_extension = e_source_get_extension (source, extension_name);
 		e_source_ews_folder_set_id (folder_extension, oal_id);
+		e_source_ews_folder_set_name (folder_extension, display_name);
 
 		extension_name = E_SOURCE_EXTENSION_OFFLINE;
 		offline_extension = e_source_get_extension (source, extension_name);
@@ -602,12 +662,9 @@ ews_backend_sync_folders_idle_cb (gpointer user_data)
 {
 	SyncFoldersClosure *closure = user_data;
 
-	/* FIXME Handle updated folders. */
-
-	ews_backend_sync_deleted_folders (
-		closure->backend, closure->folders_deleted, closure->old_sources);
-	ews_backend_sync_created_folders (
-		closure->backend, closure->folders_created, closure->old_sources);
+	ews_backend_sync_deleted_folders (closure->backend, closure->folders_deleted, closure->old_sources);
+	ews_backend_sync_updated_folders (closure->backend, closure->folders_updated, closure->old_sources);
+	ews_backend_sync_created_folders (closure->backend, closure->folders_created, closure->old_sources);
 
 	add_remote_sources (closure->backend, closure->old_sources);
 
@@ -645,6 +702,7 @@ ews_backend_finalize (GObject *object)
 
 	priv = E_EWS_BACKEND_GET_PRIVATE (object);
 
+	g_free (priv->deleted_items_folder_id);
 	g_hash_table_destroy (priv->folders);
 	g_mutex_clear (&priv->folders_lock);
 
@@ -865,7 +923,6 @@ ews_backend_child_added (ECollectionBackend *backend,
 			ews_backend_folders_insert (
 				E_EWS_BACKEND (backend),
 				folder_id, child_source);
-			g_free (folder_id);
 		}
 	}
 
@@ -967,8 +1024,6 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 			folder_name, folder_type,
 			&out_folder_id, cancellable, error);
 
-		g_free (folder_name);
-
 		/* Sanity check */
 		g_warn_if_fail (
 			(success && out_folder_id != NULL) ||
@@ -984,9 +1039,12 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 				extension, out_folder_id->id);
 			e_source_ews_folder_set_change_key (
 				extension, out_folder_id->change_key);
+			e_source_ews_folder_set_name (extension, folder_name);
 
 			e_ews_folder_id_free (out_folder_id);
 		}
+
+		g_free (folder_name);
 	}
 
 	if (success) {
@@ -1485,6 +1543,43 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 
 	g_mutex_lock (&backend->priv->sync_state_lock);
 	old_sync_state = g_strdup (backend->priv->sync_state);
+
+	if (!backend->priv->deleted_items_folder_id) {
+		EwsFolderId fid;
+		GSList in_lst, *folders = NULL;
+
+		memset (&fid, 0, sizeof (EwsFolderId));
+		fid.id = (gchar *) "deleteditems";
+		fid.is_distinguished_id = TRUE;
+
+		memset (&in_lst, 0, sizeof (GSList));
+		in_lst.data = &fid;
+
+		g_mutex_unlock (&backend->priv->sync_state_lock);
+
+		if (e_ews_connection_get_folder_sync (connection, EWS_PRIORITY_MEDIUM, "IdOnly", NULL, &in_lst, &folders, cancellable, NULL)) {
+			EEwsFolder *deleteditems = folders ? folders->data : NULL;
+
+			g_mutex_lock (&backend->priv->sync_state_lock);
+
+			if (deleteditems) {
+				const EwsFolderId *id = e_ews_folder_get_id (deleteditems);
+
+				if (id && id->id && *id->id) {
+					/* In case multiple threads fight on the authenticate at the same
+					   time and one might eventually set the value before the lock
+					   was re-acquired. */
+					g_free (backend->priv->deleted_items_folder_id);
+					backend->priv->deleted_items_folder_id = g_strdup (id->id);
+				}
+			}
+
+			g_slist_free_full (folders, g_object_unref);
+		} else {
+			g_mutex_lock (&backend->priv->sync_state_lock);
+		}
+	}
+
 	g_mutex_unlock (&backend->priv->sync_state_lock);
 
 	success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,

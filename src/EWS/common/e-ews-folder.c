@@ -752,6 +752,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
 			e_source_ews_folder_set_id (folder_ext, folder_id->id);
 			e_source_ews_folder_set_change_key (folder_ext, NULL);
+			e_source_ews_folder_set_name (folder_ext, e_ews_folder_get_name (folder));
 			e_source_ews_folder_set_foreign (folder_ext, e_ews_folder_get_foreign (folder));
 			e_source_ews_folder_set_foreign_subfolders (folder_ext, (flags & E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS) != 0);
 			e_source_ews_folder_set_foreign_mail (folder_ext, e_ews_folder_get_foreign_mail (folder));
