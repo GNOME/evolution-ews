@@ -60,6 +60,10 @@ const gchar *	e_source_ews_folder_get_id	(ESourceEwsFolder *extension);
 gchar *		e_source_ews_folder_dup_id	(ESourceEwsFolder *extension);
 void		e_source_ews_folder_set_id	(ESourceEwsFolder *extension,
 						 const gchar *id);
+const gchar *	e_source_ews_folder_get_name	(ESourceEwsFolder *extension);
+gchar *		e_source_ews_folder_dup_name	(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_name	(ESourceEwsFolder *extension,
+						 const gchar *name);
 
 EwsFolderId *	e_source_ews_folder_dup_folder_id
 						(ESourceEwsFolder *extension);

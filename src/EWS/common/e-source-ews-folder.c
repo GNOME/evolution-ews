@@ -15,6 +15,7 @@
 struct _ESourceEwsFolderPrivate {
 	gchar *change_key;
 	gchar *id;
+	gchar *name;
 	gboolean foreign;
 	gboolean foreign_subfolders;
 	gchar *foreign_mail;
@@ -34,6 +35,7 @@ enum {
 	PROP_FOREIGN_MAIL,
 	PROP_FREEBUSY_WEEKS_BEFORE,
 	PROP_FREEBUSY_WEEKS_AFTER,
+	PROP_NAME,
 	PROP_PUBLIC,
 	PROP_USE_PRIMARY_ADDRESS,
 	PROP_FETCH_GAL_PHOTOS
@@ -91,6 +93,12 @@ source_ews_folder_set_property (GObject *object,
 			e_source_ews_folder_set_freebusy_weeks_after (
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_uint (value));
+			return;
+
+		case PROP_NAME:
+			e_source_ews_folder_set_name (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_string (value));
 			return;
 
 		case PROP_PUBLIC:
@@ -171,6 +179,13 @@ source_ews_folder_get_property (GObject *object,
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 
+		case PROP_NAME:
+			g_value_take_string (
+				value,
+				e_source_ews_folder_dup_name (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
 		case PROP_PUBLIC:
 			g_value_set_boolean (
 				value,
@@ -205,6 +220,7 @@ source_ews_folder_finalize (GObject *object)
 
 	g_free (priv->change_key);
 	g_free (priv->id);
+	g_free (priv->name);
 	g_free (priv->foreign_mail);
 
 	/* Chain up to parent's finalize() method. */
@@ -321,6 +337,19 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 
 	g_object_class_install_property (
 		object_class,
+		PROP_NAME,
+		g_param_spec_string (
+			"name",
+			"Name",
+			"The server-side folder name",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
 		PROP_PUBLIC,
 		g_param_spec_boolean (
 			"public",
@@ -407,13 +436,13 @@ e_source_ews_folder_set_change_key (ESourceEwsFolder *extension,
 
 	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
 
-	if (g_strcmp0 (extension->priv->change_key, change_key) == 0) {
+	if (e_util_strcmp0 (extension->priv->change_key, change_key) == 0) {
 		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 		return;
 	}
 
 	g_free (extension->priv->change_key);
-	extension->priv->change_key = g_strdup (change_key);
+	extension->priv->change_key = e_util_strdup_strip (change_key);
 
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
@@ -454,13 +483,13 @@ e_source_ews_folder_set_id (ESourceEwsFolder *extension,
 
 	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
 
-	if (g_strcmp0 (extension->priv->id, id) == 0) {
+	if (e_util_strcmp0 (extension->priv->id, id) == 0) {
 		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 		return;
 	}
 
 	g_free (extension->priv->id);
-	extension->priv->id = g_strdup (id);
+	extension->priv->id = e_util_strdup_strip (id);
 
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
@@ -483,6 +512,53 @@ e_source_ews_folder_dup_folder_id (ESourceEwsFolder *extension)
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
 	return folder_id;
+}
+
+const gchar *
+e_source_ews_folder_get_name (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
+
+	return extension->priv->name;
+}
+
+gchar *
+e_source_ews_folder_dup_name (ESourceEwsFolder *extension)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	protected = e_source_ews_folder_get_name (extension);
+	duplicate = g_strdup (protected);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	return duplicate;
+}
+
+void
+e_source_ews_folder_set_name (ESourceEwsFolder *extension,
+			      const gchar *name)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if (e_util_strcmp0 (extension->priv->name, name) == 0) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	g_free (extension->priv->name);
+	extension->priv->name = e_util_strdup_strip (name);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "name");
 }
 
 gboolean
@@ -563,13 +639,13 @@ e_source_ews_folder_set_foreign_mail (ESourceEwsFolder *extension,
 
 	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
 
-	if (g_strcmp0 (extension->priv->foreign_mail, foreign_mail) == 0) {
+	if (e_util_strcmp0 (extension->priv->foreign_mail, foreign_mail) == 0) {
 		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 		return;
 	}
 
 	g_free (extension->priv->foreign_mail);
-	extension->priv->foreign_mail = g_strdup (foreign_mail);
+	extension->priv->foreign_mail = e_util_strdup_strip (foreign_mail);
 
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
