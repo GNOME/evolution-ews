@@ -29,7 +29,7 @@ msgstr "Webové služby Exchange"
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
 #: ../src/EWS/camel/camel-ews-provider.c:70
 msgid "For accessing Exchange servers using Web Services"
-msgstr "Pro přístup k serverům Exchange pomocí webových služeb"
+msgstr "Přístup k serverům Exchange pomocí webových služeb"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:3510
 msgid "Failed to update GAL:"
