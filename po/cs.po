@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-09-17 10:12+0000\n"
-"PO-Revision-Date: 2020-09-24 09:05+0200\n"
+"POT-Creation-Date: 2020-11-09 18:35+0000\n"
+"PO-Revision-Date: 2020-11-12 22:48+0100\n"
 "Last-Translator: Jiri Eischmann <jiri@eischmann.cz>\n"
 "Language-Team: čeština <>\n"
 "Language: cs\n"
@@ -31,47 +31,47 @@ msgstr "Webové služby Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Přístup k serverům Exchange pomocí webových služeb"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3510
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
 msgid "Failed to update GAL:"
 msgstr "Selhala aktualizace globálního seznamu adres:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3672
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nelze uložit seznam kontaktů, je to podporováno jen na EWS Server 2010 nebo "
 "novějším"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3765
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
 msgid "Failed to set contact photo:"
 msgstr "Selhalo nastavení fotografie kontaktu:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1921
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Volný"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1924
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Obsazený"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1926
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Mimo kancelář"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1928
+#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Předběžné"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2504
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2683
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
 msgid "Cannot determine EWS ItemId"
 msgstr "Nezdařilo se určit EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2974
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -79,7 +79,7 @@ msgstr ""
 "Nezdařilo se vytvořit v kalenáři Exchange Web Services schůzku organizovanou "
 "jiným uživatelem."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3684
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Uživatele „%s“ nelze nalézt mezi účastníky"
@@ -401,6 +401,7 @@ msgid "Could not locate Junk folder"
 msgstr "Nelze vyhledat složku Nevyžádaná pošta"
 
 #: ../src/EWS/camel/camel-ews-store.c:3648
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "K odběru složek EWS se nelze přihlásit v režimu odpojení"
 
@@ -573,6 +574,10 @@ msgstr "Selhalo vyhledání prvku <OAB>\n"
 msgid "No items found"
 msgstr "Nenalezeny žádné položky"
 
+#: ../src/EWS/common/e-ews-connection.c:11846
+msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgstr "Vyžaduje při nejmenším server Microsoft Exchange 2007 SP1"
+
 #: ../src/EWS/common/e-ews-connection-utils.c:185
 #, c-format
 msgid "Password expired. Change password at “%s”."
@@ -587,22 +592,22 @@ msgstr "Vypršela platnost hesla."
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
-#: ../src/EWS/common/e-ews-folder.c:782
+#: ../src/EWS/common/e-ews-folder.c:783
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nelze přidat složku, nepodporovaný typ složky"
 
-#: ../src/EWS/common/e-ews-folder.c:787
+#: ../src/EWS/common/e-ews-folder.c:788
 msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, nenalezen hlavní zdroj"
 
-#: ../src/EWS/common/e-ews-folder.c:827
+#: ../src/EWS/common/e-ews-folder.c:828
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:86
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nelze přidat složku, složka již existuje jako „%s“"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:99
+#: ../src/EWS/common/e-oauth2-service-office365.c:143
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -652,6 +657,7 @@ msgid "Requires password to continue."
 msgstr "Pro pokračovaní je zapotřebí heslo"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Složka"
 
@@ -677,7 +683,7 @@ msgid "Fetching folder list…"
 msgstr "Získává se seznam složek…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:822
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:743
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:646
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Přihlásit odběr složky jiného uživatele EWS…"
 
@@ -818,7 +824,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "Upravit oprávnění složky EWS"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:667
 msgid "Account:"
 msgstr "Účet:"
 
@@ -998,17 +1004,13 @@ msgstr "Schránka – %s"
 msgid "Cannot test foreign folder availability when the account is offline"
 msgstr "Test dostupnosti vzdálené složky nelze provést v režimu odpojení"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
-#, c-format
-msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr "Jméno uživatele „%s“ je nejednoznačné, zadejte jej prosím přesněji"
-
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:365
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:314
 msgid "Availability"
 msgstr "Dostupnost"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:383
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:332
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:96
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -1017,80 +1019,86 @@ msgstr ""
 "Složka „%s“ nebyla nalezena. Buď neexistuje nebo k ní nemáte oprávnění "
 "přístupu."
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:402
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nelze přidat složku, nelze určit typ složky"
+
+#. convert well-known names to their non-localized form
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Přijatá"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
+msgid "Contacts"
+msgstr "Kontakty"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:467
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:749
+msgid "Calendar"
+msgstr "Kalendář"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:469
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:750
+msgid "Free/Busy as Calendar"
+msgstr "Volný/obsazený jako v kalendáři"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:471
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:751
+msgid "Memos"
+msgstr "Poznámky"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:473
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:752
+msgid "Tasks"
+msgstr "Úkoly"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:490
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr "Testuje se dostupnost složky „%s“ uživatele „%s“, čekejte prosím…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:529
+msgid "Cannot search for user when the account is offline"
+msgstr "Nelze hledat uživatele, když je účet v režimu odpojení"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:692
+msgid "User"
+msgstr "Uživatel"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:699
+msgid "_User:"
+msgstr "_Uživatel:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:714
+msgid "C_hoose…"
+msgstr "Vy_brat…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:730
+msgid "_Folder name:"
+msgstr "Název _složky:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
+msgid "Include _subfolders"
+msgstr "Včetně pod_složek"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:843
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "Jméno uživatele „%s“ je nejednoznačné, zadejte jej prosím přesněji"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:447
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:879
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
-
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:560
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:844
-msgid "Inbox"
-msgstr "Přijatá"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:562
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:845
-msgid "Contacts"
-msgstr "Kontakty"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:564
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:846
-msgid "Calendar"
-msgstr "Kalendář"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:566
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:847
-msgid "Free/Busy as Calendar"
-msgstr "Volný/obsazený jako v kalendáři"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:568
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:848
-msgid "Memos"
-msgstr "Poznámky"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:570
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:849
-msgid "Tasks"
-msgstr "Úkoly"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:587
-#, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait…"
-msgstr "Testuje se dostupnost složky „%s“ uživatele „%s“, čekejte prosím…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:626
-msgid "Cannot search for user when the account is offline"
-msgstr "Nelze hledat uživatele, když je účet v režimu odpojení"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:789
-msgid "User"
-msgstr "Uživatel"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:796
-msgid "_User:"
-msgstr "_Uživatel:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:811
-msgid "C_hoose…"
-msgstr "Vy_brat…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:827
-msgid "_Folder name:"
-msgstr "Název _složky:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:858
-msgid "Include _subfolders"
-msgstr "Včetně pod_složek"
 
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:270
 msgid "Querying Autodiscover service"
@@ -1100,123 +1108,149 @@ msgstr "Dotazuje se služby automatického vyhledávání"
 msgid "Fetch _URL"
 msgstr "Získat adresu _URL"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:166
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:107
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:175
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Nastavení"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:184
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:125
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "Jmé_no uživatele:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:207
 msgid "_Host URL:"
 msgstr "Adresa URL _počítače:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:226
 msgid "OAB U_RL:"
 msgstr "Adresa U_RL s OAB:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:231
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:139
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:240
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Otevřít _schránku jiného uživatele"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:284
 msgid "S_earch…"
 msgstr "Hl_edat…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:276
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:173
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:295
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Autentizace"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:322
 msgid "_Override Office365 OAuth2 settings"
 msgstr "Přepsat nastavení _Office365 OAuth2"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:307
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:326
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:404
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Nápo_věda"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:207
-msgid "_Tenant:"
-msgstr "_Tenant:"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:232
-msgid "Default tenant is “common“"
-msgstr "Výchozí tenant je „common“"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:235
-#, c-format
-msgid "Default tenant is “%s”"
-msgstr "Výchozí tenant je „%s“"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:333
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "I_D aplikace:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:369
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:260
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:356
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Není nastavené žádné výchozí ID aplikace"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:370
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:261
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:357
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Výchozí ID aplikace je „%s“"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:372
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
-msgid "_Redirect URI:"
-msgstr "Přesmě_rovat na URI:"
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:361
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
+msgid "_Tenant ID:"
+msgstr "_Tenant ID:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:386
+msgid "Default tenant ID is “common“"
+msgstr "Výchozí tenant ID je „common“"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:389
+#, c-format
+msgid "Default tenant ID is “%s”"
+msgstr "Výchozí tenant IDnje „%s“"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:394
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:397
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:285
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:288
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
+msgid "_Advanced Settings"
+msgstr "Pokročilá n_astavení"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
+msgid "_Endpoint host:"
+msgstr "Hostit_el koncového bodu:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:438
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
+#, c-format
+msgid "Default endpoint host is “%s”"
+msgstr "Výchozí hostitel koncového bodu je „%s“"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:441
+msgid "Red_irect URI:"
+msgstr "Přesměrovat na UR_I:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:467
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
-msgstr "Výchozí URI pro přesměrování je „%s“"
+msgstr "Výchozí adresa URI pro přesměrování je „%s“"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:580
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:470
+msgid "Re_source URI:"
+msgstr "URI pro_středku:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:493
+#, c-format
+msgid ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+msgstr ""
+"Výchozí adresa URI prostředku je odvozena z adresy URL hostitele, případně "
+"může spadnou do záložní varianty „%s“."
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
 msgid "Host URL is not valid"
 msgstr "Adresa URL hostitele není platná"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:584
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:742
 msgid "Host URL cannot be empty"
 msgstr "Adresa URL hostitele nesmí být prázdná"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:595
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:753
 msgid "OAB URL is not valid"
 msgstr "Adresa URL OAB není platná"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:605
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:409
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:763
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
 msgid "User name cannot be empty"
 msgstr "Uživatelské jméno nesmí být prázdné"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:619
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:777
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:534
 msgid "Application ID cannot be empty"
 msgstr "ID aplikace nesmí být prázdné"
 
@@ -1344,7 +1378,7 @@ msgid "Locating offline address books"
 msgstr "Hledá se off-line adresář"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:262
-#: ../src/EWS/registry/e-ews-backend.c:493
+#: ../src/EWS/registry/e-ews-backend.c:552
 msgid "Global Address List"
 msgstr "Globální seznam adres"
 
@@ -1425,6 +1459,46 @@ msgstr "Odpovídat libovolným odesilatelům mimo organizaci"
 msgid "Retrieving “Out of Office” settings"
 msgstr "Získává se nastavení „Mimo kancelář“"
 
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgstr ""
+"Máte pozvánku od uživatele %s (%s) k prohlížení jeho či jejího kalendáře "
+"Microsoft Exchange."
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
+msgstr ""
+"Máte pozvánku od uživatele %s (%s) k prohlížení jeho či její složky Microsoft "
+"Exchange."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
+msgid "Click the Subscribe button to add it to Evolution."
+msgstr "Kliknutím na Přihlásit k odběru se přidá do Evolutionu."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:125
+msgid "Subscribe"
+msgstr "Přihlásit k odběru"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:134
+msgid "Failed to extract sharing information from provided data."
+msgstr "Selhalo získání informací o sdílení z poskytnutých dat."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:203
+msgid "EWS Sharing Metadata"
+msgstr "Metadata o sdílení EWS"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:204
+msgid "Display part as EWS sharing metadata"
+msgstr "Zobrazit část jako metadata o sdílení EWS"
+
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
+msgid "Subscribing EWS folder…"
+msgstr "Přihlásit odběr složky EWS…"
+
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
 msgstr "Automatický dotaz selhal."
@@ -1449,13 +1523,25 @@ msgstr "Selhalo získání nastavení „Delegátů“."
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Váš účet Exchange „{0}“ má stav nastaven na „Mimo kancelář“."
 
-#: ../src/EWS/registry/e-ews-backend.c:956
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
+msgid "Failed to subscribe user folder."
+msgstr "Selhalo přihlášení k odběru složky uživatele."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
+msgid "Folder had been subscribed."
+msgstr "Složka byla přihlášena k odběru."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:9
+msgid "Folder of user “{0}” had been subscribed successfully."
+msgstr "Složka uživatele „{0}“ byla úspěšně přihlášena k odběru."
+
+#: ../src/EWS/registry/e-ews-backend.c:1013
 #: ../src/Microsoft365/registry/e-m365-backend.c:688
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nelze určit vhodnou třídu složky pro novou složku s názvem „%s“"
 
-#: ../src/EWS/registry/e-ews-backend.c:1044
+#: ../src/EWS/registry/e-ews-backend.c:1102
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Zdroj dat „%s“ se nenachází ve složce Exchange Web Services"
@@ -1617,7 +1703,7 @@ msgstr ""
 "Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:114
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
@@ -1648,9 +1734,26 @@ msgstr[2] ""
 msgid "Failed to parse own Json data"
 msgstr "Selhalo zpracování vlastních dat Json"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "Přepsat nastavení _OAuth2 v Microsoft 365"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
+msgid "Default tenant is “common“"
+msgstr "Výchozí tenant je „common“"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:277
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Výchozí tenant je „%s“"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:329
+msgid "_Redirect URI:"
+msgstr "Přesmě_rovat na URI:"
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:779
 #, c-format
