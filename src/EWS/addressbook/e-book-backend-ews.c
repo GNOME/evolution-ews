@@ -89,7 +89,7 @@ struct _EBookBackendEwsPrivate {
 	gchar *attachments_dir;
 };
 
-G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_META_BACKEND)
+G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_META_BACKEND)
 
 static void
 ebb_ews_remove_x_attribute (EContact *contact,
@@ -4075,7 +4075,7 @@ e_book_backend_ews_finalize (GObject *object)
 static void
 e_book_backend_ews_init (EBookBackendEws *bbews)
 {
-	bbews->priv = G_TYPE_INSTANCE_GET_PRIVATE (bbews, E_TYPE_BOOK_BACKEND_EWS, EBookBackendEwsPrivate);
+	bbews->priv = e_book_backend_ews_get_instance_private (bbews);
 
 	g_rec_mutex_init (&bbews->priv->cnc_lock);
 }
@@ -4087,8 +4087,6 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	EBackendClass *backend_class;
 	EBookBackendClass *book_backend_class;
 	EBookMetaBackendClass *book_meta_backend_class;
-
-	g_type_class_add_private (klass, sizeof (EBookBackendEwsPrivate));
 
 	book_meta_backend_class = E_BOOK_META_BACKEND_CLASS (klass);
 	book_meta_backend_class->backend_module_filename = "libebookbackendews.so";

@@ -16,10 +16,6 @@
 #include "camel-ews-folder.h"
 #include "camel-ews-search.h"
 
-#define CAMEL_EWS_SEARCH_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_EWS_SEARCH, CamelEwsSearchPrivate))
-
 struct _CamelEwsSearchPrivate {
 	GWeakRef ews_store;
 	gint *local_data_search; /* not NULL, if testing whether all used headers are all locally available */
@@ -34,10 +30,7 @@ enum {
 	PROP_STORE
 };
 
-G_DEFINE_TYPE (
-	CamelEwsSearch,
-	camel_ews_search,
-	CAMEL_TYPE_FOLDER_SEARCH)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsSearch, camel_ews_search, CAMEL_TYPE_FOLDER_SEARCH)
 
 static void
 ews_search_set_property (GObject *object,
@@ -77,11 +70,9 @@ ews_search_get_property (GObject *object,
 static void
 ews_search_dispose (GObject *object)
 {
-	CamelEwsSearchPrivate *priv;
+	CamelEwsSearch *ews_search = CAMEL_EWS_SEARCH (object);
 
-	priv = CAMEL_EWS_SEARCH_GET_PRIVATE (object);
-
-	g_weak_ref_set (&priv->ews_store, NULL);
+	g_weak_ref_set (&ews_search->priv->ews_store, NULL);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_search_parent_class)->dispose (object);
@@ -90,12 +81,10 @@ ews_search_dispose (GObject *object)
 static void
 ews_search_finalize (GObject *object)
 {
-	CamelEwsSearchPrivate *priv;
+	CamelEwsSearch *ews_search = CAMEL_EWS_SEARCH (object);
 
-	priv = CAMEL_EWS_SEARCH_GET_PRIVATE (object);
-
-	g_weak_ref_clear (&priv->ews_store);
-	g_hash_table_destroy (priv->cached_results);
+	g_weak_ref_clear (&ews_search->priv->ews_store);
+	g_hash_table_destroy (ews_search->priv->cached_results);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_search_parent_class)->finalize (object);
@@ -451,8 +440,6 @@ camel_ews_search_class_init (CamelEwsSearchClass *class)
 	GObjectClass *object_class;
 	CamelFolderSearchClass *search_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsSearchPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_search_set_property;
 	object_class->get_property = ews_search_get_property;
@@ -477,7 +464,7 @@ camel_ews_search_class_init (CamelEwsSearchClass *class)
 static void
 camel_ews_search_init (CamelEwsSearch *search)
 {
-	search->priv = CAMEL_EWS_SEARCH_GET_PRIVATE (search);
+	search->priv = camel_ews_search_get_instance_private (search);
 	search->priv->local_data_search = NULL;
 	search->priv->cached_results = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
 

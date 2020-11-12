@@ -16,10 +16,6 @@
 #include <mail/e-mail-ui-session.h>
 #include <glib/gi18n-lib.h>
 
-#define E_EWS_OOO_NOTIFICATOR_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	 ((obj), E_TYPE_EWS_OOO_NOTIFICATOR, EEwsOooNotificatorPrivate))
-
 typedef gboolean (*EEwsOooNotificationDispatcherFunction) (gpointer data);
 
 struct _EEwsOooNotificatorPrivate {
@@ -35,10 +31,8 @@ typedef struct _EEwsOooNotificatorDispatcherData {
 	guint timeout_id;
 } EEwsOooNotificatorDispatcherData;
 
-G_DEFINE_DYNAMIC_TYPE (
-	EEwsOooNotificator,
-	e_ews_ooo_notificator,
-	E_TYPE_EXTENSION)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EEwsOooNotificator, e_ews_ooo_notificator, E_TYPE_EXTENSION, 0,
+	G_ADD_PRIVATE_DYNAMIC (EEwsOooNotificator))
 
 /* Forward declarations */
 static void e_ews_ooo_notificator_has_ooo_set_cb (EEwsOooNotificator *extension,
@@ -350,7 +344,7 @@ e_ews_ooo_notificator_online_cb (EEwsOooNotificator* extension,
 static void
 e_ews_ooo_notificator_init (EEwsOooNotificator *extension)
 {
-	extension->priv = E_EWS_OOO_NOTIFICATOR_GET_PRIVATE (extension);
+	extension->priv = e_ews_ooo_notificator_get_instance_private (extension);
 
 	extension->priv->alerts = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, g_object_unref);
 }
@@ -490,8 +484,6 @@ e_ews_ooo_notificator_class_init (EEwsOooNotificatorClass *class)
 
 	extension_class = E_EXTENSION_CLASS (class);
 	extension_class->extensible_type = E_TYPE_SHELL_VIEW;
-
-	g_type_class_add_private (class, sizeof (EEwsOooNotificatorPrivate));
 }
 
 static void

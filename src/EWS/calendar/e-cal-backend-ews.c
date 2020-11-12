@@ -113,7 +113,7 @@ struct _ECalBackendEwsPrivate {
 		}								\
 	} G_STMT_END
 
-G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_META_BACKEND)
+G_DEFINE_TYPE_WITH_PRIVATE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_META_BACKEND)
 
 static CamelEwsSettings *
 ecb_ews_get_collection_settings (ECalBackendEws *cbews)
@@ -4398,7 +4398,7 @@ ecb_ews_finalize (GObject *object)
 static void
 e_cal_backend_ews_init (ECalBackendEws *cbews)
 {
-	cbews->priv = G_TYPE_INSTANCE_GET_PRIVATE (cbews, E_TYPE_CAL_BACKEND_EWS, ECalBackendEwsPrivate);
+	cbews->priv = e_cal_backend_ews_get_instance_private (cbews);
 
 	g_rec_mutex_init (&cbews->priv->cnc_lock);
 
@@ -4413,8 +4413,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *klass)
 	ECalBackendClass *cal_backend_class;
 	ECalBackendSyncClass *cal_backend_sync_class;
 	ECalMetaBackendClass *cal_meta_backend_class;
-
-	g_type_class_add_private (klass, sizeof (ECalBackendEwsPrivate));
 
 	cal_meta_backend_class = E_CAL_META_BACKEND_CLASS (klass);
 	cal_meta_backend_class->connect_sync = ecb_ews_connect_sync;

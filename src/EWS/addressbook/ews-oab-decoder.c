@@ -18,17 +18,10 @@
 #include "ews-oab-decoder.h"
 #include "ews-oab-props.h"
 
-G_DEFINE_TYPE (EwsOabDecoder, ews_oab_decoder, G_TYPE_OBJECT)
-
 #define d(x)
-
-#define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), EWS_TYPE_OAB_DECODER, EwsOabDecoderPrivate))
 
 #define EOD_ERROR \
 	(ews_oab_decoder_error_quark ())
-
-typedef struct _EwsOabDecoderPrivate EwsOabDecoderPrivate;
 
 struct _EwsOabDecoderPrivate {
 	gchar *cache_dir;
@@ -40,6 +33,8 @@ struct _EwsOabDecoderPrivate {
 
 	GHashTable *prop_index_dict;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (EwsOabDecoder, ews_oab_decoder, G_TYPE_OBJECT)
 
 /* The of properties which will be accumulated and later set in EContact */
 typedef struct {
@@ -162,7 +157,6 @@ ews_populate_photo (EContact *contact,
                     gpointer user_data)
 {
 	EwsOabDecoder *eod = EWS_OAB_DECODER (user_data);
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	const gchar *at;
 	GBytes *bytes = value;
 	gchar *email;
@@ -184,7 +178,7 @@ ews_populate_photo (EContact *contact,
 	name = g_strndup (email, at - email);
 
 	pic_name = g_strconcat (name, ".jpg", NULL);
-	filename = g_build_filename (priv->cache_dir, pic_name, NULL);
+	filename = g_build_filename (eod->priv->cache_dir, pic_name, NULL);
 
 	success = g_file_set_contents (filename, g_bytes_get_data (bytes, NULL), g_bytes_get_size (bytes), &local_error);
 
@@ -249,32 +243,13 @@ static const struct prop_field_mapping {
 static void
 ews_oab_decoder_finalize (GObject *object)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (object);
+	EwsOabDecoder *eod = EWS_OAB_DECODER (object);
 
-	if (priv->cache_dir) {
-		g_free (priv->cache_dir);
-		priv->cache_dir = NULL;
-	}
-
-	if (priv->fis) {
-		g_object_unref (priv->fis);
-		priv->fis = NULL;
-	}
-
-	if (priv->prop_index_dict) {
-		g_hash_table_destroy (priv->prop_index_dict);
-		priv->prop_index_dict = NULL;
-	}
-
-	if (priv->oab_props) {
-		g_slist_free (priv->oab_props);
-		priv->oab_props = NULL;
-	}
-
-	if (priv->hdr_props) {
-		g_slist_free (priv->hdr_props);
-		priv->hdr_props = NULL;
-	}
+	g_clear_pointer (&eod->priv->cache_dir, g_free);
+	g_clear_object (&eod->priv->fis);
+	g_clear_pointer (&eod->priv->prop_index_dict, g_hash_table_destroy);
+	g_clear_pointer (&eod->priv->oab_props, g_slist_free);
+	g_clear_pointer (&eod->priv->hdr_props, g_slist_free);
 
 	G_OBJECT_CLASS (ews_oab_decoder_parent_class)->finalize (object);
 }
@@ -284,22 +259,19 @@ ews_oab_decoder_class_init (EwsOabDecoderClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	g_type_class_add_private (klass, sizeof (EwsOabDecoderPrivate));
-
 	object_class->finalize = ews_oab_decoder_finalize;
 }
 
 static void
 ews_oab_decoder_init (EwsOabDecoder *self)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (self);
 	gint i;
 
-	priv->cache_dir = NULL;
+	self->priv = ews_oab_decoder_get_instance_private (self);
 
-	priv->prop_index_dict = g_hash_table_new (g_direct_hash, g_direct_equal);
+	self->priv->prop_index_dict = g_hash_table_new (g_direct_hash, g_direct_equal);
 	for (i = 1; i <= G_N_ELEMENTS (prop_map); i++)
-		g_hash_table_insert (priv->prop_index_dict, GINT_TO_POINTER (prop_map[i - 1].prop_id), GINT_TO_POINTER (i));
+		g_hash_table_insert (self->priv->prop_index_dict, GINT_TO_POINTER (prop_map[i - 1].prop_id), GINT_TO_POINTER (i));
 }
 
 EwsOabDecoder *
@@ -308,23 +280,21 @@ ews_oab_decoder_new (const gchar *oab_filename,
                      GError **error)
 {
 	EwsOabDecoder *eod;
-	EwsOabDecoderPrivate *priv;
 	GError *err = NULL;
 	GFile *gf = NULL;
 
 	eod = g_object_new (EWS_TYPE_OAB_DECODER, NULL);
-	priv = GET_PRIVATE (eod);
 
 	gf = g_file_new_for_path (oab_filename);
-	priv->fis = (GInputStream *)g_file_read (gf, NULL, &err);
+	eod->priv->fis = (GInputStream *) g_file_read (gf, NULL, &err);
 	if (err)
 		goto exit;
 
-	priv->cache_dir = g_strdup (cache_dir);
+	eod->priv->cache_dir = g_strdup (cache_dir);
 
-exit:
-	if (gf)
-		g_object_unref (gf);
+ exit:
+	g_clear_object (&gf);
+
 	if (err) {
 		g_propagate_error (error, err);
 		g_object_unref (eod);
@@ -484,12 +454,12 @@ exit:
 }
 
 static gboolean
-ews_decode_hdr_props (EwsOabDecoder *eod, GInputStream *stream,
-                      gboolean oab_hdrs,
-                      GCancellable *cancellable,
-                      GError **error)
+ews_decode_hdr_props (EwsOabDecoder *eod,
+		      GInputStream *stream,
+		      gboolean oab_hdrs,
+		      GCancellable *cancellable,
+		      GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	guint32 num_props, i;
 	GSList **props;
 
@@ -500,9 +470,9 @@ ews_decode_hdr_props (EwsOabDecoder *eod, GInputStream *stream,
 		return FALSE;
 
 	if (oab_hdrs)
-		props = &priv->oab_props;
+		props = &eod->priv->oab_props;
 	else
-		props = &priv->hdr_props;
+		props = &eod->priv->hdr_props;
 
 	if (*props) {
 		g_slist_free (*props);
@@ -881,13 +851,13 @@ ews_decode_addressbook_write_display_type (EContact **contact,
  * Returns: 
  **/
 static gboolean
-ews_decode_addressbook_record (EwsOabDecoder *eod, GInputStream *stream,
-                               EContact *contact,
-                               GSList *props,
-                               GCancellable *cancellable,
-                               GError **error)
+ews_decode_addressbook_record (EwsOabDecoder *eod,
+			       GInputStream *stream,
+			       EContact *contact,
+			       GSList *props,
+			       GCancellable *cancellable,
+			       GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	EwsDeferredSet *dset = NULL;
 	guint bit_array_size, i, len;
 	gchar *bit_str;
@@ -930,7 +900,7 @@ ews_decode_addressbook_record (EwsOabDecoder *eod, GInputStream *stream,
 			ews_decode_addressbook_write_display_type (&contact, GPOINTER_TO_UINT (val), TRUE);
 
 		/* Check the contact map and store the data in EContact */
-		index = g_hash_table_lookup (priv->prop_index_dict, GINT_TO_POINTER (prop_id));
+		index = g_hash_table_lookup (eod->priv->prop_index_dict, GINT_TO_POINTER (prop_id));
 		if (contact && index) {
 			gint i = GPOINTER_TO_INT (index);
 
@@ -978,7 +948,6 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
                                   GCancellable *cancellable,
                                   GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	gboolean ret = FALSE;
 	guint32 i;
 	int buf_len = 200;
@@ -990,17 +959,17 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 	/* eat the size */
 	ews_oab_read_uint32 (
-		priv->fis,
+		eod->priv->fis,
 		cancellable, error);
 
-	ews_decode_addressbook_record (eod, priv->fis, NULL,
-				       priv->hdr_props, cancellable, error);
+	ews_decode_addressbook_record (eod, eod->priv->fis, NULL,
+				       eod->priv->hdr_props, cancellable, error);
 
 	if (*error)
 		goto exit;
 
 
-	for (i = 0; i < priv->total_records; i++) {
+	for (i = 0; i < eod->priv->total_records; i++) {
 		EContact *contact;
 		goffset offset;
 		guint32 rec_size;
@@ -1010,7 +979,7 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 		contact = e_contact_new ();
 
 		/* eat the size */
-		rec_size = ews_oab_read_uint32 (priv->fis, cancellable, error);
+		rec_size = ews_oab_read_uint32 (eod->priv->fis, cancellable, error);
 		if (rec_size < 4)
 			goto exit;
 
@@ -1024,8 +993,8 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 				goto exit;
 		}
 		/* fetch the offset */
-		offset = g_seekable_tell ((GSeekable *) priv->fis);
-		if (g_input_stream_read (priv->fis, record_buf, rec_size, cancellable, error) != rec_size)
+		offset = g_seekable_tell ((GSeekable *) eod->priv->fis);
+		if (g_input_stream_read (eod->priv->fis, record_buf, rec_size, cancellable, error) != rec_size)
 			goto exit;
 
 		g_checksum_reset (sum);
@@ -1036,10 +1005,10 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 		if ((!filter_cb || filter_cb (offset, sum_str, user_data, error)) &&
 		    ews_decode_addressbook_record (eod, memstream,
-						   contact, priv->oab_props,
+						   contact, eod->priv->oab_props,
 						   cancellable, error))
 			cb (contact, offset, sum_str,
-			    ((gfloat) (i + 1) / priv->total_records) * 100,
+			    ((gfloat) (i + 1) / eod->priv->total_records) * 100,
 			    user_data, cancellable, error);
 
 		g_object_unref (memstream);
@@ -1060,11 +1029,10 @@ gchar *
 ews_oab_decoder_get_oab_prop_string (EwsOabDecoder *eod,
                                      GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	GString *str = g_string_new (NULL);
 	GSList *l;
 
-	if (!priv->oab_props) {
+	if (!eod->priv->oab_props) {
 		g_set_error_literal (
 			error, EOD_ERROR, 1,
 			"Oab props not found");
@@ -1073,7 +1041,7 @@ ews_oab_decoder_get_oab_prop_string (EwsOabDecoder *eod,
 
 	/* Ideally i would liked to store int as int instead of converting to
 	 * string, but sqlite db doesn't yet support storing keys as blob. */
-	for (l = priv->oab_props; l != NULL; l = g_slist_next (l)) {
+	for (l = eod->priv->oab_props; l != NULL; l = g_slist_next (l)) {
 		guint32 prop_id = GPOINTER_TO_UINT (l->data);
 		g_string_append_printf (str, "%"G_GUINT32_FORMAT, prop_id);
 		g_string_append_c (str, ';');
@@ -1091,7 +1059,6 @@ ews_oab_decoder_set_oab_prop_string (EwsOabDecoder *eod,
                                      const gchar *prop_str,
                                      GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	gchar **vals;
 	guint32 len, i;
 
@@ -1106,21 +1073,18 @@ ews_oab_decoder_set_oab_prop_string (EwsOabDecoder *eod,
 		return FALSE;
 	}
 
-	if (priv->oab_props) {
-		g_slist_free (priv->oab_props);
-		priv->oab_props = NULL;
-	}
+	g_clear_pointer (&eod->priv->oab_props, g_slist_free);
 
 	for (i = 0; i < len; i++) {
 		guint32 prop_id;
 
 		sscanf (vals[i],"%"G_GUINT32_FORMAT,&prop_id);
-		priv->oab_props = g_slist_prepend (
-			priv->oab_props, GUINT_TO_POINTER (prop_id));
+		eod->priv->oab_props = g_slist_prepend (
+			eod->priv->oab_props, GUINT_TO_POINTER (prop_id));
 		d (printf ("%X\n", prop_id);)
 	}
 
-	priv->oab_props = g_slist_reverse (priv->oab_props);
+	eod->priv->oab_props = g_slist_reverse (eod->priv->oab_props);
 
 	g_strfreev (vals);
 
@@ -1145,21 +1109,20 @@ ews_oab_decoder_decode (EwsOabDecoder *eod,
                         GCancellable *cancellable,
                         GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	GError *err = NULL;
 	EwsOabHdr *o_hdr;
 	gboolean ret = TRUE;
 
-	o_hdr = ews_read_oab_header (eod, priv->fis, cancellable, &err);
+	o_hdr = ews_read_oab_header (eod, eod->priv->fis, cancellable, &err);
 	if (!o_hdr) {
 		ret = FALSE;
 		goto exit;
 	}
 
-	priv->total_records = o_hdr->total_recs;
-	g_print ("Total records is %d \n", priv->total_records);
+	eod->priv->total_records = o_hdr->total_recs;
+	d (g_print ("Total records is %d \n", eod->priv->total_records));
 
-	ret = ews_decode_metadata (eod, priv->fis, cancellable, &err);
+	ret = ews_decode_metadata (eod, eod->priv->fis, cancellable, &err);
 	if (!ret)
 		goto exit;
 
@@ -1182,14 +1145,13 @@ ews_oab_decoder_get_contact_from_offset (EwsOabDecoder *eod,
                                          GCancellable *cancellable,
                                          GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	EContact *contact = NULL;
 
-	if (!g_seekable_seek ((GSeekable *) priv->fis, offset, G_SEEK_SET, cancellable, error))
+	if (!g_seekable_seek ((GSeekable *) eod->priv->fis, offset, G_SEEK_SET, cancellable, error))
 		return NULL;
 
 	contact = e_contact_new ();
-	if (!ews_decode_addressbook_record (eod, priv->fis,
+	if (!ews_decode_addressbook_record (eod, eod->priv->fis,
 					    contact, oab_props, cancellable,
 					    error)) {
 		g_object_unref (contact);

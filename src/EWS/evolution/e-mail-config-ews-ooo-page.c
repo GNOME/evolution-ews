@@ -23,10 +23,6 @@
 
 #include "e-mail-config-ews-ooo-page.h"
 
-#define E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_OOO_PAGE, EMailConfigEwsOooPagePrivate))
-
 typedef struct _AsyncContext AsyncContext;
 
 struct _EMailConfigEwsOooPagePrivate {
@@ -74,14 +70,9 @@ enum {
 static void	e_mail_config_ews_ooo_page_interface_init
 				(EMailConfigPageInterface *iface);
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (
-	EMailConfigEwsOooPage,
-	e_mail_config_ews_ooo_page,
-	E_TYPE_MAIL_CONFIG_ACTIVITY_PAGE,
-	0,
-	G_IMPLEMENT_INTERFACE_DYNAMIC (
-		E_TYPE_MAIL_CONFIG_PAGE,
-		e_mail_config_ews_ooo_page_interface_init))
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsOooPage, e_mail_config_ews_ooo_page, E_TYPE_MAIL_CONFIG_ACTIVITY_PAGE, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsOooPage)
+	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_ews_ooo_page_interface_init))
 
 static void
 async_context_free (gpointer ptr)
@@ -322,38 +313,32 @@ mail_config_ews_ooo_page_get_property (GObject *object,
 static void
 mail_config_ews_ooo_page_dispose (GObject *object)
 {
-	EMailConfigEwsOooPagePrivate *priv;
+	EMailConfigEwsOooPage *ooo_page = E_MAIL_CONFIG_EWS_OOO_PAGE (object);
 
-	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (object);
-
-	if (priv->refresh_cancellable) {
-		g_cancellable_cancel (priv->refresh_cancellable);
-		g_clear_object (&priv->refresh_cancellable);
+	if (ooo_page->priv->refresh_cancellable) {
+		g_cancellable_cancel (ooo_page->priv->refresh_cancellable);
+		g_clear_object (&ooo_page->priv->refresh_cancellable);
 	}
 
-	g_clear_object (&priv->registry);
-	g_clear_object (&priv->account_source);
-	g_clear_object (&priv->collection_source);
-	g_clear_object (&priv->identity_source);
-	g_clear_object (&priv->oof_settings);
+	g_clear_object (&ooo_page->priv->registry);
+	g_clear_object (&ooo_page->priv->account_source);
+	g_clear_object (&ooo_page->priv->collection_source);
+	g_clear_object (&ooo_page->priv->identity_source);
+	g_clear_object (&ooo_page->priv->oof_settings);
 
 	/* Chain up to parent's dispose() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
-		dispose (object);
+	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->dispose (object);
 }
 
 static void
 mail_config_ews_ooo_page_finalize (GObject *object)
 {
-	EMailConfigEwsOooPagePrivate *priv;
+	EMailConfigEwsOooPage *ooo_page = E_MAIL_CONFIG_EWS_OOO_PAGE (object);
 
-	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (object);
-
-	g_mutex_clear (&priv->oof_settings_lock);
+	g_mutex_clear (&ooo_page->priv->oof_settings_lock);
 
 	/* Chain up to parent's finalize() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
-		finalize (object);
+	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->finalize (object);
 }
 
 static void
@@ -633,7 +618,7 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
                                  GAsyncReadyCallback callback,
                                  gpointer user_data)
 {
-	EMailConfigEwsOooPagePrivate *priv;
+	EMailConfigEwsOooPage *ooo_page;
 	GSimpleAsyncResult *simple;
 	GtkToggleButton *toggle_button;
 	GtkTextBuffer *text_buffer;
@@ -643,15 +628,15 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 	time_t tm;
 	gulong signal_id;
 
-	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
+	ooo_page = E_MAIL_CONFIG_EWS_OOO_PAGE (page);
 
-	g_mutex_lock (&priv->oof_settings_lock);
+	g_mutex_lock (&ooo_page->priv->oof_settings_lock);
 
 	/* It may be that the Out of Office settings are still
 	 * loading or have failed to load, in which case there
 	 * are obviously no changes to submit. */
-	if (priv->oof_settings == NULL) {
-		g_mutex_unlock (&priv->oof_settings_lock);
+	if (!ooo_page->priv->oof_settings) {
+		g_mutex_unlock (&ooo_page->priv->oof_settings_lock);
 
 		simple = g_simple_async_result_new (
 			G_OBJECT (page), callback, user_data,
@@ -663,63 +648,63 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 	}
 
 	signal_id = g_signal_connect_swapped (
-		priv->oof_settings, "notify",
-		G_CALLBACK (ews_oof_settings_changed), &priv->changed);
+		ooo_page->priv->oof_settings, "notify",
+		G_CALLBACK (ews_oof_settings_changed), &ooo_page->priv->changed);
 
-	toggle_button = GTK_TOGGLE_BUTTON (priv->enabled_radio_button);
+	toggle_button = GTK_TOGGLE_BUTTON (ooo_page->priv->enabled_radio_button);
 	if (gtk_toggle_button_get_active (toggle_button))
 		e_ews_oof_settings_set_state (
-			priv->oof_settings,
+			ooo_page->priv->oof_settings,
 			E_EWS_OOF_STATE_ENABLED);
 
-	toggle_button = GTK_TOGGLE_BUTTON (priv->disabled_radio_button);
+	toggle_button = GTK_TOGGLE_BUTTON (ooo_page->priv->disabled_radio_button);
 	if (gtk_toggle_button_get_active (toggle_button))
 		e_ews_oof_settings_set_state (
-			priv->oof_settings,
+			ooo_page->priv->oof_settings,
 			E_EWS_OOF_STATE_DISABLED);
 
-	toggle_button = GTK_TOGGLE_BUTTON (priv->scheduled_radio_button);
+	toggle_button = GTK_TOGGLE_BUTTON (ooo_page->priv->scheduled_radio_button);
 	if (gtk_toggle_button_get_active (toggle_button))
 		e_ews_oof_settings_set_state (
-			priv->oof_settings,
+			ooo_page->priv->oof_settings,
 			E_EWS_OOF_STATE_SCHEDULED);
 
-	tm = e_date_edit_get_time (E_DATE_EDIT (priv->start_time));
+	tm = e_date_edit_get_time (E_DATE_EDIT (ooo_page->priv->start_time));
 	date_time = g_date_time_new_from_unix_utc ((gint64) tm);
-	e_ews_oof_settings_set_start_time (priv->oof_settings, date_time);
+	e_ews_oof_settings_set_start_time (ooo_page->priv->oof_settings, date_time);
 	g_date_time_unref (date_time);
 
-	tm = e_date_edit_get_time (E_DATE_EDIT (priv->end_time));
+	tm = e_date_edit_get_time (E_DATE_EDIT (ooo_page->priv->end_time));
 	date_time = g_date_time_new_from_unix_utc ((gint64) tm);
-	e_ews_oof_settings_set_end_time (priv->oof_settings, date_time);
+	e_ews_oof_settings_set_end_time (ooo_page->priv->oof_settings, date_time);
 	g_date_time_unref (date_time);
 
-	text_buffer = priv->internal_reply;
+	text_buffer = ooo_page->priv->internal_reply;
 	gtk_text_buffer_get_bounds (text_buffer, &start, &end);
 	text = gtk_text_buffer_get_text (text_buffer, &start, &end, FALSE);
-	e_ews_oof_settings_set_internal_reply (priv->oof_settings, text);
+	e_ews_oof_settings_set_internal_reply (ooo_page->priv->oof_settings, text);
 	g_free (text);
 
-	e_ews_oof_settings_set_external_audience (priv->oof_settings,
-		gtk_combo_box_get_active (GTK_COMBO_BOX (priv->external_audience)));
+	e_ews_oof_settings_set_external_audience (ooo_page->priv->oof_settings,
+		gtk_combo_box_get_active (GTK_COMBO_BOX (ooo_page->priv->external_audience)));
 
-	text_buffer = priv->external_reply;
+	text_buffer = ooo_page->priv->external_reply;
 	gtk_text_buffer_get_bounds (text_buffer, &start, &end);
 	text = gtk_text_buffer_get_text (text_buffer, &start, &end, FALSE);
-	e_ews_oof_settings_set_external_reply (priv->oof_settings, text);
+	e_ews_oof_settings_set_external_reply (ooo_page->priv->oof_settings, text);
 	g_free (text);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (page), callback, user_data,
 		mail_config_ews_ooo_page_submit);
 
-	g_signal_handler_disconnect (priv->oof_settings, signal_id);
+	g_signal_handler_disconnect (ooo_page->priv->oof_settings, signal_id);
 
-	if (priv->changed) {
+	if (ooo_page->priv->changed) {
 		g_simple_async_result_set_check_cancellable (simple, cancellable);
 
 		e_ews_oof_settings_submit (
-			priv->oof_settings, cancellable,
+			ooo_page->priv->oof_settings, cancellable,
 			mail_config_ews_ooo_page_submit_cb,
 			g_object_ref (simple));
 	} else {
@@ -728,7 +713,7 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 
 	g_object_unref (simple);
 
-	g_mutex_unlock (&priv->oof_settings_lock);
+	g_mutex_unlock (&ooo_page->priv->oof_settings_lock);
 }
 
 static gboolean
@@ -861,9 +846,6 @@ e_mail_config_ews_ooo_page_class_init (EMailConfigEwsOooPageClass *class)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (
-		class, sizeof (EMailConfigEwsOooPagePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mail_config_ews_ooo_page_set_property;
 	object_class->get_property = mail_config_ews_ooo_page_get_property;
@@ -933,7 +915,7 @@ e_mail_config_ews_ooo_page_class_finalize (EMailConfigEwsOooPageClass *class)
 static void
 e_mail_config_ews_ooo_page_init (EMailConfigEwsOooPage *page)
 {
-	page->priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
+	page->priv = e_mail_config_ews_ooo_page_get_instance_private (page);
 
 	g_mutex_init (&page->priv->oof_settings_lock);
 }
@@ -999,7 +981,7 @@ e_mail_config_ews_ooo_page_refresh (EMailConfigEwsOooPage *page)
 	async_context->page = g_object_ref (page);
 	async_context->activity = activity;  /* takes ownership */
 	async_context->source = g_object_ref (source);
-	async_context->settings = g_object_ref (settings);
+	async_context->settings = G_OBJECT (g_object_ref (settings));
 
 	/* Property changes can cause update of the UI, but this runs in a thread,
 	   thus freeze the notify till be back in UI thread */

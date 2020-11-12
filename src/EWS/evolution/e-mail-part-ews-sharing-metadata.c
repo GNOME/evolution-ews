@@ -152,7 +152,7 @@ ews_sharing_metadata_btn_clicked_cb (EWebView *web_view,
 		alert_sink = E_ALERT_SINK (web_view);
 
 	sd = g_slice_new (SubscribeData);
-	sd->ews_store = g_object_ref (store);
+	sd->ews_store = CAMEL_EWS_STORE (g_object_ref (store));
 	sd->cnc = camel_ews_store_ref_connection (CAMEL_EWS_STORE (store));
 	sd->params = e_named_parameters_new_string (element_value);
 

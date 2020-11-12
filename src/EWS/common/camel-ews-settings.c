@@ -10,10 +10,6 @@
 
 #include <libedataserver/libedataserver.h>
 
-#define CAMEL_EWS_SETTINGS_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_EWS_SETTINGS, CamelEwsSettingsPrivate))
-
 struct _CamelEwsSettingsPrivate {
 	GMutex property_lock;
 	gboolean check_all;
@@ -73,12 +69,9 @@ enum {
 	PROP_CONCURRENT_CONNECTIONS
 };
 
-G_DEFINE_TYPE_WITH_CODE (
-	CamelEwsSettings,
-	camel_ews_settings,
-	CAMEL_TYPE_OFFLINE_SETTINGS,
-	G_IMPLEMENT_INTERFACE (
-		CAMEL_TYPE_NETWORK_SETTINGS, NULL))
+G_DEFINE_TYPE_WITH_CODE (CamelEwsSettings, camel_ews_settings, CAMEL_TYPE_OFFLINE_SETTINGS,
+	G_ADD_PRIVATE (CamelEwsSettings)
+	G_IMPLEMENT_INTERFACE (CAMEL_TYPE_NETWORK_SETTINGS, NULL))
 
 static gboolean
 ews_settings_transform_host_url_to_host_cb (GBinding *binding,
@@ -498,24 +491,22 @@ ews_settings_get_property (GObject *object,
 static void
 ews_settings_finalize (GObject *object)
 {
-	CamelEwsSettingsPrivate *priv;
+	CamelEwsSettings *ews_settings = CAMEL_EWS_SETTINGS (object);
 
-	priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (object);
+	g_mutex_clear (&ews_settings->priv->property_lock);
 
-	g_mutex_clear (&priv->property_lock);
-
-	g_free (priv->email);
-	g_free (priv->gal_uid);
-	g_free (priv->hosturl);
-	g_free (priv->oaburl);
-	g_free (priv->oal_selected);
-	g_free (priv->impersonate_user);
-	g_free (priv->user_agent);
-	g_free (priv->oauth2_tenant);
-	g_free (priv->oauth2_client_id);
-	g_free (priv->oauth2_redirect_uri);
-	g_free (priv->oauth2_resource_uri);
-	g_free (priv->oauth2_endpoint_host);
+	g_free (ews_settings->priv->email);
+	g_free (ews_settings->priv->gal_uid);
+	g_free (ews_settings->priv->hosturl);
+	g_free (ews_settings->priv->oaburl);
+	g_free (ews_settings->priv->oal_selected);
+	g_free (ews_settings->priv->impersonate_user);
+	g_free (ews_settings->priv->user_agent);
+	g_free (ews_settings->priv->oauth2_tenant);
+	g_free (ews_settings->priv->oauth2_client_id);
+	g_free (ews_settings->priv->oauth2_redirect_uri);
+	g_free (ews_settings->priv->oauth2_resource_uri);
+	g_free (ews_settings->priv->oauth2_endpoint_host);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_settings_parent_class)->finalize (object);
@@ -525,8 +516,6 @@ static void
 camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 {
 	GObjectClass *object_class;
-
-	g_type_class_add_private (class, sizeof (CamelEwsSettingsPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_settings_set_property;
@@ -846,7 +835,7 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 static void
 camel_ews_settings_init (CamelEwsSettings *settings)
 {
-	settings->priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (settings);
+	settings->priv = camel_ews_settings_get_instance_private (settings);
 	g_mutex_init (&settings->priv->property_lock);
 
 	e_binding_bind_property_full (settings, "hosturl",

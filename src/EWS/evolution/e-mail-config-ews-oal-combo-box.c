@@ -14,10 +14,6 @@
 #include "e-ews-config-utils.h"
 #include "e-mail-config-ews-oal-combo-box.h"
 
-#define E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_OAL_COMBO_BOX, EMailConfigEwsOalComboBoxPrivate))
-
 struct _EMailConfigEwsOalComboBoxPrivate {
 	EMailConfigServiceBackend *backend;
 
@@ -34,7 +30,8 @@ enum {
 	PROP_BACKEND
 };
 
-G_DEFINE_DYNAMIC_TYPE (EMailConfigEwsOalComboBox, e_mail_config_ews_oal_combo_box, GTK_TYPE_COMBO_BOX_TEXT)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsOalComboBox, e_mail_config_ews_oal_combo_box, GTK_TYPE_COMBO_BOX_TEXT, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsOalComboBox))
 
 typedef struct _AsyncContext {
 	EMailConfigEwsOalComboBox *combo_box;
@@ -110,41 +107,29 @@ mail_config_ews_oal_combo_box_get_property (GObject *object,
 static void
 mail_config_ews_oal_combo_box_dispose (GObject *object)
 {
-	EMailConfigEwsOalComboBoxPrivate *priv;
+	EMailConfigEwsOalComboBox *ews_combo = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (object);
 
-	priv = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE (object);
-
-	if (priv->backend != NULL) {
-		g_object_ref (priv->backend);
-		priv->backend = NULL;
-	}
+	g_clear_object (&ews_combo->priv->backend);
 
 	/* Chain up to parent's dispose() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_oal_combo_box_parent_class)->
-		dispose (object);
+	G_OBJECT_CLASS (e_mail_config_ews_oal_combo_box_parent_class)->dispose (object);
 }
 
 static void
 mail_config_ews_oal_combo_box_finalize (GObject *object)
 {
-	EMailConfigEwsOalComboBoxPrivate *priv;
+	EMailConfigEwsOalComboBox *ews_combo = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (object);
 
-	priv = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE (object);
-
-	g_mutex_clear (&priv->oal_items_lock);
+	g_mutex_clear (&ews_combo->priv->oal_items_lock);
 
 	/* Chain up to parent's finalize() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_oal_combo_box_parent_class)->
-		finalize (object);
+	G_OBJECT_CLASS (e_mail_config_ews_oal_combo_box_parent_class)->finalize (object);
 }
 
 static void
 e_mail_config_ews_oal_combo_box_class_init (EMailConfigEwsOalComboBoxClass *class)
 {
 	GObjectClass *object_class;
-
-	g_type_class_add_private (
-		class, sizeof (EMailConfigEwsOalComboBoxPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mail_config_ews_oal_combo_box_set_property;
@@ -172,8 +157,7 @@ e_mail_config_ews_oal_combo_box_class_finalize (EMailConfigEwsOalComboBoxClass *
 static void
 e_mail_config_ews_oal_combo_box_init (EMailConfigEwsOalComboBox *combo_box)
 {
-	combo_box->priv =
-		E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE (combo_box);
+	combo_box->priv = e_mail_config_ews_oal_combo_box_get_instance_private (combo_box);
 
 	g_mutex_init (&combo_box->priv->oal_items_lock);
 }
@@ -327,7 +311,7 @@ e_mail_config_ews_oal_combo_box_update (EMailConfigEwsOalComboBox *combo_box,
 	async_context->combo_box = g_object_ref (combo_box);
 	async_context->simple = simple;  /* takes ownership */
 	async_context->source = g_object_ref (source);
-	async_context->settings = g_object_ref (settings);
+	async_context->settings = G_OBJECT (g_object_ref (settings));
 
 	/* Property changes can cause update of the UI, but this runs in a thread,
 	   thus freeze the notify till be back in UI thread */

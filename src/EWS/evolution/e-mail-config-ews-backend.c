@@ -23,10 +23,6 @@
 #include "e-ews-config-utils.h"
 #include "e-ews-search-user.h"
 
-#define E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_BACKEND, EMailConfigEwsBackendPrivate))
-
 struct _EMailConfigEwsBackendPrivate {
 	GtkWidget *user_entry;
 	GtkWidget *host_entry;
@@ -43,10 +39,8 @@ struct _EMailConfigEwsBackendPrivate {
 	GtkWidget *oauth2_endpoint_host_entry;
 };
 
-G_DEFINE_DYNAMIC_TYPE (
-	EMailConfigEwsBackend,
-	e_mail_config_ews_backend,
-	E_TYPE_MAIL_CONFIG_SERVICE_BACKEND)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsBackend, e_mail_config_ews_backend, E_TYPE_MAIL_CONFIG_SERVICE_BACKEND, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsBackend))
 
 static ESource *
 mail_config_ews_backend_new_collection (EMailConfigServiceBackend *backend)
@@ -79,7 +73,7 @@ static void
 search_for_impersonate_user_clicked_cb (GtkButton *button,
 					EMailConfigServiceBackend *backend)
 {
-	EMailConfigEwsBackendPrivate *priv;
+	EMailConfigEwsBackend *ews_backend;
 	ESource *source;
 	CamelSettings *settings;
 	EEwsConnection *conn;
@@ -92,13 +86,13 @@ search_for_impersonate_user_clicked_cb (GtkButton *button,
 	if (!source)
 		source = e_mail_config_service_backend_get_source (backend);
 
-	priv = E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE (backend);
+	ews_backend = E_MAIL_CONFIG_EWS_BACKEND (backend);
 	settings = e_mail_config_service_backend_get_settings (backend);
-	conn = e_ews_connection_new (source, gtk_entry_get_text (GTK_ENTRY (priv->host_entry)), CAMEL_EWS_SETTINGS (settings));
+	conn = e_ews_connection_new (source, gtk_entry_get_text (GTK_ENTRY (ews_backend->priv->host_entry)), CAMEL_EWS_SETTINGS (settings));
 	parent = e_ews_config_utils_get_widget_toplevel_window (GTK_WIDGET (button));
 
 	if (e_ews_search_user_modal (parent, conn, NULL, NULL, &email)) {
-		gtk_entry_set_text (GTK_ENTRY (priv->impersonate_user_entry), email);
+		gtk_entry_set_text (GTK_ENTRY (ews_backend->priv->impersonate_user_entry), email);
 	}
 
 	g_object_unref (conn);
@@ -139,7 +133,7 @@ static void
 mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
                                         GtkBox *parent)
 {
-	EMailConfigEwsBackendPrivate *priv;
+	EMailConfigEwsBackend *ews_backend;
 	EMailConfigServicePage *page;
 	ESource *source;
 	ESourceExtension *extension;
@@ -157,7 +151,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	const gchar *text;
 	gchar *markup;
 
-	priv = E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE (backend);
+	ews_backend = E_MAIL_CONFIG_EWS_BACKEND (backend);
 	page = e_mail_config_service_backend_get_page (backend);
 
 	/* This backend serves double duty.  One instance holds the
@@ -201,7 +195,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 0, 2, 1);
-	priv->user_entry = widget;  /* do not reference */
+	ews_backend->priv->user_entry = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
 	widget = gtk_label_new_with_mnemonic (_("_Host URL:"));
@@ -215,12 +209,12 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 1, 1, 1);
-	priv->host_entry = widget;  /* do not reference */
+	ews_backend->priv->host_entry = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
 	widget = e_mail_config_ews_autodiscover_new (backend);
 	gtk_grid_attach (GTK_GRID (container), widget, 2, 1, 1, 1);
-	priv->url_button = widget;  /* do not reference */
+	ews_backend->priv->url_button = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
 	widget = gtk_label_new_with_mnemonic (_("OAB U_RL:"));
@@ -234,7 +228,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 2, 2, 1);
-	priv->oab_entry = widget;  /* do not reference */
+	ews_backend->priv->oab_entry = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
 	widget = gtk_check_button_new_with_mnemonic (_("Open _Mailbox of other user"));
@@ -269,7 +263,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 4, 1, 1);
 	gtk_widget_show (widget);
-	priv->impersonate_user_entry = widget;  /* do not reference */
+	ews_backend->priv->impersonate_user_entry = widget;  /* do not reference */
 
 	e_binding_bind_object_text_property (
 		settings, "impersonate-user",
@@ -286,7 +280,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_show (widget);
 
 	e_binding_bind_property (
-		priv->impersonate_user_entry, "sensitive",
+		ews_backend->priv->impersonate_user_entry, "sensitive",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -305,23 +299,23 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = e_mail_config_auth_check_new (backend);
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_box_pack_start (GTK_BOX (parent), widget, FALSE, FALSE, 0);
-	priv->auth_check = widget;  /* do not reference */
+	ews_backend->priv->auth_check = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
 	widget = gtk_grid_new ();
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_box_pack_start (GTK_BOX (parent), widget, FALSE, FALSE, 0);
-	priv->oauth2_settings_grid = GTK_GRID (widget);
+	ews_backend->priv->oauth2_settings_grid = GTK_GRID (widget);
 
-	gtk_grid_set_column_spacing (priv->oauth2_settings_grid, 4);
-	gtk_grid_set_row_spacing (priv->oauth2_settings_grid, 4);
+	gtk_grid_set_column_spacing (ews_backend->priv->oauth2_settings_grid, 4);
+	gtk_grid_set_row_spacing (ews_backend->priv->oauth2_settings_grid, 4);
 
 	container = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-	gtk_grid_attach (priv->oauth2_settings_grid, container, 0, 0, 2, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, container, 0, 0, 2, 1);
 
 	widget = gtk_check_button_new_with_mnemonic (_("_Override Office365 OAuth2 settings"));
 	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
-	priv->oauth2_override_check = widget;
+	ews_backend->priv->oauth2_override_check = widget;
 
 	markup = g_markup_printf_escaped ("(<a href=\"https://wiki.gnome.org/Apps/Evolution/EWS/OAuth2\">%s</a>)", _("Help…"));
 	widget = gtk_label_new (markup);
@@ -333,22 +327,22 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = gtk_label_new_with_mnemonic (_("Application I_D:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 1, 1, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 0, 1, 1, 1);
 	label = GTK_LABEL (widget);
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
 	widget = gtk_entry_new ();
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 1, 1, 1);
-	priv->oauth2_client_id_entry = widget;
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 1, 1, 1, 1);
+	ews_backend->priv->oauth2_client_id_entry = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -361,22 +355,22 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = gtk_label_new_with_mnemonic (_("_Tenant ID:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 2, 1, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 0, 2, 1, 1);
 	label = GTK_LABEL (widget);
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
 	widget = gtk_entry_new ();
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 2, 1, 1);
-	priv->oauth2_tenant_entry = widget;
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 1, 2, 1, 1);
+	ews_backend->priv->oauth2_tenant_entry = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -389,7 +383,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		g_strdup_printf (_("Default tenant ID is “%s”"), OFFICE365_TENANT));
 
 	container = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-	gtk_grid_attach (priv->oauth2_settings_grid, container, 0, 3, 2, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, container, 0, 3, 2, 1);
 
 	widget = gtk_expander_new_with_mnemonic (_("_Advanced Settings"));
 	gtk_widget_set_margin_left (widget, 12);
@@ -397,7 +391,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	expander = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -412,23 +406,23 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = gtk_label_new_with_mnemonic (_("_Endpoint host:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 4, 1, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 0, 4, 1, 1);
 	label = GTK_LABEL (widget);
 	endpoint_host_label = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
 	widget = gtk_entry_new ();
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 4, 1, 1);
-	priv->oauth2_endpoint_host_entry = widget;
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 1, 4, 1, 1);
+	ews_backend->priv->oauth2_endpoint_host_entry = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -441,23 +435,23 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = gtk_label_new_with_mnemonic (_("Red_irect URI:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 5, 1, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 0, 5, 1, 1);
 	label = GTK_LABEL (widget);
 	redirect_uri_label = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
 	widget = gtk_entry_new ();
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 5, 1, 1);
-	priv->oauth2_redirect_uri_entry = widget;
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 1, 5, 1, 1);
+	ews_backend->priv->oauth2_redirect_uri_entry = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -470,23 +464,23 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	widget = gtk_label_new_with_mnemonic (_("Re_source URI:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 0, 6, 1, 1);
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 0, 6, 1, 1);
 	label = GTK_LABEL (widget);
 	resource_uri_label = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
 	widget = gtk_entry_new ();
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_label_set_mnemonic_widget (label, widget);
-	gtk_grid_attach (priv->oauth2_settings_grid, widget, 1, 6, 1, 1);
-	priv->oauth2_resource_uri_entry = widget;
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 1, 6, 1, 1);
+	ews_backend->priv->oauth2_resource_uri_entry = widget;
 
 	e_binding_bind_property (
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
@@ -496,7 +490,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		NULL);
 	g_free (markup);
 
-	gtk_widget_show_all (GTK_WIDGET (priv->oauth2_settings_grid));
+	gtk_widget_show_all (GTK_WIDGET (ews_backend->priv->oauth2_settings_grid));
 
 	camel_ews_settings_lock (ews_settings);
 
@@ -519,7 +513,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 
 	e_binding_bind_property (
 		expander, "expanded",
-		priv->oauth2_endpoint_host_entry, "visible",
+		ews_backend->priv->oauth2_endpoint_host_entry, "visible",
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property (
@@ -529,7 +523,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 
 	e_binding_bind_property (
 		expander, "expanded",
-		priv->oauth2_redirect_uri_entry, "visible",
+		ews_backend->priv->oauth2_redirect_uri_entry, "visible",
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property (
@@ -539,31 +533,31 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 
 	e_binding_bind_property (
 		expander, "expanded",
-		priv->oauth2_resource_uri_entry, "visible",
+		ews_backend->priv->oauth2_resource_uri_entry, "visible",
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property_full (
-		priv->auth_check, "active-mechanism",
-		priv->oauth2_settings_grid, "visible",
+		ews_backend->priv->auth_check, "active-mechanism",
+		ews_backend->priv->oauth2_settings_grid, "visible",
 		G_BINDING_SYNC_CREATE,
 		mail_config_ews_backend_auth_mech_is_oauth2,
 		NULL, NULL, NULL);
 
 	e_binding_bind_object_text_property (
 		settings, "user",
-		priv->user_entry, "text",
+		ews_backend->priv->user_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "hosturl",
-		priv->host_entry, "text",
+		ews_backend->priv->host_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "oaburl",
-		priv->oab_entry, "text",
+		ews_backend->priv->oab_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
@@ -572,42 +566,42 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	 * a simple property binding would. */
 	e_binding_bind_property (
 		settings, "auth-mechanism",
-		priv->auth_check, "active-mechanism",
+		ews_backend->priv->auth_check, "active-mechanism",
 		G_BINDING_BIDIRECTIONAL);
 
 	e_binding_bind_property (
 		settings, "override-oauth2",
-		priv->oauth2_override_check, "active",
+		ews_backend->priv->oauth2_override_check, "active",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "oauth2-tenant",
-		priv->oauth2_tenant_entry, "text",
+		ews_backend->priv->oauth2_tenant_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "oauth2-client-id",
-		priv->oauth2_client_id_entry, "text",
+		ews_backend->priv->oauth2_client_id_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "oauth2-redirect-uri",
-		priv->oauth2_redirect_uri_entry, "text",
+		ews_backend->priv->oauth2_redirect_uri_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "oauth2-resource-uri",
-		priv->oauth2_resource_uri_entry, "text",
+		ews_backend->priv->oauth2_resource_uri_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_object_text_property (
 		settings, "oauth2-endpoint-host",
-		priv->oauth2_endpoint_host_entry, "text",
+		ews_backend->priv->oauth2_endpoint_host_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
@@ -691,7 +685,7 @@ static gboolean
 mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 {
 	EMailConfigServicePage *page;
-	EMailConfigEwsBackendPrivate *priv;
+	EMailConfigEwsBackend *ews_backend;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
 	CamelNetworkSettings *network_settings;
@@ -699,7 +693,7 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	const gchar *user;
 	gboolean correct, complete = TRUE;
 
-	priv = E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE (backend);
+	ews_backend = E_MAIL_CONFIG_EWS_BACKEND (backend);
 	page = e_mail_config_service_backend_get_page (backend);
 
 	/* This backend serves double duty.  One instance holds the
@@ -733,13 +727,13 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 		suri = soup_uri_new (hosturl);
 		if (suri) {
 			soup_uri_free (suri);
-			e_util_set_entry_issue_hint (priv->host_entry, NULL);
+			e_util_set_entry_issue_hint (ews_backend->priv->host_entry, NULL);
 		} else {
-			e_util_set_entry_issue_hint (priv->host_entry, _("Host URL is not valid"));
+			e_util_set_entry_issue_hint (ews_backend->priv->host_entry, _("Host URL is not valid"));
 			complete = FALSE;
 		}
 	} else {
-		e_util_set_entry_issue_hint (priv->host_entry, _("Host URL cannot be empty"));
+		e_util_set_entry_issue_hint (ews_backend->priv->host_entry, _("Host URL cannot be empty"));
 	}
 
 	if (oaburl && *oaburl) {
@@ -748,19 +742,19 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 		suri = soup_uri_new (oaburl);
 		if (suri) {
 			soup_uri_free (suri);
-			e_util_set_entry_issue_hint (priv->oab_entry, NULL);
+			e_util_set_entry_issue_hint (ews_backend->priv->oab_entry, NULL);
 		} else {
-			e_util_set_entry_issue_hint (priv->oab_entry, _("OAB URL is not valid"));
+			e_util_set_entry_issue_hint (ews_backend->priv->oab_entry, _("OAB URL is not valid"));
 			complete = FALSE;
 		}
 	} else {
-		e_util_set_entry_issue_hint (priv->oab_entry, NULL);
+		e_util_set_entry_issue_hint (ews_backend->priv->oab_entry, NULL);
 	}
 
 	correct = user != NULL && *user != '\0';
 	complete = complete && correct;
 
-	e_util_set_entry_issue_hint (priv->user_entry, correct ? NULL : _("User name cannot be empty"));
+	e_util_set_entry_issue_hint (ews_backend->priv->user_entry, correct ? NULL : _("User name cannot be empty"));
 
 	if (correct && camel_ews_settings_get_auth_mechanism (ews_settings) == EWS_AUTH_TYPE_OAUTH2) {
 		const gchar *client_id;
@@ -774,7 +768,7 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 		correct = e_util_strcmp0 (client_id, NULL) != 0;
 		complete = complete && correct;
 
-		e_util_set_entry_issue_hint (priv->oauth2_client_id_entry, correct ? NULL : _("Application ID cannot be empty"));
+		e_util_set_entry_issue_hint (ews_backend->priv->oauth2_client_id_entry, correct ? NULL : _("Application ID cannot be empty"));
 	}
 
 	camel_ews_settings_unlock (ews_settings);
@@ -816,9 +810,6 @@ e_mail_config_ews_backend_class_init (EMailConfigEwsBackendClass *class)
 {
 	EMailConfigServiceBackendClass *backend_class;
 
-	g_type_class_add_private (
-		class, sizeof (EMailConfigEwsBackendPrivate));
-
 	backend_class = E_MAIL_CONFIG_SERVICE_BACKEND_CLASS (class);
 	backend_class->backend_name = "ews";
 	backend_class->new_collection = mail_config_ews_backend_new_collection;
@@ -837,7 +828,7 @@ e_mail_config_ews_backend_class_finalize (EMailConfigEwsBackendClass *class)
 static void
 e_mail_config_ews_backend_init (EMailConfigEwsBackend *backend)
 {
-	backend->priv = E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE (backend);
+	backend->priv = e_mail_config_ews_backend_get_instance_private (backend);
 }
 
 void

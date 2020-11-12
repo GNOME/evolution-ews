@@ -39,10 +39,6 @@
 #define d(x) x
 #define CURSOR_ITEM_LIMIT 100
 
-#define CAMEL_EWS_STORE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_EWS_STORE, CamelEwsStorePrivate))
-
 #define FINFO_REFRESH_INTERVAL 60
 
 #define UPDATE_LOCK(x) (g_rec_mutex_lock(&(x)->priv->update_lock))
@@ -95,14 +91,11 @@ enum {
 	PROP_HOST_REACHABLE
 };
 
-G_DEFINE_TYPE_WITH_CODE (
-	CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE,
-	G_IMPLEMENT_INTERFACE (
-		G_TYPE_INITABLE, camel_ews_store_initable_init)
-	G_IMPLEMENT_INTERFACE (
-		CAMEL_TYPE_NETWORK_SERVICE, NULL)
-	G_IMPLEMENT_INTERFACE (
-		CAMEL_TYPE_SUBSCRIBABLE, camel_ews_subscribable_init))
+G_DEFINE_TYPE_WITH_CODE (CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE,
+	G_ADD_PRIVATE (CamelEwsStore)
+	G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, camel_ews_store_initable_init)
+	G_IMPLEMENT_INTERFACE (CAMEL_TYPE_NETWORK_SERVICE, NULL)
+	G_IMPLEMENT_INTERFACE (CAMEL_TYPE_SUBSCRIBABLE, camel_ews_subscribable_init))
 
 static void
 ews_store_set_property (GObject *object,
@@ -4065,8 +4058,6 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	CamelServiceClass *service_class;
 	CamelStoreClass *store_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsStorePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_store_set_property;
 	object_class->get_property = ews_store_get_property;
@@ -4142,7 +4133,7 @@ camel_ews_subscribable_init (CamelSubscribableInterface *iface)
 static void
 camel_ews_store_init (CamelEwsStore *ews_store)
 {
-	ews_store->priv = CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
+	ews_store->priv = camel_ews_store_get_instance_private (ews_store);
 
 	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
 	ews_store->priv->updates_cancellable = NULL;

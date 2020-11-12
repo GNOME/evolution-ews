@@ -16,10 +16,6 @@
 #include "e-ews-enumtypes.h"
 #include "e-ews-message.h"
 
-#define E_EWS_OOF_SETTINGS_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_EWS_OOF_SETTINGS, EEwsOofSettingsPrivate))
-
 /* Forward Declarations */
 static void	e_ews_oof_settings_initable_init
 					(GInitableIface *iface);
@@ -48,16 +44,10 @@ enum {
 	PROP_STATE
 };
 
-G_DEFINE_TYPE_WITH_CODE (
-	EEwsOofSettings,
-	e_ews_oof_settings,
-	G_TYPE_OBJECT,
-	G_IMPLEMENT_INTERFACE (
-		G_TYPE_INITABLE,
-		e_ews_oof_settings_initable_init)
-	G_IMPLEMENT_INTERFACE (
-		G_TYPE_ASYNC_INITABLE,
-		e_ews_oof_settings_async_initable_init))
+G_DEFINE_TYPE_WITH_CODE (EEwsOofSettings, e_ews_oof_settings, G_TYPE_OBJECT,
+	G_ADD_PRIVATE (EEwsOofSettings)
+	G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, e_ews_oof_settings_initable_init)
+	G_IMPLEMENT_INTERFACE (G_TYPE_ASYNC_INITABLE, e_ews_oof_settings_async_initable_init))
 
 static GDateTime *
 ews_oof_settings_string_to_date_time (const gchar *string)
@@ -380,14 +370,9 @@ ews_oof_settings_get_property (GObject *object,
 static void
 ews_oof_settings_dispose (GObject *object)
 {
-	EEwsOofSettingsPrivate *priv;
+	EEwsOofSettings *settings = E_EWS_OOF_SETTINGS (object);
 
-	priv = E_EWS_OOF_SETTINGS_GET_PRIVATE (object);
-
-	if (priv->connection != NULL) {
-		g_object_unref (priv->connection);
-		priv->connection = NULL;
-	}
+	g_clear_object (&settings->priv->connection);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_oof_settings_parent_class)->dispose (object);
@@ -396,17 +381,15 @@ ews_oof_settings_dispose (GObject *object)
 static void
 ews_oof_settings_finalize (GObject *object)
 {
-	EEwsOofSettingsPrivate *priv;
+	EEwsOofSettings *settings = E_EWS_OOF_SETTINGS (object);
 
-	priv = E_EWS_OOF_SETTINGS_GET_PRIVATE (object);
+	g_mutex_clear (&settings->priv->property_lock);
 
-	g_mutex_clear (&priv->property_lock);
+	g_date_time_unref (settings->priv->start_time);
+	g_date_time_unref (settings->priv->end_time);
 
-	g_date_time_unref (priv->start_time);
-	g_date_time_unref (priv->end_time);
-
-	g_free (priv->internal_reply);
-	g_free (priv->external_reply);
+	g_free (settings->priv->internal_reply);
+	g_free (settings->priv->external_reply);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_oof_settings_parent_class)->finalize (object);
@@ -521,8 +504,6 @@ e_ews_oof_settings_class_init (EEwsOofSettingsClass *class)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (EEwsOofSettingsPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_oof_settings_set_property;
 	object_class->get_property = ews_oof_settings_get_property;
@@ -614,7 +595,7 @@ e_ews_oof_settings_class_init (EEwsOofSettingsClass *class)
 static void
 e_ews_oof_settings_init (EEwsOofSettings *settings)
 {
-	settings->priv = E_EWS_OOF_SETTINGS_GET_PRIVATE (settings);
+	settings->priv = e_ews_oof_settings_get_instance_private (settings);
 
 	g_mutex_init (&settings->priv->property_lock);
 

@@ -33,7 +33,7 @@ struct _CamelEwsSummaryPrivate {
 	gint32 version;
 };
 
-G_DEFINE_TYPE (CamelEwsSummary, camel_ews_summary, CAMEL_TYPE_FOLDER_SUMMARY)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsSummary, camel_ews_summary, CAMEL_TYPE_FOLDER_SUMMARY)
 
 static void
 ews_summary_finalize (GObject *object)
@@ -53,8 +53,6 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 	CamelFolderSummaryClass *folder_summary_class;
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsSummaryPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->finalize = ews_summary_finalize;
 
@@ -67,7 +65,7 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 static void
 camel_ews_summary_init (CamelEwsSummary *ews_summary)
 {
-	ews_summary->priv = G_TYPE_INSTANCE_GET_PRIVATE (ews_summary, CAMEL_TYPE_EWS_SUMMARY, CamelEwsSummaryPrivate);
+	ews_summary->priv = camel_ews_summary_get_instance_private (ews_summary);
 
 	g_mutex_init (&ews_summary->priv->property_lock);
 }

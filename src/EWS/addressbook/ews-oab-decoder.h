@@ -33,9 +33,11 @@ G_BEGIN_DECLS
 
 typedef struct _EwsOabDecoder EwsOabDecoder;
 typedef struct _EwsOabDecoderClass EwsOabDecoderClass;
+typedef struct _EwsOabDecoderPrivate EwsOabDecoderPrivate;
 
 struct _EwsOabDecoder {
 	GObject parent;
+	EwsOabDecoderPrivate *priv;
 };
 
 struct _EwsOabDecoderClass {

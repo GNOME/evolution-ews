@@ -25,10 +25,6 @@
 #include "e-ews-search-user.h"
 #include "e-mail-config-ews-delegates-page.h"
 
-#define E_MAIL_CONFIG_EWS_DELEGATES_PAGE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_DELEGATES_PAGE, EMailConfigEwsDelegatesPagePrivate))
-
 typedef struct _AsyncContext AsyncContext;
 
 struct _EMailConfigEwsDelegatesPagePrivate {
@@ -81,14 +77,9 @@ static gboolean	page_contains_user	(EMailConfigEwsDelegatesPage *page,
 					 const gchar *primary_smtp,
 					 GtkTreeIter *piter);
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (
-	EMailConfigEwsDelegatesPage,
-	e_mail_config_ews_delegates_page,
-	E_TYPE_MAIL_CONFIG_ACTIVITY_PAGE,
-	0,
-	G_IMPLEMENT_INTERFACE_DYNAMIC (
-		E_TYPE_MAIL_CONFIG_PAGE,
-		e_mail_config_ews_delegates_page_interface_init))
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsDelegatesPage, e_mail_config_ews_delegates_page, E_TYPE_MAIL_CONFIG_ACTIVITY_PAGE, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsDelegatesPage)
+	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_ews_delegates_page_interface_init))
 
 static void
 async_context_free (gpointer ptr)
@@ -335,44 +326,38 @@ mail_config_ews_delegates_page_get_property (GObject *object,
 static void
 mail_config_ews_delegates_page_dispose (GObject *object)
 {
-	EMailConfigEwsDelegatesPagePrivate *priv;
+	EMailConfigEwsDelegatesPage *page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (object);
 
-	priv = E_MAIL_CONFIG_EWS_DELEGATES_PAGE_GET_PRIVATE (object);
-
-	if (priv->refresh_cancellable) {
-		g_cancellable_cancel (priv->refresh_cancellable);
-		g_clear_object (&priv->refresh_cancellable);
+	if (page->priv->refresh_cancellable) {
+		g_cancellable_cancel (page->priv->refresh_cancellable);
+		g_clear_object (&page->priv->refresh_cancellable);
 	}
 
-	g_clear_object (&priv->registry);
-	g_clear_object (&priv->account_source);
-	g_clear_object (&priv->collection_source);
-	g_clear_object (&priv->identity_source);
-	g_clear_object (&priv->connection);
+	g_clear_object (&page->priv->registry);
+	g_clear_object (&page->priv->account_source);
+	g_clear_object (&page->priv->collection_source);
+	g_clear_object (&page->priv->identity_source);
+	g_clear_object (&page->priv->connection);
 
-	g_slist_free_full (priv->orig_delegates, (GDestroyNotify) ews_delegate_info_free);
-	priv->orig_delegates = NULL;
+	g_slist_free_full (page->priv->orig_delegates, (GDestroyNotify) ews_delegate_info_free);
+	page->priv->orig_delegates = NULL;
 
-	g_slist_free_full (priv->new_delegates, (GDestroyNotify) ews_delegate_info_free);
-	priv->new_delegates = NULL;
+	g_slist_free_full (page->priv->new_delegates, (GDestroyNotify) ews_delegate_info_free);
+	page->priv->new_delegates = NULL;
 
 	/* Chain up to parent's dispose() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->
-		dispose (object);
+	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->dispose (object);
 }
 
 static void
 mail_config_ews_delegates_page_finalize (GObject *object)
 {
-	EMailConfigEwsDelegatesPagePrivate *priv;
+	EMailConfigEwsDelegatesPage *page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (object);
 
-	priv = E_MAIL_CONFIG_EWS_DELEGATES_PAGE_GET_PRIVATE (object);
-
-	g_mutex_clear (&priv->delegates_lock);
+	g_mutex_clear (&page->priv->delegates_lock);
 
 	/* Chain up to parent's finalize() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->
-		finalize (object);
+	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->finalize (object);
 }
 
 static void
@@ -1260,7 +1245,7 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data)
 {
-	EMailConfigEwsDelegatesPagePrivate *priv;
+	EMailConfigEwsDelegatesPage *ews_page;
 	GSimpleAsyncResult *simple;
 	EwsDelegateDeliver deliver_to;
 	GSList *added = NULL, *updated = NULL, *removed = NULL, *iter;
@@ -1268,12 +1253,12 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 	GHashTableIter titer;
 	gpointer key, value;
 
-	priv = E_MAIL_CONFIG_EWS_DELEGATES_PAGE_GET_PRIVATE (page);
+	ews_page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (page);
 
-	g_mutex_lock (&priv->delegates_lock);
+	g_mutex_lock (&ews_page->priv->delegates_lock);
 
-	if (!priv->connection) {
-		g_mutex_unlock (&priv->delegates_lock);
+	if (!ews_page->priv->connection) {
+		g_mutex_unlock (&ews_page->priv->delegates_lock);
 
 		simple = g_simple_async_result_new (
 			G_OBJECT (page), callback, user_data,
@@ -1285,7 +1270,7 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 	}
 
 	oldies = g_hash_table_new (g_str_hash, g_str_equal);
-	for (iter = priv->orig_delegates; iter; iter = iter->next) {
+	for (iter = ews_page->priv->orig_delegates; iter; iter = g_slist_next (iter)) {
 		EwsDelegateInfo *di = iter->data;
 
 		if (!di) {
@@ -1296,7 +1281,7 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 		g_hash_table_insert (oldies, di->user_id->primary_smtp, di);
 	}
 
-	for (iter = priv->new_delegates; iter; iter = iter->next) {
+	for (iter = ews_page->priv->new_delegates; iter; iter = g_slist_next (iter)) {
 		EwsDelegateInfo *di = iter->data;
 		EwsDelegateInfo *orig_di;
 
@@ -1324,18 +1309,18 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 
 	g_hash_table_destroy (oldies);
 
-	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->deliver_copy_me_radio)))
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (ews_page->priv->deliver_copy_me_radio)))
 		deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
-	else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->deliver_delegates_only_radio)))
+	else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (ews_page->priv->deliver_delegates_only_radio)))
 		deliver_to = EwsDelegateDeliver_DelegatesOnly;
-	else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->deliver_delegates_and_me_radio)))
+	else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (ews_page->priv->deliver_delegates_and_me_radio)))
 		deliver_to = EwsDelegateDeliver_DelegatesAndMe;
 	else
 		deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
 
-	if (deliver_to == priv->deliver_to && !added && !updated && !removed) {
+	if (deliver_to == ews_page->priv->deliver_to && !added && !updated && !removed) {
 		/* nothing changed, bye bye */
-		g_mutex_unlock (&priv->delegates_lock);
+		g_mutex_unlock (&ews_page->priv->delegates_lock);
 
 		simple = g_simple_async_result_new (
 			G_OBJECT (page), callback, user_data,
@@ -1357,25 +1342,25 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 	if (cancellable)
 		g_object_set_data_full (G_OBJECT (simple), CANCELLABLE_KEY, g_object_ref (cancellable), g_object_unref);
 
-	if (deliver_to != priv->deliver_to || updated) {
+	if (deliver_to != ews_page->priv->deliver_to || updated) {
 		e_ews_connection_update_delegate (
-			priv->connection, G_PRIORITY_DEFAULT, NULL, deliver_to, updated,
+			ews_page->priv->connection, G_PRIORITY_DEFAULT, NULL, deliver_to, updated,
 			cancellable, mail_config_ews_delegates_page_update_delegate_cb, g_object_ref (simple));
 	} else if (removed) {
 		e_ews_connection_remove_delegate (
-			priv->connection, G_PRIORITY_DEFAULT, NULL, removed,
+			ews_page->priv->connection, G_PRIORITY_DEFAULT, NULL, removed,
 			cancellable, mail_config_ews_delegates_page_remove_delegate_cb, g_object_ref (simple));
 	} else {
 		g_warn_if_fail (added != NULL);
 
 		e_ews_connection_add_delegate (
-			priv->connection, G_PRIORITY_DEFAULT, NULL, added,
+			ews_page->priv->connection, G_PRIORITY_DEFAULT, NULL, added,
 			cancellable, mail_config_ews_delegates_page_add_delegate_cb, g_object_ref (simple));
 	}
 
 	g_object_unref (simple);
 
-	g_mutex_unlock (&priv->delegates_lock);
+	g_mutex_unlock (&ews_page->priv->delegates_lock);
 }
 
 static gboolean
@@ -1580,9 +1565,6 @@ e_mail_config_ews_delegates_page_class_init (EMailConfigEwsDelegatesPageClass *c
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (
-		class, sizeof (EMailConfigEwsDelegatesPagePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mail_config_ews_delegates_page_set_property;
 	object_class->get_property = mail_config_ews_delegates_page_get_property;
@@ -1652,7 +1634,7 @@ e_mail_config_ews_delegates_page_class_finalize (EMailConfigEwsDelegatesPageClas
 static void
 e_mail_config_ews_delegates_page_init (EMailConfigEwsDelegatesPage *page)
 {
-	page->priv = E_MAIL_CONFIG_EWS_DELEGATES_PAGE_GET_PRIVATE (page);
+	page->priv = e_mail_config_ews_delegates_page_get_instance_private (page);
 
 	g_mutex_init (&page->priv->delegates_lock);
 }
@@ -1718,7 +1700,7 @@ e_mail_config_ews_delegates_page_refresh (EMailConfigEwsDelegatesPage *page)
 	async_context->page = g_object_ref (page);
 	async_context->activity = activity;  /* takes ownership */
 	async_context->source = g_object_ref (source);
-	async_context->settings = g_object_ref (settings);
+	async_context->settings = G_OBJECT (g_object_ref (settings));
 
 	/* Property changes can cause update of the UI, but this runs in a thread,
 	   thus freeze the notify till be back in UI thread */

@@ -23,13 +23,13 @@
 
 #define REPLY_VIEW "default message attachments threading"
 
-G_DEFINE_TYPE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
-
 struct _CamelEwsTransportPrivate
 {
 	GMutex connection_lock;
 	EEwsConnection *connection;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
 
 static gboolean
 ews_transport_can_server_side_sent_folder (CamelService *service,
@@ -436,8 +436,6 @@ camel_ews_transport_class_init (CamelEwsTransportClass *class)
 	CamelServiceClass *service_class;
 	CamelTransportClass *transport_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsTransportPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = ews_transport_dispose;
 	object_class->finalize = ews_transport_finalize;
@@ -456,7 +454,7 @@ camel_ews_transport_class_init (CamelEwsTransportClass *class)
 static void
 camel_ews_transport_init (CamelEwsTransport *ews_transport)
 {
-	ews_transport->priv = G_TYPE_INSTANCE_GET_PRIVATE (ews_transport, CAMEL_TYPE_EWS_TRANSPORT, CamelEwsTransportPrivate);
+	ews_transport->priv = camel_ews_transport_get_instance_private (ews_transport);
 
 	g_mutex_init (&ews_transport->priv->connection_lock);
 }

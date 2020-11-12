@@ -13,10 +13,6 @@
 #include "common/e-ews-connection-utils.h"
 #include "common/e-source-ews-folder.h"
 
-#define E_EWS_BACKEND_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_EWS_BACKEND, EEwsBackendPrivate))
-
 typedef struct _SyncFoldersClosure SyncFoldersClosure;
 
 struct _EEwsBackendPrivate {
@@ -48,10 +44,8 @@ struct _SyncFoldersClosure {
 	GHashTable *old_sources; /* gchar *folder_id ~> ESource * */
 };
 
-G_DEFINE_DYNAMIC_TYPE (
-	EEwsBackend,
-	e_ews_backend,
-	E_TYPE_COLLECTION_BACKEND)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EEwsBackend, e_ews_backend, E_TYPE_COLLECTION_BACKEND, 0,
+	G_ADD_PRIVATE_DYNAMIC (EEwsBackend))
 
 static void
 sync_folders_closure_free (SyncFoldersClosure *closure)
@@ -674,22 +668,20 @@ ews_backend_sync_folders_idle_cb (gpointer user_data)
 static void
 ews_backend_dispose (GObject *object)
 {
-	EEwsBackendPrivate *priv;
+	EEwsBackend *ews_backend = E_EWS_BACKEND (object);
 	ESource *source;
 
-	priv = E_EWS_BACKEND_GET_PRIVATE (object);
-
 	source = e_backend_get_source (E_BACKEND (object));
-	if (source && priv->source_changed_id) {
-		g_signal_handler_disconnect (source, priv->source_changed_id);
-		priv->source_changed_id = 0;
+	if (source && ews_backend->priv->source_changed_id) {
+		g_signal_handler_disconnect (source, ews_backend->priv->source_changed_id);
+		ews_backend->priv->source_changed_id = 0;
 	}
 
-	g_hash_table_remove_all (priv->folders);
+	g_hash_table_remove_all (ews_backend->priv->folders);
 
-	g_mutex_lock (&priv->connection_lock);
-	g_clear_object (&priv->connection);
-	g_mutex_unlock (&priv->connection_lock);
+	g_mutex_lock (&ews_backend->priv->connection_lock);
+	g_clear_object (&ews_backend->priv->connection);
+	g_mutex_unlock (&ews_backend->priv->connection_lock);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->dispose (object);
@@ -698,22 +690,16 @@ ews_backend_dispose (GObject *object)
 static void
 ews_backend_finalize (GObject *object)
 {
-	EEwsBackendPrivate *priv;
+	EEwsBackend *ews_backend = E_EWS_BACKEND (object);
 
-	priv = E_EWS_BACKEND_GET_PRIVATE (object);
-
-	g_free (priv->deleted_items_folder_id);
-	g_hash_table_destroy (priv->folders);
-	g_mutex_clear (&priv->folders_lock);
-
-	g_free (priv->oal_selected);
-
-	g_free (priv->sync_state);
-	g_mutex_clear (&priv->sync_state_lock);
-
-	g_mutex_clear (&priv->connection_lock);
-
-	e_named_parameters_free (priv->credentials);
+	g_free (ews_backend->priv->deleted_items_folder_id);
+	g_hash_table_destroy (ews_backend->priv->folders);
+	g_mutex_clear (&ews_backend->priv->folders_lock);
+	g_free (ews_backend->priv->oal_selected);
+	g_free (ews_backend->priv->sync_state);
+	g_mutex_clear (&ews_backend->priv->sync_state_lock);
+	g_mutex_clear (&ews_backend->priv->connection_lock);
+	e_named_parameters_free (ews_backend->priv->credentials);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->finalize (object);
@@ -1227,8 +1213,6 @@ e_ews_backend_class_init (EEwsBackendClass *class)
 	EBackendClass *backend_class;
 	ECollectionBackendClass *collection_backend_class;
 
-	g_type_class_add_private (class, sizeof (EEwsBackendPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = ews_backend_dispose;
 	object_class->finalize = ews_backend_finalize;
@@ -1258,7 +1242,7 @@ e_ews_backend_class_finalize (EEwsBackendClass *class)
 static void
 e_ews_backend_init (EEwsBackend *backend)
 {
-	backend->priv = E_EWS_BACKEND_GET_PRIVATE (backend);
+	backend->priv = e_ews_backend_get_instance_private (backend);
 
 	backend->priv->folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 

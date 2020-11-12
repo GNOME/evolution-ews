@@ -55,10 +55,6 @@ which needs to be better organized via functions */
 
 #define SUMMARY_POSTITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS " message:From message:Sender"
 
-#define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_EWS_FOLDER, CamelEwsFolderPrivate))
-
 struct _CamelEwsFolderPrivate {
 	GMutex search_lock;	/* for locking the search object */
 	GRecMutex cache_lock;	/* for locking the cache object */
@@ -76,7 +72,7 @@ static gboolean ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancel
 
 #define d(x)
 
-G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static GSList *
 ews_folder_get_summary_followup_mapi_flags (void)
@@ -3129,8 +3125,6 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	GObjectClass *object_class;
 	CamelFolderClass *folder_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsFolderPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = ews_folder_dispose;
 	object_class->finalize = ews_folder_finalize;
@@ -3159,7 +3153,7 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 {
 	CamelFolder *folder = CAMEL_FOLDER (ews_folder);
 
-	ews_folder->priv = CAMEL_EWS_FOLDER_GET_PRIVATE (ews_folder);
+	ews_folder->priv = camel_ews_folder_get_instance_private (ews_folder);
 
 	camel_folder_set_flags (folder, CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY);
 

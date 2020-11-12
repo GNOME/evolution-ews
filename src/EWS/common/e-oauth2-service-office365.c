@@ -28,6 +28,7 @@ struct _EOAuth2ServiceOffice365Private
 static void e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EOAuth2ServiceOffice365, e_oauth2_service_office365, E_TYPE_OAUTH2_SERVICE_BASE, 0,
+	G_ADD_PRIVATE_DYNAMIC (EOAuth2ServiceOffice365)
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_OAUTH2_SERVICE, e_oauth2_service_office365_oauth2_service_init))
 
 static const gchar *
@@ -471,8 +472,6 @@ e_oauth2_service_office365_class_init (EOAuth2ServiceOffice365Class *klass)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (klass, sizeof (EOAuth2ServiceOffice365Private));
-
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->finalize = eos_office365_finalize;
 }
@@ -485,7 +484,7 @@ e_oauth2_service_office365_class_finalize (EOAuth2ServiceOffice365Class *klass)
 static void
 e_oauth2_service_office365_init (EOAuth2ServiceOffice365 *oauth2_office365)
 {
-	oauth2_office365->priv = G_TYPE_INSTANCE_GET_PRIVATE (oauth2_office365, E_TYPE_OAUTH2_SERVICE_OFFICE365, EOAuth2ServiceOffice365Private);
+	oauth2_office365->priv = e_oauth2_service_office365_get_instance_private (oauth2_office365);
 
 	g_mutex_init (&oauth2_office365->priv->string_cache_lock);
 	oauth2_office365->priv->string_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);

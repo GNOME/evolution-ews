@@ -35,7 +35,7 @@ struct _CamelEwsStoreSummaryPrivate {
 	GFileMonitor *monitor_delete;
 };
 
-G_DEFINE_TYPE (CamelEwsStoreSummary, camel_ews_store_summary, CAMEL_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsStoreSummary, camel_ews_store_summary, CAMEL_TYPE_OBJECT)
 
 static void
 ews_store_summary_finalize (GObject *object)
@@ -60,8 +60,6 @@ camel_ews_store_summary_class_init (CamelEwsStoreSummaryClass *class)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsStoreSummaryPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->finalize = ews_store_summary_finalize;
 }
@@ -69,7 +67,7 @@ camel_ews_store_summary_class_init (CamelEwsStoreSummaryClass *class)
 static void
 camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 {
-	ews_summary->priv = G_TYPE_INSTANCE_GET_PRIVATE (ews_summary, CAMEL_TYPE_EWS_STORE_SUMMARY, CamelEwsStoreSummaryPrivate);
+	ews_summary->priv = camel_ews_store_summary_get_instance_private (ews_summary);
 
 	ews_summary->priv->key_file = g_key_file_new ();
 	ews_summary->priv->dirty = FALSE;

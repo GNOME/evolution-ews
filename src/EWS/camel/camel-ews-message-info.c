@@ -28,7 +28,7 @@ enum {
 	PROP_CHANGE_KEY,
 };
 
-G_DEFINE_TYPE (CamelEwsMessageInfo, camel_ews_message_info, CAMEL_TYPE_MESSAGE_INFO_BASE)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsMessageInfo, camel_ews_message_info, CAMEL_TYPE_MESSAGE_INFO_BASE)
 
 static CamelMessageInfo *
 ews_message_info_clone (const CamelMessageInfo *mi,
@@ -184,8 +184,6 @@ camel_ews_message_info_class_init (CamelEwsMessageInfoClass *class)
 	CamelMessageInfoClass *mi_class;
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsMessageInfoPrivate));
-
 	mi_class = CAMEL_MESSAGE_INFO_CLASS (class);
 	mi_class->clone = ews_message_info_clone;
 	mi_class->load = ews_message_info_load;
@@ -251,7 +249,7 @@ camel_ews_message_info_class_init (CamelEwsMessageInfoClass *class)
 static void
 camel_ews_message_info_init (CamelEwsMessageInfo *emi)
 {
-	emi->priv = G_TYPE_INSTANCE_GET_PRIVATE (emi, CAMEL_TYPE_EWS_MESSAGE_INFO, CamelEwsMessageInfoPrivate);
+	emi->priv = camel_ews_message_info_get_instance_private (emi);
 }
 
 guint32

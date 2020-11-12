@@ -17,10 +17,6 @@
 #include "common/e-ews-connection.h"
 #include "common/e-ews-connection-utils.h"
 
-#define E_MAIL_CONFIG_EWS_AUTODISCOVER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_AUTODISCOVER, EMailConfigEwsAutodiscoverPrivate))
-
 typedef struct _AsyncContext AsyncContext;
 
 struct _EMailConfigEwsAutodiscoverPrivate {
@@ -42,7 +38,8 @@ enum {
 	PROP_BACKEND
 };
 
-G_DEFINE_DYNAMIC_TYPE (EMailConfigEwsAutodiscover, e_mail_config_ews_autodiscover, GTK_TYPE_BUTTON)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsAutodiscover, e_mail_config_ews_autodiscover, GTK_TYPE_BUTTON, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsAutodiscover))
 
 static void
 async_context_free (gpointer ptr)
@@ -275,7 +272,7 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	async_context->autodiscover = g_object_ref (autodiscover);
 	async_context->activity = activity;  /* takes ownership */
 	async_context->source = g_object_ref (source);
-	async_context->ews_settings = g_object_ref (settings);
+	async_context->ews_settings = CAMEL_EWS_SETTINGS (g_object_ref (settings));
 	async_context->email_address = g_strdup (e_mail_config_service_page_get_email_address (page));
 	async_context->certificate_pem = NULL;
 	async_context->certificate_errors = 0;
@@ -346,18 +343,12 @@ mail_config_ews_autodiscover_get_property (GObject *object,
 static void
 mail_config_ews_autodiscover_dispose (GObject *object)
 {
-	EMailConfigEwsAutodiscoverPrivate *priv;
+	EMailConfigEwsAutodiscover *autodiscover = E_MAIL_CONFIG_EWS_AUTODISCOVER (object);
 
-	priv = E_MAIL_CONFIG_EWS_AUTODISCOVER_GET_PRIVATE (object);
-
-	if (priv->backend != NULL) {
-		g_object_unref (priv->backend);
-		priv->backend = NULL;
-	}
+	g_clear_object (&autodiscover->priv->backend);
 
 	/* Chain up to parent's dispose() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_autodiscover_parent_class)->
-		dispose (object);
+	G_OBJECT_CLASS (e_mail_config_ews_autodiscover_parent_class)->dispose (object);
 }
 
 static void
@@ -389,9 +380,6 @@ e_mail_config_ews_autodiscover_class_init (EMailConfigEwsAutodiscoverClass *clas
 	GObjectClass *object_class;
 	GtkButtonClass *button_class;
 
-	g_type_class_add_private (
-		class, sizeof (EMailConfigEwsAutodiscoverPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mail_config_ews_autodiscover_set_property;
 	object_class->get_property = mail_config_ews_autodiscover_get_property;
@@ -421,8 +409,7 @@ e_mail_config_ews_autodiscover_class_finalize (EMailConfigEwsAutodiscoverClass *
 static void
 e_mail_config_ews_autodiscover_init (EMailConfigEwsAutodiscover *autodiscover)
 {
-	autodiscover->priv =
-		E_MAIL_CONFIG_EWS_AUTODISCOVER_GET_PRIVATE (autodiscover);
+	autodiscover->priv = e_mail_config_ews_autodiscover_get_instance_private (autodiscover);
 }
 
 void

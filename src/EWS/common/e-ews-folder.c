@@ -16,8 +16,6 @@
 #include "e-source-ews-folder.h"
 #include "camel-ews-settings.h"
 
-G_DEFINE_TYPE (EEwsFolder, e_ews_folder, G_TYPE_OBJECT)
-
 struct _EEwsFolderPrivate {
 	GError *error;
 	gchar *name;
@@ -34,6 +32,8 @@ struct _EEwsFolderPrivate {
 	gboolean is_public;
 	gboolean is_hidden;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (EEwsFolder, e_ews_folder, G_TYPE_OBJECT)
 
 static void
 e_ews_folder_dispose (GObject *object)
@@ -82,8 +82,6 @@ e_ews_folder_class_init (EEwsFolderClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	g_type_class_add_private (klass, sizeof (EEwsFolderPrivate));
-
 	object_class->dispose = e_ews_folder_dispose;
 	object_class->finalize = e_ews_folder_finalize;
 }
@@ -91,7 +89,7 @@ e_ews_folder_class_init (EEwsFolderClass *klass)
 static void
 e_ews_folder_init (EEwsFolder *folder)
 {
-	folder->priv = G_TYPE_INSTANCE_GET_PRIVATE (folder, E_TYPE_EWS_FOLDER, EEwsFolderPrivate);
+	folder->priv = e_ews_folder_get_instance_private (folder);
 	folder->priv->error = NULL;
 	folder->priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	folder->priv->foreign = FALSE;

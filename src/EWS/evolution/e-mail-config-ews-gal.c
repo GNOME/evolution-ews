@@ -16,10 +16,6 @@
 
 #include "e-mail-config-ews-oal-combo-box.h"
 
-#define E_MAIL_CONFIG_EWS_GAL_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_GAL, EMailConfigEwsGalPrivate))
-
 typedef struct _AsyncContext AsyncContext;
 
 struct _EMailConfigEwsGalPrivate {
@@ -33,10 +29,8 @@ struct _AsyncContext {
 	EActivity *activity;
 };
 
-G_DEFINE_DYNAMIC_TYPE (
-	EMailConfigEwsGal,
-	e_mail_config_ews_gal,
-	E_TYPE_EXTENSION)
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsGal, e_mail_config_ews_gal, E_TYPE_EXTENSION, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsGal))
 
 static void
 async_context_free (AsyncContext *async_context)
@@ -353,8 +347,6 @@ e_mail_config_ews_gal_class_init (EMailConfigEwsGalClass *class)
 	GObjectClass *object_class;
 	EExtensionClass *extension_class;
 
-	g_type_class_add_private (class, sizeof (EMailConfigEwsGalPrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->constructed = mail_config_ews_gal_constructed;
 
@@ -370,7 +362,7 @@ e_mail_config_ews_gal_class_finalize (EMailConfigEwsGalClass *class)
 static void
 e_mail_config_ews_gal_init (EMailConfigEwsGal *extension)
 {
-	extension->priv = E_MAIL_CONFIG_EWS_GAL_GET_PRIVATE (extension);
+	extension->priv = e_mail_config_ews_gal_get_instance_private (extension);
 }
 
 void

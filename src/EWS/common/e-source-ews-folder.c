@@ -8,10 +8,6 @@
 
 #include "e-source-ews-folder.h"
 
-#define E_SOURCE_EWS_FOLDER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_SOURCE_EWS_FOLDER, ESourceEwsFolderPrivate))
-
 struct _ESourceEwsFolderPrivate {
 	gchar *change_key;
 	gchar *id;
@@ -41,10 +37,7 @@ enum {
 	PROP_FETCH_GAL_PHOTOS
 };
 
-G_DEFINE_TYPE (
-	ESourceEwsFolder,
-	e_source_ews_folder,
-	E_TYPE_SOURCE_EXTENSION)
+G_DEFINE_TYPE_WITH_PRIVATE (ESourceEwsFolder, e_source_ews_folder, E_TYPE_SOURCE_EXTENSION)
 
 static void
 source_ews_folder_set_property (GObject *object,
@@ -214,14 +207,12 @@ source_ews_folder_get_property (GObject *object,
 static void
 source_ews_folder_finalize (GObject *object)
 {
-	ESourceEwsFolderPrivate *priv;
+	ESourceEwsFolder *extension = E_SOURCE_EWS_FOLDER (object);
 
-	priv = E_SOURCE_EWS_FOLDER_GET_PRIVATE (object);
-
-	g_free (priv->change_key);
-	g_free (priv->id);
-	g_free (priv->name);
-	g_free (priv->foreign_mail);
+	g_free (extension->priv->change_key);
+	g_free (extension->priv->id);
+	g_free (extension->priv->name);
+	g_free (extension->priv->foreign_mail);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_source_ews_folder_parent_class)->finalize (object);
@@ -232,8 +223,6 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 {
 	GObjectClass *object_class;
 	ESourceExtensionClass *extension_class;
-
-	g_type_class_add_private (class, sizeof (ESourceEwsFolderPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = source_ews_folder_set_property;
@@ -391,7 +380,7 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 static void
 e_source_ews_folder_init (ESourceEwsFolder *extension)
 {
-	extension->priv = E_SOURCE_EWS_FOLDER_GET_PRIVATE (extension);
+	extension->priv = e_source_ews_folder_get_instance_private (extension);
 }
 
 void

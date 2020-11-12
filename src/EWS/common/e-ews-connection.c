@@ -30,10 +30,6 @@
 
 #define d(x) x
 
-#define E_EWS_CONNECTION_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_EWS_CONNECTION, EEwsConnectionPrivate))
-
 /* A chunk size limit when moving items in chunks. */
 #define EWS_MOVE_ITEMS_CHUNK_SIZE 500
 
@@ -169,7 +165,7 @@ struct _EwsUrls {
 	gpointer future2;
 };
 
-G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
 static guint
 ews_connection_get_concurrent_connections (EEwsConnection *cnc)
@@ -2102,23 +2098,21 @@ ews_connection_dispose (GObject *object)
 static void
 ews_connection_finalize (GObject *object)
 {
-	EEwsConnectionPrivate *priv;
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 
-	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
+	g_free (cnc->priv->uri);
+	g_free (cnc->priv->password);
+	g_free (cnc->priv->email);
+	g_free (cnc->priv->hash_key);
+	g_free (cnc->priv->impersonate_user);
+	g_free (cnc->priv->ssl_certificate_pem);
+	g_free (cnc->priv->last_subscription_id);
 
-	g_free (priv->uri);
-	g_free (priv->password);
-	g_free (priv->email);
-	g_free (priv->hash_key);
-	g_free (priv->impersonate_user);
-	g_free (priv->ssl_certificate_pem);
-	g_free (priv->last_subscription_id);
+	g_clear_object (&cnc->priv->bearer_auth);
 
-	g_clear_object (&priv->bearer_auth);
-
-	g_mutex_clear (&priv->property_lock);
-	g_rec_mutex_clear (&priv->queue_lock);
-	g_mutex_clear (&priv->notification_lock);
+	g_mutex_clear (&cnc->priv->property_lock);
+	g_rec_mutex_clear (&cnc->priv->queue_lock);
+	g_mutex_clear (&cnc->priv->notification_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
@@ -2128,8 +2122,6 @@ static void
 e_ews_connection_class_init (EEwsConnectionClass *class)
 {
 	GObjectClass *object_class;
-
-	g_type_class_add_private (class, sizeof (EEwsConnectionPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_connection_set_property;
@@ -2237,7 +2229,7 @@ e_ews_connection_folders_list_free (gpointer data)
 static void
 e_ews_connection_init (EEwsConnection *cnc)
 {
-	cnc->priv = E_EWS_CONNECTION_GET_PRIVATE (cnc);
+	cnc->priv = e_ews_connection_get_instance_private (cnc);
 
 	cnc->priv->soup_context = g_main_context_new ();
 	cnc->priv->soup_loop = g_main_loop_new (cnc->priv->soup_context, FALSE);

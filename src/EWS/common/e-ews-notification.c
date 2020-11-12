@@ -13,12 +13,6 @@
 #include "e-ews-notification.h"
 #include "e-soup-auth-negotiate.h"
 
-#define E_EWS_NOTIFICATION_GET_PRIVATE(obj)\
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_EWS_NOTIFICATION, EEwsNotificationPrivate))
-
-G_DEFINE_TYPE (EEwsNotification, e_ews_notification, G_TYPE_OBJECT)
-
 struct _EEwsNotificationPrivate {
 	SoupSession *soup_session;
 	GWeakRef connection_wk;
@@ -26,6 +20,8 @@ struct _EEwsNotificationPrivate {
 	GCancellable *cancellable;
 	gchar *last_subscription_id; /* guarded by the caller, because it can be set only after construct */
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (EEwsNotification, e_ews_notification, G_TYPE_OBJECT)
 
 enum {
 	PROP_0,
@@ -175,24 +171,18 @@ ews_notification_constructed (GObject *object)
 static void
 ews_notification_dispose (GObject *object)
 {
-	EEwsNotificationPrivate *priv;
+	EEwsNotification *notif = E_EWS_NOTIFICATION (object);
 
-	priv = E_EWS_NOTIFICATION_GET_PRIVATE (object);
+	if (notif->priv->cancellable != NULL)
+		g_cancellable_cancel (notif->priv->cancellable);
 
-	if (priv->cancellable != NULL)
-		g_cancellable_cancel (priv->cancellable);
-
-	if (priv->soup_session != NULL) {
-		g_signal_handlers_disconnect_by_func (
-			priv->soup_session,
-			ews_notification_authenticate, object);
-		g_clear_object (&priv->soup_session);
+	if (notif->priv->soup_session != NULL) {
+		g_signal_handlers_disconnect_by_func (notif->priv->soup_session, ews_notification_authenticate, object);
+		g_clear_object (&notif->priv->soup_session);
 	}
 
-	if (priv->cancellable != NULL)
-		g_clear_object (&priv->cancellable);
-
-	g_weak_ref_set (&priv->connection_wk, NULL);
+	g_clear_object (&notif->priv->cancellable);
+	g_weak_ref_set (&notif->priv->connection_wk, NULL);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_notification_parent_class)->dispose (object);
@@ -216,8 +206,6 @@ static void
 e_ews_notification_class_init (EEwsNotificationClass *class)
 {
 	GObjectClass *object_class;
-
-	g_type_class_add_private (class, sizeof (EEwsNotificationPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_notification_set_property;
@@ -253,7 +241,7 @@ e_ews_notification_init (EEwsNotification *notification)
 {
 	gint log_level;
 
-	notification->priv = E_EWS_NOTIFICATION_GET_PRIVATE (notification);
+	notification->priv = e_ews_notification_get_instance_private (notification);
 
 	g_weak_ref_init (&notification->priv->connection_wk, NULL);
 

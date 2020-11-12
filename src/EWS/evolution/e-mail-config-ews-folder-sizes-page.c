@@ -17,10 +17,6 @@
 
 #include "e-mail-config-ews-folder-sizes-page.h"
 
-#define E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE, EMailConfigEwsFolderSizesPagePrivate))
-
 #define E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE_SORT_ORDER \
 	(E_MAIL_CONFIG_SECURITY_PAGE_SORT_ORDER + 10)
 
@@ -38,6 +34,7 @@ enum {
 static void e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsFolderSizesPage, e_mail_config_ews_folder_sizes_page, GTK_TYPE_SCROLLED_WINDOW, 0,
+	G_ADD_PRIVATE_DYNAMIC (EMailConfigEwsFolderSizesPage)
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_ews_folder_sizes_page_interface_init))
 
 static void
@@ -141,19 +138,12 @@ mail_config_ews_folder_sizes_page_get_property (GObject *object,
 static void
 mail_config_ews_folder_sizes_page_dispose (GObject *object)
 {
-	EMailConfigEwsFolderSizesPagePrivate *priv;
+	EMailConfigEwsFolderSizesPage *ews_page;
 
-	priv = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE_GET_PRIVATE (object);
+	ews_page = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object);
 
-	if (priv->account_source != NULL) {
-		g_object_unref (priv->account_source);
-		priv->account_source = NULL;
-	}
-
-	if (priv->registry != NULL) {
-		g_object_unref (priv->registry);
-		priv->registry = NULL;
-	}
+	g_clear_object (&ews_page->priv->account_source);
+	g_clear_object (&ews_page->priv->registry);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_folder_sizes_page_parent_class)->dispose (object);
@@ -203,8 +193,6 @@ e_mail_config_ews_folder_sizes_page_class_init (EMailConfigEwsFolderSizesPageCla
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (EMailConfigEwsFolderSizesPagePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = mail_config_ews_folder_sizes_page_set_property;
 	object_class->get_property = mail_config_ews_folder_sizes_page_get_property;
@@ -249,7 +237,7 @@ e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *if
 static void
 e_mail_config_ews_folder_sizes_page_init (EMailConfigEwsFolderSizesPage *page)
 {
-	page->priv = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE_GET_PRIVATE (page);
+	page->priv = e_mail_config_ews_folder_sizes_page_get_instance_private (page);
 }
 
 void

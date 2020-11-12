@@ -14,10 +14,6 @@
 #include <libsoup/soup.h>
 #include "e-soap-response.h"
 
-#define E_SOAP_RESPONSE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), E_TYPE_SOAP_RESPONSE, ESoapResponsePrivate))
-
 struct _ESoapResponsePrivate {
 	/* the XML document */
 	xmlDocPtr xmldoc;
@@ -28,7 +24,7 @@ struct _ESoapResponsePrivate {
 	GList *parameters;
 };
 
-G_DEFINE_TYPE (ESoapResponse, e_soap_response, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (ESoapResponse, e_soap_response, G_TYPE_OBJECT)
 
 static xmlNode *
 soup_xml_real_node (xmlNode *node)
@@ -42,14 +38,10 @@ soup_xml_real_node (xmlNode *node)
 static void
 soap_response_finalize (GObject *object)
 {
-	ESoapResponsePrivate *priv;
+	ESoapResponse *resp = E_SOAP_RESPONSE (object);
 
-	priv = E_SOAP_RESPONSE_GET_PRIVATE (object);
-
-	if (priv->xmldoc != NULL)
-		xmlFreeDoc (priv->xmldoc);
-
-	g_list_free (priv->parameters);
+	g_clear_pointer (&resp->priv->xmldoc, xmlFreeDoc);
+	g_list_free (resp->priv->parameters);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_soap_response_parent_class)->finalize (object);
@@ -60,8 +52,6 @@ e_soap_response_class_init (ESoapResponseClass *class)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (class, sizeof (ESoapResponsePrivate));
-
 	object_class = G_OBJECT_CLASS (class);
 	object_class->finalize = soap_response_finalize;
 }
@@ -69,7 +59,7 @@ e_soap_response_class_init (ESoapResponseClass *class)
 static void
 e_soap_response_init (ESoapResponse *response)
 {
-	response->priv = E_SOAP_RESPONSE_GET_PRIVATE (response);
+	response->priv = e_soap_response_get_instance_private (response);
 
 	response->priv->xmldoc = xmlNewDoc ((const xmlChar *)"1.0");
 }

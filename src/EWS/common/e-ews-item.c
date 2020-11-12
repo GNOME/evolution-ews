@@ -21,8 +21,6 @@
 #include "e-ews-item.h"
 #include "e-ews-item-change.h"
 
-G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
-
 struct _EEwsContactFields {
 	gchar *fileas;
 	gchar *display_name;
@@ -152,6 +150,8 @@ struct _EEwsItemPrivate {
 	struct _EEwsTaskFields *task_fields;
 };
 
+G_DEFINE_TYPE_WITH_PRIVATE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
+
 static void	ews_item_free_attendee (EwsAttendee *attendee);
 static void	ews_free_contact_fields (struct _EEwsContactFields *con_fields);
 
@@ -266,15 +266,13 @@ e_ews_item_class_init (EEwsItemClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	g_type_class_add_private (klass, sizeof (EEwsItemPrivate));
-
 	object_class->dispose = e_ews_item_dispose;
 }
 
 static void
 e_ews_item_init (EEwsItem *item)
 {
-	item->priv = G_TYPE_INSTANCE_GET_PRIVATE (item, E_TYPE_EWS_ITEM, EEwsItemPrivate);
+	item->priv = e_ews_item_get_instance_private (item);
 
 	item->priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
 	item->priv->body_type = E_EWS_BODY_TYPE_ANY;
