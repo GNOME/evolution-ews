@@ -495,8 +495,10 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	camel_ews_settings_lock (ews_settings);
 
 	gtk_expander_set_expanded (GTK_EXPANDER (expander),
-		e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), NULL) != 0 ||
-		e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (ews_settings), NULL) != 0 ||
+		(e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), NULL) != 0 &&
+		 e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), OFFICE365_ENDPOINT_HOST) != 0) ||
+		(e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (ews_settings), NULL) != 0 &&
+		 e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (ews_settings), OFFICE365_REDIRECT_URI) != 0) ||
 		e_util_strcmp0 (camel_ews_settings_get_oauth2_resource_uri (ews_settings), NULL) != 0);
 
 	camel_ews_settings_unlock (ews_settings);

@@ -470,7 +470,7 @@ camel_m365_settings_class_init (CamelM365SettingsClass *class)
 			"oauth2-tenant",
 			"OAuth2 Tenant",
 			"OAuth2 Tenant to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
-			NULL,
+			MICROSOFT365_TENANT,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -482,7 +482,7 @@ camel_m365_settings_class_init (CamelM365SettingsClass *class)
 			"oauth2-client-id",
 			"OAuth2 Client ID",
 			"OAuth2 Client-ID to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
-			NULL,
+			MICROSOFT365_CLIENT_ID,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -494,7 +494,7 @@ camel_m365_settings_class_init (CamelM365SettingsClass *class)
 			"oauth2-redirect-uri",
 			"OAuth2 Redirect URI",
 			"OAuth2 Redirect URI to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
-			NULL,
+			MICROSOFT365_REDIRECT_URI,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -506,7 +506,7 @@ camel_m365_settings_class_init (CamelM365SettingsClass *class)
 			"oauth2-endpoint-host",
 			"OAuth2 Endpoint Host",
 			"OAuth2 endpoint host to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
-			NULL,
+			MICROSOFT365_ENDPOINT_HOST,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
