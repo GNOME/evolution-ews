@@ -1,3 +1,18 @@
+Evolution-EWS 3.38.2 2020-11-20
+-------------------------------
+
+Bug Fixes:
+	I#132 - Server-side deleted calendar does not disappear (Milan Crha)
+
+Miscellaneous:
+	Listen for change notifications only on user folders (Milan Crha)
+	Calendar: Copy 'X-MICROSOFT-SKYPETEAMSMEETINGURL' into 'URL' property (Milan Crha)
+	Preset OAuth2 Client ID for Office365 (EWS) (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+	Anders Jonsson (sv)
+
 Evolution-EWS 3.38.1 2020-10-02
 -------------------------------
 
