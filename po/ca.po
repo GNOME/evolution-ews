@@ -167,7 +167,7 @@ msgstr "Connexió"
 #: ../src/camel/camel-ews-provider.c:70
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
-msgstr "Temps de connexió per finalitzar (en segons) %s"
+msgstr "Temps de _connexió per finalitzar (en segons) %s"
 
 #: ../src/camel/camel-ews-provider.c:72
 msgid "Override _User-Agent header value"
@@ -1170,11 +1170,11 @@ msgstr "Localització de llibretes d'adreces fora de línia"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:301
 msgid "Cache o_ffline address book"
-msgstr "Memòria cau de les llibretes d'adreces fora de línia"
+msgstr "_Memòria cau de les llibretes d'adreces fora de línia"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:327
 msgid "Select ad_dress list:"
-msgstr "Selecciona la llista d'adreces:"
+msgstr "S_elecciona la llista d'adreces:"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:351
 msgid "Fetch List"
@@ -1203,7 +1203,7 @@ msgstr "Envia re_spostes «Fora de l'oficina»"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:437
 msgid "Send Out of Office replies only _during this time period:"
-msgstr "Envia respostes «Fora de l'oficina» sols durant el període de temps:"
+msgstr "_Envia respostes «Fora de l'oficina» sols durant el període de temps:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:457
 msgid "_From:"
@@ -1365,7 +1365,7 @@ msgstr "L'URL «%s» no és vàlida"
 
 #: ../src/server/e-ews-connection.c:3187
 msgid "Email address is missing a domain part"
-msgstr "L'adreça de correu ha perdut una part del domini"
+msgstr "Falta una part del domini a l'adreça de correu"
 
 #: ../src/server/e-ews-connection.c:3542
 msgid "Failed to parse oab XML"
