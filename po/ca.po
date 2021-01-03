@@ -30,7 +30,7 @@ msgstr "Serveis web de l'Exchange"
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
 #: ../src/EWS/camel/camel-ews-provider.c:70
 msgid "For accessing Exchange servers using Web Services"
-msgstr "Per accedir a servidors Exchange usant serveis web"
+msgstr "Per a accedir a servidors Exchange usant serveis web"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:3512
 msgid "Failed to update GAL:"
@@ -199,7 +199,7 @@ msgstr "Connexió"
 #: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
-msgstr "Temps de _connexió per finalitzar (en segons) %s"
+msgstr "Temps de _connexió per a finalitzar (en segons) %s"
 
 #: ../src/EWS/camel/camel-ews-provider.c:57
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
@@ -253,9 +253,9 @@ msgid "Session has no storage path"
 msgstr "La sessió no té camí al magatzem"
 
 #. Translators: This composes a "Public Folders" folder name for case when
-#. * user has such in his store already. The %s is replaced with "Public Folders",
+#. * user has such in his store already. The %s is replaced with "Public
+#. Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
-#.
 #: ../src/EWS/camel/camel-ews-store.c:353
 #, c-format
 msgctxt "PublicFolders"
@@ -263,9 +263,9 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #. Translators: This composes a "Foreign Folders" folder name for case when
-#. * user has such in his store already. The %s is replaced with "Foreign Folders",
+#. * user has such in his store already. The %s is replaced with "Foreign
+#. Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
-#.
 #: ../src/EWS/camel/camel-ews-store.c:508
 #, c-format
 msgctxt "ForeignFolders"
@@ -433,7 +433,7 @@ msgstr ""
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
-msgstr "Heu d'estar en línia per completar aquesta operació"
+msgstr "Heu d'estar en línia per a completar aquesta operació"
 
 #: ../src/EWS/camel/camel-ews-store.c:3959
 #: ../src/EWS/camel/camel-ews-store.c:3996
@@ -483,8 +483,8 @@ msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Office365."
 "com server"
 msgstr ""
-"Aquesta opció usarà el testimoni d'accés OAuth 2.0 per connectar al servidor "
-"Office365.com"
+"Aquesta opció usarà el testimoni d'accés OAuth 2.0 per a connectar al "
+"servidor Office365.com"
 
 #: ../src/EWS/common/e-ews-calendar-utils.c:1207
 #, c-format
@@ -518,18 +518,18 @@ msgstr "Sense resposta: %s"
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
-"El servidor Exchange és ocupat, esperant per provar de nou (%d:%02d minut)"
+"El servidor Exchange és ocupat, esperant per a provar de nou (%d:%02d minut)"
 msgstr[1] ""
-"El servidor Exchange és ocupat, esperant per provar de nou (%d:%02d minuts)"
+"El servidor Exchange és ocupat, esperant per a provar de nou (%d:%02d minuts)"
 
 #: ../src/EWS/common/e-ews-connection.c:1072
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
-"El servidor Exchange és ocupat, esperant per provar de nou (%d segon)"
+"El servidor Exchange és ocupat, esperant per a provar de nou (%d segon)"
 msgstr[1] ""
-"El servidor Exchange és ocupat, esperant per provar de nou (%d segons)"
+"El servidor Exchange és ocupat, esperant per a provar de nou (%d segons)"
 
 #: ../src/EWS/common/e-ews-connection.c:3215
 #, c-format
@@ -613,7 +613,8 @@ msgstr "No es pot afegir la carpeta, la font mestra no s'ha trobat"
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "No s'ha pogut afegir la carpeta, la carpeta existeix com «%s»"
 
-#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#. Translators: This is a user-visible string, display name of an OAuth2
+#. service.
 #: ../src/EWS/common/e-oauth2-service-office365.c:144
 msgctxt "OAuth2Service"
 msgid "Office365"
@@ -997,9 +998,9 @@ msgstr "Tria l'usuari EWS..."
 msgid "_Search:"
 msgstr "_Cerca:"
 
-#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Translators: The '%s' is replaced with user name, to whom the foreign
+#. mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
-#.
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:96
 #, c-format
 msgctxt "ForeignFolder"
@@ -1012,7 +1013,8 @@ msgstr ""
 "No es pot provar la disponibilitat de la carpeta aliena mentre el compte "
 "estigui fora de línia"
 
-#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#. Translators: This is used as a calendar name; it constructs "User Name -
+#. Availability" string shown in UI
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:314
 msgid "Availability"
 msgstr "Disponibilitat"
@@ -1024,7 +1026,7 @@ msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"No s'ha trobat la carpeta «%s». O bé no existeix o no teniu permís per "
+"No s'ha trobat la carpeta «%s». O bé no existeix o no teniu permís per a "
 "accedir-hi."
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
@@ -1103,7 +1105,6 @@ msgstr "L'usuari amb nom «%s» és ambigu, especifiqueu-lo de forma més precis
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
-#.
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:879
 #, c-format
 msgctxt "ForeignFolder"
@@ -1177,23 +1178,32 @@ msgstr "No hi ha configurada cap ID d'aplicació per defecte"
 msgid "Default application ID is “%s”"
 msgstr "L'ID de l'aplicació per defecte és «%s»"
 
-#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a
+#. company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a
+#. company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "Identificador del _tenant:"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in an Office 365 world. Same for 'common', it's a
+#. default URL path.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 msgid "Default tenant ID is “common“"
 msgstr "L'identificador del tenant per defecte és «common»"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
 msgid "Default tenant ID is “%s”"
@@ -1350,9 +1360,10 @@ msgid ""
 "where I am the organizer to:"
 msgstr ""
 "Proporcioneu les sol·licituds de reunió adreçades a mi i les respostes a les "
-"sol·licituds de reunió on sóc l'organitzador de:"
+"sol·licituds de reunió on soc l'organitzador de:"
 
-#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner
+#. label
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1087
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
@@ -1472,14 +1483,16 @@ msgstr "Contesteu a qualsevol remitent fora de l'organització"
 msgid "Retrieving “Out of Office” settings"
 msgstr "S'estan recuperant els paràmetres de «Fora de l'oficina»"
 
-#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#. Translators: the first %s is replaced with a user name, the second %s is
+#. replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
 msgstr ""
 "%s (%s) us ha convidat a visualitzar el seu calendari de Microsoft Exchange."
 
-#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#. Translators: the first %s is replaced with a user name, the second %s is
+#. replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
@@ -1698,7 +1711,7 @@ msgstr "No s'ha pogut crear la connexió"
 #: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "Parent folder “%s” does not exist"
-msgstr "La carpeta pare «%s» no existeix«"
+msgstr "La carpeta pare «%s» no existeix"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:895
 msgid "Cannot find “Deleted Items” folder"
@@ -1732,7 +1745,8 @@ msgstr ""
 "Aquesta opció usarà un testimoni d'accés OAuth 2.0 per a connectar-se al "
 "servidor del Microsoft 365"
 
-#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#. Translators: This is a user-visible string, display name of an OAuth2
+#. service.
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
@@ -1768,14 +1782,19 @@ msgstr "No s'han pogut analitzar les dades JSON pròpies"
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "S_obreescriu els paràmetres OAuth2 del Microsoft 365"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in a Microsoft 365 world. Same for 'common', it's a
+#. default URL path.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
 msgid "Default tenant is “common“"
 msgstr "El tenant per defecte és «common»"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:277
 #, c-format
 msgid "Default tenant is “%s”"
@@ -1789,21 +1808,3 @@ msgstr "URI de _redirecció:"
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "La font de dades «%s» no representa una carpeta del Microsoft 365"
-
-#~ msgid "User “%s” was not found on the server"
-#~ msgstr "L'usuari «%s» no s'ha trobat al servidor"
-
-#~ msgid "There is not set any default tenant"
-#~ msgstr "No hi ha configurat cap inquilí per defecte"
-
-#~ msgid "Tenant cannot be empty"
-#~ msgstr "L'inquilí no pot estar buit"
-
-#~ msgid "The backend does not support bulk additions"
-#~ msgstr "El rerefons no permet les addicions en bloc"
-
-#~ msgid "The backend does not support bulk modifications"
-#~ msgstr "El rerefons no permet les modificacions en bloc"
-
-#~ msgid "Authentication password not available"
-#~ msgstr "No està disponible l'autenticació per contrasenya"
