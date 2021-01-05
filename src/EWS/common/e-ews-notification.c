@@ -164,6 +164,12 @@ ews_notification_constructed (GObject *object)
 			camel_ews_settings_get_auth_mechanism (ews_settings));
 
 		g_object_unref (ews_settings);
+
+		e_binding_bind_property (
+			cnc, "proxy-resolver",
+			notif->priv->soup_session, "proxy-resolver",
+			G_BINDING_SYNC_CREATE);
+
 		g_object_unref (cnc);
 	}
 }
