@@ -594,7 +594,7 @@ static void
 ews_backend_source_changed_cb (ESource *source,
                                EEwsBackend *backend)
 {
-	if (!e_source_get_enabled (source)) {
+	if (!e_collection_backend_get_part_enabled (E_COLLECTION_BACKEND (backend), E_COLLECTION_BACKEND_PART_ANY)) {
 		backend->priv->need_update_folders = TRUE;
 		return;
 	}
@@ -800,12 +800,13 @@ ews_backend_folders_synced_cb (GObject *source,
 }
 
 static void
-ews_backend_populate (ECollectionBackend *backend)
+ews_backend_populate (ECollectionBackend *collection_backend)
 {
 	ESource *source;
-	EEwsBackend *ews_backend = E_EWS_BACKEND (backend);
+	EEwsBackend *ews_backend = E_EWS_BACKEND (collection_backend);
+	EBackend *backend = E_BACKEND (ews_backend);
 
-	source = e_backend_get_source (E_BACKEND (backend));
+	source = e_backend_get_source (backend);
 
 	ews_backend->priv->need_update_folders = TRUE;
 
@@ -816,32 +817,32 @@ ews_backend_populate (ECollectionBackend *backend)
 	}
 
 	/* do not do anything, if account is disabled */
-	if (!e_source_get_enabled (source))
+	if (!e_collection_backend_get_part_enabled (collection_backend, E_COLLECTION_BACKEND_PART_ANY))
 		return;
 
-	if (!e_collection_backend_freeze_populate (backend)) {
-		e_collection_backend_thaw_populate (backend);
+	if (!e_collection_backend_freeze_populate (collection_backend)) {
+		e_collection_backend_thaw_populate (collection_backend);
 		return;
 	}
 
 	ews_backend_add_gal_source (ews_backend);
-	ews_backend_claim_old_resources (backend);
+	ews_backend_claim_old_resources (collection_backend);
 
-	if (e_backend_get_online (E_BACKEND (backend))) {
+	if (e_backend_get_online (backend)) {
 		CamelEwsSettings *ews_settings;
 
 		ews_settings = ews_backend_get_settings (ews_backend);
 
 		if (e_ews_connection_utils_get_without_password (ews_settings)) {
-			e_backend_schedule_authenticate (E_BACKEND (backend), NULL);
+			e_backend_schedule_authenticate (backend, NULL);
 		} else {
-			e_backend_credentials_required_sync (E_BACKEND (backend),
+			e_backend_credentials_required_sync (backend,
 				E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
 				NULL, NULL);
 		}
 	}
 
-	e_collection_backend_thaw_populate (backend);
+	e_collection_backend_thaw_populate (collection_backend);
 }
 
 static gchar *

@@ -59,7 +59,7 @@ static void
 m365_backend_source_changed_cb (ESource *source,
 				EM365Backend *backend)
 {
-	if (!e_source_get_enabled (source)) {
+	if (!e_collection_backend_get_part_enabled (E_COLLECTION_BACKEND (backend), E_COLLECTION_BACKEND_PART_ANY)) {
 		backend->priv->need_update_folders = TRUE;
 		return;
 	}
@@ -71,10 +71,11 @@ m365_backend_source_changed_cb (ESource *source,
 }
 
 static void
-m365_backend_populate (ECollectionBackend *backend)
+m365_backend_populate (ECollectionBackend *collection_backend)
 {
 	ESource *source;
-	EM365Backend *m365_backend = E_M365_BACKEND (backend);
+	EM365Backend *m365_backend = E_M365_BACKEND (collection_backend);
+	EBackend *backend = E_BACKEND (m365_backend);
 
 	source = e_backend_get_source (E_BACKEND (backend));
 
@@ -86,20 +87,20 @@ m365_backend_populate (ECollectionBackend *backend)
 	}
 
 	/* do not do anything, if account is disabled */
-	if (!e_source_get_enabled (source))
+	if (!e_collection_backend_get_part_enabled (collection_backend, E_COLLECTION_BACKEND_PART_ANY))
 		return;
 
-	if (!e_collection_backend_freeze_populate (backend)) {
-		e_collection_backend_thaw_populate (backend);
+	if (!e_collection_backend_freeze_populate (collection_backend)) {
+		e_collection_backend_thaw_populate (collection_backend);
 		return;
 	}
 
-	m365_backend_claim_old_resources (backend);
+	m365_backend_claim_old_resources (collection_backend);
 
-	if (e_backend_get_online (E_BACKEND (backend)))
-		e_backend_schedule_authenticate (E_BACKEND (backend), NULL);
+	if (e_backend_get_online (backend))
+		e_backend_schedule_authenticate (backend, NULL);
 
-	e_collection_backend_thaw_populate (backend);
+	e_collection_backend_thaw_populate (collection_backend);
 }
 
 static void
