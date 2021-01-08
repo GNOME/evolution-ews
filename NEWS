@@ -1,3 +1,12 @@
+Evolution-EWS 3.38.3 2021-01-08
+-------------------------------
+
+Bug Fixes:
+	eds-I#286 - Skip collection account refresh when parts disabled (Milan Crha)
+
+Miscellaneous:
+	EEwsNotification: Use proxy settings from the connection object (Milan Crha)
+
 Evolution-EWS 3.38.2 2020-11-20
 -------------------------------
 
