@@ -1,3 +1,44 @@
+Evolution-EWS 3.39.1 2021-01-08
+-------------------------------
+
+Bug Fixes:
+	I#90 - Handle share folder invitation mails (Milan Crha)
+	I#120 - Created public folder not visible after restart (Milan Crha)
+	I#121 - Allow change of the Microsoft 365 OAuth2 endpoints (Milan Crha)
+	I#123 - Show HTML Description in calendar entries, when available (Milan Crha)
+	I#132 - Server-side deleted calendar does not disappear (Milan Crha)
+	eds-I#281 - GLibTools.cmake: Use basename in glib-mkenums templates (Milan Crha)
+	eds-I#286 - Skip collection account refresh when parts disabled (Milan Crha)
+	evo-I#1097 - Provide HTML invitation description, when available (Milan Crha)
+
+Miscellaneous:
+	EEwsConfigLookup: Harmonize a translatable string with Evolution (Milan Crha)
+	Allow OAuth2 for any server, not only for outlook.office365.com (Milan Crha)
+	Listen for change notifications only on user folders (Milan Crha)
+	Flip Application ID and Tenant ID in the OAuth2 properties (Milan Crha)
+	Simplify code around OAuth2 processing (Milan Crha)
+	Preset OAuth2 Client ID for Office365 (EWS) (Milan Crha)
+	Calendar: Copy 'X-MICROSOFT-SKYPETEAMSMEETINGURL' into 'URL' property (Milan Crha)
+	Bump glib requirement to 2.62, due to used functions from that version (Milan Crha)
+	Fix new compiler warnings introduced by GLib minimum version bump (Milan Crha)
+	Prefill compile-time OAuth2 settings, to be shown in the GUI (Milan Crha)
+	GLibTools.cmake: Generate signal marshallers without source reference (Milan Crha)
+	EEwsNotification: Use proxy settings from the connection object (Milan Crha)
+
+Translations:
+	Goran Vidović (hr)
+	Yuri Chornoivan (uk)
+	Piotr Drąg (pl)
+	Daniel Mustieles (es)
+	Marek Černocký (cs)
+	Andika Triwidada (id)
+	Anders Jonsson (sv)
+	Aurimas Černius (lt)
+	Henrique Machado Campos (pt_BR)
+	Enrico Nicoletto (pt_BR)
+	Jordi Mas (ca)
+	Jordi Mas i Hernandez (ca)
+
 Evolution-EWS 3.38.0 2020-09-11
 -------------------------------
 
