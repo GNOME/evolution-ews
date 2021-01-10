@@ -286,8 +286,8 @@ msgstr "Busca categories de servidor d'Exchange"
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
-msgstr[0] "La contrasenya expira en %d dia. Obriu «%s» per canviar-la."
-msgstr[1] "La contrasenya expira en %d dies. Obriu «%s» per canviar-la."
+msgstr[0] "La contrasenya expira en %d dia. Obriu «%s» per a canviar-la."
+msgstr[1] "La contrasenya expira en %d dies. Obriu «%s» per a canviar-la."
 
 #: ../src/EWS/camel/camel-ews-store.c:1569
 #, c-format
