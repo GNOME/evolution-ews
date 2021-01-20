@@ -297,9 +297,6 @@ e_ews_collect_attendees (ICalComponent *comp,
 
 		g_object_unref (param);
 	}
-
-	if (*required == NULL && *optional == NULL && *resource == NULL && org_email_address != NULL)
-		*required = g_slist_prepend (*required, (gpointer) org_email_address);
 }
 
 gint
