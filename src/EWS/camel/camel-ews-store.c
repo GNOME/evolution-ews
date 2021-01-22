@@ -3294,6 +3294,26 @@ ews_rename_folder_sync (CamelStore *store,
 				goto out;
 			}
 			g_free (parent_name);
+		} else {
+			gchar *inbox_id;
+
+			inbox_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_summary, CAMEL_FOLDER_TYPE_INBOX);
+
+			if (!inbox_id) {
+				g_set_error (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+					_("Folder %s does not exist"), _("Inbox"));
+				goto out;
+			}
+
+			pfid = camel_ews_store_summary_get_parent_folder_id (ews_summary, inbox_id, NULL);
+
+			g_free (inbox_id);
+
+			if (!pfid) {
+				g_set_error (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+					_("Cannot find folder ID for parent folder %s"), _("Inbox"));
+				goto out;
+			}
 		}
 
 		res = e_ews_connection_move_folder_sync (
