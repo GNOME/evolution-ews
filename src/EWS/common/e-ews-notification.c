@@ -20,6 +20,7 @@
 G_DEFINE_TYPE (EEwsNotification, e_ews_notification, G_TYPE_OBJECT)
 
 struct _EEwsNotificationPrivate {
+	GMutex thread_lock;
 	SoupSession *soup_session;
 	GWeakRef connection_wk;
 	GByteArray *chunk;
@@ -168,12 +169,6 @@ ews_notification_constructed (GObject *object)
 			camel_ews_settings_get_auth_mechanism (ews_settings));
 
 		g_object_unref (ews_settings);
-
-		e_binding_bind_property (
-			cnc, "proxy-resolver",
-			notif->priv->soup_session, "proxy-resolver",
-			G_BINDING_SYNC_CREATE);
-
 		g_object_unref (cnc);
 	}
 }
@@ -213,6 +208,7 @@ ews_notification_finalize (GObject *object)
 
 	g_weak_ref_clear (&notif->priv->connection_wk);
 	g_free (notif->priv->last_subscription_id);
+	g_mutex_clear (&notif->priv->thread_lock);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_ews_notification_parent_class)->finalize (object);
@@ -262,8 +258,9 @@ e_ews_notification_init (EEwsNotification *notification)
 	notification->priv = E_EWS_NOTIFICATION_GET_PRIVATE (notification);
 
 	g_weak_ref_init (&notification->priv->connection_wk, NULL);
+	g_mutex_init (&notification->priv->thread_lock);
 
-	notification->priv->soup_session = soup_session_sync_new ();
+	notification->priv->soup_session = soup_session_new ();
 
 	soup_session_add_feature_by_type (notification->priv->soup_session,
 					  SOUP_TYPE_COOKIE_JAR);
@@ -299,6 +296,9 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 
 	g_return_val_if_fail (notification != NULL, FALSE);
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (cancellable))
+		return FALSE;
 
 	cnc = e_ews_notification_ref_connection (notification);
 
@@ -845,6 +845,9 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 	g_return_val_if_fail (notification != NULL, FALSE);
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
 
+	if (g_cancellable_is_cancelled (cancellable))
+		return FALSE;
+
 	cnc = e_ews_notification_ref_connection (notification);
 
 	if (!cnc)
@@ -893,20 +896,25 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		return FALSE;
 	}
 
+	/* Unref it early, thus it doesn't keep the connection alive after all backends are freed */
+	g_object_unref (cnc);
+
 	cancel_handler_id = g_cancellable_connect (cancellable, G_CALLBACK (ews_notification_cancelled_cb),
 		notifcation_cancel_data_new (notification->priv->soup_session, SOUP_MESSAGE (msg)), notifcation_cancel_data_free);
 
-	status_code = soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
+	if (g_cancellable_is_cancelled (cancellable))
+		status_code = SOUP_STATUS_CANCELLED;
+	else
+		status_code = soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
 
 	if (cancel_handler_id > 0)
 		g_cancellable_disconnect (cancellable, cancel_handler_id);
 
 	ret = SOUP_STATUS_IS_SUCCESSFUL (status_code);
-	*out_fatal_error = SOUP_STATUS_IS_CLIENT_ERROR (status_code) || SOUP_STATUS_IS_SERVER_ERROR (status_code);
+	*out_fatal_error = SOUP_STATUS_IS_CLIENT_ERROR (status_code) || SOUP_STATUS_IS_SERVER_ERROR (status_code) || status_code == SOUP_STATUS_CANCELLED;
 
 	g_signal_handler_disconnect (msg, handler_id);
 	g_object_unref (msg);
-	g_object_unref (cnc);
 
 	return ret;
 }
@@ -915,12 +923,29 @@ static gpointer
 e_ews_notification_get_events_thread (gpointer user_data)
 {
 	EEwsNotificationThreadData *td = user_data;
+	EEwsConnection *cnc;
 	gchar *subscription_id = NULL;
 	gboolean ret, fatal_error = FALSE;
 
 	g_return_val_if_fail (td != NULL, NULL);
 	g_return_val_if_fail (td->notification != NULL, NULL);
 	g_return_val_if_fail (td->folders != NULL, NULL);
+
+	g_mutex_lock (&td->notification->priv->thread_lock);
+
+	cnc = e_ews_notification_ref_connection (td->notification);
+
+	if (cnc) {
+		GProxyResolver *proxy_resolver = NULL;
+
+		/* Skip GBinding here, due to the notification object can be freed in this thread,
+		   which can cause a crash in the GBinding code. */
+		g_object_get (cnc, "proxy-resolver", &proxy_resolver, NULL);
+		g_object_set (td->notification->priv->soup_session, "proxy-resolver", proxy_resolver, NULL);
+
+		g_clear_object (&proxy_resolver);
+		g_object_unref (cnc);
+	}
 
 	if (td->notification->priv->last_subscription_id) {
 		e_ews_notification_unsubscribe_folder_sync (td->notification, td->notification->priv->last_subscription_id);
@@ -960,6 +985,7 @@ exit:
 		g_free (subscription_id);
 	}
 
+	g_mutex_unlock (&td->notification->priv->thread_lock);
 	g_slist_free_full (td->folders, g_free);
 	g_object_unref (td->cancellable);
 	g_object_unref (td->notification);
