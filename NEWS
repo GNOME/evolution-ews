@@ -1,3 +1,16 @@
+Evolution-EWS 3.38.4 2021-02-12
+-------------------------------
+
+Bug Fixes:
+	I#140 - Calendar: Do not add organizer as the only attendee in Import (Milan Crha)
+	I#141 - Mail: Drop to account name hides dragged folder (Milan Crha)
+
+Miscellaneous:
+	e-ews-notification: Add thread safety around get_events thread (Milan Crha)
+
+Translations:
+	Мирослав Николић (sr)
+
 Evolution-EWS 3.38.3 2021-01-08
 -------------------------------
 
