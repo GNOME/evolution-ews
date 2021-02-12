@@ -1994,7 +1994,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		}
 
 		/* Compare the item_type from summary as the updated items seems to
-		 * arrive as generic types while its not the case */
+		 * arrive as generic types while it's not the case */
 		mi = camel_folder_summary_get (camel_folder_get_folder_summary (folder), id->id);
 		if (!mi) {
 			g_object_unref (item);
@@ -2351,7 +2351,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	is_drafts_folder = camel_ews_utils_folder_is_drafts_folder (ews_folder);
 
 	/* Sync folder items does not return the fields ToRecipients,
-	 * CCRecipients. With the item_type unknown, its not possible
+	 * CCRecipients. With the item_type unknown, it's not possible
 	 * to fetch the right properties which are valid for an item type.
 	 * Due to these reasons we just get the item ids and its type in
 	 * SyncFolderItem request and fetch the item using the

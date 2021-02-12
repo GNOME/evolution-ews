@@ -1135,7 +1135,7 @@ e_soap_message_get_xml_doc (ESoapMessage *msg)
  *
  * Parses the response returned by the server.
  *
- * Returns: a #ESoapResponse representing the response from
+ * Returns: an #ESoapResponse representing the response from
  * the server, or %NULL if there was an error.
  */
 ESoapResponse *

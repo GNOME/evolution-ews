@@ -47,7 +47,7 @@ mail_config_m365_backend_new_collection (EMailConfigServiceBackend *backend)
 	 * the backend is associated with.  We return a new collection
 	 * for both the Receiving Page and Sending Page.  Although the
 	 * Sending Page instance ultimately gets discarded, it's still
-	 * needed to avoid creating an [Microsoft365 Backend] extension
+	 * needed to avoid creating a [Microsoft365 Backend] extension
 	 * in the mail transport source. */
 
 	class = E_MAIL_CONFIG_SERVICE_BACKEND_GET_CLASS (backend);

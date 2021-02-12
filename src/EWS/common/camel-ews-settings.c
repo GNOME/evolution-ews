@@ -867,7 +867,7 @@ camel_ews_settings_unlock (CamelEwsSettings *settings)
  * camel_ews_settings_get_auth_mechanism:
  * @settings: a #CamelEwsSettings
  *
- * Returns a #EwsAuthType enum value indicating which authentication
+ * Returns an #EwsAuthType enum value indicating which authentication
  * method to use.
  *
  * Returns: authentication method to use for this account

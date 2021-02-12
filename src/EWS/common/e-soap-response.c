@@ -347,7 +347,7 @@ e_soap_parameter_get_string_value (ESoapParameter *param)
 
 /**
  * e_soap_parameter_get_first_child:
- * @param: A #ESoapParameter.
+ * @param: An #ESoapParameter.
  *
  * Gets the first child of the given #ESoapParameter. This is used
  * for compound data types, which can contain several parameters
@@ -365,7 +365,7 @@ e_soap_parameter_get_first_child (ESoapParameter *param)
 
 /**
  * e_soap_parameter_get_first_child_by_name:
- * @param: A #ESoapParameter.
+ * @param: An #ESoapParameter.
  * @name: The name of the child parameter to look for.
  *
  * Gets the first child of the given #ESoapParameter whose name is
@@ -395,7 +395,7 @@ e_soap_parameter_get_first_child_by_name (ESoapParameter *param,
 
 /**
  * e_soap_parameter_get_next_child:
- * @param: A #ESoapParameter.
+ * @param: An #ESoapParameter.
  *
  * Gets the next sibling of the given #ESoapParameter. This is used
  * for compound data types, which can contain several parameters
@@ -416,7 +416,7 @@ e_soap_parameter_get_next_child (ESoapParameter *param)
 
 /**
  * e_soap_parameter_get_next_child_by_name:
- * @param: A #ESoapParameter.
+ * @param: An #ESoapParameter.
  * @name: The name of the sibling parameter to look for.
  *
  * Gets the next sibling of the given #ESoapParameter whose name is
@@ -501,7 +501,7 @@ e_soap_response_get_parameter (ESoapResponse *response)
  *
  * Retrieves the first parameter contained in the SOAP response.
  *
- * Returns: a #ESoapParameter representing the first
+ * Returns: an #ESoapParameter representing the first
  * parameter, or %NULL if there are no parameters.
  */
 ESoapParameter *
@@ -528,7 +528,7 @@ e_soap_response_get_first_parameter (ESoapResponse *response)
  * The function also checks for a SOAP "faultstring" parameter and,
  * if found, uses it to set the #GError message.
  *
- * Returns: a #ESoapParameter representing the first parameter
+ * Returns: an #ESoapParameter representing the first parameter
  * with the given name, or %NULL.
  */
 ESoapParameter *
@@ -588,7 +588,7 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
  * Retrieves the parameter following @from in the #ESoapResponse
  * object.
  *
- * Returns: a #ESoapParameter representing the parameter.
+ * Returns: an #ESoapParameter representing the parameter.
  */
 ESoapParameter *
 e_soap_response_get_next_parameter (ESoapResponse *response,
@@ -615,7 +615,7 @@ e_soap_response_get_next_parameter (ESoapResponse *response,
  * Retrieves the first parameter following @from in the
  * #ESoapResponse object whose name matches @name.
  *
- * Returns: a #ESoapParameter representing the parameter.
+ * Returns: an #ESoapParameter representing the parameter.
  */
 ESoapParameter *
 e_soap_response_get_next_parameter_by_name (ESoapResponse *response,

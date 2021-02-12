@@ -473,7 +473,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	} else if (g_strcmp0 (orig_foldername, _("Tasks")) == 0) {
 		use_foldername = g_strdup ("tasks");
 	} else if (strlen (orig_foldername) > 13) {
-		/* if its a folder ID, then show only first 10 letters of it */
+		/* if it's a folder ID, then show only first 10 letters of it */
 		show_foldername = g_strdup_printf ("%.10s…", orig_foldername);
 	}
 

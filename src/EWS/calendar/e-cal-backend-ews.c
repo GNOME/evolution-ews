@@ -3826,7 +3826,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 			GSList *l;
 
 			/*
-			 * user can accept meeting but mark it as free in it's calendar
+			 * user can accept meeting but mark it as free in its calendar
 			 * the following code is updating the exchange meeting status to free
 			 */
 			for (l = ids; l != NULL; l = g_slist_next (l)) {
@@ -4062,7 +4062,7 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 		return;
 	}
 
-	/* make sure ical data we parse is actually an vcal component */
+	/* make sure ical data we parse is actually a vcal component */
 	if (i_cal_component_isa (icomp) != I_CAL_VCALENDAR_COMPONENT &&
 	    i_cal_component_isa (icomp) != I_CAL_VEVENT_COMPONENT) {
 		g_object_unref (icomp);

@@ -2165,7 +2165,7 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* This can be used as a EM365ConnectionJsonFunc function, it only
+/* This can be used as an EM365ConnectionJsonFunc function, it only
    copies items of 'results' into 'user_data', which is supposed
    to be a pointer to a GSList *. */
 gboolean
