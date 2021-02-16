@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-02-14 22:05+0000\n"
-"PO-Revision-Date: 2021-02-16 16:06+0100\n"
+"POT-Creation-Date: 2021-02-16 15:46+0000\n"
+"PO-Revision-Date: 2021-02-16 16:54+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -1192,14 +1192,12 @@ msgstr "El ID predeterminado de la aplicación es «%s»"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
-#| msgid "_Tenant:"
 msgid "_Tenant ID:"
 msgstr "ID del «tenant»:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
-#| msgid "Default tenant is “common“"
 msgid "Default tenant ID is “common“"
 msgstr "El «tenant» predeterminado es «common»"
 
@@ -1207,13 +1205,11 @@ msgstr "El «tenant» predeterminado es «common»"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant ID is “%s”"
 msgstr "El ID predeterminado del «tenant» es «%s»"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
-#| msgid "EWS Settings"
 msgid "_Advanced Settings"
 msgstr "_Configuración avanzada"
 
@@ -1227,12 +1223,10 @@ msgstr "Equipo de punto _final:"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default endpoint host is “%s”"
 msgstr "El equipo de punto final es «%s»"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
-#| msgid "_Redirect URI:"
 msgid "Red_irect URI:"
 msgstr "URI de _redirección:"
 
@@ -1245,7 +1239,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "El URI de redirección predeterminado es «%s»"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
-#| msgid "_Redirect URI:"
 msgid "Re_source URI:"
 msgstr "URI del r_ecurso:"
 
@@ -1657,8 +1650,12 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Estado de la carpeta no válido (falta el almacenamiento padre)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
+#| msgid ""
+#| "Cannot add messages into an Microsoft 365 account from another account. "
+#| "Only messages from the same account can be moved/copied between the "
+#| "Microsoft 365 folders."
 msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
+"Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
 "folders."
 msgstr ""
