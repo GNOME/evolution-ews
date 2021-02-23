@@ -3275,24 +3275,24 @@ ecb_ews_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 	}
 
 	convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
+	convert_data.change_type = E_EWS_ITEMCHANGE_TYPE_ITEM;
+	convert_data.index = -1;
 
-	if (e_cal_component_has_recurrences (comp)) {
+	if (rid && *rid) {
+		ICalComponent *icomp;
 		gint index;
 
-		convert_data.change_type = E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM;
-		index = e_cal_component_get_sequence (comp);
+		icomp = e_cal_component_get_icalcomponent (comp);
+		index = e_cal_backend_ews_rid_to_index (
+			ecb_ews_get_timezone_from_icomponent (cbews, icomp),
+			rid,
+			icomp,
+			NULL);
 
 		if (index > 0) {
-			/*Microsoft is counting the occurrences starting from 1
-			 where EcalComponent is starting from zerro */
-			convert_data.index = index + 1;
-		} else {
-			convert_data.change_type = E_EWS_ITEMCHANGE_TYPE_ITEM;
-			convert_data.index = -1;
+			convert_data.change_type = E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM;
+			convert_data.index = index;
 		}
-	} else {
-		convert_data.change_type = E_EWS_ITEMCHANGE_TYPE_ITEM;
-		convert_data.index = -1;
 	}
 
 	ecb_ews_extract_item_id (comp, &convert_data.item_id, &convert_data.change_key);
