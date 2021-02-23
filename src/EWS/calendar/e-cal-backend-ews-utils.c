@@ -1520,11 +1520,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	const gchar *old_msdn_location_start = NULL, *old_msdn_location_end = NULL;
 	const gchar *msdn_location_start = NULL, *msdn_location_end = NULL;
 	gchar *rrule_value, *rrule_old_value;
-	gboolean has_alarms, has_alarms_old;
 	gboolean dt_start_changed = FALSE, dt_end_changed = FALSE, dt_changed;
 	gboolean dt_start_changed_timezone_name = FALSE, dt_end_changed_timezone_name = FALSE;
 	gboolean satisfies, rsvp_requested = TRUE, is_all_day_event = FALSE;
-	gint alarm = 0, alarm_old = 0;
 	gchar *recid;
 
 	/* Modifying a recurring meeting ? */
@@ -1588,13 +1586,15 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	}
 
 	/*update alarm items*/
-	has_alarms = e_cal_component_has_alarms (convert_data->comp);
-	if (has_alarms) {
+	if (e_cal_component_has_alarms (convert_data->comp)) {
+		gint alarm, alarm_old = -1;
+		gboolean has_alarms_old;
+
 		alarm = ews_get_alarm (convert_data->comp);
 		has_alarms_old = e_cal_component_has_alarms (convert_data->old_comp);
 		if (has_alarms_old)
 			alarm_old = ews_get_alarm (convert_data->old_comp);
-		if (!(alarm == alarm_old)) {
+		if (alarm != alarm_old || !has_alarms_old) {
 			gchar buf[20];
 			snprintf (buf, 20, "%d", alarm);
 			convert_vevent_property_to_updatexml (msg, "ReminderIsSet", "true", "item", NULL, NULL);
