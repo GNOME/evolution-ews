@@ -240,14 +240,28 @@ endif(WITH_MICROSOFT365_ENDPOINT_HOST STREQUAL "")
 
 set(privlibdir "${LIB_INSTALL_DIR}/${PROJECT_NAME}")
 
-pkg_check_variable(errordir evolution-shell-3.0 errordir)
-pkg_check_variable(evo_privlibdir evolution-shell-3.0 privlibdir)
 pkg_check_variable(camel_providerdir camel-1.2 camel_providerdir)
 pkg_check_variable(ebook_backenddir libedata-book-1.2 backenddir)
 pkg_check_variable(ecal_backenddir libedata-cal-2.0 backenddir)
 pkg_check_variable(eds_moduledir libebackend-1.2 moduledir)
-pkg_check_variable(evo_moduledir evolution-shell-3.0 moduledir)
 pkg_check_variable(ewsdatadir evolution-data-server-1.2 privdatadir)
+pkg_check_variable(evo_privlibdir evolution-shell-3.0 privlibdir)
+pkg_check_variable(errordir evolution-shell-3.0 errordir)
+pkg_check_variable(evo_moduledir evolution-shell-3.0 moduledir)
+
+add_printable_variable(FORCE_INSTALL_PREFIX "Whether to force install evolution-data-server and evolution files into the install prefix" OFF)
+if(FORCE_INSTALL_PREFIX)
+	pkg_check_variable(eds_prefix evolution-data-server-1.2 prefix)
+	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" camel_providerdir "${camel_providerdir}")
+	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" ebook_backenddir "${ebook_backenddir}")
+	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" ecal_backenddir "${ecal_backenddir}")
+	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" eds_moduledir "${eds_moduledir}")
+	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" ewsdatadir "${ewsdatadir}")
+
+	pkg_check_variable(evo_prefix evolution-shell-3.0 prefix)
+	string(REGEX REPLACE "^${evo_prefix}" "${CMAKE_INSTALL_PREFIX}" errordir "${errordir}")
+	string(REGEX REPLACE "^${evo_prefix}" "${CMAKE_INSTALL_PREFIX}" evo_moduledir "${evo_moduledir}")
+endif(FORCE_INSTALL_PREFIX)
 
 set(ewsdatadir "${ewsdatadir}/ews")
 

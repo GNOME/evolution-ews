@@ -4089,6 +4089,7 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	EBookMetaBackendClass *book_meta_backend_class;
 
 	book_meta_backend_class = E_BOOK_META_BACKEND_CLASS (klass);
+	book_meta_backend_class->backend_module_directory = BACKENDDIR;
 	book_meta_backend_class->backend_module_filename = "libebookbackendews.so";
 	book_meta_backend_class->backend_factory_type_name = "EBookBackendEwsFactory";
 	book_meta_backend_class->connect_sync = ebb_ews_connect_sync;
