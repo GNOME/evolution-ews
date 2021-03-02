@@ -248,7 +248,7 @@ soap_sax_characters (gpointer _ctxt,
 			g_warning ("Failed to write streaming data to file");
 		}
 	} else {
-		guchar *bdata = g_malloc (len);
+		guchar *bdata = g_malloc ((len * 3 / 4) + 3);
 		gsize blen;
 
 		blen = g_base64_decode_step (
