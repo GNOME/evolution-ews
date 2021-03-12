@@ -1,3 +1,26 @@
+Evolution-EWS 3.39.3 2021-03-12
+-------------------------------
+
+Bug Fixes:
+	I#144 - Calendar: Dismiss of a reminder doesn't provide recurrence ID (Milan Crha)
+	I#145 - Calendar: Cannot create event with reminder "at the start" (Milan Crha)
+	M!5 - Correct typos in a/an (Дилян Палаузов)
+
+Miscellaneous:
+	CMake: Add FORCE_INSTALL_PREFIX compile time option (Milan Crha)
+	Allocate large-enough buffer for g_base64_decode_step() (Milan Crha)
+
+Translations:
+	Balázs Úr (hu)
+	Daniel Mustieles (es)
+	Emin Tufan Çetin (tr)
+	Yuri Chornoivan (uk)
+	Anders Jonsson (sv)
+	Kukuh Syafaat (id)
+	Piotr Drąg (pl)
+	Aurimas Černius (lt)
+	Philipp Kiemle (de)
+
 Evolution-EWS 3.39.2 2021-02-12
 -------------------------------
 
