@@ -1,17 +1,17 @@
 # Brazilian Portuguese translation for evolution-ews.
-# Copyright (C) 2020 evolution-ews's COPYRIGHT HOLDER
+# Copyright (C) 2021 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 # Gabriel Speckhahn <gabspeck@gmail.com>, 2012.
 # Rafael Fontenelle <rafaelff@gnome.org>, 2012-2020.
 # Henrique Machado Campos <henriquecamposrj@gmail.com>, 2020.
-# Enrico Nicoletto <liverig@gmail.com>, 2013, 2020.
+# Enrico Nicoletto <liverig@gmail.com>, 2013, 2020-2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-11-18 20:12+0000\n"
-"PO-Revision-Date: 2020-11-20 16:15-0300\n"
+"POT-Creation-Date: 2021-03-02 11:28+0000\n"
+"PO-Revision-Date: 2021-03-12 18:40-0300\n"
 "Last-Translator: Enrico Nicoletto <liverig@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -87,7 +87,7 @@ msgstr ""
 msgid "Cannot find user “%s” between attendees"
 msgstr "Não foi possível localizar o usuário “%s” entre os participantes"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
 msgid "Invalid occurrence ID"
 msgstr "ID de ocorrência inválida"
 
@@ -361,6 +361,7 @@ msgstr ""
 "públicas"
 
 #: ../src/EWS/camel/camel-ews-store.c:3208
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A pasta %s não existe"
@@ -376,68 +377,77 @@ msgid "Cannot both rename and move a folder at the same time"
 msgstr "Não é possível renomear e mover uma pasta ao mesmo tempo"
 
 #: ../src/EWS/camel/camel-ews-store.c:3291
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Não foi possível encontrar o ID de pasta para a pasta pai %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3343
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Caixa de entrada"
+
+#: ../src/EWS/camel/camel-ews-store.c:3363
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3366
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Serviço Exchange para %s em %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3390
+#: ../src/EWS/camel/camel-ews-store.c:3410
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Não foi possível localizar a pasta Lixeira"
 
-#: ../src/EWS/camel/camel-ews-store.c:3450
+#: ../src/EWS/camel/camel-ews-store.c:3470
 #: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Não foi possível localizar a pasta Lixo eletrônico"
 
-#: ../src/EWS/camel/camel-ews-store.c:3641
+#: ../src/EWS/camel/camel-ews-store.c:3661
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr ""
 "Não é possível realizar a inscrição das pastas EWS no modo desconectado"
 
-#: ../src/EWS/camel/camel-ews-store.c:3664
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Não foi possível realizar a inscrição da pasta “%s”, pois não há pasta "
 "pública disponível"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3694
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 "Não foi possível realizar a inscrição da pasta “%s”, pois ela não foi "
 "encontrada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3765
+#: ../src/EWS/camel/camel-ews-store.c:3785
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr ""
 "Não é possível realizar o cancelamento da inscrição das pastas EWS no modo "
 "desconectado"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3902
 #: ../src/Microsoft365/camel/camel-m365-store.c:1774
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Você precisa estar trabalhando online para completar essa operação"
 
-#: ../src/EWS/camel/camel-ews-store.c:3959
-#: ../src/EWS/camel/camel-ews-store.c:3996
+#: ../src/EWS/camel/camel-ews-store.c:3979
+#: ../src/EWS/camel/camel-ews-store.c:4016
 msgid "Unsetting the “Out of Office” status"
 msgstr "Desmarcando o estado de “Fora do escritório”"
 
@@ -1040,12 +1050,6 @@ msgstr ""
 "Não foi possível adicionar a pasta, pois não foi possível determinar o tipo "
 "da pasta"
 
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
-msgid "Inbox"
-msgstr "Caixa de entrada"
-
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
 msgid "Contacts"
@@ -1254,25 +1258,25 @@ msgstr ""
 "O URI de recurso padrão é derivado do URL do servidor, ou eventualmente "
 "retornar para \"%s\"."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:732
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
 msgid "Host URL is not valid"
 msgstr "A URL do host não é válida"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:736
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
 msgid "Host URL cannot be empty"
 msgstr "A URL do servidor não pode estar vazia"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:747
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
 msgid "OAB URL is not valid"
 msgstr "A URL de OAB não é válida"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:757
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Nome de usuário não pode estar vazio"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:771
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:534
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "ID de aplicativo não pode estar vazia"
 
@@ -1558,15 +1562,15 @@ msgstr "Foi realizada a inscrição na pasta."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Foi realizada com sucesso a inscrição na pasta do usuário \"{0}\"."
 
-#: ../src/EWS/registry/e-ews-backend.c:999
-#: ../src/Microsoft365/registry/e-m365-backend.c:688
+#: ../src/EWS/registry/e-ews-backend.c:1000
+#: ../src/Microsoft365/registry/e-m365-backend.c:689
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Não foi possível determinar uma classe de pasta apropriada para uma nova "
 "pasta chamada “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1088
+#: ../src/EWS/registry/e-ews-backend.c:1089
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -1648,7 +1652,7 @@ msgstr "Estado de pasta inválido (faltando armazenamento pai)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
 msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
+"Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
 "folders."
 msgstr ""
@@ -1790,7 +1794,7 @@ msgstr "Locatário padrão é “%s”"
 msgid "_Redirect URI:"
 msgstr "URI de _redirecionamento:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:779
+#: ../src/Microsoft365/registry/e-m365-backend.c:780
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Fonte de dados “%s” não representa uma pasta do Microsoft 365"
