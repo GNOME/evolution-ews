@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-11-18 20:12+0000\n"
-"PO-Revision-Date: 2021-02-14 23:02+0100\n"
+"POT-Creation-Date: 2021-03-02 11:28+0000\n"
+"PO-Revision-Date: 2021-03-17 00:33+0100\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -84,7 +84,7 @@ msgstr ""
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nem található a(z) „%s” felhasználó a jelenlévők között"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
 msgid "Invalid occurrence ID"
 msgstr "Érvénytelen előfordulási azonosító"
 
@@ -361,6 +361,7 @@ msgstr ""
 "használatban"
 
 #: ../src/EWS/camel/camel-ews-store.c:3208
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A(z) %s mappa nem létezik"
@@ -376,62 +377,71 @@ msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nem lehet egyszerre átnevezni és mozgatni a mappát"
 
 #: ../src/EWS/camel/camel-ews-store.c:3291
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nem található a(z) %s szülőmappa mappaazonosítója"
 
-#: ../src/EWS/camel/camel-ews-store.c:3343
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Beérkezett üzenetek"
+
+#: ../src/EWS/camel/camel-ews-store.c:3363
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "%s Exchange kiszolgáló"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3366
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange szolgáltatás %s számára ezen: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3390
+#: ../src/EWS/camel/camel-ews-store.c:3410
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "A Kuka mappa nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3450
+#: ../src/EWS/camel/camel-ews-store.c:3470
 #: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "A Levélszemét mappa nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3641
+#: ../src/EWS/camel/camel-ews-store.c:3661
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nem lehet EWS mappákra feliratkozni kapcsolat nélküli módban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3664
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nem lehet feliratkozni a(z) „%s” mappára, nem érhető el nyilvános mappa"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3694
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nem lehet feliratkozni a(z) „%s” mappára, a mappa nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3765
+#: ../src/EWS/camel/camel-ews-store.c:3785
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nem lehet EWS mappákról leiratkozni kapcsolat nélküli módban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3902
 #: ../src/Microsoft365/camel/camel-m365-store.c:1774
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "A művelet befejezéséhez online kell dolgoznia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3959
-#: ../src/EWS/camel/camel-ews-store.c:3996
+#: ../src/EWS/camel/camel-ews-store.c:3979
+#: ../src/EWS/camel/camel-ews-store.c:4016
 msgid "Unsetting the “Out of Office” status"
 msgstr "„Házon kívül” állapot törlése"
 
@@ -659,7 +669,6 @@ msgstr "OAB URL: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
-#| msgid "Requires user password to continue"
 msgid "Requires password to continue."
 msgstr "A folytatáshoz jelszó szükséges."
 
@@ -1030,12 +1039,6 @@ msgstr ""
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nem vehető fel a mappa, nem határozható meg a mappa típusa"
 
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
-msgid "Inbox"
-msgstr "Beérkezett üzenetek"
-
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
 msgid "Contacts"
@@ -1181,14 +1184,12 @@ msgstr "Az alapértelmezett alkalmazásazonosító: „%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
-#| msgid "_Tenant:"
 msgid "_Tenant ID:"
 msgstr "_Bérlőzonosító:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
-#| msgid "Default tenant is “common“"
 msgid "Default tenant ID is “common“"
 msgstr "Az alapértelmezett bérlőazonosító: „common”"
 
@@ -1196,13 +1197,11 @@ msgstr "Az alapértelmezett bérlőazonosító: „common”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant ID is “%s”"
 msgstr "Az alapértelmezett bérlőazonosító: „%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
-#| msgid "EWS Settings"
 msgid "_Advanced Settings"
 msgstr "_Speciális beállítások"
 
@@ -1216,12 +1215,10 @@ msgstr "_Végpontgép:"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default endpoint host is “%s”"
 msgstr "Az alapértelmezett végpontgép: „%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
-#| msgid "_Redirect URI:"
 msgid "Red_irect URI:"
 msgstr "Át_irányítási URI:"
 
@@ -1234,7 +1231,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "Az alapértelmezett átirányítási URI: „%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
-#| msgid "_Redirect URI:"
 msgid "Re_source URI:"
 msgstr "_Erőforrás URI:"
 
@@ -1244,28 +1240,28 @@ msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
 "back to “%s”."
 msgstr ""
-"Az alapértelmezett erőforrás URI a gép URL-ből van származtatva, vagy végső"
-" soron visszaválthat „%s” értékre."
+"Az alapértelmezett erőforrás URI a gép URL-ből van származtatva, vagy végső "
+"soron visszaválthat „%s” értékre."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:732
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
 msgid "Host URL is not valid"
 msgstr "A gép URL nem érvényes"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:736
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
 msgid "Host URL cannot be empty"
 msgstr "A gép URL nem lehet üres"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:747
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
 msgid "OAB URL is not valid"
 msgstr "Az OAB URL nem érvényes"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:757
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "A felhasználónév nem lehet üres"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:771
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:534
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Az alkalmazásazonosító nem lehet üres"
 
@@ -1492,7 +1488,8 @@ msgstr "%s (%s) meghívta Önt, hogy megnézze az ő Microsoft Exchange mappáj�
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
 msgid "Click the Subscribe button to add it to Evolution."
 msgstr ""
-"Kattintson a Feliratkozás gombra az Evolution alkalmazáshoz való hozzáadáshoz."
+"Kattintson a Feliratkozás gombra az Evolution alkalmazáshoz való "
+"hozzáadáshoz."
 
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:125
 msgid "Subscribe"
@@ -1511,7 +1508,6 @@ msgid "Display part as EWS sharing metadata"
 msgstr "Rész megjelenítése EWS megosztási metaadatokként"
 
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
-#| msgid "Subscribe to folder of other user…"
 msgid "Subscribing EWS folder…"
 msgstr "Feliratkozás EWS mappára…"
 
@@ -1551,13 +1547,13 @@ msgstr "A mappára fel lett iratkozva."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "„{0}” felhasználó mappájára sikeresen fel lett iratkozva."
 
-#: ../src/EWS/registry/e-ews-backend.c:999
-#: ../src/Microsoft365/registry/e-m365-backend.c:688
+#: ../src/EWS/registry/e-ews-backend.c:1000
+#: ../src/Microsoft365/registry/e-m365-backend.c:689
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nem határozható meg megfelelő mappaosztály a(z) „%s” nevű új mappához"
 
-#: ../src/EWS/registry/e-ews-backend.c:1088
+#: ../src/EWS/registry/e-ews-backend.c:1089
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -1566,7 +1562,6 @@ msgstr ""
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
-#| msgid "Folder does not exist"
 msgid "Folder ID is not set"
 msgstr "A mappaazonosító nincs beállítva"
 
@@ -1583,8 +1578,8 @@ msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
 msgstr ""
-"A Microsoft 365 naptár nem tud RDATE, EXDATE vagy RRULE tulajdonsággal"
-" rendelkező összetevőt tárolni"
+"A Microsoft 365 naptár nem tud RDATE, EXDATE vagy RRULE tulajdonsággal "
+"rendelkező összetevőt tárolni"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
 #, c-format
@@ -1604,7 +1599,8 @@ msgstr ""
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
-"A Microsoft 365 feladatnak csak abszolút idővel rendelkező emlékeztetője lehet"
+"A Microsoft 365 feladatnak csak abszolút idővel rendelkező emlékeztetője "
+"lehet"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
 #, c-format
@@ -1612,12 +1608,10 @@ msgid "Cannot store attachment with URI “%s”"
 msgstr "Nem lehet a(z) „%s” URI-val rendelkező mellékletet eltárolni"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
-#| msgid "Failed to read From address"
 msgid "Failed to read attachment URI"
 msgstr "Nem sikerült beolvasni melléklet URI-ját"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
-#| msgid "Failed to set contact photo:"
 msgid "Failed to get inline attachment data"
 msgstr "Nem sikerült lekérni a beágyazott melléklet adatait"
 
@@ -1639,14 +1633,18 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Érvénytelen mappaállapot (hiányzó szülőtárolás)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
+#| msgid ""
+#| "Cannot add messages into an Microsoft 365 account from another account. "
+#| "Only messages from the same account can be moved/copied between the "
+#| "Microsoft 365 folders."
 msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
+"Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
 "folders."
 msgstr ""
-"Nem lehet üzeneteket hozzáadni egy Microsoft 365 fiókba egy másik fiókból."
-" Csak ugyanabból a fiókból származó üzenetek helyezhetők át vagy másolhatók a"
-" Microsoft 365 mappák között."
+"Nem lehet üzeneteket hozzáadni egy Microsoft 365 fiókba egy másik fiókból. "
+"Csak ugyanabból a fiókból származó üzenetek helyezhetők át vagy másolhatók a "
+"Microsoft 365 mappák között."
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1746
 #, c-format
@@ -1655,7 +1653,6 @@ msgstr "A(z) „%s” mappa nem felel meg egyetlen ismert mappának sem"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1765
 #, c-format
-#| msgid "Could not load summary for %s"
 msgid "Could not load summary for “%s”"
 msgstr "Nem sikerült betölteni a(z) „%s” összefoglalását"
 
@@ -1679,66 +1676,54 @@ msgstr "Levélfogadás Microsoft 365-ön keresztül"
 #: ../src/Microsoft365/camel/camel-m365-store.c:201
 #: ../src/Microsoft365/common/e-m365-connection.c:1521
 #, c-format
-#| msgid "Default redirect URI is “%s”"
 msgid "Malformed URI: “%s”"
 msgstr "Helytelenül formázott URI: „%s”"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:534
-#| msgid "Look up Exchange server categories"
 msgid "Look up Microsoft 365 categories"
 msgstr "Microsoft 365 kategóriák keresése"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:543
 #: ../src/Microsoft365/camel/camel-m365-transport.c:183
-#| msgid "Failed to set contact photo:"
 msgid "Failed to create connection"
 msgstr "Nem sikerült a kapcsolat létrehozása"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
-#| msgid "Parent folder %s does not exist"
 msgid "Parent folder “%s” does not exist"
 msgstr "A(z) „%s” szülőmappa nem létezik"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:895
-#| msgid "Cannot find folder ID for parent folder %s"
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Nem található a „Törölt elemek” mappa"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:986
 #: ../src/Microsoft365/camel/camel-m365-store.c:1024
 #, c-format
-#| msgid "Folder %s does not exist"
 msgid "Folder “%s” does not exist"
 msgstr "A(z) „%s” mappa nem létezik"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:259
-#| msgid "Exchange mail delivery via %s"
 msgid "Mail delivery via Microsoft 365"
 msgstr "Levélkézbesítés Microsoft 365-ön keresztül"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:297
-#| msgid "Exchange server cannot send message with multiple From addresses"
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr ""
-"A Microsoft 365 kiszolgáló nem tud több Feladó címmel rendelkező üzenetet"
-" küldeni"
+"A Microsoft 365 kiszolgáló nem tud több Feladó címmel rendelkező üzenetet "
+"küldeni"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
-#| msgid "OAuth2 (Office365)"
 msgid "OAuth2 (Microsoft 365)"
 msgstr "OAuth2 (Microsoft 365)"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:15
-#| msgid ""
-#| "This option will use an OAuth 2.0 access token to connect to the "
-#| "Office365.com server"
 msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Microsoft "
 "365 server"
 msgstr ""
-"Ez a beállítás egy OAuth 2.0 hozzáférési tokent fog használni a Microsoft 365"
-" kiszolgálóhoz való kapcsolódáshoz"
+"Ez a beállítás egy OAuth 2.0 hozzáférési tokent fog használni a Microsoft "
+"365 kiszolgálóhoz való kapcsolódáshoz"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
@@ -1748,37 +1733,31 @@ msgstr "Microsoft365"
 
 #: ../src/Microsoft365/common/e-m365-connection.c:1179
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
-"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:%02d"
-" perc)"
+"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:"
+"%02d perc)"
 msgstr[1] ""
-"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:%02d"
-" perc)"
+"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:"
+"%02d perc)"
 
 #: ../src/Microsoft365/common/e-m365-connection.c:1185
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d second)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
-"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d"
-" másodperc)"
+"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d "
+"másodperc)"
 msgstr[1] ""
-"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d"
-" másodperc)"
+"A Microsoft 365 kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d "
+"másodperc)"
 
 #: ../src/Microsoft365/common/e-m365-connection.c:2037
-#| msgid "Failed to parse oab XML"
 msgid "Failed to parse own Json data"
 msgstr "Nem sikerült feldolgozni a saját JSON adatokat"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
-#| msgid "_Override Office365 OAuth2 settings"
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "Microsoft 365 OAuth2 beállítások _felülbírálása"
 
@@ -1799,11 +1778,7 @@ msgstr "Az alapértelmezett bérlő: „%s”"
 msgid "_Redirect URI:"
 msgstr "Átirányítási _URI:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:779
+#: ../src/Microsoft365/registry/e-m365-backend.c:780
 #, c-format
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "A(z) „%s” adatforrás nem Microsoft 365 mappát képvisel"
-
-#~ msgid "User “%s” was not found on the server"
-#~ msgstr "„%s” felhasználó nem található a kiszolgálón"
