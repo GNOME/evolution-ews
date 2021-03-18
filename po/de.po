@@ -3,22 +3,23 @@
 #
 # Tim Sabsch <tim@sabsch.com>, 2019.
 # Mario Blättermann <mario.blaettermann@gmail.com>, 2011-2012, 2015-2018, 2021.
+# Johannes Maibaum <jmaibaum@gmail.com>, 2021.
 # Philipp Kiemle <philipp.kiemle@gmail.com>, 2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-03-05 12:09+0000\n"
-"PO-Revision-Date: 2021-03-08 18:33+0100\n"
-"Last-Translator: Philipp Kiemle <philipp.kiemle@gmail.com>\n"
+"POT-Creation-Date: 2021-03-09 05:39+0000\n"
+"PO-Revision-Date: 2021-03-11 07:58+0100\n"
+"Last-Translator: Johannes Maibaum <jmaibaum@gmail.com>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Generator: Gtranslator 3.38.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -1442,7 +1443,7 @@ msgstr "Kei_ne Abwesenheitsantworten versenden"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:403
 msgid "_Send Out of Office replies"
-msgstr "_Abwesenheits-Antworten verschicken"
+msgstr "_Abwesenheitsantworten verschicken"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:411
 msgid "Send Out of Office replies only _during this time period:"
@@ -1452,9 +1453,10 @@ msgstr "Abwesenheitsantworten nur während _dieser Zeit versenden:"
 msgid "_From:"
 msgstr "_Von:"
 
+# Bezieht sich auf den Zeitraum, in dem Abwesenheitsantworten versendet werden.
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:456
 msgid "_To:"
-msgstr "_An:"
+msgstr "_Bis:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:481
 msgid "I_nternal:"
