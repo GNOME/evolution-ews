@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-09-03 07:46+0000\n"
-"PO-Revision-Date: 2020-08-31 19:56+0200\n"
+"POT-Creation-Date: 2020-09-11 07:13+0000\n"
+"PO-Revision-Date: 2021-03-18 22:18+0100\n"
 "Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -1411,9 +1411,10 @@ msgstr "Abwesenheitsantworten nur während _dieser Zeit versenden:"
 msgid "_From:"
 msgstr "_Von:"
 
+# Bezieht sich auf den Zeitraum, in dem Abwesenheitsantworten versendet werden.
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:471
 msgid "_To:"
-msgstr "_An:"
+msgstr "_Bis:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:496
 msgid "I_nternal:"
