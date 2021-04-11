@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-01-14 21:29+0000\n"
-"PO-Revision-Date: 2021-01-20 12:06+0200\n"
+"POT-Creation-Date: 2021-03-19 11:15+0000\n"
+"PO-Revision-Date: 2021-04-11 20:47+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -84,7 +84,7 @@ msgstr ""
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не могу да нађем корисника „%s“ међу учесницима"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
 msgid "Invalid occurrence ID"
 msgstr "Неисправан ИБ догађаја"
 
@@ -359,6 +359,7 @@ msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Не могу да уклоним фасциклу „%s“, користи се само за јавне фасцикле"
 
 #: ../src/EWS/camel/camel-ews-store.c:3208
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Не постоји фасцикла „%s“"
@@ -374,61 +375,70 @@ msgid "Cannot both rename and move a folder at the same time"
 msgstr "Не могу у исто време да преименујем и да преместим фасциклу"
 
 #: ../src/EWS/camel/camel-ews-store.c:3291
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Не могу да пронађем ИБ фасцикле за родитељску фасциклу „%s“"
 
-#: ../src/EWS/camel/camel-ews-store.c:3343
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Пријемно сандуче"
+
+#: ../src/EWS/camel/camel-ews-store.c:3363
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Сервер размене %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3366
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Услуга размене за „%s“ на „%s“"
 
-#: ../src/EWS/camel/camel-ews-store.c:3390
+#: ../src/EWS/camel/camel-ews-store.c:3410
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Не могу да пронађем фасциклу за смеће"
 
-#: ../src/EWS/camel/camel-ews-store.c:3450
+#: ../src/EWS/camel/camel-ews-store.c:3470
 #: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Не могу да пронађем фасциклу за ђубре"
 
-#: ../src/EWS/camel/camel-ews-store.c:3641
+#: ../src/EWS/camel/camel-ews-store.c:3661
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Не могу да претплатим ВУР фасцикле у режиму ван мреже"
 
-#: ../src/EWS/camel/camel-ews-store.c:3664
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Не могу да претплатим фасциклу „%s“, нема доступне јавне фасцикле"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3694
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Не могу да претплатим фасциклу „%s“, нисам нашао фасциклу"
 
-#: ../src/EWS/camel/camel-ews-store.c:3765
+#: ../src/EWS/camel/camel-ews-store.c:3785
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не могу да поништим претплату ВУР фасцикли у режиму ван мреже"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3902
 #: ../src/Microsoft365/camel/camel-m365-store.c:1774
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Морате да будете на мрежи да бисте завршили ову радњу"
 
-#: ../src/EWS/camel/camel-ews-store.c:3959
-#: ../src/EWS/camel/camel-ews-store.c:3996
+#: ../src/EWS/camel/camel-ews-store.c:3979
+#: ../src/EWS/camel/camel-ews-store.c:4016
 msgid "Unsetting the “Out of Office” status"
 msgstr "Поништавам стање за „ван канцеларије“"
 
@@ -652,7 +662,6 @@ msgstr "ОАБ адреса: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
-#| msgid "Requires user password to continue"
 msgid "Requires password to continue."
 msgstr "Захтева лозинку за наставак."
 
@@ -1028,12 +1037,6 @@ msgstr ""
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Не могу да додам фасциклу, не могу да одредим врсту датотеке"
 
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
-msgid "Inbox"
-msgstr "Пријемно сандуче"
-
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
 msgid "Contacts"
@@ -1177,14 +1180,12 @@ msgstr "Основни ИБ програма је „%s“"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
-#| msgid "_Tenant:"
 msgid "_Tenant ID:"
 msgstr "ИБ _станара:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
-#| msgid "Default tenant is “common“"
 msgid "Default tenant ID is “common“"
 msgstr "Подразумевани ИБ станара је „common“"
 
@@ -1192,13 +1193,11 @@ msgstr "Подразумевани ИБ станара је „common“"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant ID is “%s”"
 msgstr "Основни ИБ станара је „%s“"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
-#| msgid "EWS Settings"
 msgid "_Advanced Settings"
 msgstr "Н_апредна подешавања"
 
@@ -1212,12 +1211,10 @@ msgstr "Домаћин _крајње тачке:"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default endpoint host is “%s”"
 msgstr "Основни домаћин крајње тачке је „%s“"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
-#| msgid "_Redirect URI:"
 msgid "Red_irect URI:"
 msgstr "Путања _преусмерења:"
 
@@ -1230,7 +1227,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "Основна адреса преусмерења је „%s“"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
-#| msgid "_Redirect URI:"
 msgid "Re_source URI:"
 msgstr "Путања _изворишта:"
 
@@ -1475,7 +1471,8 @@ msgstr "Довлачим подешавања за „ван канцелари�
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
-msgstr "%s (%s) вас позива да видите његов или њен календар Мајкрософт размене."
+msgstr ""
+"%s (%s) вас позива да видите његов или њен календар Мајкрософт размене."
 
 #. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
@@ -1505,7 +1502,6 @@ msgid "Display part as EWS sharing metadata"
 msgstr "Прикажите део као метаподатке EWS дељења"
 
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
-#| msgid "Subscribe to folder of other user…"
 msgid "Subscribing EWS folder…"
 msgstr "Претплаћујем се на EWS фасциклу…"
 
@@ -1630,8 +1626,12 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Неисправно стање фасцикле (недостаје главни смештај)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
+#| msgid ""
+#| "Cannot add messages into an Microsoft 365 account from another account. "
+#| "Only messages from the same account can be moved/copied between the "
+#| "Microsoft 365 folders."
 msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
+"Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
 "folders."
 msgstr ""
