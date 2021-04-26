@@ -65,7 +65,8 @@ filter_recipients (CamelMimeMessage *message,
 static void
 write_recipients (ESoapMessage *msg,
 		  const gchar *elem_name,
-		  GHashTable *recips)
+		  GHashTable *recips,
+		  gboolean is_resend)
 {
 	GHashTableIter iter;
 	gpointer key, value;
@@ -74,7 +75,7 @@ write_recipients (ESoapMessage *msg,
 	g_return_if_fail (elem_name != NULL);
 	g_return_if_fail (recips != NULL);
 
-	if (!g_hash_table_size (recips))
+	if (!is_resend && !g_hash_table_size (recips))
 		return;
 
 	e_soap_message_start_element (msg, elem_name, NULL, NULL);
@@ -87,6 +88,12 @@ write_recipients (ESoapMessage *msg,
 	}
 
 	e_soap_message_end_element (msg); /* elem_name */
+}
+
+static gboolean
+is_any_address_filled (CamelInternetAddress *addrs)
+{
+	return addrs && camel_address_length (CAMEL_ADDRESS (addrs)) > 0;
 }
 
 /* MAPI flags gleaned from windows header files */
@@ -282,6 +289,11 @@ create_mime_message_cb (ESoapMessage *msg,
 
 	if (create_data->recipients) {
 		GHashTable *recip_to, *recip_cc, *recip_bcc;
+		gboolean is_resend;
+
+		is_resend = is_any_address_filled (camel_mime_message_get_recipients (create_data->message, CAMEL_RECIPIENT_TYPE_RESENT_TO)) ||
+			    is_any_address_filled (camel_mime_message_get_recipients (create_data->message, CAMEL_RECIPIENT_TYPE_RESENT_CC)) ||
+			    is_any_address_filled (camel_mime_message_get_recipients (create_data->message, CAMEL_RECIPIENT_TYPE_RESENT_BCC));
 
 		recip_to = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
 		recip_cc = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
@@ -289,9 +301,9 @@ create_mime_message_cb (ESoapMessage *msg,
 
 		filter_recipients (create_data->message, create_data->recipients, recip_to, recip_cc, recip_bcc);
 
-		write_recipients (msg, "ToRecipients", recip_to);
-		write_recipients (msg, "CcRecipients", recip_cc);
-		write_recipients (msg, "BccRecipients", recip_bcc);
+		write_recipients (msg, "ToRecipients", recip_to, is_resend);
+		write_recipients (msg, "CcRecipients", recip_cc, is_resend);
+		write_recipients (msg, "BccRecipients", recip_bcc, is_resend);
 
 		g_hash_table_destroy (recip_to);
 		g_hash_table_destroy (recip_cc);
