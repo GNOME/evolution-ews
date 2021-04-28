@@ -2264,10 +2264,23 @@ e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
 	if (!zone)
 		zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
 
-	if (!zone)
+	if (!zone) {
 		zone = vcalendar ? i_cal_component_get_timezone (vcalendar, tzid) : NULL;
-	else
+
+		/* Workaround Teams bug - see https://gitlab.gnome.org/GNOME/evolution-ews/-/issues/151 */
+		if (!zone && vcalendar && strchr (tzid, ' ')) {
+			gchar *tmp;
+
+			tmp = g_strstrip (g_strdup (tzid));
+
+			if (tmp && *tmp)
+				zone = i_cal_component_get_timezone (vcalendar, tmp);
+
+			g_free (tmp);
+		}
+	} else {
 		g_object_ref (zone);
+	}
 
 	i_cal_time_set_timezone (dt, zone);
 
