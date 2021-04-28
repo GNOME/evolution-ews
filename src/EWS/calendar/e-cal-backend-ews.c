@@ -704,6 +704,10 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			start_tzid = e_ews_item_get_start_tzid (item);
 			end_tzid = e_ews_item_get_end_tzid (item);
 
+			/* Workaround Teams bug - see https://gitlab.gnome.org/GNOME/evolution-ews/-/issues/151 */
+			if (!start_tzid || !*start_tzid)
+				start_tzid = end_tzid;
+
 			ical_start_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (start_tzid);
 			ical_end_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (end_tzid);
 
