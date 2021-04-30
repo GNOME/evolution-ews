@@ -1,3 +1,20 @@
+Evolution-EWS 3.40.1 2021-04-30
+-------------------------------
+
+Bug Fixes:
+	I#150 - Mail: Message redirect sends also to original Cc/Bcc (Milan Crha)
+	I#151 - Calendar: Teams meeting may have invalid timezone information (Milan Crha)
+	eds-M!68 - SetupBuildFlags.cmake: Correct testing of two compiler/linker build flags (Matt Turner)
+
+Miscellaneous:
+	PrintableOptions.cmake: Correct variable name comparison (Milan Crha)
+
+Translations:
+	Asier Sarasua Garmendia (eu)
+	Gianvito Cavasoli (it)
+	Nathan Follens (nl)
+	Мирослав Николић (sr)
+
 Evolution-EWS 3.40.0 2021-03-19
 -------------------------------
 
