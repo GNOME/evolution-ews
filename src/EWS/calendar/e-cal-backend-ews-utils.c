@@ -641,9 +641,10 @@ ewscal_set_timezone (ESoapMessage *msg,
 
 void
 ewscal_set_meeting_timezone (ESoapMessage *msg,
-			     ICalTimezone *icaltz)
+			     ICalTimezone *icaltz,
+			     ICalComponent *icomp)
 {
-	ICalComponent *comp;
+	ICalComponent *comp, *copy;
 	ICalComponent *xstd, *xdaylight;
 	ICalDuration *duration;
 	const gchar *location;
@@ -657,14 +658,18 @@ ewscal_set_meeting_timezone (ESoapMessage *msg,
 	if (!comp)
 		return;
 
+	/* Clamp the time zone component, to get the relevant part only */
+	copy = i_cal_component_clone (comp);
+	g_clear_object (&comp);
+	comp = copy;
+	e_cal_util_clamp_vtimezone_by_component (comp, icomp);
+
 	/* Exchange needs a BaseOffset, followed by either *both*
 	 * Standard and Daylight zones, or neither of them. If there's
 	 * more than one STANDARD or DAYLIGHT component in the VTIMEZONE,
 	 * we ignore the extra. So fully-specified timezones including
 	 * historical DST rules cannot be handled by Exchange. */
 
-	/* FIXME: Walk through them all to find the *latest* ones, like
-	 * i_cal_timezone_get_tznames_from_vtimezone() does. */
 	xstd = i_cal_component_get_first_component (comp, I_CAL_XSTANDARD_COMPONENT);
 	xdaylight = i_cal_component_get_first_component (comp, I_CAL_XDAYLIGHT_COMPONENT);
 
@@ -1284,7 +1289,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	} else {
 		e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
 
-		ewscal_set_meeting_timezone (msg, tzid_start);
+		ewscal_set_meeting_timezone (msg, tzid_start, icomp);
 	}
 
 	e_soap_message_end_element (msg); /* "CalendarItem" */
@@ -1836,7 +1841,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
 
 		e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
-		ewscal_set_meeting_timezone (msg, tzid_start ? tzid_start : convert_data->default_zone);
+		ewscal_set_meeting_timezone (msg, tzid_start ? tzid_start : convert_data->default_zone, icomp);
 		e_ews_message_end_set_item_field (msg);
 	}
 

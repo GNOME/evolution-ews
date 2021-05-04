@@ -42,7 +42,7 @@ const gchar *e_ews_collect_organizer (ICalComponent *comp);
 void e_ews_collect_attendees (ICalComponent *comp, GSList **required, GSList **optional, GSList **resource, gboolean *out_rsvp_requested);
 
 void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd);
-void ewscal_set_meeting_timezone (ESoapMessage *msg, ICalTimezone *icaltz);
+void ewscal_set_meeting_timezone (ESoapMessage *msg, ICalTimezone *icaltz, ICalComponent *icomp);
 void ewscal_set_reccurence (ESoapMessage *msg, ICalProperty *rrule, ICalTime *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, ICalComponent *comp);
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
