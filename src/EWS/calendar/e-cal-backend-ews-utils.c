@@ -1528,31 +1528,14 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	gboolean dt_start_changed = FALSE, dt_end_changed = FALSE, dt_changed;
 	gboolean dt_start_changed_timezone_name = FALSE, dt_end_changed_timezone_name = FALSE;
 	gboolean satisfies, rsvp_requested = TRUE, is_all_day_event = FALSE;
-	gchar *recid;
 
-	/* Modifying a recurring meeting ? */
-	if (e_cal_util_component_has_property (icomp_old, I_CAL_RRULE_PROPERTY)) {
-		/* A single occurrence ? */
-		prop = i_cal_component_get_first_property (icomp, I_CAL_RECURRENCEID_PROPERTY);
-		if (prop != NULL) {
-			recid = i_cal_property_get_value_as_string (prop);
-			e_ews_message_start_item_change (
-				msg,
-				E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM,
-				convert_data->item_id,
-				convert_data->change_key,
-				e_cal_backend_ews_rid_to_index (
-					convert_data->default_zone,
-					recid,
-					icomp_old,
-					NULL));
-			g_object_unref (prop);
-			g_free (recid);
-		} else {
-			e_ews_message_start_item_change (
-				msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
-				convert_data->item_id, convert_data->change_key, 0);
-		}
+	if (convert_data->change_type == E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM && convert_data->index > 0) {
+		e_ews_message_start_item_change (
+			msg,
+			convert_data->change_type,
+			convert_data->item_id,
+			convert_data->change_key,
+			convert_data->index);
 	} else {
 		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 			convert_data->item_id, convert_data->change_key, 0);
