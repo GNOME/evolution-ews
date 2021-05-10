@@ -839,6 +839,15 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				}
 
 				g_object_unref (dt);
+
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, I_CAL_RECURRENCEID_PROPERTY, i_cal_property_get_recurrenceid);
+
+				if (dt && !i_cal_time_is_date (dt)) {
+					i_cal_time_convert_to_zone_inplace (dt, zone);
+					i_cal_component_set_recurrenceid (icomp, dt);
+				}
+
+				g_clear_object (&dt);
 			}
 
 			g_free (new_tzid);
@@ -985,6 +994,18 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				itt = i_cal_property_get_exdate (prop);
 				i_cal_time_set_is_date (itt, TRUE);
 				i_cal_property_set_exdate (prop, itt);
+
+				i_cal_property_remove_parameter_by_kind (prop, I_CAL_TZID_PARAMETER);
+			}
+
+			for (prop = i_cal_component_get_first_property (icomp, I_CAL_RECURRENCEID_PROPERTY);
+			     prop;
+			     g_object_unref (prop), prop = i_cal_component_get_next_property (icomp, I_CAL_RECURRENCEID_PROPERTY)) {
+				g_clear_object (&itt);
+
+				itt = i_cal_property_get_recurrenceid (prop);
+				i_cal_time_set_is_date (itt, TRUE);
+				i_cal_property_set_recurrenceid (prop, itt);
 
 				i_cal_property_remove_parameter_by_kind (prop, I_CAL_TZID_PARAMETER);
 			}
@@ -2530,10 +2551,11 @@ ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 	if (rid && !*rid)
 		rid = NULL;
 
-	if (!e_cal_cache_get_component (cal_cache, uid, rid, &comp, cancellable, error) ||
-	    (rid && !e_cal_cache_get_component (cal_cache, uid, NULL, &parent, cancellable, error))) {
+	if (!e_cal_cache_get_component (cal_cache, uid, rid, &comp, cancellable, NULL) ||
+	    (rid && !e_cal_cache_get_component (cal_cache, uid, NULL, &parent, cancellable, NULL))) {
 		if (!parent && !comp) {
-			g_propagate_error (error, ECC_ERROR (E_CAL_CLIENT_ERROR_OBJECT_NOT_FOUND));
+			if (!g_cancellable_set_error_if_cancelled (cancellable, error))
+				g_propagate_error (error, ECC_ERROR (E_CAL_CLIENT_ERROR_OBJECT_NOT_FOUND));
 			return FALSE;
 		}
 	}
@@ -2691,6 +2713,101 @@ ecb_ews_pick_all_tzids_out (ECalBackendEws *cbews,
 }
 
 static gboolean
+ecb_ews_get_change_type_is_instance (ECalBackendEws *cbews,
+				     ICalComponent *vcalendar,
+				     ICalComponent *subcomp,
+				     GCancellable *cancellable,
+				     EEwsItemChangeType *out_change_type,
+				     gint *out_index)
+{
+	gboolean res = FALSE;
+	gchar *rid;
+
+	g_return_val_if_fail (out_change_type != NULL, FALSE);
+	g_return_val_if_fail (out_index != NULL, FALSE);
+
+	if (!e_cal_util_component_is_instance (subcomp))
+		return FALSE;
+
+	rid = e_cal_util_component_get_recurid_as_string (subcomp);
+
+	if (rid && *rid) {
+		ICalComponent *main_comp = NULL;
+
+		if (vcalendar) {
+			ICalComponentKind kind;
+			ICalCompIter *iter;
+			const gchar *uid;
+
+			uid = i_cal_component_get_uid (subcomp);
+			kind = i_cal_component_isa (subcomp);
+
+			iter = i_cal_component_begin_component (vcalendar, kind);
+			main_comp = i_cal_comp_iter_deref (iter);
+			while (main_comp) {
+				if (g_strcmp0 (uid, i_cal_component_get_uid (main_comp)) == 0 &&
+				    !e_cal_util_component_is_instance (main_comp) &&
+				    e_cal_util_component_has_rrules (main_comp)) {
+					break;
+				}
+
+				g_object_unref (main_comp);
+				main_comp = i_cal_comp_iter_next (iter);
+			}
+
+			g_clear_object (&iter);
+		}
+
+		if (!main_comp) {
+			ECalCache *cal_cache;
+			ECalComponent *existing = NULL;
+
+			cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbews));
+
+			if (cal_cache && e_cal_cache_get_component (cal_cache, i_cal_component_get_uid (subcomp), NULL, &existing, cancellable, NULL) && existing) {
+				main_comp = e_cal_component_get_icalcomponent (existing);
+				g_object_ref (main_comp);
+				g_object_unref (existing);
+			}
+
+			g_clear_object (&cal_cache);
+		}
+
+		if (main_comp) {
+			gchar *mid, *sid;
+
+			mid = e_cal_util_component_dup_x_property (main_comp, "X-EVOLUTION-ITEMID");
+			sid = e_cal_util_component_dup_x_property (subcomp, "X-EVOLUTION-ITEMID");
+
+			/* Already detached instances do not need to do this */
+			if (mid && g_strcmp0 (mid, sid) == 0) {
+				gint index;
+
+				index = e_cal_backend_ews_rid_to_index (
+					ecb_ews_get_timezone_from_icomponent (cbews, main_comp),
+					rid,
+					main_comp,
+					NULL);
+
+				if (index > 0) {
+					res = TRUE;
+					*out_change_type = E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM;
+					*out_index = index;
+				}
+			}
+
+			g_clear_object (&main_comp);
+			g_free (mid);
+			g_free (sid);
+		}
+	}
+
+	g_free (rid);
+
+	return res;
+}
+
+static gboolean
 ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 			  guint32 opflags,
 			  GHashTable *removed_indexes,
@@ -2838,6 +2955,12 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		CamelEwsSettings *ews_settings;
 		const gchar *send_meeting_invitations;
 		const gchar *send_or_save;
+
+		if (!ecb_ews_get_change_type_is_instance (cbews, NULL, e_cal_component_get_icalcomponent (comp),
+			cancellable, &convert_data.change_type, &convert_data.index)) {
+			convert_data.change_type = E_EWS_ITEMCHANGE_TYPE_ITEM;
+			convert_data.index = -1;
+		}
 
 		ews_settings = ecb_ews_get_collection_settings (cbews);
 
@@ -3736,6 +3859,51 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 			ecb_ews_receive_objects_no_exchange_mail (cbews, vcalendar, subcomp, &ids, cancellable, &local_error);
 		} else {
 			EwsCalendarConvertData convert_data = { 0 };
+			EEwsItemChangeType change_type = E_EWS_ITEMCHANGE_TYPE_ITEM;
+			gint index = -1;
+
+			/* Need to detach an instance before modifying the response on it */
+			if (ecb_ews_get_change_type_is_instance (cbews, vcalendar, subcomp, cancellable, &change_type, &index)) {
+				EwsCalendarConvertData sub_convert_data = { 0 };
+				CamelEwsSettings *ews_settings;
+
+				ews_settings = ecb_ews_get_collection_settings (cbews);
+
+				sub_convert_data.change_type = change_type;
+				sub_convert_data.index = index;
+				sub_convert_data.connection = cbews->priv->cnc;
+				sub_convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
+				sub_convert_data.user_email = camel_ews_settings_dup_email (ews_settings);
+				sub_convert_data.comp = comp;
+				sub_convert_data.old_comp = comp; /* no change, just detach the instance */
+				sub_convert_data.item_id = item_id;
+				sub_convert_data.change_key = change_key;
+				sub_convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
+
+				e_ews_connection_update_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+					"AlwaysOverwrite", "SaveOnly", "SendToNone", cbews->priv->folder_id,
+					e_cal_backend_ews_convert_component_to_updatexml, &sub_convert_data,
+					&ids, cancellable, &local_error);
+
+				g_free (sub_convert_data.user_email);
+
+				if (!local_error && ids && !ids->next) {
+					EEwsItem *item = ids->data;
+					const EwsId *id = e_ews_item_get_id (item);
+
+					if (id) {
+						g_free (item_id);
+						g_free (change_key);
+
+						item_id = g_strdup (id->id);
+						change_key = g_strdup (id->change_key);
+					}
+				}
+
+				g_clear_error (&local_error);
+				g_slist_free_full (ids, g_object_unref);
+				ids = NULL;
+			}
 
 			convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 			convert_data.response_type = (gchar *) response_type;
@@ -3885,11 +4053,12 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 	ECalBackendEws *cbews;
 	ECalBackend *cal_backend;
 	CamelEwsSettings *ews_settings;
-	ICalComponent *icomp, *subcomp;
+	ICalComponent *icomp, *subcomp, *decline_main = NULL;
 	ICalComponentKind kind;
 	GHashTable *aliases;
 	gchar *user_email;
 	gboolean success = TRUE, do_refresh = FALSE;
+	gboolean decline_main_rsvp_requested = FALSE;
 
 	g_return_if_fail (E_IS_CAL_BACKEND_EWS (sync_backend));
 
@@ -3934,9 +4103,20 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, aliases, &rsvp_requested);
 			rsvp_requested = rsvp_requested && !(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE);
 
+			/* When the main component is declined, then decline also all detached instances and do them
+			   first, because the main component decline removes the whole series from the calendar. */
+			if (!decline_main && response_type && g_ascii_strcasecmp (response_type, "DECLINED") == 0 &&
+			    !e_cal_util_component_is_instance (subcomp)) {
+				decline_main = g_object_ref (subcomp);
+				decline_main_rsvp_requested = rsvp_requested;
+				g_free (response_type);
+				continue;
+			}
+
 			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (subcomp));
 
-			success = ecb_ews_do_method_request_publish_reply (cbews, icomp, comp, subcomp, response_type, user_email, rsvp_requested, cancellable, error);
+			success = ecb_ews_do_method_request_publish_reply (cbews, icomp, comp, subcomp,
+				decline_main ? "DECLINED" : response_type, user_email, rsvp_requested, cancellable, error);
 
 			do_refresh = TRUE;
 
@@ -3944,6 +4124,21 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			g_free (response_type);
 		}
 		g_clear_object (&subcomp);
+
+		if (decline_main && success) {
+			ECalComponent *comp;
+
+			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (decline_main));
+
+			success = ecb_ews_do_method_request_publish_reply (cbews, icomp, comp, decline_main,
+				"DECLINED", user_email, decline_main_rsvp_requested, cancellable, error);
+
+			do_refresh = TRUE;
+
+			g_object_unref (comp);
+		}
+
+		g_clear_object (&decline_main);
 		break;
 	case I_CAL_METHOD_COUNTER:
 		/*
