@@ -1,3 +1,15 @@
+Evolution-EWS 3.40.2 2021-06-04
+-------------------------------
+
+Bug Fixes:
+	I#152 - Declining Single Calendar Event Results in Declining the Whole Series (Milan Crha)
+
+Miscellaneous:
+	Calendar: Clamp the timezone component when saving meeting time (Milan Crha)
+
+Translations:
+	Daniel Șerbănescu (ro)
+
 Evolution-EWS 3.40.1 2021-04-30
 -------------------------------
 
