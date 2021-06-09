@@ -56,6 +56,8 @@
 #define EBB_EWS_DATA_VERSION 1
 #define EBB_EWS_DATA_VERSION_KEY "ews-data-version"
 
+#define EBB_EWS_SYNC_TAG_STAMP_KEY "ews-sync-tag-stamp"
+
 #define X_EWS_ORIGINAL_VCARD "X-EWS-ORIGINAL-VCARD"
 #define X_EWS_CHANGEKEY "X-EWS-CHANGEKEY"
 #define X_EWS_GAL_SHA1 "X-EWS-GAL-SHA1"
@@ -258,6 +260,51 @@ ebb_ews_get_collection_settings (EBookBackendEws *bbews)
 	g_object_unref (collection);
 
 	return CAMEL_EWS_SETTINGS (settings);
+}
+
+static gboolean
+ebb_ews_get_sync_tag_stamp_changed (EBookBackendEws *bbews)
+{
+	CamelEwsSettings *settings;
+	EBookCache *book_cache;
+	guint sync_tag_stamp;
+
+	settings = ebb_ews_get_collection_settings (bbews);
+	g_return_val_if_fail (settings != NULL, FALSE);
+
+	book_cache = e_book_meta_backend_ref_cache (E_BOOK_META_BACKEND (bbews));
+	if (!book_cache)
+		return FALSE;
+
+	sync_tag_stamp = e_cache_get_key_int (E_CACHE (book_cache), EBB_EWS_SYNC_TAG_STAMP_KEY, NULL);
+	if (sync_tag_stamp == (guint) -1)
+		sync_tag_stamp = 0;
+
+	g_clear_object (&book_cache);
+
+	return sync_tag_stamp != camel_ews_settings_get_sync_tag_stamp (settings);
+}
+
+static void
+ebb_ews_update_sync_tag_stamp (EBookBackendEws *bbews)
+{
+	CamelEwsSettings *settings;
+	EBookCache *book_cache;
+	guint sync_tag_stamp;
+
+	settings = ebb_ews_get_collection_settings (bbews);
+	g_return_if_fail (settings != NULL);
+
+	book_cache = e_book_meta_backend_ref_cache (E_BOOK_META_BACKEND (bbews));
+	if (!book_cache)
+		return;
+
+	sync_tag_stamp = e_cache_get_key_int (E_CACHE (book_cache), EBB_EWS_SYNC_TAG_STAMP_KEY, NULL);
+
+	if (sync_tag_stamp != camel_ews_settings_get_sync_tag_stamp (settings))
+		e_cache_set_key_int (E_CACHE (book_cache), EBB_EWS_SYNC_TAG_STAMP_KEY, camel_ews_settings_get_sync_tag_stamp (settings), NULL);
+
+	g_clear_object (&book_cache);
 }
 
 static void
@@ -3371,6 +3418,7 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 {
 	EBookBackendEws *bbews;
 	EBookCache *book_cache;
+	gboolean sync_tag_stamp_changed;
 	gboolean success = TRUE;
 	GError *local_error = NULL;
 
@@ -3389,6 +3437,10 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 
 	book_cache = e_book_meta_backend_ref_cache (meta_backend);
 	g_return_val_if_fail (E_IS_BOOK_CACHE (book_cache), FALSE);
+
+	sync_tag_stamp_changed = ebb_ews_get_sync_tag_stamp_changed (bbews);
+	if (sync_tag_stamp_changed)
+		last_sync_tag = NULL;
 
 	g_rec_mutex_lock (&bbews->priv->cnc_lock);
 
@@ -3582,6 +3634,9 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	g_clear_object (&book_cache);
+
+	if (success && sync_tag_stamp_changed)
+		ebb_ews_update_sync_tag_stamp (bbews);
 
 	return success;
 }

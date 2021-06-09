@@ -31,6 +31,7 @@ struct _CamelEwsSummaryPrivate {
 	GMutex property_lock;
 	gchar *sync_state;
 	gint32 version;
+	guint sync_tag_stamp;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsSummary, camel_ews_summary, CAMEL_TYPE_FOLDER_SUMMARY)
@@ -102,13 +103,26 @@ summary_header_load (CamelFolderSummary *s,
 		return FALSE;
 
 	ews_summary->priv->version = 0;
+	ews_summary->priv->sync_tag_stamp = 0;
 
 	part = mir->bdata;
 
-	if (part)
+	if (part) {
 		EXTRACT_FIRST_DIGIT (ews_summary->priv->version);
 
-	if (part && part++ && strcmp (part, "(null)") &&
+		if (part && !part++)
+			part = NULL;
+	}
+
+	if (part && strcmp (part, "(null)") &&
+	    ews_summary->priv->version >= CAMEL_EWS_SUMMARY_VERSION) {
+		EXTRACT_FIRST_DIGIT (ews_summary->priv->sync_tag_stamp);
+
+		if (part && !part++)
+			part = NULL;
+	}
+
+	if (part && strcmp (part, "(null)") &&
 	    ews_summary->priv->version >= CAMEL_EWS_SUMMARY_VERSION) {
 		sync_state = part;
 	}
@@ -134,14 +148,16 @@ summary_header_save (CamelFolderSummary *s,
 	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
 	struct _CamelFIRecord *fir;
 	gchar *sync_state;
+	guint sync_tag_stamp;
 
 	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_save (s, error);
 	if (!fir)
 		return NULL;
 
 	sync_state = camel_ews_summary_dup_sync_state (ews_summary);
+	sync_tag_stamp = camel_ews_summary_get_sync_tag_stamp (ews_summary);
 
-	fir->bdata = g_strdup_printf ("%d %s", CAMEL_EWS_SUMMARY_VERSION, sync_state);
+	fir->bdata = g_strdup_printf ("%d %u %s", CAMEL_EWS_SUMMARY_VERSION, sync_tag_stamp, sync_state);
 
 	g_free (sync_state);
 
@@ -316,4 +332,22 @@ camel_ews_summary_dup_sync_state (CamelEwsSummary *ews_summary)
 	g_mutex_unlock (&ews_summary->priv->property_lock);
 
 	return sync_state;
+}
+
+guint
+camel_ews_summary_get_sync_tag_stamp (CamelEwsSummary *ews_summary)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SUMMARY (ews_summary), 0);
+
+	return ews_summary->priv->sync_tag_stamp;
+}
+
+void
+camel_ews_summary_set_sync_tag_stamp (CamelEwsSummary *ews_summary,
+				      guint value)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SUMMARY (ews_summary));
+
+	if (ews_summary->priv->sync_tag_stamp != value)
+		ews_summary->priv->sync_tag_stamp = value;
 }

@@ -49,9 +49,12 @@ struct _EMailConfigEwsFolderSizesPageClass {
 GType			e_mail_config_ews_folder_sizes_page_get_type		(void) G_GNUC_CONST;
 void			e_mail_config_ews_folder_sizes_page_type_register	(GTypeModule *type_module);
 EMailConfigPage *	e_mail_config_ews_folder_sizes_page_new			(ESource *account_source,
+										 ESource *collection_source,
 										 ESourceRegistry *registry);
 
 ESource *		e_mail_config_ews_folder_sizes_page_get_account_source	(EMailConfigEwsFolderSizesPage *page);
+ESource *		e_mail_config_ews_folder_sizes_page_get_collection_source
+										(EMailConfigEwsFolderSizesPage *page);
 ESourceRegistry *	e_mail_config_ews_folder_sizes_page_get_source_registry	(EMailConfigEwsFolderSizesPage *page);
 
 G_END_DECLS

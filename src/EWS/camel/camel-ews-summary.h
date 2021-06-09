@@ -12,7 +12,7 @@
 
 #include "camel-ews-message-info.h"
 
-#define CAMEL_EWS_SUMMARY_VERSION (2)
+#define CAMEL_EWS_SUMMARY_VERSION (3)
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_SUMMARY \
@@ -70,6 +70,11 @@ gint32	camel_ews_summary_get_version	(CamelEwsSummary *ews_summary);
 void	camel_ews_summary_set_sync_state(CamelEwsSummary *ews_summary,
 					 const gchar *sync_state);
 gchar *	camel_ews_summary_dup_sync_state(CamelEwsSummary *ews_summary);
+guint	camel_ews_summary_get_sync_tag_stamp
+					(CamelEwsSummary *ews_summary);
+void	camel_ews_summary_set_sync_tag_stamp
+					(CamelEwsSummary *ews_summary,
+					 guint value);
 
 G_END_DECLS
 

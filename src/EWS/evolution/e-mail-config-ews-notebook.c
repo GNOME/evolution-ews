@@ -82,6 +82,7 @@ mail_config_ews_notebook_constructed (GObject *object)
 
 		page = e_mail_config_ews_folder_sizes_page_new (
 			account_source,
+			collection_source,
 			registry);
 		e_mail_config_notebook_add_page (notebook, page);
 	}

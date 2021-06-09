@@ -22,12 +22,14 @@
 
 struct _EMailConfigEwsFolderSizesPagePrivate {
 	ESource *account_source;
+	ESource *collection_source;
 	ESourceRegistry *registry;
 };
 
 enum {
 	PROP_0,
 	PROP_ACCOUNT_SOURCE,
+	PROP_COLLECTION_SOURCE,
 	PROP_SOURCE_REGISTRY
 };
 
@@ -68,6 +70,26 @@ folder_sizes_clicked_cb (GtkWidget *button,
 }
 
 static void
+reset_sync_tags_clicked_cb (GtkWidget *button,
+			    EMailConfigEwsFolderSizesPage *page)
+{
+	ESource *collection_source;
+	ESourceCamel *extension;
+	CamelSettings *settings;
+	const gchar *extension_name;
+
+	collection_source = e_mail_config_ews_folder_sizes_page_get_collection_source (page);
+
+	extension_name = e_source_camel_get_extension_name ("ews");
+	e_source_camel_generate_subtype ("ews", CAMEL_TYPE_EWS_SETTINGS);
+
+	extension = e_source_get_extension (collection_source, extension_name);
+	settings = e_source_camel_get_settings (extension);
+
+	camel_ews_settings_inc_sync_tag_stamp (CAMEL_EWS_SETTINGS (settings));
+}
+
+static void
 mail_config_ews_folder_sizes_page_set_account_source (EMailConfigEwsFolderSizesPage *page,
 						      ESource *account_source)
 {
@@ -75,6 +97,16 @@ mail_config_ews_folder_sizes_page_set_account_source (EMailConfigEwsFolderSizesP
 	g_return_if_fail (page->priv->account_source == NULL);
 
 	page->priv->account_source = g_object_ref (account_source);
+}
+
+static void
+mail_config_ews_folder_sizes_page_set_collection_source (EMailConfigEwsFolderSizesPage *page,
+							 ESource *collection_source)
+{
+	g_return_if_fail (E_IS_SOURCE (collection_source));
+	g_return_if_fail (page->priv->collection_source == NULL);
+
+	page->priv->collection_source = g_object_ref (collection_source);
 }
 
 static void
@@ -96,6 +128,12 @@ mail_config_ews_folder_sizes_page_set_property (GObject *object,
 	switch (property_id) {
 		case PROP_ACCOUNT_SOURCE:
 			mail_config_ews_folder_sizes_page_set_account_source (
+				E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object),
+				g_value_get_object (value));
+			return;
+
+		case PROP_COLLECTION_SOURCE:
+			mail_config_ews_folder_sizes_page_set_collection_source (
 				E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object),
 				g_value_get_object (value));
 			return;
@@ -124,6 +162,13 @@ mail_config_ews_folder_sizes_page_get_property (GObject *object,
 				E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object)));
 			return;
 
+		case PROP_COLLECTION_SOURCE:
+			g_value_set_object (
+				value,
+				e_mail_config_ews_folder_sizes_page_get_collection_source (
+				E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object)));
+			return;
+
 		case PROP_SOURCE_REGISTRY:
 			g_value_set_object (
 				value,
@@ -143,6 +188,7 @@ mail_config_ews_folder_sizes_page_dispose (GObject *object)
 	ews_page = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object);
 
 	g_clear_object (&ews_page->priv->account_source);
+	g_clear_object (&ews_page->priv->collection_source);
 	g_clear_object (&ews_page->priv->registry);
 
 	/* Chain up to parent's dispose() method. */
@@ -175,13 +221,54 @@ mail_config_ews_folder_sizes_page_constructed (GObject *object)
 	gtk_grid_attach (content_grid, widget, 0, 0, 2, 1);
 	g_free (markup);
 
-	widget = gtk_label_new (_("View the size of all Exchange folders"));
-	gtk_misc_set_alignment (GTK_MISC (widget), 0, 0.5);
+	widget = gtk_button_new_with_mnemonic (_("Folder _Sizes"));
+	g_object_set (G_OBJECT (widget),
+		"hexpand", FALSE,
+		"halign", GTK_ALIGN_FILL,
+		"vexpand", FALSE,
+		"valign", GTK_ALIGN_START,
+		NULL);
+	g_signal_connect (widget, "clicked", G_CALLBACK (folder_sizes_clicked_cb), page);
+
 	gtk_grid_attach (content_grid, widget, 0, 1, 1, 1);
 
-	widget = gtk_button_new_with_mnemonic (_("Folder _Sizes"));
-	g_signal_connect (widget, "clicked", G_CALLBACK (folder_sizes_clicked_cb), page);
+	widget = gtk_label_new (_("View the size of all Exchange folders"));
+	gtk_misc_set_alignment (GTK_MISC (widget), 0, 0.5);
+	g_object_set (G_OBJECT (widget),
+		"hexpand", FALSE,
+		"halign", GTK_ALIGN_START,
+		"vexpand", FALSE,
+		"valign", GTK_ALIGN_CENTER,
+		NULL);
+
 	gtk_grid_attach (content_grid, widget, 1, 1, 1, 1);
+
+	widget = gtk_button_new_with_mnemonic (_("_Reset Synchronization Tags"));
+	g_object_set (G_OBJECT (widget),
+		"hexpand", FALSE,
+		"halign", GTK_ALIGN_FILL,
+		"vexpand", FALSE,
+		"valign", GTK_ALIGN_START,
+		NULL);
+	g_signal_connect (widget, "clicked", G_CALLBACK (reset_sync_tags_clicked_cb), page);
+
+	gtk_grid_attach (content_grid, widget, 0, 2, 1, 1);
+
+	widget = gtk_label_new (_("Folders can sometimes get out of synchronization, for example after a long time not being connected to the server."
+		" By resetting the synchronization tags the folders are updated completely. This does not cause download of any already locally stored"
+		" messages. The change will take effect the next time the folders are refreshed."));
+	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.0);
+	g_object_set (G_OBJECT (widget),
+		"hexpand", FALSE,
+		"halign", GTK_ALIGN_START,
+		"vexpand", FALSE,
+		"valign", GTK_ALIGN_CENTER,
+		"wrap", TRUE,
+		"width-chars", 40,
+		"max-width-chars", 60,
+		NULL);
+
+	gtk_grid_attach (content_grid, widget, 1, 2, 1, 1);
 
 	gtk_widget_show_all (GTK_WIDGET (main_box));
 
@@ -206,6 +293,17 @@ e_mail_config_ews_folder_sizes_page_class_init (EMailConfigEwsFolderSizesPageCla
 			"account-source",
 			"Account Source",
 			"Mail account source being edited",
+			E_TYPE_SOURCE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT_ONLY));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_COLLECTION_SOURCE,
+		g_param_spec_object (
+			"collection-source",
+			"Collection Source",
+			"Collection source being edited",
 			E_TYPE_SOURCE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT_ONLY));
@@ -251,14 +349,17 @@ e_mail_config_ews_folder_sizes_page_type_register (GTypeModule *type_module)
 
 EMailConfigPage *
 e_mail_config_ews_folder_sizes_page_new (ESource *account_source,
+					 ESource *collection_source,
 					 ESourceRegistry *registry)
 {
 	EMailConfigPage *page;
 
 	g_return_val_if_fail (E_IS_SOURCE (account_source), NULL);
+	g_return_val_if_fail (E_IS_SOURCE (collection_source), NULL);
 
 	page = g_object_new (E_TYPE_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE,
 		"account-source", account_source,
+		"collection-source", collection_source,
 		"source-registry", registry,
 		NULL);
 
@@ -271,6 +372,14 @@ e_mail_config_ews_folder_sizes_page_get_account_source (EMailConfigEwsFolderSize
 	g_return_val_if_fail (E_IS_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (page), NULL);
 
 	return page->priv->account_source;
+}
+
+ESource *
+e_mail_config_ews_folder_sizes_page_get_collection_source (EMailConfigEwsFolderSizesPage *page)
+{
+	g_return_val_if_fail (E_IS_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (page), NULL);
+
+	return page->priv->collection_source;
 }
 
 ESourceRegistry *

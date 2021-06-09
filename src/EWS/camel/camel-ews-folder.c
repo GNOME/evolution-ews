@@ -2308,6 +2308,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	GHashTable *updating_summary_uids = NULL;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
+	CamelEwsSettings *settings;
 	const gchar *full_name;
 	gchar *id;
 	gchar *sync_state;
@@ -2356,7 +2357,13 @@ ews_refresh_info_sync (CamelFolder *folder,
 	 * Due to these reasons we just get the item ids and its type in
 	 * SyncFolderItem request and fetch the item using the
 	 * GetItem request. */
-	sync_state = camel_ews_summary_dup_sync_state (CAMEL_EWS_SUMMARY (folder_summary));
+
+	settings = e_ews_connection_ref_settings (cnc);
+
+	if (settings && camel_ews_summary_get_sync_tag_stamp (CAMEL_EWS_SUMMARY (folder_summary)) != camel_ews_settings_get_sync_tag_stamp (settings))
+		sync_state = NULL;
+	else
+		sync_state = camel_ews_summary_dup_sync_state (CAMEL_EWS_SUMMARY (folder_summary));
 
 	if (!sync_state ||
 	    camel_ews_summary_get_version (CAMEL_EWS_SUMMARY (folder_summary)) < CAMEL_EWS_SUMMARY_VERSION) {
@@ -2426,6 +2433,8 @@ ews_refresh_info_sync (CamelFolder *folder,
 		camel_ews_store_summary_save (ews_store->summary, NULL);
 
 		camel_ews_summary_set_sync_state (CAMEL_EWS_SUMMARY (folder_summary), sync_state);
+		if (settings)
+			camel_ews_summary_set_sync_tag_stamp (CAMEL_EWS_SUMMARY (folder_summary), camel_ews_settings_get_sync_tag_stamp (settings));
 
 		camel_folder_summary_touch (folder_summary);
 
@@ -2485,6 +2494,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	priv->refreshing = FALSE;
 	g_mutex_unlock (&priv->state_lock);
 
+	g_clear_object (&settings);
 	g_object_unref (cnc);
 	g_free (sync_state);
 	g_free (id);

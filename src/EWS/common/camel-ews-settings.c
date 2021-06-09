@@ -26,6 +26,7 @@ struct _CamelEwsSettingsPrivate {
 	gchar *oal_selected;
 	guint timeout;
 	guint concurrent_connections;
+	guint sync_tag_stamp;
 	gchar *impersonate_user;
 	gboolean override_user_agent;
 	gchar *user_agent;
@@ -66,7 +67,8 @@ enum {
 	PROP_OAUTH2_RESOURCE_URI,
 	PROP_OAUTH2_ENDPOINT_HOST,
 	PROP_SHOW_PUBLIC_FOLDERS,
-	PROP_CONCURRENT_CONNECTIONS
+	PROP_CONCURRENT_CONNECTIONS,
+	PROP_SYNC_TAG_STAMP
 };
 
 G_DEFINE_TYPE_WITH_CODE (CamelEwsSettings, camel_ews_settings, CAMEL_TYPE_OFFLINE_SETTINGS,
@@ -276,6 +278,12 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_uint (value));
 			return;
+
+		case PROP_SYNC_TAG_STAMP:
+			camel_ews_settings_set_sync_tag_stamp (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_uint (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -481,6 +489,13 @@ ews_settings_get_property (GObject *object,
 			g_value_set_uint (
 				value,
 				camel_ews_settings_get_concurrent_connections (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_SYNC_TAG_STAMP:
+			g_value_set_uint (
+				value,
+				camel_ews_settings_get_sync_tag_stamp (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 	}
@@ -826,6 +841,21 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			MIN_CONCURRENT_CONNECTIONS,
 			MAX_CONCURRENT_CONNECTIONS,
 			1,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_EXPLICIT_NOTIFY |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_SYNC_TAG_STAMP,
+		g_param_spec_uint (
+			"sync-tag-stamp",
+			"Sync Tag Stamp",
+			"Stamp for synchronization tag",
+			0,
+			G_MAXUINT,
+			0,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_EXPLICIT_NOTIFY |
@@ -1791,4 +1821,49 @@ camel_ews_settings_set_concurrent_connections (CamelEwsSettings *settings,
 	settings->priv->concurrent_connections = concurrent_connections;
 
 	g_object_notify (G_OBJECT (settings), "concurrent-connections");
+}
+
+guint
+camel_ews_settings_get_sync_tag_stamp (CamelEwsSettings *settings)
+{
+	guint res;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), ~0u);
+
+	g_mutex_lock (&settings->priv->property_lock);
+	res = settings->priv->sync_tag_stamp;
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return res;
+}
+
+void
+camel_ews_settings_set_sync_tag_stamp (CamelEwsSettings *settings,
+				       guint value)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (settings->priv->sync_tag_stamp == value) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	settings->priv->sync_tag_stamp = value;
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "sync-tag-stamp");
+}
+
+void
+camel_ews_settings_inc_sync_tag_stamp (CamelEwsSettings *settings)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+	settings->priv->sync_tag_stamp++;
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "sync-tag-stamp");
 }

@@ -184,7 +184,13 @@ guint		camel_ews_settings_get_concurrent_connections
 void		camel_ews_settings_set_concurrent_connections
 						(CamelEwsSettings *settings,
 						 guint concurrent_connections);
-
+guint		camel_ews_settings_get_sync_tag_stamp
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_sync_tag_stamp
+						(CamelEwsSettings *settings,
+						 guint value);
+void		camel_ews_settings_inc_sync_tag_stamp
+						(CamelEwsSettings *settings);
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

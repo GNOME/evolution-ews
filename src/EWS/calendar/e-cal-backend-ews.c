@@ -68,6 +68,8 @@ struct _ECalBackendEwsPrivate {
 	gchar *attachments_dir;
 };
 
+#define ECB_EWS_SYNC_TAG_STAMP_KEY "ews-sync-tag-stamp"
+
 #define X_EWS_ORIGINAL_COMP "X-EWS-ORIGINAL-COMP"
 
 #define EWS_MAX_FETCH_COUNT 100
@@ -142,6 +144,51 @@ ecb_ews_get_collection_settings (ECalBackendEws *cbews)
 	g_object_unref (collection);
 
 	return CAMEL_EWS_SETTINGS (settings);
+}
+
+static gboolean
+ecb_ews_get_sync_tag_stamp_changed (ECalBackendEws *cbews)
+{
+	CamelEwsSettings *settings;
+	ECalCache *cal_cache;
+	guint sync_tag_stamp;
+
+	settings = ecb_ews_get_collection_settings (cbews);
+	g_return_val_if_fail (settings != NULL, FALSE);
+
+	cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbews));
+	if (!cal_cache)
+		return FALSE;
+
+	sync_tag_stamp = e_cache_get_key_int (E_CACHE (cal_cache), ECB_EWS_SYNC_TAG_STAMP_KEY, NULL);
+	if (sync_tag_stamp == (guint) -1)
+		sync_tag_stamp = 0;
+
+	g_clear_object (&cal_cache);
+
+	return sync_tag_stamp != camel_ews_settings_get_sync_tag_stamp (settings);
+}
+
+static void
+ecb_ews_update_sync_tag_stamp (ECalBackendEws *cbews)
+{
+	CamelEwsSettings *settings;
+	ECalCache *cal_cache;
+	guint sync_tag_stamp;
+
+	settings = ecb_ews_get_collection_settings (cbews);
+	g_return_if_fail (settings != NULL);
+
+	cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbews));
+	if (!cal_cache)
+		return;
+
+	sync_tag_stamp = e_cache_get_key_int (E_CACHE (cal_cache), ECB_EWS_SYNC_TAG_STAMP_KEY, NULL);
+
+	if (sync_tag_stamp != camel_ews_settings_get_sync_tag_stamp (settings))
+		e_cache_set_key_int (E_CACHE (cal_cache), ECB_EWS_SYNC_TAG_STAMP_KEY, camel_ews_settings_get_sync_tag_stamp (settings), NULL);
+
+	g_clear_object (&cal_cache);
 }
 
 static GHashTable *
@@ -1833,6 +1880,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 {
 	ECalBackendEws *cbews;
 	ECalCache *cal_cache;
+	gboolean sync_tag_stamp_changed;
 	gboolean success = TRUE;
 	GError *local_error = NULL;
 
@@ -1851,6 +1899,10 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 
 	cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
 	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
+
+	sync_tag_stamp_changed = ecb_ews_get_sync_tag_stamp_changed (cbews);
+	if (sync_tag_stamp_changed)
+		last_sync_tag = NULL;
 
 	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
@@ -2145,6 +2197,9 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 	ecb_ews_convert_error_to_edc_error (error);
 	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 	g_clear_object (&cal_cache);
+
+	if (success && sync_tag_stamp_changed)
+		ecb_ews_update_sync_tag_stamp (cbews);
 
 	return success;
 }
