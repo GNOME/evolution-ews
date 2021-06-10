@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-03-02 11:28+0000\n"
-"PO-Revision-Date: 2021-03-02 14:09+0200\n"
+"POT-Creation-Date: 2021-06-09 16:57+0000\n"
+"PO-Revision-Date: 2021-06-10 07:14+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.11.70\n"
+"X-Generator: Lokalize 20.12.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -30,47 +30,47 @@ msgstr "Вебслужби Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
 msgid "Failed to update GAL:"
 msgstr "Не вдалося оновити GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Не вдалося зберегти список контактів, підтримку передбачено лише у EWS "
 "Server 2010 та новіших версіях"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -78,12 +78,12 @@ msgstr ""
 "Неможливо створити зустрічі, які організовано іншими користувачами, у "
 "календарі вебслужб Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Некоректний ідентифікатор повторення"
 
@@ -127,12 +127,12 @@ msgstr "Не вдалося перемістити кеш-файл повідо�
 msgid "Could not load summary for %s"
 msgstr "Не вдалося завантажити резюме щодо %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Оновлення теки «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
@@ -507,7 +507,7 @@ msgstr ""
 "Не вдалося зберегти це повторення. Змініть його на одинарне щоденне, "
 "щотижневе або щорічне повторення без виключення і з початковою датою."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:392
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Виклик CreateItem не повернув ідентифікатора нового повідомлення"
@@ -1387,18 +1387,33 @@ msgstr "Ваші деле_гати і ви"
 msgid "Retrieving “Delegates” settings"
 msgstr "Отримуємо параметри «Делегатів»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "Параметри EWS"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "_Розміри тек"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Переглянути розмір усіх тек Exchange"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "_Розміри тек"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr ""
+"С_кинути мітки синхронізації"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Іноді синхронізація тек може порушуватися, наприклад, якщо з сервером довго не було з'єднання. Якщо скинути мітки синхронізації тек, відбудеться повне оновлення. При цьому не відбуватиметься отримання вже збережених локально повідомлень. Зміни набудуть чинності під час наступного оновлення вмісту тек."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1649,10 +1664,6 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Некоректний стан теки (пропущено батьківське сховище)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
-#| msgid ""
-#| "Cannot add messages into an Microsoft 365 account from another account. "
-#| "Only messages from the same account can be moved/copied between the "
-#| "Microsoft 365 folders."
 msgid ""
 "Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
