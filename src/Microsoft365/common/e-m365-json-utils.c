@@ -701,9 +701,11 @@ e_m365_time_of_day_encode (gint hour,
 
 time_t
 e_m365_get_date_time_offset_member (JsonObject *object,
-				    const gchar *member_name)
+				    const gchar *member_name,
+				    gboolean *out_exists)
 {
 	const gchar *value;
+	gboolean exists = FALSE;
 	time_t res = (time_t) 0;
 
 	value = e_m365_json_get_string_member (object, member_name, NULL);
@@ -730,9 +732,13 @@ e_m365_get_date_time_offset_member (JsonObject *object,
 
 		if (dt) {
 			res = (time_t) g_date_time_to_unix (dt);
+			exists = TRUE;
 			g_date_time_unref (dt);
 		}
 	}
+
+	if (out_exists)
+		*out_exists = exists;
 
 	return res;
 }
@@ -784,7 +790,7 @@ e_m365_add_date_time_offset_member (JsonBuilder *builder,
 time_t
 e_m365_date_time_get_date_time (EM365DateTimeWithZone *datetime)
 {
-	return e_m365_get_date_time_offset_member (datetime, "dateTime");
+	return e_m365_get_date_time_offset_member (datetime, "dateTime", NULL);
 }
 
 const gchar *
@@ -1216,7 +1222,7 @@ e_m365_mail_message_get_conversation_index (EM365MailMessage *mail)
 time_t
 e_m365_mail_message_get_created_date_time (EM365MailMessage *mail)
 {
-	return e_m365_get_date_time_offset_member (mail, "createdDateTime");
+	return e_m365_get_date_time_offset_member (mail, "createdDateTime", NULL);
 }
 
 EM365FollowupFlag *
@@ -1370,7 +1376,7 @@ e_m365_mail_message_add_is_read_receipt_requested (JsonBuilder *builder,
 time_t
 e_m365_mail_message_get_last_modified_date_time (EM365MailMessage *mail)
 {
-	return e_m365_get_date_time_offset_member (mail, "lastModifiedDateTime");
+	return e_m365_get_date_time_offset_member (mail, "lastModifiedDateTime", NULL);
 }
 
 const gchar *
@@ -1382,7 +1388,7 @@ e_m365_mail_message_get_parent_folder_id (EM365MailMessage *mail)
 time_t
 e_m365_mail_message_get_received_date_time (EM365MailMessage *mail)
 {
-	return e_m365_get_date_time_offset_member (mail, "receivedDateTime");
+	return e_m365_get_date_time_offset_member (mail, "receivedDateTime", NULL);
 }
 
 void
@@ -1429,7 +1435,7 @@ e_m365_mail_message_add_sender (JsonBuilder *builder,
 time_t
 e_m365_mail_message_get_sent_date_time (EM365MailMessage *mail)
 {
-	return e_m365_get_date_time_offset_member (mail, "sentDateTime");
+	return e_m365_get_date_time_offset_member (mail, "sentDateTime", NULL);
 }
 
 void
@@ -1546,7 +1552,7 @@ e_m365_attachment_add_is_inline (JsonBuilder *builder,
 time_t
 e_m365_attachment_get_last_modified_date_time (EM365Attachment *attachment)
 {
-	return e_m365_get_date_time_offset_member (attachment, "lastModifiedDateTime");
+	return e_m365_get_date_time_offset_member (attachment, "lastModifiedDateTime", NULL);
 }
 
 void
@@ -1722,13 +1728,13 @@ e_m365_contact_get_change_key (EM365Contact *contact)
 time_t
 e_m365_contact_get_created_date_time (EM365Contact *contact)
 {
-	return e_m365_get_date_time_offset_member (contact, "createdDateTime");
+	return e_m365_get_date_time_offset_member (contact, "createdDateTime", NULL);
 }
 
 time_t
 e_m365_contact_get_last_modified_date_time (EM365Contact *contact)
 {
-	return e_m365_get_date_time_offset_member (contact, "lastModifiedDateTime");
+	return e_m365_get_date_time_offset_member (contact, "lastModifiedDateTime", NULL);
 }
 
 const gchar *
@@ -1745,9 +1751,10 @@ e_m365_contact_add_assistant_name (JsonBuilder *builder,
 }
 
 time_t
-e_m365_contact_get_birthday (EM365Contact *contact)
+e_m365_contact_get_birthday (EM365Contact *contact,
+			     gboolean *out_exists)
 {
-	return e_m365_get_date_time_offset_member (contact, "birthday");
+	return e_m365_get_date_time_offset_member (contact, "birthday", out_exists);
 }
 
 void
@@ -2463,7 +2470,7 @@ e_m365_response_status_get_response (EM365ResponseStatus *response_status)
 time_t
 e_m365_response_status_get_time (EM365ResponseStatus *response_status)
 {
-	return e_m365_get_date_time_offset_member (response_status, "time");
+	return e_m365_get_date_time_offset_member (response_status, "time", NULL);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/attendee?view=graph-rest-1.0 */
@@ -3066,7 +3073,7 @@ e_m365_event_add_category (JsonBuilder *builder,
 time_t
 e_m365_event_get_created_date_time (EM365Event *event)
 {
-	return e_m365_get_date_time_offset_member (event, "createdDateTime");
+	return e_m365_get_date_time_offset_member (event, "createdDateTime", NULL);
 }
 
 EM365DateTimeWithZone *
@@ -3168,7 +3175,7 @@ e_m365_event_add_is_reminder_on (JsonBuilder *builder,
 time_t
 e_m365_event_get_last_modified_date_time (EM365Event *event)
 {
-	return e_m365_get_date_time_offset_member (event, "lastModifiedDateTime");
+	return e_m365_get_date_time_offset_member (event, "lastModifiedDateTime", NULL);
 }
 
 EM365Location *
@@ -3289,7 +3296,7 @@ e_m365_event_get_original_end_timezone (EM365Event *event)
 time_t
 e_m365_event_get_original_start (EM365Event *event)
 {
-	return e_m365_get_date_time_offset_member (event, "originalStart");
+	return e_m365_get_date_time_offset_member (event, "originalStart", NULL);
 }
 
 const gchar *
@@ -3711,7 +3718,7 @@ e_m365_task_add_completed_date_time (JsonBuilder *builder,
 time_t
 e_m365_task_get_created_date_time (EM365Task *task)
 {
-	return e_m365_get_date_time_offset_member (task, "createdDateTime");
+	return e_m365_get_date_time_offset_member (task, "createdDateTime", NULL);
 }
 
 EM365DateTimeWithZone *
@@ -3769,7 +3776,7 @@ e_m365_task_add_is_reminder_on (JsonBuilder *builder,
 time_t
 e_m365_task_get_last_modified_date_time (EM365Task *task)
 {
-	return e_m365_get_date_time_offset_member (task, "lastModifiedDateTime");
+	return e_m365_get_date_time_offset_member (task, "lastModifiedDateTime", NULL);
 }
 
 const gchar *

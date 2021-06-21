@@ -317,7 +317,8 @@ EM365TimeOfDay	e_m365_time_of_day_encode		(gint hour,
 							 gint fraction);
 
 time_t		e_m365_get_date_time_offset_member	(JsonObject *object,
-							 const gchar *member_name);
+							 const gchar *member_name,
+							 gboolean *out_exists);
 void		e_m365_add_date_time_offset_member	(JsonBuilder *builder,
 							 const gchar *member_name,
 							 time_t value);
@@ -538,7 +539,8 @@ time_t		e_m365_contact_get_last_modified_date_time
 const gchar *	e_m365_contact_get_assistant_name	(EM365Contact *contact);
 void		e_m365_contact_add_assistant_name	(JsonBuilder *builder,
 							 const gchar *value);
-time_t		e_m365_contact_get_birthday		(EM365Contact *contact);
+time_t		e_m365_contact_get_birthday		(EM365Contact *contact,
+							 gboolean *out_exists);
 void		e_m365_contact_add_birthday		(JsonBuilder *builder,
 							 time_t value);
 EM365PhysicalAddress *

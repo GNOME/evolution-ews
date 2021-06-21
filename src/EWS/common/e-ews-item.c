@@ -40,7 +40,9 @@ struct _EEwsContactFields {
 
 	gchar *business_homepage;
 
+	gboolean has_birthday;
 	time_t birthday;
+	gboolean has_wedding_anniversary;
 	time_t wedding_anniversary;
 
 	gchar *profession;
@@ -792,6 +794,7 @@ parse_contact_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "AssistantName")) {
 		priv->contact_fields->assistant_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Birthday")) {
+		priv->contact_fields->has_birthday = TRUE;
 		priv->contact_fields->birthday = ews_item_parse_date (subparam);
 	} else if (!g_ascii_strcasecmp (name, "BusinessHomePage")) {
 		priv->contact_fields->business_homepage = e_soap_parameter_get_string_value (subparam);
@@ -817,6 +820,7 @@ parse_contact_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "MiddleName")) {
 		priv->contact_fields->middlename = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "WeddingAnniversary")) {
+		priv->contact_fields->has_wedding_anniversary = TRUE;
 		priv->contact_fields->wedding_anniversary = ews_item_parse_date (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Body")) {
 		/*
@@ -2697,19 +2701,27 @@ e_ews_item_get_notes (EEwsItem *item)
 }
 
 time_t
-e_ews_item_get_birthday (EEwsItem *item)
+e_ews_item_get_birthday (EEwsItem *item,
+			 gboolean *out_exists)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
+
+	if (out_exists)
+		*out_exists = item->priv->contact_fields->has_birthday;
 
 	return item->priv->contact_fields->birthday;
 }
 
 time_t
-e_ews_item_get_wedding_anniversary (EEwsItem *item)
+e_ews_item_get_wedding_anniversary (EEwsItem *item,
+				    gboolean *out_exists)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
+
+	if (out_exists)
+		*out_exists = item->priv->contact_fields->has_wedding_anniversary;
 
 	return item->priv->contact_fields->wedding_anniversary;
 }
