@@ -107,10 +107,11 @@ ebb_m365_contact_get_birthday (EBookBackendM365 *bbm365,
 			       GError **error)
 {
 	time_t value;
+	gboolean exists = FALSE;
 
-	value = e_m365_contact_get_birthday (m365_contact);
+	value = e_m365_contact_get_birthday (m365_contact, &exists);
 
-	if (value > (time_t) 0) {
+	if (exists) {
 		EContactDate dt;
 		struct tm stm;
 

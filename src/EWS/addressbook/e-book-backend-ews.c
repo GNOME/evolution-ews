@@ -456,9 +456,15 @@ static void
 ebews_populate_date_value (EBookBackendEws *bbews,
 			   EContact *contact,
 			   EContactField field,
-			   time_t value)
+			   EEwsItem *item,
+			   time_t (*get_func) (EEwsItem *item, gboolean *out_exists))
 {
-	if (value > (time_t) 0) {
+	time_t value;
+	gboolean exists = FALSE;
+
+	value = get_func (item, &exists);
+
+	if (exists) {
 		ICalTime *itt;
 
 		itt = i_cal_time_new_from_timet_with_zone (value, TRUE, i_cal_timezone_get_utc_timezone ());
@@ -484,7 +490,7 @@ ebews_populate_birth_date (EBookBackendEws *bbews,
 			   GCancellable *cancellable,
 			   GError **error)
 {
-	ebews_populate_date_value (bbews, contact, E_CONTACT_BIRTH_DATE, e_ews_item_get_birthday (item));
+	ebews_populate_date_value (bbews, contact, E_CONTACT_BIRTH_DATE, item, e_ews_item_get_birthday);
 }
 
 static void
@@ -494,7 +500,7 @@ ebews_populate_anniversary (EBookBackendEws *bbews,
 			    GCancellable *cancellable,
 			    GError **error)
 {
-	ebews_populate_date_value (bbews, contact, E_CONTACT_ANNIVERSARY, e_ews_item_get_wedding_anniversary (item));
+	ebews_populate_date_value (bbews, contact, E_CONTACT_ANNIVERSARY, item, e_ews_item_get_wedding_anniversary);
 }
 
 static EContactPhoto *

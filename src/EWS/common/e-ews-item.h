@@ -409,9 +409,11 @@ const gchar *	e_ews_item_get_manager		(EEwsItem *item);
 const gchar *	e_ews_item_get_office_location	(EEwsItem *item);
 const gchar *	e_ews_item_get_business_homepage
 						(EEwsItem *item);
-time_t		e_ews_item_get_birthday		(EEwsItem *item);
+time_t		e_ews_item_get_birthday		(EEwsItem *item,
+						 gboolean *out_exists);
 time_t		e_ews_item_get_wedding_anniversary
-						(EEwsItem *item);
+						(EEwsItem *item,
+						 gboolean *out_exists);
 const gchar *	e_ews_item_get_profession	(EEwsItem *item);
 const gchar *	e_ews_item_get_spouse_name	(EEwsItem *item);
 const gchar *	e_ews_item_get_culture		(EEwsItem *item);
