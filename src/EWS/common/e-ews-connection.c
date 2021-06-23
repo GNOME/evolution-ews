@@ -1716,6 +1716,7 @@ ews_handle_create_folders_param (ESoapParameter *soapparam,
 
 	switch (async_data->folder_type) {
 		case E_EWS_FOLDER_TYPE_MAILBOX:
+		case E_EWS_FOLDER_TYPE_MEMOS:
 			folder_element = "Folder";
 			break;
 		case E_EWS_FOLDER_TYPE_CALENDAR:
@@ -7071,6 +7072,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 	const gchar *folder_element;
+	const gchar *folder_class;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -7107,29 +7109,38 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	switch (folder_type) {
+		default:
+			g_warn_if_reached ();
+			/* fall through */
 		case E_EWS_FOLDER_TYPE_MAILBOX:
 			folder_element = "Folder";
+			folder_class = "IPF.Note";
 			break;
 		case E_EWS_FOLDER_TYPE_CALENDAR:
 			folder_element = "CalendarFolder";
+			folder_class = "IPF.Appointment";
 			break;
 		case E_EWS_FOLDER_TYPE_CONTACTS:
 			folder_element = "ContactsFolder";
+			folder_class = "IPF.Contact";
 			break;
 		case E_EWS_FOLDER_TYPE_SEARCH:
 			folder_element = "SearchFolder";
+			folder_class = "IPF.Note";
 			break;
 		case E_EWS_FOLDER_TYPE_TASKS:
 			folder_element = "TasksFolder";
+			folder_class = "IPF.Task";
 			break;
-		default:
-			g_warn_if_reached ();
+		case E_EWS_FOLDER_TYPE_MEMOS:
 			folder_element = "Folder";
+			folder_class = "IPF.StickyNote";
 			break;
 	}
 
 	e_soap_message_start_element (msg, "Folders", "messages", NULL);
 	e_soap_message_start_element (msg, folder_element, NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "FolderClass", NULL, folder_class);
 	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, folder_name);
 
 	e_soap_message_end_element (msg);
