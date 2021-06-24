@@ -139,10 +139,6 @@ create_mime_message_cb (ESoapMessage *msg,
 	 * to stream this directly rather than storing it in RAM. Which right
 	 * now we are doing about four times: the GByteArray in the mem stream,
 	 * then the base64 version, then the xmlDoc, then the soup request. */
-	camel_mime_message_set_best_encoding (
-		create_data->message,
-		CAMEL_BESTENC_GET_ENCODING,
-		CAMEL_BESTENC_8BIT);
 
 	mem = camel_stream_mem_new ();
 	filtered = camel_stream_filter_new (mem);
