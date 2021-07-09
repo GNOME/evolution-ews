@@ -1,3 +1,32 @@
+Evolution-EWS 3.41.1 2021-07-09
+-------------------------------
+
+Bug Fixes:
+	I#150 - Mail: Message redirect sends also to original Cc/Bcc (Milan Crha)
+	I#151 - Calendar: Teams meeting may have invalid timezone information (Milan Crha)
+	I#152 - Declining Single Calendar Event Results in Declining the Whole Series (Milan Crha)
+	I#154 - Add an option to reset sync tags (Milan Crha)
+	I#155 - Contacts: Birthday/Anniversary before Epoch ignored (Milan Crha)
+	I#156 - Set FolderClass when creating a new folder (Milan Crha)
+	I#157 - Mail: Do not re-encode message on append (Milan Crha)
+	eds-M!68 - SetupBuildFlags.cmake: Correct testing of two compiler/linker build flags (Matt Turner)
+
+Miscellaneous:
+	PrintableOptions.cmake: Correct variable name comparison (Milan Crha)
+	Calendar: Clamp the timezone component when saving meeting time (Milan Crha)
+
+Translations:
+	Alexey Rubtsov (ru)
+	Anders Jonsson (sv)
+	Asier Sarasua Garmendia (eu)
+	Daniel Șerbănescu (ro)
+	Gianvito Cavasoli (it)
+	Nathan Follens (nl)
+	Piotr Drąg (pl)
+	Rafael Fontenelle (pt_BR)
+	Yuri Chornoivan (uk)
+	Мирослав Николић (sr)
+
 Evolution-EWS 3.40.0 2021-03-19
 -------------------------------
 
