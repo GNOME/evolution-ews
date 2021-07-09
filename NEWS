@@ -1,3 +1,11 @@
+Evolution-EWS 3.40.3 2021-07-09
+-------------------------------
+
+Bug Fixes:
+	I#155 - Contacts: Birthday/Anniversary before Epoch ignored (Milan Crha)
+	I#156 - Set FolderClass when creating a new folder (Milan Crha)
+	I#157 - Mail: Do not re-encode message on append (Milan Crha)
+
 Evolution-EWS 3.40.2 2021-06-04
 -------------------------------
 
