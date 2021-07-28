@@ -168,7 +168,7 @@ e_ews_ooo_notificator_show_notification (EEwsOooNotificator *extension,
 			action,
 			"activate",
 			G_CALLBACK (e_ews_ooo_notificator_unset_on_server_cb), data);
-	e_alert_add_action (alert, action, 0);
+	e_alert_add_action (alert, action, 0, FALSE);
 
 	g_hash_table_insert (extension->priv->alerts, ews_store, alert);
 	e_alert_sink_submit_alert (E_ALERT_SINK (shell_content), alert);
