@@ -10,6 +10,7 @@
 
 #include <camel/camel.h>
 #include <libsoup/soup.h>
+#include <libedataserver/libedataserver.h>
 #include "e-soup-auth-negotiate.h"
 
 /*
@@ -37,6 +38,7 @@ typedef struct {
 	gint  challenge_available;
 } SoupMessageState;
 
+G_LOCK_DEFINE_STATIC (msgs_table);
 static GHashTable *msgs_table;
 
 static gchar *
@@ -95,9 +97,13 @@ static void e_soup_auth_negotiate_message_finished (SoupMessage *msg,
 static void
 e_soup_auth_negotiate_delete_context (SoupMessage *msg, gpointer user_data)
 {
-	SoupMessageState *state = g_hash_table_lookup (msgs_table, msg);
+	SoupMessageState *state;
 
+	G_LOCK (msgs_table);
+	state = g_hash_table_lookup (msgs_table, msg);
 	g_hash_table_remove (msgs_table, msg);
+	G_UNLOCK (msgs_table);
+
 	g_signal_handlers_disconnect_by_func (
 		msg, G_CALLBACK (e_soup_auth_negotiate_message_finished),
 		user_data);
@@ -115,11 +121,16 @@ e_soup_auth_negotiate_message_finished (SoupMessage *msg, gpointer user_data)
 	/*
 	 * Feed the remaining GSSAPI data through SASL
 	 */
-	SoupAuth *auth = SOUP_AUTH (user_data);
+	GWeakRef *weak_ref = user_data;
+	SoupAuth *auth;
 
-	if (msg->status_code == 200 &&
+	auth = g_weak_ref_get (weak_ref);
+
+	if (auth && msg->status_code == 200 &&
 	    e_soup_auth_negotiate_update (auth, msg, NULL))
 		e_soup_auth_negotiate_is_ready (auth, msg);
+
+	g_clear_object (&auth);
 
 	e_soup_auth_negotiate_delete_context (msg, user_data);
 }
@@ -129,15 +140,17 @@ e_soup_auth_negotiate_get_message_state (SoupMessage *msg, SoupAuth *auth)
 {
 	SoupMessageState *state;
 
+	G_LOCK (msgs_table);
 	state = g_hash_table_lookup (msgs_table, msg);
 	if (!state) {
 		state = g_slice_new0 (SoupMessageState);
 		g_hash_table_insert (msgs_table, msg, state);
-		g_signal_connect (
+		g_signal_connect_data (
 			msg, "finished",
 			G_CALLBACK (e_soup_auth_negotiate_message_finished),
-			auth);
+			e_weak_ref_new (auth), (GClosureNotify) e_weak_ref_free, 0);
 	}
+	G_UNLOCK (msgs_table);
 
 	return state;
 }
@@ -319,5 +332,7 @@ e_soup_auth_negotiate_class_init (ESoupAuthNegotiateClass *auth_negotiate_class)
 
 	object_class->finalize = e_soup_auth_negotiate_finalize;
 
+	G_LOCK (msgs_table);
 	msgs_table = g_hash_table_new (NULL, NULL);
+	G_UNLOCK (msgs_table);
 }
