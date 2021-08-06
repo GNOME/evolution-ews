@@ -205,9 +205,12 @@ e_soup_auth_negotiate_update (SoupAuth *auth, SoupMessage *msg,
 				chlg = NULL;
 			state->challenge = g_strdup (chlg);
 			state->challenge_available = TRUE;
+			g_strfreev (auths);
 			return TRUE;
 		}
 	}
+
+	g_strfreev (auths);
 
 	return FALSE;
 }
@@ -285,6 +288,7 @@ e_soup_auth_negotiate_is_ready (SoupAuth *auth, SoupMessage *msg)
 			 */
 			soup_message_set_status_full (
 				msg, SOUP_STATUS_BAD_REQUEST, error->message);
+			g_clear_error (&error);
 			return FALSE;
 		}
 	}
