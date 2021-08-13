@@ -1,3 +1,14 @@
+Evolution-EWS 3.41.2 2021-08-13
+-------------------------------
+
+Miscellaneous:
+	Adapt to e_alert_add_action() API change (Milan Crha)
+	ESoupAuthNegotiate: Improve thread safety (Milan Crha)
+	ESoupAuthNegotiate: Fix two memory leaks (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+
 Evolution-EWS 3.41.1 2021-07-09
 -------------------------------
 
