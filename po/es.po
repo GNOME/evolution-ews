@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-02-16 15:46+0000\n"
-"PO-Revision-Date: 2021-02-16 16:54+0100\n"
+"POT-Creation-Date: 2021-06-09 16:57+0000\n"
+"PO-Revision-Date: 2021-08-26 17:36+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 3.38.0\n"
+"X-Generator: Poedit 3.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -36,47 +36,47 @@ msgstr "Servicios web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acceder a servidores Exchange usando servicios web"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
 msgid "Failed to update GAL:"
 msgstr "Falló al actualizar GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "No se puede guardar la lista de contactos. Esto sólo se soporta en EWS "
 "server 2010 o posterior"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
 msgid "Failed to set contact photo:"
 msgstr "Falló al establecer la foto del contacto:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Libre"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fuera de la oficina"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Provisional"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "No se puede determinar el ItemId de EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -84,12 +84,12 @@ msgstr ""
 "No se pueden crear reuniones organizadas por otros usuarios en un calendario "
 "de servicios web de Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "No se puede encontrar al usuario «%s» entre los asistentes"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "ID de ocurrencia no válido"
 
@@ -133,12 +133,12 @@ msgstr "Falló al mover el archivo de la caché de mensajes de «%s» a «%s»: 
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Actualizando carpeta «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
@@ -447,7 +447,7 @@ msgstr "Debe estar conectado para completar esta operación"
 #: ../src/EWS/camel/camel-ews-store.c:3979
 #: ../src/EWS/camel/camel-ews-store.c:4016
 msgid "Unsetting the “Out of Office” status"
-msgstr "Quitando el estado de «Estoy fuera de la oficina»."
+msgstr "Quitando el estado de «Estoy fuera de la oficina»"
 
 #: ../src/EWS/camel/camel-ews-store.h:40
 msgid "Foreign Folders"
@@ -504,7 +504,7 @@ msgstr ""
 "No se puede guardar esta repetición. Cámbiela a de un sólo día, semanal, "
 "mensual o anual sin excepciones y con fecha de inicio."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:392
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
@@ -672,7 +672,7 @@ msgstr "URL OAB: %s"
 #: ../src/EWS/evolution/e-ews-config-lookup.c:311
 #, c-format
 msgid "Requires password to continue."
-msgstr "Se necesita una contraseña para continuar"
+msgstr "Se necesita una contraseña para continuar."
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:562
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
@@ -845,7 +845,7 @@ msgstr "Editar permisos de la carpeta EWS…"
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:667
 msgid "Account:"
-msgstr "Cuenta"
+msgstr "Cuenta:"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:965
 msgid "Folder name:"
@@ -1382,18 +1382,36 @@ msgstr "Mis delegados _y yo"
 msgid "Retrieving “Delegates” settings"
 msgstr "Obteniendo la configuración de «Delegados»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "Configuración de EWS"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "_Tamaño de carpetas"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Ver el tamaño de todas las carpetas de Exchange"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "_Tamaño de carpetas"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "_Restablecer las etiquetas de sincronización"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Las carpetas a veces pueden perder la sincronización , por ejemplo, después "
+"de un largo tiempo sin conectarse al servidor. Al restablecer las etiquetas "
+"de sincronización, las carpetas se actualizan completamente. Esto no causa "
+"la descarga de los mensajes que ya están almacenados localmente. El cambio "
+"se produce la próxima vez que las carpetas se actualicen."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1538,7 +1556,7 @@ msgstr "Falló al obtener la configuración de «Estoy fuera de la oficina»."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:5
 msgid "Failed to retrieve “Delegates” settings."
-msgstr "Falló al obtener la configuración de «Delegados»"
+msgstr "Falló al obtener la configuración de «Delegados»."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
@@ -1650,10 +1668,6 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Estado de la carpeta no válido (falta el almacenamiento padre)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
-#| msgid ""
-#| "Cannot add messages into an Microsoft 365 account from another account. "
-#| "Only messages from the same account can be moved/copied between the "
-#| "Microsoft 365 folders."
 msgid ""
 "Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
