@@ -711,22 +711,20 @@ ews_next_request (gpointer _cnc)
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 
+	QUEUE_UNLOCK (cnc);
+
 	if (cnc->priv->soup_session) {
 		SoupMessage *msg = SOUP_MESSAGE (node->msg);
 
 		if (!e_ews_connection_utils_prepare_message (cnc, NULL, msg, node->cancellable)) {
 			e_ews_debug_dump_raw_soup_request (msg);
-			QUEUE_UNLOCK (cnc);
 
 			ews_response_cb (cnc->priv->soup_session, msg, node);
 		} else {
 			e_ews_debug_dump_raw_soup_request (msg);
 			soup_session_queue_message (cnc->priv->soup_session, msg, ews_response_cb, node);
-			QUEUE_UNLOCK (cnc);
 		}
 	} else {
-		QUEUE_UNLOCK (cnc);
-
 		ews_cancel_request (NULL, node);
 	}
 
