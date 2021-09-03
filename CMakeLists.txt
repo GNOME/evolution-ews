@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
 project(evolution-ews
-	VERSION 3.41.3
+	VERSION 3.42.0
 	LANGUAGES C)
 set(PROJECT_BUGREPORT "https://gitlab.gnome.org/GNOME/evolution-ews/issues/")
 
