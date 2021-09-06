@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-03-02 11:28+0000\n"
-"PO-Revision-Date: 2021-03-08 22:31+0200\n"
+"POT-Creation-Date: 2021-06-09 16:57+0000\n"
+"PO-Revision-Date: 2021-09-06 13:59+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
 "%100<10 || n%100>=20) ? 1 : 2)\n"
-"X-Generator: Gtranslator 3.38.0\n"
+"X-Generator: Gtranslator 40.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -31,47 +31,47 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange serverių pasiekimui naudojant internetines tarnybas"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
 msgid "Failed to update GAL:"
 msgstr "Nepavyko atnaujinti GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Negalima įrašyti kontaktų sąrašo, jis palaikomas tik EWS Server 2010 ir "
 "naujesniame"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
 msgid "Failed to set contact photo:"
 msgstr "Nepavyko nustatyti kontakto nuotraukos:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Laisvas"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Užsiėmęs"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ne biure"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Bandomasis"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "Nepavyko nustatyti EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -79,12 +79,12 @@ msgstr ""
 "Exchange Web Services kalendoriuje negalima sukurti susitikimų, "
 "organizuojamų kitų naudotojų."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nepavyko rasti tarp dalyvių naudotojo „%s“"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Netinkamas pasikartojimo ID"
 
@@ -128,12 +128,12 @@ msgstr "Nepavyko perkelti laiškų podėlio failo iš „%s“ į „%s“: %s"
 msgid "Could not load summary for %s"
 msgstr "Nepavyksta įkelti %s santraukos"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Atnaujinamas aplankas „%s“"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Negalima atlikti veiksmų aplanke esant atsijungus"
@@ -500,7 +500,7 @@ msgstr ""
 "Negalima įrašyti šio pasikartojimo. Pakeiskite į paprasčiausią kasdienį, "
 "savaitinį, mėnesinį ar metinį pasikartojimą be išimčių ir su pradžios data."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:392
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem iškvietimas negrąžino naujo laiško ID"
@@ -1373,18 +1373,35 @@ msgstr "Ma_no įgaliotiniams ir man"
 msgid "Retrieving “Delegates” settings"
 msgstr "Gaunami „įgaliotinių“ nustatymai"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "EWS nustatymai"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "Aplankų _dydžiai"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Rodyti visų Exchange aplankų dydį"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "Aplankų _dydžiai"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "Atstatyti sinch_ronizacijos žymas"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Aplankų sinchronizacija kartais gali būti prarasta, pavyzdžiui jei ilgai "
+"neprisijungta prie serverio. Atstatant sinchronizacija aplankai yra visiškai "
+"atnaujinami. Dėl to nebus atsisiunčiame jau vietoje įrašyti laiškai. "
+"Pakeitimas įsigalios kitą kartą atnaujinus aplankus."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1630,10 +1647,6 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Netinkama aplanko būsena (trūksta tėvinės saugyklos)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
-#| msgid ""
-#| "Cannot add messages into an Microsoft 365 account from another account. "
-#| "Only messages from the same account can be moved/copied between the "
-#| "Microsoft 365 folders."
 msgid ""
 "Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
