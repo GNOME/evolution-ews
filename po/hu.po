@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-03-02 11:28+0000\n"
-"PO-Revision-Date: 2021-03-17 00:33+0100\n"
+"POT-Creation-Date: 2021-06-09 16:57+0000\n"
+"PO-Revision-Date: 2021-09-10 21:50+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -32,46 +32,46 @@ msgstr "Exchange webszolgáltatások"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange kiszolgálók eléréséhez webszolgáltatások használatával"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
 msgid "Failed to update GAL:"
 msgstr "Nem sikerült a GAL frissítése:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nem menthető a névjegylista, csak az EWS Server 2010 vagy újabb támogatja"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
 msgid "Failed to set contact photo:"
 msgstr "Nem sikerült a kapcsolati fénykép beállítása:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Szabad"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Elfoglalt"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Házon kívül"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Feltételes"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "Nem lehet meghatározni az EWS elemazonosítót"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -79,12 +79,12 @@ msgstr ""
 "Nem lehet létrehozni más felhasználók által szervezett találkozókat egy "
 "Exchange Web Services naptárban."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nem található a(z) „%s” felhasználó a jelenlévők között"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Érvénytelen előfordulási azonosító"
 
@@ -129,12 +129,12 @@ msgstr ""
 msgid "Could not load summary for %s"
 msgstr "„%s” összefoglalása nem tölthető be"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "A(z) „%s” mappa frissítése"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kapcsolat nélküli módban nem lehet végrehajtani a műveleteket a mappán"
@@ -500,7 +500,7 @@ msgstr ""
 "Nem tárolható ez az előfordulás. Módosítsa egy egyszerű naponta, hetente, "
 "havonta vagy évente ismétlődővé, kivételek nélkül és egy kezdődátummal."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:392
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A CreateItem hívás nem adott vissza új üzenetazonosítót"
@@ -1374,18 +1374,35 @@ msgstr "Megbízottaimnak és _nekem"
 msgid "Retrieving “Delegates” settings"
 msgstr "„Megbízottak” beállításainak lekérése"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "EWS-beállítások"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "_Mappaméretek"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Az összes Exchange mappa méretének megjelenítése"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "_Mappaméretek"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "Szinkronizálási címkék _visszaállítása"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Néha a mappák elveszíthetik a szinkronizációt, például ha hosszabb ideig nem"
+" csatlakozik a kiszolgálóhoz. A szinkronizálási címkék visszaállításával a"
+" mappák teljesen frissülnek. Ez nem okozza a már helyileg tárolt üzenetek"
+" letöltését. A változtatás a mappák következő frissítésekor lép hatályba."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1633,10 +1650,6 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Érvénytelen mappaállapot (hiányzó szülőtárolás)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
-#| msgid ""
-#| "Cannot add messages into an Microsoft 365 account from another account. "
-#| "Only messages from the same account can be moved/copied between the "
-#| "Microsoft 365 folders."
 msgid ""
 "Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
