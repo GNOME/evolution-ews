@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-06-09 16:57+0000\n"
-"PO-Revision-Date: 2021-06-10 07:14+0300\n"
+"POT-Creation-Date: 2021-09-17 10:36+0000\n"
+"PO-Revision-Date: 2021-09-17 14:46+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -30,18 +30,23 @@ msgstr "Вебслужби Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2796
+#| msgid "_Fetch contact photos"
+msgid "Fetching contact photos…"
+msgstr "Отримуємо фотографії контактів…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3988
 msgid "Failed to update GAL:"
 msgstr "Не вдалося оновити GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4153
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Не вдалося зберегти список контактів, підтримку передбачено лише у EWS "
 "Server 2010 та новіших версіях"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4251
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
@@ -507,25 +512,25 @@ msgstr ""
 "Не вдалося зберегти це повторення. Змініть його на одинарне щоденне, "
 "щотижневе або щорічне повторення без виключення і з початковою датою."
 
-#: ../src/EWS/common/e-ews-camel-common.c:392
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Виклик CreateItem не повернув ідентифікатора нового повідомлення"
 
-#: ../src/EWS/common/e-ews-connection.c:811
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "Дію скасовано"
 
-#: ../src/EWS/common/e-ews-connection.c:981
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "Не вдалось пройти розпізнавання"
 
-#: ../src/EWS/common/e-ews-connection.c:1003
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Немає відповіді: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1066
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -538,7 +543,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Exchange зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/EWS/common/e-ews-connection.c:1072
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -547,57 +552,57 @@ msgstr[1] "Сервер Exchange зайнято, очікуємо на повт�
 msgstr[2] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунд)"
 msgstr[3] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/EWS/common/e-ews-connection.c:3215
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Не вдалося обробити відповідь XML autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Не вдалося знайти елемент <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Не вдалося знайти елемент <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:3244
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Не вдалося знайти елемент <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:3290
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Не вдалося знайти <ASUrl> у відповіді на автовиявлення"
 
-#: ../src/EWS/common/e-ews-connection.c:3476
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бути порожньою"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Адреса «%s» є некоректною"
 
-#: ../src/EWS/common/e-ews-connection.c:3781
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
 msgstr "У адресі електронної пошти пропущено частину домену"
 
-#: ../src/EWS/common/e-ews-connection.c:4090
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "Не вдалося обробити XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "Не вдалося знайти елемент <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5387
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
 msgstr "Пункти не знайдено"
 
-#: ../src/EWS/common/e-ews-connection.c:11838
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2007 SP1"
 
@@ -1402,8 +1407,7 @@ msgstr "Переглянути розмір усіх тек Exchange"
 
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
 msgid "_Reset Synchronization Tags"
-msgstr ""
-"С_кинути мітки синхронізації"
+msgstr "С_кинути мітки синхронізації"
 
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
 msgid ""
@@ -1413,7 +1417,10 @@ msgid ""
 "already locally stored messages. The change will take effect the next time "
 "the folders are refreshed."
 msgstr ""
-"Іноді синхронізація тек може порушуватися, наприклад, якщо з сервером довго не було з'єднання. Якщо скинути мітки синхронізації тек, відбудеться повне оновлення. При цьому не відбуватиметься отримання вже збережених локально повідомлень. Зміни набудуть чинності під час наступного оновлення вмісту тек."
+"Іноді синхронізація тек може порушуватися, наприклад, якщо з сервером довго "
+"не було з'єднання. Якщо скинути мітки синхронізації тек, відбудеться повне "
+"оновлення. При цьому не відбуватиметься отримання вже збережених локально "
+"повідомлень. Зміни набудуть чинності під час наступного оновлення вмісту тек."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1592,12 +1599,12 @@ msgstr "Не вдалося визначити належний клас тек 
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Джерело даних «%s» не є відповідником теки веб служб Exchange"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "Не встановлено ідентифікатор теки"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Не вдалося зберегти список контактів до адресної книги Microsoft 365"
 
