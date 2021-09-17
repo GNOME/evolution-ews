@@ -95,6 +95,7 @@ struct _EBookBackendEwsPrivate {
 
 	gchar *folder_id;
 	gboolean is_gal;
+	gboolean fetching_gal_photos;
 
 	guint subscription_key;
 
@@ -2743,15 +2744,149 @@ ebb_ews_fetch_gal_photo_sync (EBookBackendEws *bbews,
 	return success;
 }
 
+static EBookMetaBackendInfo *ebb_ews_contact_to_info (EContact *contact, gboolean is_gal);
+
+static void
+ebb_ews_fetch_gal_photos_thread (EBookBackend *book_backend,
+				 gpointer user_data,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EBookBackendEws *bbews = E_BOOK_BACKEND_EWS (book_backend);
+	EBookCache *book_cache;
+	ESourceEwsFolder *ews_folder;
+	GSList *uids = user_data;
+
+	book_cache = e_book_meta_backend_ref_cache (E_BOOK_META_BACKEND (bbews));
+	if (!book_cache)
+		return;
+
+	ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (bbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+	if (e_source_ews_folder_get_fetch_gal_photos (ews_folder)) {
+		g_rec_mutex_lock (&bbews->priv->cnc_lock);
+
+		if (!bbews->priv->fetching_gal_photos && bbews->priv->cnc &&
+		    e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2013)) {
+			guint counter = 0;
+			GSList *link, *modified = NULL;
+
+			bbews->priv->fetching_gal_photos = TRUE;
+
+			g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+
+			/* Recheck the fetch-gal-photo property every time, in case the user changed it
+			   while the fetching had been ongoing. */
+			for (link = uids;
+			     link && !g_cancellable_is_cancelled (cancellable) && e_source_ews_folder_get_fetch_gal_photos (ews_folder);
+			     link = g_slist_next (link)) {
+				const gchar *uid = link->data;
+				EContact *contact = NULL;
+				EBookMetaBackendInfo *nfo;
+				GError *local_error = NULL;
+
+				if (!e_book_cache_get_contact (book_cache, uid, FALSE, &contact, cancellable, NULL) ||
+				    !contact || e_vcard_get_attribute (E_VCARD (contact), EVC_PHOTO) ||
+				    !ebb_ews_can_check_user_photo (contact)) {
+					g_clear_object (&contact);
+					continue;
+				}
+
+				if (!ebb_ews_fetch_gal_photo_sync (bbews, contact, cancellable, &local_error))
+					ebb_ews_store_photo_check_date (contact, NULL);
+
+				nfo = ebb_ews_contact_to_info (contact, bbews->priv->is_gal);
+				if (nfo) {
+					modified = g_slist_prepend (modified, nfo);
+					counter++;
+				}
+
+				g_clear_object (&contact);
+
+				/* Stop immediately when the server is busy */
+				if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SERVERBUSY)) {
+					g_clear_error (&local_error);
+					break;
+				}
+
+				g_clear_error (&local_error);
+
+				if (counter == 100) {
+					counter = 0;
+					e_book_meta_backend_process_changes_sync (E_BOOK_META_BACKEND (bbews), NULL, modified, NULL, cancellable, NULL);
+					g_slist_free_full (modified, e_book_meta_backend_info_free);
+					modified = NULL;
+				}
+
+				/* Give a chance to other threads to work with the connection, because the photos
+				   are not that important like the other operations. */
+				g_thread_yield ();
+				g_usleep (G_USEC_PER_SEC / 4);
+				g_thread_yield ();
+			}
+
+			if (modified) {
+				e_book_meta_backend_process_changes_sync (E_BOOK_META_BACKEND (bbews), NULL, modified, NULL, cancellable, NULL);
+				g_slist_free_full (modified, e_book_meta_backend_info_free);
+			}
+
+			g_rec_mutex_lock (&bbews->priv->cnc_lock);
+			bbews->priv->fetching_gal_photos = FALSE;
+			g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+		} else {
+			g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+		}
+	}
+
+	g_object_unref (book_cache);
+}
+
+static void
+ebb_ews_free_string_slist (gpointer ptr)
+{
+	GSList *list = ptr;
+
+	g_slist_free_full (list, g_free);
+}
+
+static void
+ebb_ews_maybe_schedule_fetch_gal_photos (EBookBackendEws *bbews,
+					 GSList **inout_uids) /* gchar * */
+{
+	ESourceEwsFolder *ews_folder;
+
+	if (!inout_uids || !*inout_uids)
+		return;
+
+	ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (bbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+
+	if (e_source_ews_folder_get_fetch_gal_photos (ews_folder)) {
+		gboolean can_do_it;
+
+		g_rec_mutex_lock (&bbews->priv->cnc_lock);
+		can_do_it = !bbews->priv->fetching_gal_photos && bbews->priv->cnc &&
+			    e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2013);
+		g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+
+		if (can_do_it) {
+			e_book_backend_schedule_custom_operation (E_BOOK_BACKEND (bbews), NULL,
+				ebb_ews_fetch_gal_photos_thread,
+				*inout_uids,
+				ebb_ews_free_string_slist);
+			*inout_uids = NULL;
+		}
+	}
+}
+
 struct _db_data {
 	EBookBackendEws *bbews;
-	gboolean fetch_gal_photos;
 	GHashTable *uids;
 	GHashTable *sha1s;
 	gint unchanged;
 	gint changed;
 	gint added;
 	gint percent;
+	gboolean fetch_gal_photos;
+	GSList *fetch_gal_photos_list; /* gchar *uid */
 	GSList *created_objects;
 	GSList *modified_objects;
 };
@@ -2797,18 +2932,8 @@ ebb_ews_gal_store_contact (EContact *contact,
 		ebews_populate_rev (contact, NULL);
 		e_vcard_util_set_x_attribute (E_VCARD (contact), X_EWS_GAL_SHA1, sha1);
 
-		if (data->fetch_gal_photos && !g_cancellable_is_cancelled (cancellable)) {
-			GError *local_error = NULL;
-
-			if (!ebb_ews_fetch_gal_photo_sync (data->bbews, contact, cancellable, &local_error))
-				ebb_ews_store_photo_check_date (contact, NULL);
-
-			/* The server can kick-off the flood of photo requests, then better stop it */
-			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SERVERBUSY))
-				data->fetch_gal_photos = FALSE;
-
-			g_clear_error (&local_error);
-		}
+		if (data->fetch_gal_photos && !g_cancellable_is_cancelled (cancellable))
+			data->fetch_gal_photos_list = g_slist_prepend (data->fetch_gal_photos_list, g_strdup (uid));
 
 		nfo = e_book_meta_backend_info_new (uid, e_contact_get_const (contact, E_CONTACT_REV), NULL, NULL);
 		nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -2896,6 +3021,7 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 
 	data.bbews = bbews;
 	data.fetch_gal_photos = e_source_ews_folder_get_fetch_gal_photos (ews_folder);
+	data.fetch_gal_photos_list = NULL;
 	data.created_objects = NULL;
 	data.modified_objects = NULL;
 	data.unchanged = data.changed = data.added = 0;
@@ -2926,10 +3052,14 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 				*out_removed_objects = g_slist_prepend (*out_removed_objects,
 					e_book_meta_backend_info_new (uid, NULL, NULL, NULL));
 			}
+
+			ebb_ews_maybe_schedule_fetch_gal_photos (bbews, &data.fetch_gal_photos_list);
 		} else {
 			g_slist_free_full (data.created_objects, e_book_meta_backend_info_free);
 			g_slist_free_full (data.modified_objects, e_book_meta_backend_info_free);
 		}
+
+		g_slist_free_full (data.fetch_gal_photos_list, g_free);
 	} else {
 		success = FALSE;
 	}
@@ -4185,42 +4315,22 @@ ebb_ews_search_sync (EBookMetaBackend *meta_backend,
 			g_rec_mutex_lock (&bbews->priv->cnc_lock);
 
 			if (bbews->priv->cnc && e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2013)) {
-				GSList *link, *modified = NULL;
-				gint count = 10;
+				GSList *link, *fetch_gal_photos_list = NULL;
 
-				/* Limit to first 10 without photo, no need to flood the server
-				   and slow the response too much */
-				for (link = *out_contacts; link && count > 0 && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+				for (link = *out_contacts; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
 					EContact *contact = link->data;
-					EBookMetaBackendInfo *nfo;
-					GError *local_error = NULL;
 
 					if (!contact || e_vcard_get_attribute (E_VCARD (contact), EVC_PHOTO) ||
 					    !ebb_ews_can_check_user_photo (contact))
 						continue;
 
-					count--;
-
-					if (!ebb_ews_fetch_gal_photo_sync (bbews, contact, cancellable, &local_error))
-						ebb_ews_store_photo_check_date (contact, NULL);
-
-					nfo = ebb_ews_contact_to_info (contact, bbews->priv->is_gal);
-					if (nfo)
-						modified = g_slist_prepend (modified, nfo);
-
-					/* Stop immediately when the server is busy */
-					if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SERVERBUSY)) {
-						g_clear_error (&local_error);
-						break;
-					}
-
-					g_clear_error (&local_error);
+					fetch_gal_photos_list = g_slist_prepend (fetch_gal_photos_list, e_contact_get (contact, E_CONTACT_UID));
 				}
 
-				if (modified) {
-					e_book_meta_backend_process_changes_sync (meta_backend, NULL, modified, NULL, cancellable, NULL);
-					g_slist_free_full (modified, e_book_meta_backend_info_free);
-				}
+				if (!g_cancellable_is_cancelled (cancellable))
+					ebb_ews_maybe_schedule_fetch_gal_photos (bbews, &fetch_gal_photos_list);
+
+				g_slist_free_full (fetch_gal_photos_list, g_free);
 			}
 
 			g_rec_mutex_unlock (&bbews->priv->cnc_lock);
