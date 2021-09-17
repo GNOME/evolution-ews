@@ -421,6 +421,11 @@ const gchar *	e_ews_item_get_surname		(EEwsItem *item);
 const gchar *	e_ews_item_get_givenname	(EEwsItem *item);
 const gchar *	e_ews_item_get_middlename	(EEwsItem *item);
 const gchar *	e_ews_item_get_notes		(EEwsItem *item);
+const guchar *	e_ews_item_get_user_certificate	(EEwsItem *item,
+						 gsize *out_len);
+const guchar *	e_ews_item_get_msexchange_certificate
+						(EEwsItem *item,
+						 gsize *out_len);
 
 /*Task fields*/
 const gchar *	e_ews_item_get_status		(EEwsItem *item);
