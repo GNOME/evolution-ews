@@ -6259,10 +6259,14 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 
 	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
 
-	if (fetch_contact_data)
+	if (fetch_contact_data) {
 		e_soap_message_add_attribute (msg, "ReturnFullContactData", "true", NULL, NULL);
-	else
+
+		if (e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2010_SP2))
+			e_soap_message_add_attribute (msg, "ContactDataShape", "AllProperties", NULL, NULL);
+	} else {
 		e_soap_message_add_attribute (msg, "ReturnFullContactData", "false", NULL, NULL);
+	}
 
 	if (parent_folder_ids) {
 		e_soap_message_start_element (msg, "ParentFolderIds", "messages", NULL);

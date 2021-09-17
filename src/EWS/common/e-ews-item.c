@@ -52,6 +52,12 @@ struct _EEwsContactFields {
 	gchar *givenname;
 	gchar *middlename;
 	gchar *notes;
+
+	gsize msexchange_cert_len;
+	guchar *msexchange_cert;
+
+	gsize user_cert_len;
+	guchar *user_cert;
 };
 
 struct _EEwsTaskFields {
@@ -337,6 +343,8 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		g_free (con_fields->givenname);
 		g_free (con_fields->middlename);
 		g_free (con_fields->notes);
+		g_free (con_fields->msexchange_cert);
+		g_free (con_fields->user_cert);
 		g_free (con_fields);
 	}
 }
@@ -829,6 +837,37 @@ parse_contact_field (EEwsItem *item,
 		 * with old servers (< 2010_SP2) we prefer use item:Body.
 		 */
 		priv->contact_fields->notes = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "UserSMIMECertificate") ||
+		   !g_ascii_strcasecmp (name, "MSExchangeCertificate")) {
+		ESoapParameter *data_param;
+		guchar **out_bytes;
+		gsize *out_len;
+
+		if (!g_ascii_strcasecmp (name, "UserSMIMECertificate")) {
+			out_bytes = &priv->contact_fields->user_cert;
+			out_len = &priv->contact_fields->user_cert_len;
+		} else {
+			out_bytes = &priv->contact_fields->msexchange_cert;
+			out_len = &priv->contact_fields->msexchange_cert_len;
+		}
+
+		data_param = e_soap_parameter_get_first_child_by_name (subparam, "Base64Binary");
+		if (data_param) {
+			gchar *base64_data;
+
+			base64_data = e_soap_parameter_get_string_value (data_param);
+			if (base64_data && *base64_data) {
+				*out_bytes = g_base64_decode_inplace (base64_data, out_len);
+				if (!*out_len) {
+					g_free (*out_bytes);
+
+					*out_len = 0;
+					*out_bytes = NULL;
+				}
+			} else {
+				g_free (base64_data);
+			}
+		}
 	}
 }
 
@@ -2698,6 +2737,32 @@ e_ews_item_get_notes (EEwsItem *item)
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
 	return item->priv->contact_fields->notes;
+}
+
+const guchar *
+e_ews_item_get_user_certificate (EEwsItem *item,
+				 gsize *out_len)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+	g_return_val_if_fail (out_len != NULL, NULL);
+
+	*out_len = item->priv->contact_fields->user_cert_len;
+
+	return item->priv->contact_fields->user_cert;
+}
+
+const guchar *
+e_ews_item_get_msexchange_certificate (EEwsItem *item,
+				       gsize *out_len)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+	g_return_val_if_fail (out_len != NULL, NULL);
+
+	*out_len = item->priv->contact_fields->msexchange_cert_len;
+
+	return item->priv->contact_fields->msexchange_cert;
 }
 
 time_t
