@@ -237,9 +237,7 @@ ews_config_lookup_worker_result_from_data (EConfigLookup *config_lookup,
 		if (email_address && *email_address) {
 			e_config_lookup_result_simple_add_string (lookup_result, extension_name,
 				"email", email_address);
-		}
 
-		if (email_address && *email_address) {
 			e_config_lookup_result_simple_add_string (lookup_result,
 				E_SOURCE_EXTENSION_COLLECTION,
 				"identity", email_address);
