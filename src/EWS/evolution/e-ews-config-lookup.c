@@ -198,30 +198,17 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 	if (url && *url) {
 		EConfigLookupResult *lookup_result;
 		GString *description;
-		gchar *tmp, *ptr, *user;
 		const gchar *extension_name;
 		SoupURI *suri;
 
 		extension_name = e_source_camel_get_extension_name ("ews");
 
-		tmp = g_strdup (email_address);
-		ptr = tmp ? strchr (tmp, '@') : NULL;
-		if (ptr)
-			*ptr = '\0';
-
-		if (!tmp || !*tmp) {
-			g_free (tmp);
-			tmp = NULL;
-		}
-
-		user = tmp;
-
 		suri = soup_uri_new (url);
 
 		description = g_string_new ("");
 
-		if (user && *user)
-			g_string_append_printf (description, _("User: %s"), user);
+		if (email_address && *email_address)
+			g_string_append_printf (description, _("User: %s"), email_address);
 
 		if (description->len)
 			g_string_append_c (description, '\n');
@@ -252,14 +239,17 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 		e_config_lookup_result_simple_add_string (lookup_result, extension_name,
 			"oaburl", camel_ews_settings_get_oaburl (ews_settings));
 
-		if (user && *user) {
+		if (email_address && *email_address) {
+			e_config_lookup_result_simple_add_string (lookup_result, extension_name,
+				"email", email_address);
+
 			e_config_lookup_result_simple_add_string (lookup_result,
 				E_SOURCE_EXTENSION_COLLECTION,
-				"identity", user);
+				"identity", email_address);
 
 			e_config_lookup_result_simple_add_string (lookup_result,
 				E_SOURCE_EXTENSION_AUTHENTICATION,
-				"user", user);
+				"user", email_address);
 		}
 
 		if (suri && suri->host && *suri->host) {
@@ -277,7 +267,6 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 		e_config_lookup_add_result (config_lookup, lookup_result);
 
 		g_string_free (description, TRUE);
-		g_free (user);
 		if (suri)
 			soup_uri_free (suri);
 	}
