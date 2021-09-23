@@ -9,6 +9,7 @@
 #include <glib/gi18n-lib.h>
 
 #include <e-util/e-util.h>
+#include <mail/e-mail-autoconfig.h>
 
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-connection.h"
@@ -182,20 +183,15 @@ ews_config_lookup_worker_get_display_name (EConfigLookupWorker *worker)
 }
 
 static void
-ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worker,
-					       EConfigLookup *config_lookup,
-					       const gchar *email_address,
-					       CamelEwsSettings *ews_settings,
-					       const ENamedParameters *params)
+ews_config_lookup_worker_result_from_data (EConfigLookup *config_lookup,
+					   const gchar *email_address,
+					   const gchar *hosturl,
+					   const gchar *oaburl,
+					   const ENamedParameters *params)
 {
-	const gchar *url;
-
-	g_return_if_fail (E_IS_EWS_CONFIG_LOOKUP (lookup_worker));
 	g_return_if_fail (E_IS_CONFIG_LOOKUP (config_lookup));
-	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (ews_settings));
 
-	url = camel_ews_settings_get_hosturl (ews_settings);
-	if (url && *url) {
+	if (hosturl && *hosturl) {
 		EConfigLookupResult *lookup_result;
 		GString *description;
 		gchar *tmp, *ptr, *user;
@@ -216,7 +212,7 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 
 		user = tmp;
 
-		suri = soup_uri_new (url);
+		suri = soup_uri_new (hosturl);
 
 		description = g_string_new ("");
 
@@ -226,12 +222,11 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 		if (description->len)
 			g_string_append_c (description, '\n');
 
-		g_string_append_printf (description, _("Host URL: %s"), url);
+		g_string_append_printf (description, _("Host URL: %s"), hosturl);
 
-		url = camel_ews_settings_get_oaburl (ews_settings);
-		if (url && *url) {
+		if (oaburl && *oaburl) {
 			g_string_append_c (description, '\n');
-			g_string_append_printf (description, _("OAB URL: %s"), url);
+			g_string_append_printf (description, _("OAB URL: %s"), oaburl);
 		}
 
 		lookup_result = e_ews_config_lookup_result_new (E_CONFIG_LOOKUP_RESULT_COLLECTION,
@@ -247,10 +242,10 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 			"backend-name", "ews");
 
 		e_config_lookup_result_simple_add_string (lookup_result, extension_name,
-			"hosturl", camel_ews_settings_get_hosturl (ews_settings));
+			"hosturl", hosturl);
 
 		e_config_lookup_result_simple_add_string (lookup_result, extension_name,
-			"oaburl", camel_ews_settings_get_oaburl (ews_settings));
+			"oaburl", oaburl);
 
 		if (user && *user) {
 			e_config_lookup_result_simple_add_string (lookup_result,
@@ -281,6 +276,24 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 		if (suri)
 			soup_uri_free (suri);
 	}
+}
+
+static void
+ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worker,
+					       EConfigLookup *config_lookup,
+					       const gchar *email_address,
+					       CamelEwsSettings *ews_settings,
+					       const ENamedParameters *params)
+{
+	g_return_if_fail (E_IS_EWS_CONFIG_LOOKUP (lookup_worker));
+	g_return_if_fail (E_IS_CONFIG_LOOKUP (config_lookup));
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (ews_settings));
+
+	ews_config_lookup_worker_result_from_data (config_lookup,
+		email_address,
+		camel_ews_settings_get_hosturl (ews_settings),
+		camel_ews_settings_get_oaburl (ews_settings),
+		params);
 }
 
 static void
@@ -499,6 +512,86 @@ e_ews_config_lookup_init (EEwsConfigLookup *extension)
 {
 }
 
+/* ------------------------------------------------------------------------- */
+
+#define E_TYPE_MAIL_AUTOCONFIG_EWS_EXTENSION (e_mail_autoconfig_ews_extension_get_type ())
+
+typedef struct _EMailAutoconfigEwsExtension EMailAutoconfigEwsExtension;
+typedef struct _EMailAutoconfigEwsExtensionClass EMailAutoconfigEwsExtensionClass;
+
+struct _EMailAutoconfigEwsExtension {
+	EExtension parent;
+};
+
+struct _EMailAutoconfigEwsExtensionClass {
+	EExtensionClass parent_class;
+};
+
+GType e_mail_autoconfig_ews_extension_get_type (void) G_GNUC_CONST;
+
+G_DEFINE_DYNAMIC_TYPE (EMailAutoconfigEwsExtension, e_mail_autoconfig_ews_extension, E_TYPE_EXTENSION)
+
+static void
+e_mail_autoconfig_ews_extesion_process_custom_types (EMailAutoconfig *mail_autoconfig,
+						     EConfigLookup *config_lookup,
+						     GHashTable *custom_types,
+						     gpointer user_data)
+{
+	const ENamedParameters *autoconfig_params;
+
+	g_return_if_fail (E_IS_CONFIG_LOOKUP (config_lookup));
+	g_return_if_fail (custom_types != NULL);
+
+	autoconfig_params = g_hash_table_lookup (custom_types, "exchange");
+	if (!autoconfig_params)
+		return;
+
+	ews_config_lookup_worker_result_from_data (config_lookup,
+		e_named_parameters_get (autoconfig_params, "user"),
+		e_named_parameters_get (autoconfig_params, "ewsURL"),
+		NULL,
+		NULL);
+}
+
+static void
+e_mail_autoconfig_ews_extension_constructed (GObject *object)
+{
+	EExtensible *extensible;
+
+	/* Chain up to parent's method. */
+	G_OBJECT_CLASS (e_mail_autoconfig_ews_extension_parent_class)->constructed (object);
+
+	extensible = e_extension_get_extensible (E_EXTENSION (object));
+
+	g_signal_connect (extensible, "process-custom-types",
+		G_CALLBACK (e_mail_autoconfig_ews_extesion_process_custom_types), NULL);
+}
+
+static void
+e_mail_autoconfig_ews_extension_class_init (EMailAutoconfigEwsExtensionClass *klass)
+{
+	GObjectClass *object_class;
+	EExtensionClass *extension_class;
+
+	object_class = G_OBJECT_CLASS (klass);
+	object_class->constructed = e_mail_autoconfig_ews_extension_constructed;
+
+	extension_class = E_EXTENSION_CLASS (klass);
+	extension_class->extensible_type = E_TYPE_MAIL_AUTOCONFIG;
+}
+
+static void
+e_mail_autoconfig_ews_extension_class_finalize (EMailAutoconfigEwsExtensionClass *klass)
+{
+}
+
+static void
+e_mail_autoconfig_ews_extension_init (EMailAutoconfigEwsExtension *extension)
+{
+}
+
+/* ------------------------------------------------------------------------- */
+
 void
 e_ews_config_lookup_type_register (GTypeModule *type_module)
 {
@@ -506,4 +599,5 @@ e_ews_config_lookup_type_register (GTypeModule *type_module)
 	 *     function, so we have to wrap it with a public function in
 	 *     order to register types from a separate compilation unit. */
 	e_ews_config_lookup_register_type (type_module);
+	e_mail_autoconfig_ews_extension_register_type (type_module);
 }
