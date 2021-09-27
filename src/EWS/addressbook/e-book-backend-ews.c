@@ -3086,6 +3086,7 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 
 	g_hash_table_destroy (data.sha1s);
 	g_hash_table_destroy (data.uids);
+	g_clear_object (&eod);
 
 	if (local_error)
 		g_propagate_error (error, local_error);

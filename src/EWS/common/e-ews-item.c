@@ -313,6 +313,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 			g_free (cn->nick_name);
 			g_free (cn->yomi_first_name);
 			g_free (cn->yomi_last_name);
+			g_free (cn);
 		}
 
 		if (con_fields->email_addresses)
