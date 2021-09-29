@@ -344,7 +344,7 @@ test_time_zones_sync (gconstpointer user_data)
 	e_ews_folder_id_free (calendar_fid);
 	g_clear_error (&error);
 
-	g_assert (retval == TRUE);
+	g_assert_true (retval == TRUE);
 }
 
 int main (int argc,

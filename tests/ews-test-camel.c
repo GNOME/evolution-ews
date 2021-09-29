@@ -135,7 +135,7 @@ test_create_existing_folder (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && folder_exists == TRUE);
+	g_assert_true (retval == FALSE && folder_exists == TRUE);
 }
 
 static void
@@ -177,7 +177,7 @@ test_create_folder_with_invalid_distinguished_parent_id (gconstpointer user_data
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && parent_folder_not_found == TRUE);
+	g_assert_true (retval == FALSE && parent_folder_not_found == TRUE);
 }
 
 static void
@@ -224,7 +224,7 @@ test_create_folder_with_invalid_non_distinguished_parent_id (gconstpointer user_
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && parent_folder_not_found == TRUE);
+	g_assert_true (retval == FALSE && parent_folder_not_found == TRUE);
 }
 
 static void
@@ -266,7 +266,7 @@ test_create_folder_with_malformed_parent_id (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && malformed_parent_id == TRUE);
+	g_assert_true (retval == FALSE && malformed_parent_id == TRUE);
 }
 
 static void
@@ -304,7 +304,7 @@ test_create_distinguished_folder_subfolder (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == TRUE && on_server == TRUE);
+	g_assert_true (retval == TRUE && on_server == TRUE);
 }
 
 static void
@@ -343,7 +343,7 @@ test_create_non_distinguished_folder_subfolder (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == TRUE && on_server == TRUE);
+	g_assert_true (retval == TRUE && on_server == TRUE);
 }
 
 static void
@@ -383,7 +383,7 @@ test_move_valid_folder_to_invalid_folder (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && malformed_parent_id == TRUE);
+	g_assert_true (retval == FALSE && malformed_parent_id == TRUE);
 }
 
 static void
@@ -423,7 +423,7 @@ test_move_invalid_to_valid_folder (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && malformed_parent_id == TRUE);
+	g_assert_true (retval == FALSE && malformed_parent_id == TRUE);
 }
 
 static void
@@ -495,7 +495,7 @@ test_move_folder_to_msgfolderroot (gconstpointer user_data)
 	g_slist_free (folder_ids);
 	g_clear_error (&error);
 
-	g_assert (retval == TRUE && moved_to_msgfolderroot == TRUE);
+	g_assert_true (retval == TRUE && moved_to_msgfolderroot == TRUE);
 }
 
 static void
@@ -549,7 +549,7 @@ test_move_folder_to_folder_that_has_subfolder_with_the_same_name (gconstpointer 
 
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && move_failed == TRUE);
+	g_assert_true (retval == FALSE && move_failed == TRUE);
 }
 
 static void
@@ -619,7 +619,7 @@ test_move_folder_to_valid_folder (gconstpointer user_data)
 	g_slist_free (folder_ids);
 	g_clear_error (&error);
 
-	g_assert (retval == TRUE && moved_to_correct_folder == TRUE);
+	g_assert_true (retval == TRUE && moved_to_correct_folder == TRUE);
 }
 
 static void
@@ -659,7 +659,7 @@ test_hard_delete_distinguished_folder (gconstpointer user_data)
 	uhm_server_end_trace (local_server);
 	g_clear_error (&error);
 
-	g_assert (retval == FALSE && distinguished_folder == TRUE);
+	g_assert_true (retval == FALSE && distinguished_folder == TRUE);
 }
 
 static void
@@ -698,7 +698,7 @@ test_hard_delete_non_distinguished_folder_subfolder (gconstpointer user_data)
 	e_ews_folder_id_free (non_distinguished_folder_subfolder_id);
 	non_distinguished_folder_subfolder_id = NULL;
 
-	g_assert (retval == TRUE && on_server == FALSE);
+	g_assert_true (retval == TRUE && on_server == FALSE);
 }
 
 static void
@@ -737,7 +737,7 @@ test_hard_delete_distinguished_folder_subfolder (gconstpointer user_data)
 	e_ews_folder_id_free (distinguished_folder_subfolder_id);
 	distinguished_folder_subfolder_id = NULL;
 
-	g_assert (retval == TRUE && on_server == FALSE);
+	g_assert_true (retval == TRUE && on_server == FALSE);
 }
 
 int main (int argc,
