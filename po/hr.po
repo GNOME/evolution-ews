@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2021-09-27 21:12+0000\n"
-"PO-Revision-Date: 2021-10-01 16:07+0200\n"
+"PO-Revision-Date: 2021-10-01 16:14+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
@@ -1387,7 +1387,7 @@ msgstr "Pogledaj veličinu svih Exchange mapa"
 
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
 msgid "_Reset Synchronization Tags"
-msgstr ""
+msgstr "_Obnovi oznake usklađivanja"
 
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
 msgid ""
@@ -1397,6 +1397,11 @@ msgid ""
 "already locally stored messages. The change will take effect the next time "
 "the folders are refreshed."
 msgstr ""
+"Mape mogu ponekada biti neusklađene, na primjer, nakon duljeg vremena "
+"nepovezivanja s poslužiteljem. Obnovom oznake usklađivanja mapa je "
+"nadopunjena u potpunosti. To ne prouzrokuje preuzimanje već lokalno "
+"pohranjenih poruka. Promjene će se primijeniti sljedeći puta kada se mapa "
+"osvježi."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
