@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-03-19 11:15+0000\n"
-"PO-Revision-Date: 2021-09-15 18:21+0200\n"
+"POT-Creation-Date: 2021-09-27 21:12+0000\n"
+"PO-Revision-Date: 2021-10-01 16:07+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
-"X-Generator: Gtranslator 40.0\n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 2.3\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
-#: ../src/EWS/evolution/e-ews-config-lookup.c:240
+#: ../src/EWS/evolution/e-ews-config-lookup.c:222
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Exchange web usluge"
@@ -32,47 +32,51 @@ msgstr "Exchange web usluge"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za pristup Exchange poslužiteljima koristeći web usluge"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2796
+msgid "Fetching contact photos…"
+msgstr "Preuzimanje fotografija kontakta…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3989
 msgid "Failed to update GAL:"
 msgstr "Neuspjela GAL nadopuna:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4154
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nemoguće spremanje popisa kontakta, podržano je samo na EWU poslužitelju "
 "2010 ili novijem"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4252
 msgid "Failed to set contact photo:"
 msgstr "Neuspjelo postavljanje fotografije kontakta:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Slobodno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zauzeto"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Izvan ureda"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Privremeno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "Nemoguće otkrivanje EWU ID-a stavke"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -80,12 +84,12 @@ msgstr ""
 "Nemoguće stvaranje sastanaka organiziranih od strane drugih ljudi u "
 "kalendaru Exchange web usluge."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nemoguć pronalazak korisnika “%s” među sudionicima"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Nevaljani ID pojave"
 
@@ -129,12 +133,12 @@ msgstr "Neuspjelo premještanje datoteke predmemorije iz “%s” u “%s”: %s
 msgid "Could not load summary for %s"
 msgstr "Neuspjelo učitavanje sažetka za %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Osvježavanje mape “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nemoguće izvođenje radnji na mapi u izvanmrežnom načinu rada"
@@ -496,25 +500,25 @@ msgstr ""
 "pojedinačno dnevno, tjedno, mjesečno ili godišnje ponavljanje bez iznimki i "
 "s datumom početka."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Stvaranje stavke poziva nije neuspjelo vratiti ID za novu poruku"
 
-#: ../src/EWS/common/e-ews-connection.c:811
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "Radnja je prekinuta"
 
-#: ../src/EWS/common/e-ews-connection.c:981
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "Neuspjela ovjera"
 
-#: ../src/EWS/common/e-ews-connection.c:1003
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Nema odgovora: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1066
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -525,7 +529,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d:%02d minuta)"
 
-#: ../src/EWS/common/e-ews-connection.c:1072
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -536,57 +540,57 @@ msgstr[1] ""
 msgstr[2] ""
 "Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d sekundi)"
 
-#: ../src/EWS/common/e-ews-connection.c:3215
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Nemoguća obrada automatskog otkrivanja odgovora XML-a"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nemoguće je pronaći element <Automatskog otkrivanja>"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Nemoguće je pronaći element <Odgovora>"
 
-#: ../src/EWS/common/e-ews-connection.c:3244
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Nemoguće je pronaći <element> računa"
 
-#: ../src/EWS/common/e-ews-connection.c:3290
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Nemoguće je pronaći <ASUrl> u odgovoru automatskog otkrivanja"
 
-#: ../src/EWS/common/e-ews-connection.c:3476
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "URL ne može biti NIŠTA"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL “%s” nije valjana"
 
-#: ../src/EWS/common/e-ews-connection.c:3781
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
 msgstr "Adresi e-pošte nedostaje domena"
 
-#: ../src/EWS/common/e-ews-connection.c:4090
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "Neuspjela obrada oab XML-a"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "Nemoguće pronalazak <OAB> elementa\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5387
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
 msgstr "Nema pronađenih stavki stavki"
 
-#: ../src/EWS/common/e-ews-connection.c:11838
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2007 SP1 server"
 
@@ -644,26 +648,26 @@ msgstr "_Preuzmi fotografije kontakta"
 msgid "Tries to look up for user photo"
 msgstr "Pokušava pretražiti fotografije korisnika"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:181
+#: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
 msgstr "Automatsko otkrivanje Exchange web usluge"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:224
+#: ../src/EWS/evolution/e-ews-config-lookup.c:207
 #, c-format
 msgid "User: %s"
 msgstr "Korisnik: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:229
+#: ../src/EWS/evolution/e-ews-config-lookup.c:212
 #, c-format
 msgid "Host URL: %s"
 msgstr "URL poslužitelja: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:234
+#: ../src/EWS/evolution/e-ews-config-lookup.c:216
 #, c-format
 msgid "OAB URL: %s"
 msgstr "OAB URL: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:311
+#: ../src/EWS/evolution/e-ews-config-lookup.c:313
 #, c-format
 msgid "Requires password to continue."
 msgstr "Potrebna je lozinka za nastavak."
@@ -1181,14 +1185,12 @@ msgstr "Zadani postavljeni ID aplikacije je “%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
-#| msgid "_Tenant:"
 msgid "_Tenant ID:"
 msgstr "_Tenant ID:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
-#| msgid "Default tenant is “common“"
 msgid "Default tenant ID is “common“"
 msgstr "Zadani tenant ID je “common“"
 
@@ -1196,32 +1198,28 @@ msgstr "Zadani tenant ID je “common“"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant ID is “%s”"
 msgstr "Zadani tenant ID je “%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
-#| msgid "EWS Settings"
 msgid "_Advanced Settings"
 msgstr "_Napredne postavke"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:406
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
-msgstr "_Završni poslužitelj"
+msgstr "_Završni poslužitelj:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:429
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:432
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default endpoint host is “%s”"
 msgstr "Zadani završni poslužitelj je “%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
-#| msgid "_Redirect URI:"
 msgid "Red_irect URI:"
 msgstr "URI _preusmjeravanja:"
 
@@ -1234,7 +1232,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "Zadani URI preusmjeravanja je “%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
-#| msgid "_Redirect URI:"
 msgid "Re_source URI:"
 msgstr "URI resursa:"
 
@@ -1375,18 +1372,31 @@ msgstr "Moji delegati i j_a"
 msgid "Retrieving “Delegates” settings"
 msgstr "Primenje \"Delegati\" postavki"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "EWU postavke"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "Veličine _mapa"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Pogledaj veličinu svih Exchange mapa"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "Veličine _mapa"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr ""
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1507,7 +1517,6 @@ msgid "Display part as EWS sharing metadata"
 msgstr "Prikaži dio kao EWS dijeljeni metapodatak"
 
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
-#| msgid "Subscribe to folder of other user…"
 msgid "Subscribing EWS folder…"
 msgstr "Pretplati se na EWS mapu…"
 
@@ -1537,7 +1546,7 @@ msgstr "Vaš Exchange \"{0}\" račun ima stanje postavljeno na \"Izvan ureda\"."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
 msgid "Failed to subscribe user folder."
-msgstr "Neuspjela pretplata na korisničku mapu"
+msgstr "Neuspjela pretplata na korisničku mapu."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
 msgid "Folder had been subscribed."
@@ -1558,12 +1567,12 @@ msgstr "Nemoguće otkrivanje prikladne klase mape za novu mapu naziva “%s”"
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Izvor podataka “%s” ne predstavlja mapu Exchange web usluge"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "ID mape nije postavljen"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Nemoguće spremanje popisa kontakata u Microsoft 365 adresar"
 
@@ -1629,10 +1638,6 @@ msgid "Invalid folder state (missing parent store)"
 msgstr "Nevaljano stanje mape (nedostaje sadržana pohrana)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
-#| msgid ""
-#| "Cannot add messages into an Microsoft 365 account from another account. "
-#| "Only messages from the same account can be moved/copied between the "
-#| "Microsoft 365 folders."
 msgid ""
 "Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
