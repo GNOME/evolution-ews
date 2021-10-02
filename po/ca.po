@@ -155,7 +155,7 @@ msgstr "Comprova si _hi ha missatges nous a totes les carpetes"
 
 #: ../src/EWS/camel/camel-ews-provider.c:34
 msgid "_Listen for server change notifications"
-msgstr "_Escolta el servidor per notificacions de canvis"
+msgstr "_Escolta el servidor per a notificacions de canvis"
 
 #: ../src/EWS/camel/camel-ews-provider.c:37
 #: ../src/Microsoft365/camel/camel-m365-provider.c:30
