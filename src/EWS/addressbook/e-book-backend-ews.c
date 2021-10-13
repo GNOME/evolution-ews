@@ -78,6 +78,7 @@
 #define CONTACT_ITEM_PROPS "item:Attachments "\
 			   "item:HasAttachments "\
 			   "item:Body "\
+			   "item:Categories " \
 			   "item:LastModifiedTime "\
 			   "contacts:Manager "\
 			   "contacts:Department "\
@@ -1813,6 +1814,102 @@ ebews_get_fileas_or_display_name (EEwsItem *item)
 	return value;
 }
 
+static void
+ebews_populate_categories (EBookBackendEws *bbews,
+			   EContact *contact,
+			   EEwsItem *item,
+			   GCancellable *cancellable,
+			   GError **error)
+{
+	GList *values = NULL;
+	GSList *link;
+
+	for (link = (GSList *) e_ews_item_get_categories (item); link; link = g_slist_next (link)) {
+		values = g_list_prepend (values, link->data);
+	}
+
+	values = g_list_reverse (values);
+
+	e_contact_set (contact, E_CONTACT_CATEGORY_LIST, values);
+
+	g_list_free (values);
+}
+
+static void
+ebews_set_categories (EBookBackendEws *bbews,
+		      ESoapMessage *message,
+		      EContact *contact)
+{
+	GList *values;
+
+	values = e_contact_get (contact, E_CONTACT_CATEGORY_LIST);
+	if (values) {
+		GList *link;
+
+		e_soap_message_start_element (message, "Categories", NULL, NULL);
+		for (link = values; link; link = g_list_next (link)) {
+			const gchar *category = link->data;
+			if (category && *category)
+				e_ews_message_write_string_parameter (message, "String", NULL, category);
+		}
+		e_soap_message_end_element (message);
+	}
+
+	g_list_free_full (values, g_free);
+}
+
+static void
+ebews_set_categories_changes (EBookBackendEws *bbews,
+			      ESoapMessage *message,
+			      EContact *new,
+			      EContact *old,
+			      gchar **out_new_change_key,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	gchar *old_categories, *new_categories;
+
+	if (!message)
+		return;
+
+	old_categories = e_contact_get (old, E_CONTACT_CATEGORIES);
+	new_categories = e_contact_get (new, E_CONTACT_CATEGORIES);
+
+	if (g_strcmp0 (old_categories, new_categories) != 0) {
+		GList *values, *link;
+
+		values = e_contact_get (new, E_CONTACT_CATEGORY_LIST);
+		if (values) {
+			e_soap_message_start_element (message, "SetItemField", NULL, NULL);
+
+			e_soap_message_start_element (message, "FieldURI", NULL, NULL);
+			e_soap_message_add_attribute (message, "FieldURI", "item:Categories", NULL, NULL);
+			e_soap_message_end_element (message);
+
+			e_soap_message_start_element (message, "Contact", NULL, NULL);
+			e_soap_message_start_element (message, "Categories", NULL, NULL);
+
+			for (link = values; link; link = g_list_next (link)) {
+				const gchar *category = link->data;
+
+				if (category && *category)
+					e_ews_message_write_string_parameter (message, "String", NULL, category);
+			}
+
+			e_soap_message_end_element (message); /* Categories */
+			e_soap_message_end_element (message); /* Contact */
+			e_soap_message_end_element (message); /* SetItemField */
+		} else {
+			e_ews_message_add_delete_item_field (message, "Categories", "item");
+		}
+
+		g_list_free_full (values, g_free);
+	}
+
+	g_free (old_categories);
+	g_free (new_categories);
+}
+
 static const struct field_element_mapping {
 	EContactField field_id;
 	gint element_type;
@@ -1853,6 +1950,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_PHOTO, ELEMENT_TYPE_COMPLEX, "Photo", NULL,  ebews_populate_photo, ebews_set_photo, ebews_set_photo_changes },
 	{ E_CONTACT_X509_CERT, ELEMENT_TYPE_COMPLEX, "UserSMIMECertificate", NULL,  ebews_populate_user_cert, ebews_set_user_cert, ebews_set_user_cert_changes },
 	{ E_CONTACT_X509_CERT, ELEMENT_TYPE_COMPLEX, "MSExchangeCertificate", NULL,  ebews_populate_msex_cert, ebews_set_msex_cert, ebews_set_msex_cert_changes },
+	{ E_CONTACT_CATEGORIES, ELEMENT_TYPE_COMPLEX, "Categories", NULL, ebews_populate_categories, ebews_set_categories, ebews_set_categories_changes },
 
 	/* Should take of uid and changekey (REV) */
 	{ E_CONTACT_UID, ELEMENT_TYPE_COMPLEX, "ItemId", NULL,  ebews_populate_uid, ebews_set_item_id},
@@ -4421,6 +4519,7 @@ ebb_ews_get_backend_property (EBookBackend *book_backend,
 			e_contact_field_name (E_CONTACT_NOTE),
 			e_contact_field_name (E_CONTACT_PHOTO),
 			e_contact_field_name (E_CONTACT_X509_CERT),
+			e_contact_field_name (E_CONTACT_CATEGORIES),
 			NULL);
 
 		g_string_free (buffer, TRUE);
