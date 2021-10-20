@@ -1314,8 +1314,6 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 		dueby_tt = camel_header_decode_date (dueby, NULL);
 
 	if (followup) {
-		time_t now_tt = time (NULL);
-
 		/* PidTagFlagStatus */
 		e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1090,
 			completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */);
@@ -1327,6 +1325,8 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 		e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x0e2b, 1);
 
 		if (completed_tt == (time_t) 0 && dueby_tt == (time_t) 0) {
+			time_t now_tt = time (NULL);
+
 			/* PidLidTaskStatus */
 			e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 0);
 
@@ -1335,9 +1335,6 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 
 			/* PidLidTaskStartDate */
 			e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8104, now_tt);
-
-			/* PidLidTaskDueDate */
-			e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8105, now_tt);
 
 			/* PidLidTaskComplete */
 			e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
@@ -1423,6 +1420,9 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 
 		/* PidLidTaskComplete */
 		e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
+	} else if (followup && dueby_tt == (time_t) 0) {
+		/* PidLidTaskDueDate */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8105, E_EWS_MESSAGE_DATA_TYPE_TIME);
 	}
 }
 gboolean
