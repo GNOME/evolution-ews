@@ -1,3 +1,20 @@
+Evolution-EWS 3.42.1 2021-10-29
+-------------------------------
+
+Bug Fixes:
+	I#3 - Contacts: Retrieve user certificate (Milan Crha)
+	I#163 - GAL: Postpone user photo download (Milan Crha)
+	I#165 - Contacts: Support categories (Milan Crha)
+	I#166 - Unable to set follow-up flag without a due date (Milan Crha)
+
+Miscellaneous:
+	ConfigLookup: Change values saved to the lookup result (Milan Crha)
+	Addressbook: Fix two memory leaks (Milan Crha)
+
+Translations:
+	Мирослав Николић (sr)
+	Goran Vidović (hr)
+
 Evolution-EWS 3.42.0 2021-09-17
 -------------------------------
 
