@@ -13,7 +13,7 @@
 #include <camel/camel.h>
 #include <libedata-cal/libedata-cal.h>
 
-#include "e-ews-message.h"
+#include "e-ews-request.h"
 
 #include "e-ews-query-to-restriction.h"
 
@@ -125,7 +125,7 @@ struct EmailIndex {
 };
 
 typedef struct _EvalContext {
-	ESoapMessage *msg; /* NULL when just checking whether any applied */
+	ESoapRequest *req; /* NULL when just checking whether any applied */
 	gboolean any_applicable;
 } EvalContext;
 
@@ -138,17 +138,17 @@ ews_restriction_write_contains_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "Contains", NULL, NULL);
-	e_soap_message_add_attribute (ctx->msg, "ContainmentMode", mode, NULL, NULL);
-	e_soap_message_add_attribute (ctx->msg, "ContainmentComparison", compare, NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "Contains", NULL, NULL);
+	e_soap_request_add_attribute (ctx->req, "ContainmentMode", mode, NULL, NULL);
+	e_soap_request_add_attribute (ctx->req, "ContainmentComparison", compare, NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -161,20 +161,20 @@ ews_restriction_write_contains_message_indexed (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "Contains", NULL, NULL);
-	e_soap_message_add_attribute (ctx->msg, "ContainmentMode", mode, NULL, NULL);
-	e_soap_message_add_attribute (ctx->msg, "ContainmentComparison", compare, NULL, NULL);
-	e_soap_message_start_element (ctx->msg, "IndexedFieldURI", NULL, NULL);
-	e_soap_message_add_attribute (ctx->msg, "FieldURI", uri, NULL, NULL);
-	e_soap_message_add_attribute (ctx->msg, "FieldIndex", index, NULL, NULL);
-	e_soap_message_end_element (ctx->msg);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "Contains", NULL, NULL);
+	e_soap_request_add_attribute (ctx->req, "ContainmentMode", mode, NULL, NULL);
+	e_soap_request_add_attribute (ctx->req, "ContainmentComparison", compare, NULL, NULL);
+	e_soap_request_start_element (ctx->req, "IndexedFieldURI", NULL, NULL);
+	e_soap_request_add_attribute (ctx->req, "FieldURI", uri, NULL, NULL);
+	e_soap_request_add_attribute (ctx->req, "FieldIndex", index, NULL, NULL);
+	e_soap_request_end_element (ctx->req);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -183,14 +183,14 @@ ews_restriction_write_exists_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "Exists", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "Exists", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -200,17 +200,17 @@ ews_restriction_write_greater_than_or_equal_to_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "IsGreaterThanOrEqualTo", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_soap_message_start_element (ctx->msg, "FieldURIOrConstant", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "IsGreaterThanOrEqualTo", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_soap_request_start_element (ctx->req, "FieldURIOrConstant", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -220,17 +220,17 @@ ews_restriction_write_less_than_or_equal_to_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "IsLessThanOrEqualTo", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_soap_message_start_element (ctx->msg, "FieldURIOrConstant", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "IsLessThanOrEqualTo", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_soap_request_start_element (ctx->req, "FieldURIOrConstant", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -240,17 +240,17 @@ ews_restriction_write_greater_than_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "IsGreaterThan", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_soap_message_start_element (ctx->msg, "FieldURIOrConstant", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "IsGreaterThan", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_soap_request_start_element (ctx->req, "FieldURIOrConstant", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -260,17 +260,17 @@ ews_restriction_write_less_than_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "IsLessThan", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_soap_message_start_element (ctx->msg, "FieldURIOrConstant", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "IsLessThan", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_soap_request_start_element (ctx->req, "FieldURIOrConstant", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
+	e_soap_request_end_element (ctx->req);
 }
 
 static void
@@ -280,17 +280,17 @@ ews_restriction_write_is_equal_to_message (EvalContext *ctx,
 {
 	g_return_if_fail (ctx != NULL);
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 		return;
 	}
 
-	e_soap_message_start_element (ctx->msg, "IsEqualTo", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "FieldURI", NULL, NULL, "FieldURI", uri);
-	e_soap_message_start_element (ctx->msg, "FieldURIOrConstant", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (ctx->msg, "Constant", NULL, NULL, "Value", val);
-	e_soap_message_end_element (ctx->msg);
-	e_soap_message_end_element (ctx->msg);
+	e_soap_request_start_element (ctx->req, "IsEqualTo", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "FieldURI", NULL, NULL, "FieldURI", uri);
+	e_soap_request_start_element (ctx->req, "FieldURIOrConstant", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (ctx->req, "Constant", NULL, NULL, "Value", val);
+	e_soap_request_end_element (ctx->req);
+	e_soap_request_end_element (ctx->req);
 }
 
 static ESExpResult *
@@ -324,27 +324,27 @@ e_ews_implement_contact_contains (ESExp *f,
 				const gchar *value;
 				value = argv[1]->value.string;
 
-				if (!ctx->msg) {
+				if (!ctx->req) {
 					ctx->any_applicable = TRUE;
 				} else {
-					e_soap_message_start_element (ctx->msg, "Or", NULL, NULL);
+					e_soap_request_start_element (ctx->req, "Or", NULL, NULL);
 					while (n < G_N_ELEMENTS (contact_field)) {
 						if ((contact_field[n].flag == CONTACT_NAME) && (!contact_field[n].indexed)) {
 							ews_restriction_write_contains_message (ctx, mode, "IgnoreCase", contact_field[n].field_uri, value);
 						}
 						n++;
 					}
-					e_soap_message_end_element (ctx->msg); /* Or */
+					e_soap_request_end_element (ctx->req); /* Or */
 				}
 			} else if (!strcmp (field, "x-evolution-any-field")) {
 				gint n = 0;
 				const gchar *value;
 				value = argv[1]->value.string;
 
-				if (!ctx->msg) {
+				if (!ctx->req) {
 					ctx->any_applicable = TRUE;
 				} else {
-					e_soap_message_start_element (ctx->msg, "Or", NULL, NULL);
+					e_soap_request_start_element (ctx->req, "Or", NULL, NULL);
 					while (n < G_N_ELEMENTS (contact_field)) {
 						if (!contact_field[n].indexed) {
 							ews_restriction_write_contains_message (ctx, "Substring", "IgnoreCase", contact_field[n].field_uri, value);
@@ -357,22 +357,22 @@ e_ews_implement_contact_contains (ESExp *f,
 						}
 						n++;
 					}
-					e_soap_message_end_element (ctx->msg); /* Or */
+					e_soap_request_end_element (ctx->req); /* Or */
 				}
 			} else if (!strcmp (field, "email")) {
 				const gchar *value;
 				gint n = 0;
 				value = argv[1]->value.string;
 
-				if (!ctx->msg) {
+				if (!ctx->req) {
 					ctx->any_applicable = TRUE;
 				} else {
-					e_soap_message_start_element (ctx->msg, "Or", NULL, NULL);
+					e_soap_request_start_element (ctx->req, "Or", NULL, NULL);
 					while (n < G_N_ELEMENTS (email_index)) {
 						ews_restriction_write_contains_message_indexed (ctx, mode, "IgnoreCase", "contacts:EmailAddress", email_index[n].field_index, value);
 						n++;
 					}
-					e_soap_message_end_element (ctx->msg); /* Or */
+					e_soap_request_end_element (ctx->req); /* Or */
 				}
 			} else if (!strcmp (field, "category_list")) {
 				const gchar *value;
@@ -397,7 +397,7 @@ e_ews_func_and_or_not (ESExp *f,
 {
 	ESExpResult *r, *r1;
 	EvalContext *ctx = data;
-	ESoapMessage *used_msg;
+	ESoapRequest *used_req;
 	gboolean was_any_applicable;
 	gint ii, n_applicable = 0;
 	const gchar *elem_name = NULL;
@@ -408,8 +408,8 @@ e_ews_func_and_or_not (ESExp *f,
 		goto result;
 
 	was_any_applicable = ctx->any_applicable;
-	used_msg = ctx->msg;
-	ctx->msg = NULL;
+	used_req = ctx->req;
+	ctx->req = NULL;
 
 	for (ii = 0; ii < argc; ii++) {
 		ctx->any_applicable = FALSE;
@@ -421,9 +421,9 @@ e_ews_func_and_or_not (ESExp *f,
 			n_applicable++;
 	}
 
-	ctx->msg = used_msg;
+	ctx->req = used_req;
 
-	if (!ctx->msg || !n_applicable) {
+	if (!ctx->req || !n_applicable) {
 		ctx->any_applicable = n_applicable > 0 || was_any_applicable;
 		goto result;
 	}
@@ -440,7 +440,7 @@ e_ews_func_and_or_not (ESExp *f,
 		elem_name = "Not";
 
 	if (elem_name)
-		e_soap_message_start_element (ctx->msg, elem_name, NULL, NULL);
+		e_soap_request_start_element (ctx->req, elem_name, NULL, NULL);
 
 	for (ii = 0; ii < argc; ii++) {
 		r1 = e_sexp_term_eval (f, argv[ii]);
@@ -448,7 +448,7 @@ e_ews_func_and_or_not (ESExp *f,
 	}
 
 	if (elem_name)
-		e_soap_message_end_element (ctx->msg);
+		e_soap_request_end_element (ctx->req);
 
  result:
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
@@ -489,13 +489,13 @@ calendar_func_contains (ESExp *f,
 				const gchar *value;
 				value = argv[1]->value.string;
 
-				if (!ctx->msg) {
+				if (!ctx->req) {
 					ctx->any_applicable = TRUE;
 				} else {
-					e_soap_message_start_element (ctx->msg, "Or", NULL, NULL);
+					e_soap_request_start_element (ctx->req, "Or", NULL, NULL);
 					ews_restriction_write_contains_message (ctx, "Substring", "IgnoreCase", "calendar:RequiredAttendees", value);
 					ews_restriction_write_contains_message (ctx, "Substring", "IgnoreCase", "calendar:OptionalAttendees", value);
-					e_soap_message_end_element (ctx->msg);
+					e_soap_request_end_element (ctx->req);
 				}
 			} else if (!g_strcmp0 (field, "organizer")) {
 				const gchar *value;
@@ -517,10 +517,10 @@ calendar_func_contains (ESExp *f,
 				gint n = 0;
 				value = argv[1]->value.string;
 
-				if (!ctx->msg) {
+				if (!ctx->req) {
 					ctx->any_applicable = TRUE;
 				} else {
-					e_soap_message_start_element (ctx->msg, "Or", NULL, NULL);
+					e_soap_request_start_element (ctx->req, "Or", NULL, NULL);
 					while (n < G_N_ELEMENTS (calendar_field)) {
 						if (calendar_field[n].any_field) {
 							ews_restriction_write_contains_message (ctx, "Substring", "IgnoreCase", calendar_field[n].field_uri, value);
@@ -534,7 +534,7 @@ calendar_func_contains (ESExp *f,
 						}
 						n++;
 					}
-					e_soap_message_end_element (ctx->msg);
+					e_soap_request_end_element (ctx->req);
 				}
 			}
 		}
@@ -635,7 +635,7 @@ calendar_func_occur_in_time_range (ESExp *f,
 		return NULL;
 	}
 
-	if (!ctx->msg) {
+	if (!ctx->req) {
 		ctx->any_applicable = TRUE;
 	} else {
 		gchar *start, *end;
@@ -643,10 +643,10 @@ calendar_func_occur_in_time_range (ESExp *f,
 		start = e_ews_make_timestamp (argv[0]->value.time);
 		end = e_ews_make_timestamp (argv[1]->value.time);
 
-		e_soap_message_start_element (ctx->msg, "And", NULL, NULL);
+		e_soap_request_start_element (ctx->req, "And", NULL, NULL);
 		ews_restriction_write_greater_than_or_equal_to_message (ctx, "calendar:Start", start);
 		ews_restriction_write_less_than_or_equal_to_message (ctx, "calendar:End", end);
-		e_soap_message_end_element (ctx->msg);
+		e_soap_request_end_element (ctx->req);
 
 		g_free (start);
 		g_free (end);
@@ -1302,7 +1302,7 @@ e_ews_query_check_applicable (const gchar *query,
 	if (!e_ews_check_is_query (query, type))
 		return FALSE;
 
-	ctx.msg = NULL;
+	ctx.req = NULL;
 	ctx.any_applicable = FALSE;
 
 	e_ews_convert_sexp_to_restriction (&ctx, query, type);
@@ -1311,13 +1311,13 @@ e_ews_query_check_applicable (const gchar *query,
 }
 
 void
-e_ews_query_to_restriction (ESoapMessage *msg,
+e_ews_query_to_restriction (ESoapRequest *req,
                             const gchar *query,
                             EEwsFolderType type)
 {
 	EvalContext ctx;
 
-	ctx.msg = msg;
+	ctx.req = req;
 	ctx.any_applicable = FALSE;
 
 	e_ews_convert_sexp_to_restriction (&ctx, query, type);

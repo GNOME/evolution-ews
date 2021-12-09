@@ -219,7 +219,7 @@ mail_config_ews_aol_combo_box_update_try_credentials_sync (EEwsConnection *conne
 		combo_box->priv->oal_items = oal_items;
 		g_mutex_unlock (&combo_box->priv->oal_items_lock);
 
-	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	} else if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
 		g_error_free (local_error);
 

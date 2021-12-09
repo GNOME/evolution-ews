@@ -8,6 +8,7 @@
 #define E_SOAP_RESPONSE_H
 
 #include <glib-object.h>
+#include <libsoup/soup-message.h>
 #include <libxml/tree.h>
 
 /* Standard GObject macros */
@@ -30,6 +31,9 @@
 	((obj), E_TYPE_SOAP_RESPONSE, ESoapResponseClass))
 
 G_BEGIN_DECLS
+
+/* By an amazing coincidence, this looks a lot like camel_progress() */
+typedef void (* ESoapResponseProgressFn) (gpointer object, gint percent);
 
 typedef struct _ESoapResponse ESoapResponse;
 typedef struct _ESoapResponseClass ESoapResponseClass;
@@ -54,6 +58,28 @@ gboolean	e_soap_response_from_string	(ESoapResponse *response,
 						 gint xmlstr_length);
 gboolean	e_soap_response_from_xmldoc	(ESoapResponse *response,
 						 xmlDoc *xmldoc);
+gboolean	e_soap_response_from_message_sync
+						(ESoapResponse *response,
+						 SoupMessage *msg,
+						 GInputStream *response_data,
+						 GCancellable *cancellable,
+						 GError **error);
+xmlDoc *	e_soap_response_xmldoc_from_message_sync
+						(ESoapResponse *response,
+						 SoupMessage *msg,
+						 GInputStream *response_data,
+						 GCancellable *cancellable,
+						 GError **error);
+/* used only with e_soap_response_from_message_sync() */
+void		e_soap_response_set_store_node_data
+						(ESoapResponse *response,
+						 const gchar *nodename,
+						 const gchar *directory,
+						 gboolean base64);
+/* used only with e_soap_response_from_message_sync() */
+void		e_soap_response_set_progress_fn	(ESoapResponse *response,
+						 ESoapResponseProgressFn fn,
+						 gpointer object);
 const gchar *	e_soap_response_get_method_name	(ESoapResponse *response);
 void		e_soap_response_set_method_name	(ESoapResponse *response,
 						 const gchar *method_name);

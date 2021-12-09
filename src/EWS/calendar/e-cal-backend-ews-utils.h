@@ -41,12 +41,12 @@ typedef struct {
 const gchar *e_ews_collect_organizer (ICalComponent *comp);
 void e_ews_collect_attendees (ICalComponent *comp, GSList **required, GSList **optional, GSList **resource, gboolean *out_rsvp_requested);
 
-void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd);
-void ewscal_set_meeting_timezone (ESoapMessage *msg, ICalTimezone *icaltz, ICalComponent *icomp);
-void ewscal_set_reccurence (ESoapMessage *msg, ICalProperty *rrule, ICalTime *dtstart);
-void ewscal_set_reccurence_exceptions (ESoapMessage *msg, ICalComponent *comp);
+void ewscal_set_timezone (ESoapRequest *request, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd);
+void ewscal_set_meeting_timezone (ESoapRequest *request, ICalTimezone *icaltz, ICalComponent *icomp);
+void ewscal_set_reccurence (ESoapRequest *request, ICalProperty *rrule, ICalTime *dtstart);
+void ewscal_set_reccurence_exceptions (ESoapRequest *request, ICalComponent *comp);
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
-void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp, ETimezoneCache *timezone_cache, ICalComponent *vcalendar, gboolean with_due_by);
+void ews_set_alarm (ESoapRequest *request, ECalComponent *comp, ETimezoneCache *timezone_cache, ICalComponent *vcalendar, gboolean with_due_by);
 gint ews_get_alarm (ECalComponent *comp);
 void e_ews_clean_icomponent (ICalComponent *icomp);
 
@@ -55,11 +55,11 @@ const gchar *e_cal_backend_ews_tz_util_get_ical_equivalent (const gchar *msdn_tz
 void e_cal_backend_ews_populate_windows_zones (void);
 void e_cal_backend_ews_unref_windows_zones (void);
 
-gboolean e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg, gpointer user_data, GError **error);
-gboolean e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data, GError **error);
-gboolean e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg, gpointer user_data, GError **error);
-gboolean e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,gpointer user_data, GError **error);
-gboolean e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_convert_calcomp_to_xml (ESoapRequest *request, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_convert_component_to_updatexml (ESoapRequest *request, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_clear_reminder_is_set (ESoapRequest *request, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_prepare_set_free_busy_status (ESoapRequest *request,gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_prepare_accept_item_request (ESoapRequest *request, gpointer user_data, GError **error);
 
 guint e_cal_backend_ews_rid_to_index (ICalTimezone *timezone, const gchar *rid, ICalComponent *comp, GError **error);
 

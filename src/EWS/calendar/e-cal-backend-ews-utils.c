@@ -27,11 +27,10 @@
 #include <libxml/xpathInternals.h>
 
 #include <libecal/libecal.h>
-#include <libsoup/soup-misc.h>
 
 #include "common/e-ews-calendar-utils.h"
 #include "common/e-ews-connection.h"
-#include "common/e-ews-message.h"
+#include "common/e-ews-request.h"
 #include "common/e-ews-item-change.h"
 
 #include "e-cal-backend-ews-utils.h"
@@ -329,7 +328,7 @@ ews_get_alarm (ECalComponent *comp)
 }
 
 void
-ews_set_alarm (ESoapMessage *msg,
+ews_set_alarm (ESoapRequest *request,
                ECalComponent *comp,
 	       ETimezoneCache *timezone_cache,
 	       ICalComponent *vcalendar,
@@ -346,7 +345,7 @@ ews_set_alarm (ESoapMessage *msg,
 
 	alarm = e_cal_component_get_alarm (comp, (const gchar *) (alarm_uids->data));
 
-	e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "true");
+	e_ews_request_write_string_parameter (request, "ReminderIsSet", NULL, "true");
 	action = e_cal_component_alarm_get_action (alarm);
 	if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
 		ECalComponentAlarmTrigger *trigger;
@@ -355,7 +354,7 @@ ews_set_alarm (ESoapMessage *msg,
 		trigger = e_cal_component_alarm_get_trigger (alarm);
 		if (trigger && e_cal_component_alarm_trigger_get_kind (trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START) {
 			dur_int = (i_cal_duration_as_int (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
-			e_ews_message_write_int_parameter (msg, "ReminderMinutesBeforeStart", NULL, dur_int);
+			e_ews_request_write_int_parameter (request, "ReminderMinutesBeforeStart", NULL, dur_int);
 			if (with_due_by) {
 				ICalTime *dtstart;
 
@@ -363,7 +362,7 @@ ews_set_alarm (ESoapMessage *msg,
 					I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
 
 				if (dtstart && !i_cal_time_is_null_time (dtstart)) {
-					e_ews_message_write_time_parameter (msg, "ReminderDueBy", NULL,
+					e_ews_request_write_time_parameter (request, "ReminderDueBy", NULL,
 						i_cal_time_as_timet_with_zone (dtstart, i_cal_timezone_get_utc_timezone ()));
 				}
 
@@ -376,7 +375,7 @@ ews_set_alarm (ESoapMessage *msg,
 }
 
 static void
-ewscal_set_date (ESoapMessage *msg,
+ewscal_set_date (ESoapRequest *request,
                  const gchar *name,
                  ICalTime *itt)
 {
@@ -386,7 +385,7 @@ ewscal_set_date (ESoapMessage *msg,
 		"%04d-%02d-%02d",
 		i_cal_time_get_year (itt), i_cal_time_get_month (itt), i_cal_time_get_day (itt));
 
-	e_ews_message_write_string_parameter (msg, name, NULL, str);
+	e_ews_request_write_string_parameter (request, name, NULL, str);
 	g_free (str);
 }
 
@@ -432,23 +431,23 @@ static const gchar *weekindex_to_ical (gint index) {
 }
 
 static void
-ewscal_add_rrule (ESoapMessage *msg,
+ewscal_add_rrule (ESoapRequest *request,
 		  ICalProperty *prop)
 {
 	ICalRecurrence *recur = i_cal_property_get_rrule (prop);
 
-	e_soap_message_start_element (msg, "RelativeYearlyRecurrence", NULL, NULL);
+	e_soap_request_start_element (request, "RelativeYearlyRecurrence", NULL, NULL);
 
-	e_ews_message_write_string_parameter (msg, "DaysOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
-	e_ews_message_write_string_parameter (msg, "DayOfWeekIndex", NULL, weekindex_to_ical (i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (recur, 0))));
-	e_ews_message_write_string_parameter (msg, "Month", NULL, number_to_month (i_cal_recurrence_get_by_month (recur, 0)));
+	e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
+	e_ews_request_write_string_parameter (request, "DayOfWeekIndex", NULL, weekindex_to_ical (i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (recur, 0))));
+	e_ews_request_write_string_parameter (request, "Month", NULL, number_to_month (i_cal_recurrence_get_by_month (recur, 0)));
 
-	e_soap_message_end_element (msg); /* "RelativeYearlyRecurrence" */
+	e_soap_request_end_element (request); /* "RelativeYearlyRecurrence" */
 	g_clear_object (&recur);
 }
 
 static void
-ewscal_add_timechange (ESoapMessage *msg,
+ewscal_add_timechange (ESoapRequest *request,
 		       ICalComponent *comp,
 		       gint baseoffs)
 {
@@ -461,7 +460,7 @@ ewscal_add_timechange (ESoapMessage *msg,
 	prop = i_cal_component_get_first_property (comp, I_CAL_TZNAME_PROPERTY);
 	if (prop) {
 		tzname = i_cal_property_get_tzname (prop);
-		e_soap_message_add_attribute (msg, "TimeZoneName", tzname, NULL, NULL);
+		e_soap_request_add_attribute (request, "TimeZoneName", tzname, NULL, NULL);
 		g_object_unref (prop);
 	}
 
@@ -474,7 +473,7 @@ ewscal_add_timechange (ESoapMessage *msg,
 		utcoffs -= baseoffs;
 		duration = i_cal_duration_new_from_int (utcoffs);
 		offset = i_cal_duration_as_ical_string (duration);
-		e_ews_message_write_string_parameter (msg, "Offset", NULL, offset);
+		e_ews_request_write_string_parameter (request, "Offset", NULL, offset);
 
 		g_clear_object (&duration);
 		g_object_unref (prop);
@@ -483,7 +482,7 @@ ewscal_add_timechange (ESoapMessage *msg,
 
 	prop = i_cal_component_get_first_property (comp, I_CAL_RRULE_PROPERTY);
 	if (prop) {
-		ewscal_add_rrule (msg, prop);
+		ewscal_add_rrule (request, prop);
 		g_object_unref (prop);
 	}
 
@@ -491,14 +490,14 @@ ewscal_add_timechange (ESoapMessage *msg,
 	if (prop) {
 		dtstart = i_cal_property_get_dtstart (prop);
 		snprintf (buffer, 16, "%02d:%02d:%02d", i_cal_time_get_hour (dtstart), i_cal_time_get_minute (dtstart), i_cal_time_get_second (dtstart));
-		e_ews_message_write_string_parameter (msg, "Time", NULL, buffer);
+		e_ews_request_write_string_parameter (request, "Time", NULL, buffer);
 		g_clear_object (&dtstart);
 		g_object_unref (prop);
 	}
 }
 
 static void
-ewscal_set_absolute_date_transitions (ESoapMessage *msg,
+ewscal_set_absolute_date_transitions (ESoapRequest *request,
 				      GSList *absolute_date_transitions)
 {
 	GSList *l;
@@ -509,20 +508,19 @@ ewscal_set_absolute_date_transitions (ESoapMessage *msg,
 	for (l = absolute_date_transitions; l != NULL; l = l->next) {
 		EEwsCalendarAbsoluteDateTransition *adt = l->data;
 
-		e_soap_message_start_element (msg, "AbsoluteDateTransition", NULL, NULL);
+		e_soap_request_start_element (request, "AbsoluteDateTransition", NULL, NULL);
 
-		e_ews_message_write_string_parameter_with_attribute (
-			msg,
+		e_ews_request_write_string_parameter_with_attribute (request,
 			"To", NULL, adt->to->value,
 			"Kind", adt->to->kind);
-		e_ews_message_write_string_parameter (msg, "DateTime", NULL, adt->date_time);
+		e_ews_request_write_string_parameter (request, "DateTime", NULL, adt->date_time);
 
-		e_soap_message_end_element (msg); /* "AbsoluteDateTransition" */
+		e_soap_request_end_element (request); /* "AbsoluteDateTransition" */
 	}
 }
 
 static void
-ewscal_set_recurring_day_transitions (ESoapMessage *msg,
+ewscal_set_recurring_day_transitions (ESoapRequest *request,
 				      GSList *recurring_day_transitions)
 {
 	GSList *l;
@@ -533,23 +531,22 @@ ewscal_set_recurring_day_transitions (ESoapMessage *msg,
 	for (l = recurring_day_transitions; l != NULL; l = l->next) {
 		EEwsCalendarRecurringDayTransition *rdt = l->data;
 
-		e_soap_message_start_element (msg, "RecurringDayTransition", NULL, NULL);
+		e_soap_request_start_element (request, "RecurringDayTransition", NULL, NULL);
 
-		e_ews_message_write_string_parameter_with_attribute (
-			msg,
+		e_ews_request_write_string_parameter_with_attribute (request,
 			"To", NULL, rdt->to->value,
 			"Kind", rdt->to->kind);
-		e_ews_message_write_string_parameter (msg, "TimeOffset", NULL, rdt->time_offset);
-		e_ews_message_write_string_parameter (msg, "Month", NULL, rdt->month);
-		e_ews_message_write_string_parameter (msg, "DayOfWeek", NULL, rdt->day_of_week);
-		e_ews_message_write_string_parameter (msg, "Occurrence", NULL, rdt->occurrence);
+		e_ews_request_write_string_parameter (request, "TimeOffset", NULL, rdt->time_offset);
+		e_ews_request_write_string_parameter (request, "Month", NULL, rdt->month);
+		e_ews_request_write_string_parameter (request, "DayOfWeek", NULL, rdt->day_of_week);
+		e_ews_request_write_string_parameter (request, "Occurrence", NULL, rdt->occurrence);
 
-		e_soap_message_end_element (msg); /* "RecurringDayTransition" */
+		e_soap_request_end_element (request); /* "RecurringDayTransition" */
 	}
 }
 
 static void
-ewscal_set_recurring_date_transitions (ESoapMessage *msg,
+ewscal_set_recurring_date_transitions (ESoapRequest *request,
 				       GSList *recurring_date_transitions)
 {
 	GSList *l;
@@ -560,22 +557,21 @@ ewscal_set_recurring_date_transitions (ESoapMessage *msg,
 	for (l = recurring_date_transitions; l != NULL; l = l->next) {
 		EEwsCalendarRecurringDateTransition *rdt = l->data;
 
-		e_soap_message_start_element (msg, "RecurringDateTransition", NULL, NULL);
+		e_soap_request_start_element (request, "RecurringDateTransition", NULL, NULL);
 
-		e_ews_message_write_string_parameter_with_attribute (
-			msg,
+		e_ews_request_write_string_parameter_with_attribute (request,
 			"To", NULL, rdt->to->value,
 			"Kind", rdt->to->kind);
-		e_ews_message_write_string_parameter (msg, "TimeOffset", NULL, rdt->time_offset);
-		e_ews_message_write_string_parameter (msg, "Month", NULL, rdt->month);
-		e_ews_message_write_string_parameter (msg, "Day", NULL, rdt->day);
+		e_ews_request_write_string_parameter (request, "TimeOffset", NULL, rdt->time_offset);
+		e_ews_request_write_string_parameter (request, "Month", NULL, rdt->month);
+		e_ews_request_write_string_parameter (request, "Day", NULL, rdt->day);
 
-		e_soap_message_end_element (msg); /* "RecurringDateTransition" */
+		e_soap_request_end_element (request); /* "RecurringDateTransition" */
 	}
 }
 
 void
-ewscal_set_timezone (ESoapMessage *msg,
+ewscal_set_timezone (ESoapRequest *request,
 		     const gchar *name,
 		     EEwsCalendarTimeZoneDefinition *tzd)
 {
@@ -584,63 +580,61 @@ ewscal_set_timezone (ESoapMessage *msg,
 	if (name == NULL || tzd == NULL)
 		return;
 
-	e_soap_message_start_element (msg, name, NULL, NULL);
-	e_soap_message_add_attribute (msg, "Id", tzd->id, NULL, NULL);
-	e_soap_message_add_attribute (msg, "Name", tzd->name, NULL, NULL);
+	e_soap_request_start_element (request, name, NULL, NULL);
+	e_soap_request_add_attribute (request, "Id", tzd->id, NULL, NULL);
+	e_soap_request_add_attribute (request, "Name", tzd->name, NULL, NULL);
 
-	e_soap_message_start_element (msg, "Periods", NULL, NULL);
+	e_soap_request_start_element (request, "Periods", NULL, NULL);
 	for (l = tzd->periods; l != NULL; l = l->next) {
 		EEwsCalendarPeriod *period = l->data;
 
-		e_soap_message_start_element (msg, "Period", NULL, NULL);
-		e_soap_message_add_attribute (msg, "Bias", period->bias, NULL, NULL);
-		e_soap_message_add_attribute (msg, "Name", period->name, NULL, NULL);
-		e_soap_message_add_attribute (msg, "Id", period->id, NULL, NULL);
-		e_soap_message_end_element (msg); /* "Period" */
+		e_soap_request_start_element (request, "Period", NULL, NULL);
+		e_soap_request_add_attribute (request, "Bias", period->bias, NULL, NULL);
+		e_soap_request_add_attribute (request, "Name", period->name, NULL, NULL);
+		e_soap_request_add_attribute (request, "Id", period->id, NULL, NULL);
+		e_soap_request_end_element (request); /* "Period" */
 	}
-	e_soap_message_end_element (msg); /* "Periods" */
+	e_soap_request_end_element (request); /* "Periods" */
 
-	e_soap_message_start_element (msg, "TransitionsGroups", NULL, NULL);
+	e_soap_request_start_element (request, "TransitionsGroups", NULL, NULL);
 	for (l = tzd->transitions_groups; l != NULL; l = l->next) {
 		EEwsCalendarTransitionsGroup *tg = l->data;
 
-		e_soap_message_start_element (msg, "TransitionsGroup", NULL, NULL);
-		e_soap_message_add_attribute (msg, "Id", tg->id, NULL, NULL);
+		e_soap_request_start_element (request, "TransitionsGroup", NULL, NULL);
+		e_soap_request_add_attribute (request, "Id", tg->id, NULL, NULL);
 
 		if (tg->transition != NULL) {
-			e_soap_message_start_element (msg, "Transition", NULL, NULL);
-			e_ews_message_write_string_parameter_with_attribute (
-				msg,
+			e_soap_request_start_element (request, "Transition", NULL, NULL);
+			e_ews_request_write_string_parameter_with_attribute (request,
 				"To", NULL, tg->transition->value,
 				"Kind", tg->transition->kind);
-			e_soap_message_end_element (msg); /* "Transition" */
+			e_soap_request_end_element (request); /* "Transition" */
 		}
 
-		ewscal_set_absolute_date_transitions (msg, tg->absolute_date_transitions);
-		ewscal_set_recurring_day_transitions (msg, tg->recurring_day_transitions);
-		ewscal_set_recurring_date_transitions (msg, tg->recurring_date_transitions);
+		ewscal_set_absolute_date_transitions (request, tg->absolute_date_transitions);
+		ewscal_set_recurring_day_transitions (request, tg->recurring_day_transitions);
+		ewscal_set_recurring_date_transitions (request, tg->recurring_date_transitions);
 
-		e_soap_message_end_element (msg); /* "TransitionsGroup" */
+		e_soap_request_end_element (request); /* "TransitionsGroup" */
 	}
-	e_soap_message_end_element (msg); /* "TransitionsGroups" */
+	e_soap_request_end_element (request); /* "TransitionsGroups" */
 
-	e_soap_message_start_element (msg, "Transitions", NULL, NULL);
-	e_soap_message_start_element (msg, "Transition", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (
-		msg,
+	e_soap_request_start_element (request, "Transitions", NULL, NULL);
+	e_soap_request_start_element (request, "Transition", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (request,
 		"To", NULL, tzd->transitions->transition->value,
 		"Kind", tzd->transitions->transition->kind);
-	e_soap_message_end_element (msg); /* "Transition" */
-	ewscal_set_absolute_date_transitions (msg, tzd->transitions->absolute_date_transitions);
-	ewscal_set_recurring_day_transitions (msg, tzd->transitions->recurring_day_transitions);
-	ewscal_set_recurring_date_transitions (msg, tzd->transitions->recurring_date_transitions);
-	e_soap_message_end_element (msg); /* "Transitions" */
+	e_soap_request_end_element (request); /* "Transition" */
+	ewscal_set_absolute_date_transitions (request, tzd->transitions->absolute_date_transitions);
+	ewscal_set_recurring_day_transitions (request, tzd->transitions->recurring_day_transitions);
+	ewscal_set_recurring_date_transitions (request, tzd->transitions->recurring_date_transitions);
+	e_soap_request_end_element (request); /* "Transitions" */
 
-	e_soap_message_end_element (msg); /* "StartTimeZone" */
+	e_soap_request_end_element (request); /* "StartTimeZone" */
 }
 
 void
-ewscal_set_meeting_timezone (ESoapMessage *msg,
+ewscal_set_meeting_timezone (ESoapRequest *request,
 			     ICalTimezone *icaltz,
 			     ICalComponent *icomp)
 {
@@ -688,8 +682,8 @@ ewscal_set_meeting_timezone (ESoapMessage *msg,
 	if (!location)
 		location = i_cal_timezone_get_tznames (icaltz);
 
-	e_soap_message_start_element (msg, "MeetingTimeZone", NULL, NULL);
-	e_soap_message_add_attribute (msg, "TimeZoneName", location, NULL, NULL);
+	e_soap_request_start_element (request, "MeetingTimeZone", NULL, NULL);
+	e_soap_request_add_attribute (request, "TimeZoneName", location, NULL, NULL);
 
 	/* Fetch the timezone offsets for the standard (or only) zone.
 	 * Negate it, because Exchange does it backwards */
@@ -710,7 +704,7 @@ ewscal_set_meeting_timezone (ESoapMessage *msg,
 	 * zone to zero. So try to avoid problems by doing the same. */
 	duration = i_cal_duration_new_from_int (std_utcoffs);
 	offset = i_cal_duration_as_ical_string (duration);
-	e_ews_message_write_string_parameter (msg, "BaseOffset", NULL, offset);
+	e_ews_request_write_string_parameter (request, "BaseOffset", NULL, offset);
 	g_clear_object (&duration);
 	free (offset);
 
@@ -719,16 +713,16 @@ ewscal_set_meeting_timezone (ESoapMessage *msg,
 	 * one. */
 	if (xdaylight) {
 		/* Standard */
-		e_soap_message_start_element (msg, "Standard", NULL, NULL);
-		ewscal_add_timechange (msg, xstd, std_utcoffs);
-		e_soap_message_end_element (msg); /* "Standard" */
+		e_soap_request_start_element (request, "Standard", NULL, NULL);
+		ewscal_add_timechange (request, xstd, std_utcoffs);
+		e_soap_request_end_element (request); /* "Standard" */
 
 		/* DayLight */
-		e_soap_message_start_element (msg, "Daylight", NULL, NULL);
-		ewscal_add_timechange (msg, xdaylight, std_utcoffs);
-		e_soap_message_end_element (msg); /* "Daylight" */
+		e_soap_request_start_element (request, "Daylight", NULL, NULL);
+		ewscal_add_timechange (request, xdaylight, std_utcoffs);
+		e_soap_request_end_element (request); /* "Daylight" */
 	}
-	e_soap_message_end_element (msg); /* "MeetingTimeZone" */
+	e_soap_request_end_element (request); /* "MeetingTimeZone" */
 
 	g_clear_object (&comp);
 	g_clear_object (&xstd);
@@ -736,7 +730,7 @@ ewscal_set_meeting_timezone (ESoapMessage *msg,
 }
 
 void
-ewscal_set_reccurence (ESoapMessage *msg,
+ewscal_set_reccurence (ESoapRequest *request,
 		       ICalProperty *rrule,
 		       ICalTime *dtstart)
 {
@@ -750,21 +744,21 @@ ewscal_set_reccurence (ESoapMessage *msg,
 	if (!recur)
 		return;
 
-	e_soap_message_start_element (msg, "Recurrence", NULL, NULL);
+	e_soap_request_start_element (request, "Recurrence", NULL, NULL);
 
 	switch (i_cal_recurrence_get_freq (recur)) {
 		case I_CAL_DAILY_RECURRENCE:
-			e_soap_message_start_element (msg, "DailyRecurrence", NULL, NULL);
+			e_soap_request_start_element (request, "DailyRecurrence", NULL, NULL);
 			snprintf (buffer, 32, "%d", i_cal_recurrence_get_interval (recur));
-			e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
-			e_soap_message_end_element (msg); /* "DailyRecurrence" */
+			e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
+			e_soap_request_end_element (request); /* "DailyRecurrence" */
 			break;
 
 		case I_CAL_WEEKLY_RECURRENCE:
-			e_soap_message_start_element (msg, "WeeklyRecurrence", NULL, NULL);
+			e_soap_request_start_element (request, "WeeklyRecurrence", NULL, NULL);
 
 			snprintf (buffer, 32, "%d", i_cal_recurrence_get_interval (recur));
-			e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+			e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
 
 			len = snprintf (
 				buffer, 256, "%s",
@@ -774,51 +768,50 @@ ewscal_set_reccurence (ESoapMessage *msg,
 					buffer + len, 256 - len, " %s",
 					number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, i))));
 			}
-			e_ews_message_write_string_parameter (msg, "DaysOfWeek", NULL, buffer);
+			e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL, buffer);
 
-			e_soap_message_end_element (msg); /* "WeeklyRecurrence" */
+			e_soap_request_end_element (request); /* "WeeklyRecurrence" */
 			break;
 
 		case I_CAL_MONTHLY_RECURRENCE:
 			if (i_cal_recurrence_get_by_month_day (recur, 0) == I_CAL_RECURRENCE_ARRAY_MAX) {
-				e_soap_message_start_element (msg, "RelativeMonthlyRecurrence", NULL, NULL);
+				e_soap_request_start_element (request, "RelativeMonthlyRecurrence", NULL, NULL);
 
 				/* For now this is what got implemented since this is the only
 				 relative monthly recurrence evolution can set.
 				 TODO: extend the code with all possible monthly recurrence settings */
 				snprintf (buffer, 32, "%d", i_cal_recurrence_get_interval (recur));
-				e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+				e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
 
-				e_ews_message_write_string_parameter (
-					msg, "DaysOfWeek", NULL,
+				e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL,
 					number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
 
-				e_ews_message_write_string_parameter (msg, "DayOfWeekIndex", NULL, weekindex_to_ical (
+				e_ews_request_write_string_parameter (request, "DayOfWeekIndex", NULL, weekindex_to_ical (
 					i_cal_recurrence_get_by_set_pos (recur, 0) == 5 ? -1 : i_cal_recurrence_get_by_set_pos (recur, 0)));
 
-				e_soap_message_end_element (msg); /* "RelativeMonthlyRecurrence" */
+				e_soap_request_end_element (request); /* "RelativeMonthlyRecurrence" */
 			} else {
-				e_soap_message_start_element (msg, "AbsoluteMonthlyRecurrence", NULL, NULL);
+				e_soap_request_start_element (request, "AbsoluteMonthlyRecurrence", NULL, NULL);
 
 				snprintf (buffer, 256, "%d", i_cal_recurrence_get_interval (recur));
-				e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+				e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
 
 				snprintf (buffer, 256, "%d", i_cal_recurrence_get_by_month_day (recur, 0) == -1 ? 31 : i_cal_recurrence_get_by_month_day (recur, 0));
-				e_ews_message_write_string_parameter (msg, "DayOfMonth", NULL, buffer);
+				e_ews_request_write_string_parameter (request, "DayOfMonth", NULL, buffer);
 
-				e_soap_message_end_element (msg); /* "AbsoluteMonthlyRecurrence" */
+				e_soap_request_end_element (request); /* "AbsoluteMonthlyRecurrence" */
 			}
 			break;
 
 		case I_CAL_YEARLY_RECURRENCE:
 			#if 0 /* FIXME */
 			if (is_relative) {
-				ewscal_add_rrule (msg, rrule);
+				ewscal_add_rrule (request, rrule);
 
 			} else
 			#endif
 			{
-				e_soap_message_start_element (msg, "AbsoluteYearlyRecurrence", NULL, NULL);
+				e_soap_request_start_element (request, "AbsoluteYearlyRecurrence", NULL, NULL);
 
 				/* work according to RFC5545 §3.3.10
 				 * dtstart is the default, give preference to by_month & by_month_day if they are set
@@ -828,20 +821,18 @@ ewscal_set_reccurence (ESoapMessage *msg,
 				} else {
 					snprintf (buffer, 256, "%d", i_cal_time_get_day (dtstart));
 				}
-				e_ews_message_write_string_parameter (msg, "DayOfMonth", NULL, buffer);
+				e_ews_request_write_string_parameter (request, "DayOfMonth", NULL, buffer);
 
 				if (i_cal_recurrence_get_by_month (recur, 0) != I_CAL_RECURRENCE_ARRAY_MAX) {
 					snprintf (buffer, 256, "%d", i_cal_recurrence_get_by_month_day (recur, 0));
-					e_ews_message_write_string_parameter (
-						msg, "Month", NULL,
+					e_ews_request_write_string_parameter (request, "Month", NULL,
 						number_to_month (i_cal_recurrence_get_by_month (recur, 0)));
 				} else {
-					e_ews_message_write_string_parameter (
-						msg, "Month", NULL,
+					e_ews_request_write_string_parameter (request, "Month", NULL,
 						number_to_month (i_cal_time_get_month (dtstart)));
 				}
 
-				e_soap_message_end_element (msg); /* "AbsoluteYearlyRecurrence" */
+				e_soap_request_end_element (request); /* "AbsoluteYearlyRecurrence" */
 
 			}
 			break;
@@ -856,32 +847,32 @@ ewscal_set_reccurence (ESoapMessage *msg,
 	}
 
 	if (i_cal_recurrence_get_count (recur) > 0) {
-		e_soap_message_start_element (msg, "NumberedRecurrence", NULL, NULL);
-		ewscal_set_date (msg, "StartDate", dtstart);
+		e_soap_request_start_element (request, "NumberedRecurrence", NULL, NULL);
+		ewscal_set_date (request, "StartDate", dtstart);
 		snprintf (buffer, 32, "%d", i_cal_recurrence_get_count (recur));
-		e_ews_message_write_string_parameter (msg, "NumberOfOccurrences", NULL, buffer);
-		e_soap_message_end_element (msg); /* "NumberedRecurrence" */
+		e_ews_request_write_string_parameter (request, "NumberOfOccurrences", NULL, buffer);
+		e_soap_request_end_element (request); /* "NumberedRecurrence" */
 	} else {
 		ICalTime *until;
 
 		until = i_cal_recurrence_get_until (recur);
 
 		if (until && !i_cal_time_is_null_time (until)) {
-			e_soap_message_start_element (msg, "EndDateRecurrence", NULL, NULL);
-			ewscal_set_date (msg, "StartDate", dtstart);
-			ewscal_set_date (msg, "EndDate", until);
-			e_soap_message_end_element (msg); /* "EndDateRecurrence" */
+			e_soap_request_start_element (request, "EndDateRecurrence", NULL, NULL);
+			ewscal_set_date (request, "StartDate", dtstart);
+			ewscal_set_date (request, "EndDate", until);
+			e_soap_request_end_element (request); /* "EndDateRecurrence" */
 		} else {
-			e_soap_message_start_element (msg, "NoEndRecurrence", NULL, NULL);
-			ewscal_set_date (msg, "StartDate", dtstart);
-			e_soap_message_end_element (msg); /* "NoEndRecurrence" */
+			e_soap_request_start_element (request, "NoEndRecurrence", NULL, NULL);
+			ewscal_set_date (request, "StartDate", dtstart);
+			e_soap_request_end_element (request); /* "NoEndRecurrence" */
 		}
 
 		g_clear_object (&until);
 	}
 
 exit:
-	e_soap_message_end_element (msg); /* "Recurrence" */
+	e_soap_request_end_element (request); /* "Recurrence" */
 	g_object_unref (recur);
 }
 
@@ -932,7 +923,7 @@ icomponent_get_datetime (ICalComponent *comp,
 }
 
 void
-ewscal_set_reccurence_exceptions (ESoapMessage *msg,
+ewscal_set_reccurence_exceptions (ESoapRequest *request,
 				  ICalComponent *comp)
 {
 	ICalProperty *exdate;
@@ -942,21 +933,21 @@ ewscal_set_reccurence_exceptions (ESoapMessage *msg,
 	if (!exdate)
 		return;
 
-	e_soap_message_start_element (msg, "DeletedOccurrences", NULL, NULL);
+	e_soap_request_start_element (request, "DeletedOccurrences", NULL, NULL);
 
 	for (; exdate; g_object_unref (exdate), exdate = i_cal_component_get_next_property (comp, I_CAL_EXDATE_PROPERTY)) {
 		ICalTime *exdatetime = icomponent_get_datetime (comp, exdate);
 
-		e_soap_message_start_element (msg, "DeletedOccurrence", NULL, NULL);
+		e_soap_request_start_element (request, "DeletedOccurrence", NULL, NULL);
 
-		ewscal_set_date (msg, "Start", exdatetime);
+		ewscal_set_date (request, "Start", exdatetime);
 
-		e_soap_message_end_element (msg); /* "DeletedOccurrence" */
+		e_soap_request_end_element (request); /* "DeletedOccurrence" */
 
 		g_clear_object (&exdatetime);
 	}
 
-	e_soap_message_end_element (msg); /* "DeletedOccurrences" */
+	e_soap_request_end_element (request); /* "DeletedOccurrences" */
 }
 
 /*
@@ -1017,58 +1008,58 @@ e_ews_clean_icomponent (ICalComponent *icomp)
 }
 
 static void
-add_attendees_list_to_message (ESoapMessage *msg,
+add_attendees_list_to_message (ESoapRequest *request,
                                const gchar *listname,
                                GSList *list)
 {
 	GSList *item;
 
-	e_soap_message_start_element (msg, listname, NULL, NULL);
+	e_soap_request_start_element (request, listname, NULL, NULL);
 
 	for (item = list; item != NULL; item = item->next) {
-		e_soap_message_start_element (msg, "Attendee", NULL, NULL);
-		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+		e_soap_request_start_element (request, "Attendee", NULL, NULL);
+		e_soap_request_start_element (request, "Mailbox", NULL, NULL);
 
-		e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, item->data);
+		e_ews_request_write_string_parameter (request, "EmailAddress", NULL, item->data);
 
-		e_soap_message_end_element (msg); /* "Mailbox" */
-		e_soap_message_end_element (msg); /* "Attendee" */
+		e_soap_request_end_element (request); /* "Mailbox" */
+		e_soap_request_end_element (request); /* "Attendee" */
 	}
 
-	e_soap_message_end_element (msg);
+	e_soap_request_end_element (request);
 }
 
 static void
-convert_sensitivity_calcomp_to_xml (ESoapMessage *msg,
+convert_sensitivity_calcomp_to_xml (ESoapRequest *request,
 				    ICalComponent *icomp)
 {
 	ICalProperty *prop;
 
-	g_return_if_fail (msg != NULL);
+	g_return_if_fail (request != NULL);
 	g_return_if_fail (icomp != NULL);
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
 		ICalProperty_Class classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
-			e_ews_message_write_string_parameter (msg, "Sensitivity", NULL, "Normal");
+			e_ews_request_write_string_parameter (request, "Sensitivity", NULL, "Normal");
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
-			e_ews_message_write_string_parameter (msg, "Sensitivity", NULL, "Private");
+			e_ews_request_write_string_parameter (request, "Sensitivity", NULL, "Private");
 		} else if (classify == I_CAL_CLASS_CONFIDENTIAL) {
-			e_ews_message_write_string_parameter (msg, "Sensitivity", NULL, "Personal");
+			e_ews_request_write_string_parameter (request, "Sensitivity", NULL, "Personal");
 		}
 		g_object_unref (prop);
 	}
 }
 
 static void
-convert_categories_calcomp_to_xml (ESoapMessage *msg,
+convert_categories_calcomp_to_xml (ESoapRequest *request,
 				   ECalComponent *comp,
 				   ICalComponent *icomp)
 {
 	GSList *categ_list, *citer;
 
-	g_return_if_fail (msg != NULL);
+	g_return_if_fail (request != NULL);
 	g_return_if_fail (icomp != NULL);
 
 	if (comp) {
@@ -1097,7 +1088,7 @@ convert_categories_calcomp_to_xml (ESoapMessage *msg,
 	}
 
 	if (citer) {
-		e_soap_message_start_element (msg, "Categories", NULL, NULL);
+		e_soap_request_start_element (request, "Categories", NULL, NULL);
 
 		for (citer = categ_list; citer; citer = g_slist_next (citer)) {
 			const gchar *category = citer->data;
@@ -1105,10 +1096,10 @@ convert_categories_calcomp_to_xml (ESoapMessage *msg,
 			if (!category || !*category)
 				continue;
 
-			e_ews_message_write_string_parameter (msg, "String", NULL, category);
+			e_ews_request_write_string_parameter (request, "String", NULL, category);
 		}
 
-		e_soap_message_end_element (msg); /* Categories */
+		e_soap_request_end_element (request); /* Categories */
 	}
 
 	g_slist_free_full (categ_list, g_free);
@@ -1133,7 +1124,7 @@ check_is_all_day_event (const ICalTime *dtstart,
 }
 
 static gboolean
-convert_vevent_calcomp_to_xml (ESoapMessage *msg,
+convert_vevent_calcomp_to_xml (ESoapRequest *request,
                                gpointer user_data,
 			       GError **error)
 {
@@ -1155,28 +1146,28 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
 	/* Prepare CalendarItem node in the SOAP message */
-	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
+	e_soap_request_start_element (request, "CalendarItem", NULL, NULL);
 
 	/* subject */
 	value = i_cal_component_get_summary (icomp);
 	if (value)
-		e_ews_message_write_string_parameter (msg, "Subject", NULL, value);
+		e_ews_request_write_string_parameter (request, "Subject", NULL, value);
 
-	convert_sensitivity_calcomp_to_xml (msg, icomp);
+	convert_sensitivity_calcomp_to_xml (request, icomp);
 
 	/* description */
 	value = i_cal_component_get_description (icomp);
 	if (value)
-		e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, value, "BodyType", "Text");
+		e_ews_request_write_string_parameter_with_attribute (request, "Body", NULL, value, "BodyType", "Text");
 
-	convert_categories_calcomp_to_xml (msg, comp, icomp);
+	convert_categories_calcomp_to_xml (request, comp, icomp);
 
 	/* set alarms */
 	has_alarms = e_cal_component_has_alarms (comp);
 	if (has_alarms)
-		ews_set_alarm (msg, comp, convert_data->timezone_cache, convert_data->vcalendar, FALSE);
+		ews_set_alarm (request, comp, convert_data->timezone_cache, convert_data->vcalendar, FALSE);
 	else
-		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
+		e_ews_request_write_string_parameter (request, "ReminderIsSet", NULL, "false");
 
 	/* start time, end time and meeting time zone */
 	dtstart = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
@@ -1194,14 +1185,12 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
 	if (satisfies && ical_location_start != NULL && ical_location_end != NULL) {
 		/* set iana timezone info as an extended property */
-		e_ews_message_add_extended_property_distinguished_name_string (
-			msg,
+		e_ews_request_add_extended_property_distinguished_name_string (request,
 			"PublicStrings",
 			"EvolutionEWSStartTimeZone",
 			ical_location_start);
 
-		e_ews_message_add_extended_property_distinguished_name_string (
-			msg,
+		e_ews_request_add_extended_property_distinguished_name_string (request,
 			"PublicStrings",
 			"EvolutionEWSEndTimeZone",
 			ical_location_end);
@@ -1209,49 +1198,49 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 
 	is_all_day_event = check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end);
 
-	e_ews_cal_utils_set_time (msg, "Start", dtstart, is_all_day_event && i_cal_time_is_date (dtstart));
+	e_ews_cal_utils_set_time (request, "Start", dtstart, is_all_day_event && i_cal_time_is_date (dtstart));
 
 	/* Cover components without DTEND */
 	if (dtend && i_cal_time_is_valid_time (dtend) &&
 	    !i_cal_time_is_null_time (dtend))
-		e_ews_cal_utils_set_time (msg, "End", dtend, is_all_day_event && i_cal_time_is_date (dtend));
+		e_ews_cal_utils_set_time (request, "End", dtend, is_all_day_event && i_cal_time_is_date (dtend));
 	else
-		e_ews_cal_utils_set_time (msg, "End", dtstart, is_all_day_event && i_cal_time_is_date (dtstart));
+		e_ews_cal_utils_set_time (request, "End", dtstart, is_all_day_event && i_cal_time_is_date (dtstart));
 
 	/* We have to do the time zone(s) later, or the server rejects the request */
 
 	/* All day event ? */
 	if (is_all_day_event)
-		e_ews_message_write_string_parameter (msg, "IsAllDayEvent", NULL, "true");
+		e_ews_request_write_string_parameter (request, "IsAllDayEvent", NULL, "true");
 
 	/*freebusy*/
 	prop = i_cal_component_get_first_property (icomp, I_CAL_TRANSP_PROPERTY);
 	if (!prop || i_cal_property_get_transp (prop) == I_CAL_TRANSP_TRANSPARENT)
-		e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus", NULL, "Free");
+		e_ews_request_write_string_parameter (request, "LegacyFreeBusyStatus", NULL, "Free");
 	else
-		e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus", NULL, "Busy");
+		e_ews_request_write_string_parameter (request, "LegacyFreeBusyStatus", NULL, "Busy");
 	g_clear_object (&prop);
 
 	/* location */
 	value = i_cal_component_get_location (icomp);
 	if (value)
-		e_ews_message_write_string_parameter (msg, "Location", NULL, value);
+		e_ews_request_write_string_parameter (request, "Location", NULL, value);
 
 	/* collect attendees */
 	e_ews_collect_attendees (icomp, &required, &optional, &resource, &rsvp_requested);
 
-	e_ews_message_write_string_parameter (msg, "IsResponseRequested", NULL, rsvp_requested ? "true" : "false");
+	e_ews_request_write_string_parameter (request, "IsResponseRequested", NULL, rsvp_requested ? "true" : "false");
 
 	if (required != NULL) {
-		add_attendees_list_to_message (msg, "RequiredAttendees", required);
+		add_attendees_list_to_message (request, "RequiredAttendees", required);
 		g_slist_free (required);
 	}
 	if (optional != NULL) {
-		add_attendees_list_to_message (msg, "OptionalAttendees", optional);
+		add_attendees_list_to_message (request, "OptionalAttendees", optional);
 		g_slist_free (optional);
 	}
 	if (resource != NULL) {
-		add_attendees_list_to_message (msg, "Resources", resource);
+		add_attendees_list_to_message (request, "Resources", resource);
 		g_slist_free (resource);
 	}
 	/* end of attendees */
@@ -1259,7 +1248,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	/* Recurrence */
 	prop = i_cal_component_get_first_property (icomp, I_CAL_RRULE_PROPERTY);
 	if (prop) {
-		ewscal_set_reccurence (msg, prop, dtstart);
+		ewscal_set_reccurence (request, prop, dtstart);
 		g_object_unref (prop);
 	}
 
@@ -1281,19 +1270,19 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 				&tzds,
 				NULL,
 				NULL)) {
-			ewscal_set_timezone (msg, "StartTimeZone", tzds->data);
-			ewscal_set_timezone (msg, "EndTimeZone", tzds->data);
+			ewscal_set_timezone (request, "StartTimeZone", tzds->data);
+			ewscal_set_timezone (request, "EndTimeZone", tzds->data);
 		}
 
 		g_slist_free (msdn_locations);
 		g_slist_free_full (tzds, (GDestroyNotify) e_ews_calendar_time_zone_definition_free);
 	} else {
-		e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
+		e_ews_request_replace_server_version (request, E_EWS_EXCHANGE_2007_SP1);
 
-		ewscal_set_meeting_timezone (msg, tzid_start, icomp);
+		ewscal_set_meeting_timezone (request, tzid_start, icomp);
 	}
 
-	e_soap_message_end_element (msg); /* "CalendarItem" */
+	e_soap_request_end_element (request); /* "CalendarItem" */
 
 	g_clear_object (&dtstart);
 	g_clear_object (&dtend);
@@ -1315,7 +1304,7 @@ ews_priority_to_string (gint priority)
 }
 
 static gboolean
-convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
+convert_vtodo_calcomp_to_xml (ESoapRequest *request,
                               gpointer user_data,
 			      GError **error)
 {
@@ -1328,29 +1317,29 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	gboolean success;
 	/* gboolean has_alarms; */
 
-	e_soap_message_start_element (msg, "Task", NULL, NULL);
+	e_soap_request_start_element (request, "Task", NULL, NULL);
 
-	e_ews_message_write_string_parameter (msg, "Subject", NULL, i_cal_component_get_summary (icomp));
+	e_ews_request_write_string_parameter (request, "Subject", NULL, i_cal_component_get_summary (icomp));
 
-	convert_sensitivity_calcomp_to_xml (msg, icomp);
+	convert_sensitivity_calcomp_to_xml (request, icomp);
 
-	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, i_cal_component_get_description (icomp), "BodyType", "Text");
+	e_ews_request_write_string_parameter_with_attribute (request, "Body", NULL, i_cal_component_get_description (icomp), "BodyType", "Text");
 
-	convert_categories_calcomp_to_xml (msg, NULL, icomp);
+	convert_categories_calcomp_to_xml (request, NULL, icomp);
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_PRIORITY_PROPERTY);
 	if (prop) {
 		gint priority;
 
 		priority = i_cal_property_get_priority (prop);
-		e_ews_message_write_string_parameter (msg, "Importance", NULL, ews_priority_to_string (priority));
+		e_ews_request_write_string_parameter (request, "Importance", NULL, ews_priority_to_string (priority));
 		g_object_unref (prop);
 	}
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_DUE_PROPERTY);
 	if (prop) {
 		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DUE_PROPERTY, i_cal_property_get_due);
-		e_ews_cal_utils_set_time (msg, "DueDate", dt, TRUE);
+		e_ews_cal_utils_set_time (request, "DueDate", dt, TRUE);
 		g_clear_object (&dt);
 		g_object_unref (prop);
 	}
@@ -1359,16 +1348,16 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	if (prop) {
 		value = i_cal_property_get_percentcomplete (prop);
 		snprintf (buffer, 16, "%d", value);
-		e_ews_message_write_string_parameter (msg, "PercentComplete", NULL, buffer);
+		e_ews_request_write_string_parameter (request, "PercentComplete", NULL, buffer);
 		g_object_unref (prop);
 	}
 
-	success = e_ews_cal_utils_set_recurrence (msg, icomp, FALSE, error);
+	success = e_ews_cal_utils_set_recurrence (request, icomp, FALSE, error);
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_DTSTART_PROPERTY);
 	if (prop) {
 		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
-		e_ews_cal_utils_set_time (msg, "StartDate", dt, TRUE);
+		e_ews_cal_utils_set_time (request, "StartDate", dt, TRUE);
 		g_clear_object (&dt);
 		g_object_unref (prop);
 	}
@@ -1377,10 +1366,10 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	if (prop) {
 		switch (i_cal_property_get_status (prop)) {
 		case I_CAL_STATUS_INPROCESS:
-			e_ews_message_write_string_parameter (msg, "Status", NULL, "InProgress");
+			e_ews_request_write_string_parameter (request, "Status", NULL, "InProgress");
 			break;
 		case I_CAL_STATUS_COMPLETED:
-			e_ews_message_write_string_parameter (msg, "Status", NULL, "Completed");
+			e_ews_request_write_string_parameter (request, "Status", NULL, "Completed");
 			break;
 		default:
 			break;
@@ -1393,7 +1382,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 		ECalComponent *comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
 
 		if (comp && e_cal_component_has_alarms (comp)) {
-			ews_set_alarm (msg, comp, convert_data->timezone_cache, convert_data->vcalendar, TRUE);
+			ews_set_alarm (request, comp, convert_data->timezone_cache, convert_data->vcalendar, TRUE);
 		} else {
 			has_alarms = FALSE;
 		}
@@ -1402,15 +1391,15 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	}
 
 	if (!has_alarms)
-		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false"); */
+		e_ews_request_write_string_parameter (request, "ReminderIsSet", NULL, "false"); */
 
-	e_soap_message_end_element (msg); /* "Task" */
+	e_soap_request_end_element (request); /* "Task" */
 
 	return success;
 }
 
 static gboolean
-convert_vjournal_calcomp_to_xml (ESoapMessage *msg,
+convert_vjournal_calcomp_to_xml (ESoapRequest *request,
 				 gpointer user_data,
 				 GError **error)
 {
@@ -1418,27 +1407,27 @@ convert_vjournal_calcomp_to_xml (ESoapMessage *msg,
 	ICalComponent *icomp = convert_data->icomp;
 	const gchar *text;
 
-	e_soap_message_start_element (msg, "Message", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "ItemClass", NULL, "IPM.StickyNote");
+	e_soap_request_start_element (request, "Message", NULL, NULL);
+	e_ews_request_write_string_parameter (request, "ItemClass", NULL, "IPM.StickyNote");
 
-	e_ews_message_write_string_parameter (msg, "Subject", NULL, i_cal_component_get_summary (icomp));
+	e_ews_request_write_string_parameter (request, "Subject", NULL, i_cal_component_get_summary (icomp));
 
-	convert_sensitivity_calcomp_to_xml (msg, icomp);
+	convert_sensitivity_calcomp_to_xml (request, icomp);
 
 	text = i_cal_component_get_description (icomp);
 	if (!text || !*text)
 		text = i_cal_component_get_summary (icomp);
-	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, text, "BodyType", "Text");
+	e_ews_request_write_string_parameter_with_attribute (request, "Body", NULL, text, "BodyType", "Text");
 
-	convert_categories_calcomp_to_xml (msg, NULL, icomp);
+	convert_categories_calcomp_to_xml (request, NULL, icomp);
 
-	e_soap_message_end_element (msg); /* Message */
+	e_soap_request_end_element (request); /* Message */
 
 	return TRUE;
 }
 
 gboolean
-e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg,
+e_cal_backend_ews_convert_calcomp_to_xml (ESoapRequest *request,
 					  gpointer user_data,
 					  GError **error)
 {
@@ -1447,13 +1436,13 @@ e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg,
 
 	switch (i_cal_component_isa (convert_data->icomp)) {
 	case I_CAL_VEVENT_COMPONENT:
-		success = convert_vevent_calcomp_to_xml (msg, convert_data, error);
+		success = convert_vevent_calcomp_to_xml (request, convert_data, error);
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		success = convert_vtodo_calcomp_to_xml (msg, convert_data, error);
+		success = convert_vtodo_calcomp_to_xml (request, convert_data, error);
 		break;
 	case I_CAL_VJOURNAL_COMPONENT:
-		success = convert_vjournal_calcomp_to_xml (msg, convert_data, error);
+		success = convert_vjournal_calcomp_to_xml (request, convert_data, error);
 		break;
 	default:
 		g_warn_if_reached ();
@@ -1465,19 +1454,19 @@ e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg,
 
 static void
 convert_component_categories_to_updatexml (ECalComponent *comp,
-					   ESoapMessage *msg,
+					   ESoapRequest *request,
 					   const gchar *base_elem_name)
 {
 	GSList *categ_list, *citer;
 
 	g_return_if_fail (comp != NULL);
-	g_return_if_fail (msg != NULL);
+	g_return_if_fail (request != NULL);
 	g_return_if_fail (base_elem_name != NULL);
 
 	categ_list = e_cal_component_get_categories_list (comp);
 
-	e_ews_message_start_set_item_field (msg, "Categories", "item", base_elem_name);
-	e_soap_message_start_element (msg, "Categories", NULL, NULL);
+	e_ews_request_start_set_item_field (request, "Categories", "item", base_elem_name);
+	e_soap_request_start_element (request, "Categories", NULL, NULL);
 
 	for (citer = categ_list; citer; citer = g_slist_next (citer)) {
 		const gchar *category = citer->data;
@@ -1485,30 +1474,30 @@ convert_component_categories_to_updatexml (ECalComponent *comp,
 		if (!category || !*category)
 			continue;
 
-		e_ews_message_write_string_parameter (msg, "String", NULL, category);
+		e_ews_request_write_string_parameter (request, "String", NULL, category);
 	}
 
-	e_soap_message_end_element (msg); /* Categories */
-	e_ews_message_end_set_item_field (msg);
+	e_soap_request_end_element (request); /* Categories */
+	e_ews_request_end_set_item_field (request);
 
 	g_slist_free_full (categ_list, g_free);
 }
 
 static void
-convert_vevent_property_to_updatexml (ESoapMessage *msg,
+convert_vevent_property_to_updatexml (ESoapRequest *request,
                                       const gchar *name,
                                       const gchar *value,
                                       const gchar *prefix,
                                       const gchar *attr_name,
                                       const gchar *attr_value)
 {
-	e_ews_message_start_set_item_field (msg, name, prefix, "CalendarItem");
-	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
-	e_ews_message_end_set_item_field (msg);
+	e_ews_request_start_set_item_field (request, name, prefix, "CalendarItem");
+	e_ews_request_write_string_parameter_with_attribute (request, name, NULL, value, attr_name, attr_value);
+	e_ews_request_end_set_item_field (request);
 }
 
 static gboolean
-convert_vevent_component_to_updatexml (ESoapMessage *msg,
+convert_vevent_component_to_updatexml (ESoapRequest *request,
                                        gpointer user_data,
 				       GError **error)
 {
@@ -1531,14 +1520,13 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	gboolean satisfies, rsvp_requested = TRUE, is_all_day_event = FALSE;
 
 	if (convert_data->change_type == E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM && convert_data->index > 0) {
-		e_ews_message_start_item_change (
-			msg,
+		e_ews_request_start_item_change (request,
 			convert_data->change_type,
 			convert_data->item_id,
 			convert_data->change_key,
 			convert_data->index);
 	} else {
-		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+		e_ews_request_start_item_change (request, E_EWS_ITEMCHANGE_TYPE_ITEM,
 			convert_data->item_id, convert_data->change_key, 0);
 	}
 
@@ -1546,20 +1534,20 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	value = i_cal_component_get_summary (icomp);
 	old_value = i_cal_component_get_summary (icomp_old);
 	if (g_strcmp0 (value, old_value) != 0 || (value && !old_value)) {
-		convert_vevent_property_to_updatexml (msg, "Subject", value, "item", NULL, NULL);
+		convert_vevent_property_to_updatexml (request, "Subject", value, "item", NULL, NULL);
 	} else if (!value && old_value) {
-		convert_vevent_property_to_updatexml (msg, "Subject", "", "item", NULL, NULL);
+		convert_vevent_property_to_updatexml (request, "Subject", "", "item", NULL, NULL);
 	}
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
 		ICalProperty_Class classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
-			convert_vevent_property_to_updatexml (msg, "Sensitivity", "Normal", "item", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "Sensitivity", "Normal", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
-			convert_vevent_property_to_updatexml (msg, "Sensitivity", "Private", "item", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "Sensitivity", "Private", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_CONFIDENTIAL) {
-			convert_vevent_property_to_updatexml (msg, "Sensitivity", "Personal", "item", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "Sensitivity", "Personal", "item", NULL, NULL);
 		}
 
 		g_object_unref (prop);
@@ -1569,9 +1557,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	value = i_cal_component_get_description (icomp);
 	old_value = i_cal_component_get_description (icomp_old);
 	if (g_strcmp0 (value, old_value) != 0 || (value && !old_value)) {
-		convert_vevent_property_to_updatexml (msg, "Body", value, "item", "BodyType", "Text");
+		convert_vevent_property_to_updatexml (request, "Body", value, "item", "BodyType", "Text");
 	} else if (!value && old_value) {
-		convert_vevent_property_to_updatexml (msg, "Body", "", "item", "BodyType", "Text");
+		convert_vevent_property_to_updatexml (request, "Body", "", "item", "BodyType", "Text");
 	}
 
 	/*update alarm items*/
@@ -1586,23 +1574,23 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		if (alarm != alarm_old || !has_alarms_old) {
 			gchar buf[20];
 			snprintf (buf, 20, "%d", alarm);
-			convert_vevent_property_to_updatexml (msg, "ReminderIsSet", "true", "item", NULL, NULL);
-			convert_vevent_property_to_updatexml (msg, "ReminderMinutesBeforeStart", buf, "item", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "ReminderIsSet", "true", "item", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "ReminderMinutesBeforeStart", buf, "item", NULL, NULL);
 		}
 	} else {
-		convert_vevent_property_to_updatexml (msg, "ReminderIsSet", "false", "item", NULL, NULL);
+		convert_vevent_property_to_updatexml (request, "ReminderIsSet", "false", "item", NULL, NULL);
 	}
 
 	/* Categories */
-	convert_component_categories_to_updatexml (convert_data->comp, msg, "CalendarItem");
+	convert_component_categories_to_updatexml (convert_data->comp, request, "CalendarItem");
 
 	/*location*/
 	value = i_cal_component_get_location (icomp);
 	old_value = i_cal_component_get_location (icomp_old);
 	if (g_strcmp0 (value, old_value) != 0 || (value && !old_value)) {
-		convert_vevent_property_to_updatexml (msg, "Location", value, "calendar", NULL, NULL);
+		convert_vevent_property_to_updatexml (request, "Location", value, "calendar", NULL, NULL);
 	} else if (!value && old_value) {
-		convert_vevent_property_to_updatexml (msg, "Location", "", "calendar", NULL, NULL);
+		convert_vevent_property_to_updatexml (request, "Location", "", "calendar", NULL, NULL);
 	}
 
 	/*freebusy*/
@@ -1614,14 +1602,14 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	g_clear_object (&prop);
 	if (new_transp != old_transp) {
 		if (new_transp == I_CAL_TRANSP_TRANSPARENT)
-			convert_vevent_property_to_updatexml (msg, "LegacyFreeBusyStatus","Free" , "calendar", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "LegacyFreeBusyStatus","Free" , "calendar", NULL, NULL);
 		else
-			convert_vevent_property_to_updatexml (msg, "LegacyFreeBusyStatus","Busy" , "calendar", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "LegacyFreeBusyStatus","Busy" , "calendar", NULL, NULL);
 	}
 
 	org_email_address = e_ews_collect_organizer (icomp);
 	if (org_email_address && convert_data->user_email && g_ascii_strcasecmp (org_email_address, convert_data->user_email)) {
-		e_ews_message_end_item_change (msg);
+		e_ews_request_end_item_change (request);
 		return TRUE;
 	}
 
@@ -1683,8 +1671,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 			dt_end_changed = TRUE;
 
 		if ((dt_start_changed || dt_start_changed_timezone_name) && ical_location_start != NULL)
-			e_ews_message_add_set_item_field_extended_distinguished_name_string (
-				msg,
+			e_ews_request_add_set_item_field_extended_distinguished_name_string (request,
 				NULL,
 				"CalendarItem",
 				"PublicStrings",
@@ -1692,8 +1679,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 				ical_location_start);
 
 		if ((dt_end_changed || dt_end_changed_timezone_name) && ical_location_end != NULL)
-			e_ews_message_add_set_item_field_extended_distinguished_name_string (
-				msg,
+			e_ews_request_add_set_item_field_extended_distinguished_name_string (request,
 				NULL,
 				"CalendarItem",
 				"PublicStrings",
@@ -1707,52 +1693,52 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		is_all_day_event = check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end);
 
 	if (dt_start_changed) {
-		e_ews_message_start_set_item_field (msg, "Start", "calendar","CalendarItem");
-		e_ews_cal_utils_set_time (msg, "Start", dtstart, is_all_day_event && i_cal_time_is_date (dtstart));
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "Start", "calendar","CalendarItem");
+		e_ews_cal_utils_set_time (request, "Start", dtstart, is_all_day_event && i_cal_time_is_date (dtstart));
+		e_ews_request_end_set_item_field (request);
 	}
 
 	if (dt_end_changed) {
-		e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
-		e_ews_cal_utils_set_time (msg, "End", dtend, is_all_day_event && i_cal_time_is_date (dtend));
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "End", "calendar", "CalendarItem");
+		e_ews_cal_utils_set_time (request, "End", dtend, is_all_day_event && i_cal_time_is_date (dtend));
+		e_ews_request_end_set_item_field (request);
 	}
 
 	/*Check for All Day Event*/
 	if (dt_changed) {
 		if (is_all_day_event)
-			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "true", "calendar", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "IsAllDayEvent", "true", "calendar", NULL, NULL);
 		else
-			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "false", "calendar", NULL, NULL);
+			convert_vevent_property_to_updatexml (request, "IsAllDayEvent", "false", "calendar", NULL, NULL);
 	}
 
 	e_ews_collect_attendees (icomp, &required, &optional, &resource, &rsvp_requested);
 
-	convert_vevent_property_to_updatexml (msg, "IsResponseRequested", rsvp_requested ? "true" : "false", "calendar", NULL, NULL);
+	convert_vevent_property_to_updatexml (request, "IsResponseRequested", rsvp_requested ? "true" : "false", "calendar", NULL, NULL);
 
 	if (required != NULL) {
-		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar", "CalendarItem");
+		e_ews_request_start_set_item_field (request, "RequiredAttendees", "calendar", "CalendarItem");
 
-		add_attendees_list_to_message (msg, "RequiredAttendees", required);
+		add_attendees_list_to_message (request, "RequiredAttendees", required);
 		g_slist_free (required);
 
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_end_set_item_field (request);
 	}
 	if (optional != NULL) {
-		e_ews_message_start_set_item_field (msg, "OptionalAttendees", "calendar", "CalendarItem");
+		e_ews_request_start_set_item_field (request, "OptionalAttendees", "calendar", "CalendarItem");
 
-		add_attendees_list_to_message (msg, "OptionalAttendees", optional);
+		add_attendees_list_to_message (request, "OptionalAttendees", optional);
 		g_slist_free (optional);
 
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_end_set_item_field (request);
 	}
 	if (resource != NULL) {
-		e_ews_message_start_set_item_field (msg, "Resources", "calendar", "CalendarItem");
+		e_ews_request_start_set_item_field (request, "Resources", "calendar", "CalendarItem");
 
-		add_attendees_list_to_message (msg, "Resources", resource);
+		add_attendees_list_to_message (request, "Resources", resource);
 		g_slist_free (resource);
 
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_end_set_item_field (request);
 	}
 
 	/* Recurrence */
@@ -1769,9 +1755,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		rrule_value = i_cal_property_get_value_as_string (prop);
 
 	if (prop && g_strcmp0 (rrule_value, rrule_old_value)) {
-		e_ews_message_start_set_item_field (msg, "Recurrence", "calendar", "CalendarItem");
-		ewscal_set_reccurence (msg, prop, dtstart);
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "Recurrence", "calendar", "CalendarItem");
+		ewscal_set_reccurence (request, prop, dtstart);
+		e_ews_request_end_set_item_field (request);
 	}
 	g_clear_object (&prop);
 	g_free (rrule_value);
@@ -1799,9 +1785,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 
 				tmp = tzds;
 				if (tzid_start != NULL) {
-					e_ews_message_start_set_item_field (msg, "StartTimeZone", "calendar", "CalendarItem");
-					ewscal_set_timezone (msg, "StartTimeZone", tmp->data);
-					e_ews_message_end_set_item_field (msg);
+					e_ews_request_start_set_item_field (request, "StartTimeZone", "calendar", "CalendarItem");
+					ewscal_set_timezone (request, "StartTimeZone", tmp->data);
+					e_ews_request_end_set_item_field (request);
 
 					/*
 					 * Exchange server is smart enough to return the list of
@@ -1812,9 +1798,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 				}
 
 				if (tzid_end != NULL) {
-					e_ews_message_start_set_item_field (msg, "EndTimeZone", "calendar", "CalendarItem");
-					ewscal_set_timezone (msg, "EndTimeZone", tmp->data);
-					e_ews_message_end_set_item_field (msg);
+					e_ews_request_start_set_item_field (request, "EndTimeZone", "calendar", "CalendarItem");
+					ewscal_set_timezone (request, "EndTimeZone", tmp->data);
+					e_ews_request_end_set_item_field (request);
 				}
 			}
 
@@ -1822,14 +1808,14 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 			g_slist_free_full (tzds, (GDestroyNotify) e_ews_calendar_time_zone_definition_free);
 		}
 	} else if (dt_changed) {
-		e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
+		e_ews_request_replace_server_version (request, E_EWS_EXCHANGE_2007_SP1);
 
-		e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
-		ewscal_set_meeting_timezone (msg, tzid_start ? tzid_start : convert_data->default_zone, icomp);
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "MeetingTimeZone", "calendar", "CalendarItem");
+		ewscal_set_meeting_timezone (request, tzid_start ? tzid_start : convert_data->default_zone, icomp);
+		e_ews_request_end_set_item_field (request);
 	}
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	g_clear_object (&dtstart);
 	g_clear_object (&dtend);
@@ -1840,20 +1826,20 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 }
 
 static void
-convert_vtodo_property_to_updatexml (ESoapMessage *msg,
+convert_vtodo_property_to_updatexml (ESoapRequest *request,
                                      const gchar *name,
                                      const gchar *value,
                                      const gchar *prefix,
                                      const gchar *attr_name,
                                      const gchar *attr_value)
 {
-	e_ews_message_start_set_item_field (msg, name, prefix, "Task");
-	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
-	e_ews_message_end_set_item_field (msg);
+	e_ews_request_start_set_item_field (request, name, prefix, "Task");
+	e_ews_request_write_string_parameter_with_attribute (request, name, NULL, value, attr_name, attr_value);
+	e_ews_request_end_set_item_field (request);
 }
 
 static gboolean
-convert_vtodo_component_to_updatexml (ESoapMessage *msg,
+convert_vtodo_component_to_updatexml (ESoapRequest *request,
                                       gpointer user_data,
 				      GError **error)
 {
@@ -1865,46 +1851,45 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	gchar buffer[16];
 	gboolean success = TRUE;
 
-	e_ews_message_start_item_change (
-		msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+	e_ews_request_start_item_change (request, E_EWS_ITEMCHANGE_TYPE_ITEM,
 		convert_data->item_id, convert_data->change_key, 0);
 
-	convert_vtodo_property_to_updatexml (msg, "Subject", i_cal_component_get_summary (icomp), "item", NULL, NULL);
+	convert_vtodo_property_to_updatexml (request, "Subject", i_cal_component_get_summary (icomp), "item", NULL, NULL);
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
 		ICalProperty_Class classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
-			convert_vtodo_property_to_updatexml (msg, "Sensitivity", "Normal", "item", NULL, NULL);
+			convert_vtodo_property_to_updatexml (request, "Sensitivity", "Normal", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
-			convert_vtodo_property_to_updatexml (msg, "Sensitivity", "Private", "item", NULL, NULL);
+			convert_vtodo_property_to_updatexml (request, "Sensitivity", "Private", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_CONFIDENTIAL) {
-			convert_vtodo_property_to_updatexml (msg, "Sensitivity", "Personal", "item", NULL, NULL);
+			convert_vtodo_property_to_updatexml (request, "Sensitivity", "Personal", "item", NULL, NULL);
 		}
 		g_object_unref (prop);
 	}
 
-	convert_vtodo_property_to_updatexml (msg, "Body", i_cal_component_get_description (icomp), "item", "BodyType", "Text");
+	convert_vtodo_property_to_updatexml (request, "Body", i_cal_component_get_description (icomp), "item", "BodyType", "Text");
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_DUE_PROPERTY);
 	if (prop) {
 		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DUE_PROPERTY, i_cal_property_get_due);
-		e_ews_message_start_set_item_field (msg, "DueDate", "task", "Task");
-		e_ews_cal_utils_set_time (msg, "DueDate", dt, TRUE);
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "DueDate", "task", "Task");
+		e_ews_cal_utils_set_time (request, "DueDate", dt, TRUE);
+		e_ews_request_end_set_item_field (request);
 		g_object_unref (prop);
 		g_clear_object (&dt);
 	} else {
-		e_ews_message_add_delete_item_field (msg, "DueDate", "task");
+		e_ews_request_add_delete_item_field (request, "DueDate", "task");
 	}
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_PERCENTCOMPLETE_PROPERTY);
 	if (prop) {
 		value = i_cal_property_get_percentcomplete (prop);
 		snprintf (buffer, 16, "%d", value);
-		e_ews_message_start_set_item_field (msg, "PercentComplete", "task", "Task");
-		e_ews_message_write_string_parameter (msg, "PercentComplete", NULL, buffer);
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "PercentComplete", "task", "Task");
+		e_ews_request_write_string_parameter (request, "PercentComplete", NULL, buffer);
+		e_ews_request_end_set_item_field (request);
 		g_object_unref (prop);
 	}
 
@@ -1912,37 +1897,37 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	value = i_cal_component_count_properties (e_cal_component_get_icalcomponent (convert_data->old_comp), I_CAL_RRULE_PROPERTY);
 	if (i_cal_component_count_properties (icomp, I_CAL_RRULE_PROPERTY) > 0 ||
 	    (e_cal_util_component_has_x_property (icomp, X_EWS_TASK_REGENERATION) && value <= 0)) {
-		e_ews_message_start_set_item_field (msg, "Recurrence", "task", "Task");
-		success = success && e_ews_cal_utils_set_recurrence (msg, icomp, FALSE, error);
-		e_ews_message_end_set_item_field (msg); /* Recurrence */
+		e_ews_request_start_set_item_field (request, "Recurrence", "task", "Task");
+		success = success && e_ews_cal_utils_set_recurrence (request, icomp, FALSE, error);
+		e_ews_request_end_set_item_field (request); /* Recurrence */
 	} else if (value > 0) {
-		e_ews_message_add_delete_item_field (msg, "Recurrence", "task");
+		e_ews_request_add_delete_item_field (request, "Recurrence", "task");
 	}
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_DTSTART_PROPERTY);
 	if (prop) {
 		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
-		e_ews_message_start_set_item_field (msg, "StartDate", "task", "Task");
-		e_ews_cal_utils_set_time (msg, "StartDate", dt, TRUE);
-		e_ews_message_end_set_item_field (msg);
+		e_ews_request_start_set_item_field (request, "StartDate", "task", "Task");
+		e_ews_cal_utils_set_time (request, "StartDate", dt, TRUE);
+		e_ews_request_end_set_item_field (request);
 		g_object_unref (prop);
 		g_clear_object (&dt);
 	} else {
-		e_ews_message_add_delete_item_field (msg, "StartDate", "task");
+		e_ews_request_add_delete_item_field (request, "StartDate", "task");
 	}
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_STATUS_PROPERTY);
 	if (prop) {
 		switch (i_cal_property_get_status (prop)) {
 		case I_CAL_STATUS_INPROCESS:
-			convert_vtodo_property_to_updatexml (msg, "Status", "InProgress", "task", NULL, NULL);
+			convert_vtodo_property_to_updatexml (request, "Status", "InProgress", "task", NULL, NULL);
 			break;
 		case I_CAL_STATUS_COMPLETED:
-			convert_vtodo_property_to_updatexml (msg, "Status", "Completed", "task", NULL, NULL);
+			convert_vtodo_property_to_updatexml (request, "Status", "Completed", "task", NULL, NULL);
 			break;
 		case I_CAL_STATUS_NONE:
 		case I_CAL_STATUS_NEEDSACTION:
-			convert_vtodo_property_to_updatexml (msg, "Status", "NotStarted", "task", NULL, NULL);
+			convert_vtodo_property_to_updatexml (request, "Status", "NotStarted", "task", NULL, NULL);
 			break;
 		default:
 			break;
@@ -1951,37 +1936,37 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	}
 
 	/* Categories */
-	convert_component_categories_to_updatexml (convert_data->comp, msg, "Task");
+	convert_component_categories_to_updatexml (convert_data->comp, request, "Task");
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_PRIORITY_PROPERTY);
 	if (prop) {
 		gint priority;
 
 		priority = i_cal_property_get_priority (prop);
-		convert_vtodo_property_to_updatexml (msg, "Importance", ews_priority_to_string (priority), "item", NULL, NULL);
+		convert_vtodo_property_to_updatexml (request, "Importance", ews_priority_to_string (priority), "item", NULL, NULL);
 		g_object_unref (prop);
 	}
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	return success;
 }
 
 static void
-convert_vjournal_property_to_updatexml (ESoapMessage *msg,
+convert_vjournal_property_to_updatexml (ESoapRequest *request,
 					const gchar *name,
 					const gchar *value,
 					const gchar *prefix,
 					const gchar *attr_name,
 					const gchar *attr_value)
 {
-	e_ews_message_start_set_item_field (msg, name, prefix, "Message");
-	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
-	e_ews_message_end_set_item_field (msg);
+	e_ews_request_start_set_item_field (request, name, prefix, "Message");
+	e_ews_request_write_string_parameter_with_attribute (request, name, NULL, value, attr_name, attr_value);
+	e_ews_request_end_set_item_field (request);
 }
 
 static gboolean
-convert_vjournal_component_to_updatexml (ESoapMessage *msg,
+convert_vjournal_component_to_updatexml (ESoapRequest *request,
 					 gpointer user_data,
 					 GError **error)
 {
@@ -1990,22 +1975,21 @@ convert_vjournal_component_to_updatexml (ESoapMessage *msg,
 	ICalProperty *prop;
 	const gchar *text;
 
-	e_ews_message_start_item_change (
-		msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+	e_ews_request_start_item_change (request, E_EWS_ITEMCHANGE_TYPE_ITEM,
 		convert_data->item_id, convert_data->change_key, 0);
 
-	convert_vjournal_property_to_updatexml (msg, "ItemClass", "IPM.StickyNote", "item", NULL, NULL);
-	convert_vjournal_property_to_updatexml (msg, "Subject", i_cal_component_get_summary (icomp), "item", NULL, NULL);
+	convert_vjournal_property_to_updatexml (request, "ItemClass", "IPM.StickyNote", "item", NULL, NULL);
+	convert_vjournal_property_to_updatexml (request, "Subject", i_cal_component_get_summary (icomp), "item", NULL, NULL);
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
 		ICalProperty_Class classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
-			convert_vjournal_property_to_updatexml (msg, "Sensitivity", "Normal", "item", NULL, NULL);
+			convert_vjournal_property_to_updatexml (request, "Sensitivity", "Normal", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
-			convert_vjournal_property_to_updatexml (msg, "Sensitivity", "Private", "item", NULL, NULL);
+			convert_vjournal_property_to_updatexml (request, "Sensitivity", "Private", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_CONFIDENTIAL) {
-			convert_vjournal_property_to_updatexml (msg, "Sensitivity", "Personal", "item", NULL, NULL);
+			convert_vjournal_property_to_updatexml (request, "Sensitivity", "Personal", "item", NULL, NULL);
 		}
 		g_object_unref (prop);
 	}
@@ -2014,18 +1998,18 @@ convert_vjournal_component_to_updatexml (ESoapMessage *msg,
 	if (!text || !*text)
 		text = i_cal_component_get_summary (icomp);
 
-	convert_vjournal_property_to_updatexml (msg, "Body", text, "item", "BodyType", "Text");
+	convert_vjournal_property_to_updatexml (request, "Body", text, "item", "BodyType", "Text");
 
 	/* Categories */
-	convert_component_categories_to_updatexml (convert_data->comp, msg, "Message");
+	convert_component_categories_to_updatexml (convert_data->comp, request, "Message");
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	return TRUE;
 }
 
 gboolean
-e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg,
+e_cal_backend_ews_convert_component_to_updatexml (ESoapRequest *request,
 						  gpointer user_data,
 						  GError **error)
 {
@@ -2035,13 +2019,13 @@ e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg,
 
 	switch (i_cal_component_isa (icomp)) {
 	case I_CAL_VEVENT_COMPONENT:
-		success = convert_vevent_component_to_updatexml (msg, user_data, error);
+		success = convert_vevent_component_to_updatexml (request, user_data, error);
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		success = convert_vtodo_component_to_updatexml (msg, user_data, error);
+		success = convert_vtodo_component_to_updatexml (request, user_data, error);
 		break;
 	case I_CAL_VJOURNAL_COMPONENT:
-		success = convert_vjournal_component_to_updatexml (msg, user_data, error);
+		success = convert_vjournal_component_to_updatexml (request, user_data, error);
 		break;
 	default:
 		break;
@@ -2115,52 +2099,51 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 }
 
 gboolean
-e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg,
+e_cal_backend_ews_clear_reminder_is_set (ESoapRequest *request,
 					 gpointer user_data,
 					 GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 
-	e_ews_message_start_item_change (
-		msg,
+	e_ews_request_start_item_change (request,
 		convert_data->change_type,
 		convert_data->item_id,
 		convert_data->change_key,
 		convert_data->index);
 
-	e_ews_message_start_set_item_field (msg, "ReminderIsSet","item", "CalendarItem");
+	e_ews_request_start_set_item_field (request, "ReminderIsSet","item", "CalendarItem");
 
-	e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
+	e_ews_request_write_string_parameter (request, "ReminderIsSet", NULL, "false");
 
-	e_ews_message_end_set_item_field (msg);
+	e_ews_request_end_set_item_field (request);
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	return TRUE;
 }
 
 gboolean
-e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,
+e_cal_backend_ews_prepare_set_free_busy_status (ESoapRequest *request,
 						gpointer user_data,
 						GError **error)
 {
 	EwsCalendarConvertData *data = user_data;
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM, data->item_id, data->change_key, 0);
+	e_ews_request_start_item_change (request, E_EWS_ITEMCHANGE_TYPE_ITEM, data->item_id, data->change_key, 0);
 
-	e_ews_message_start_set_item_field (msg, "LegacyFreeBusyStatus", "calendar", "CalendarItem");
+	e_ews_request_start_set_item_field (request, "LegacyFreeBusyStatus", "calendar", "CalendarItem");
 
-	e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus", NULL, "Free");
+	e_ews_request_write_string_parameter (request, "LegacyFreeBusyStatus", NULL, "Free");
 
-	e_ews_message_end_set_item_field (msg);
+	e_ews_request_end_set_item_field (request);
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	return TRUE;
 }
 
 gboolean
-e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg,
+e_cal_backend_ews_prepare_accept_item_request (ESoapRequest *request,
 					       gpointer user_data,
 					       GError **error)
 {
@@ -2174,19 +2157,19 @@ e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg,
 	 * Prepare AcceptItem node in the SOAP message */
 
 	if (response_type && !g_ascii_strcasecmp (response_type, "ACCEPTED"))
-		e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
+		e_soap_request_start_element (request, "AcceptItem", NULL, NULL);
 	else if (response_type && !g_ascii_strcasecmp (response_type, "DECLINED"))
-		e_soap_message_start_element (msg, "DeclineItem", NULL, NULL);
+		e_soap_request_start_element (request, "DeclineItem", NULL, NULL);
 	else
-		e_soap_message_start_element (msg, "TentativelyAcceptItem", NULL, NULL);
+		e_soap_request_start_element (request, "TentativelyAcceptItem", NULL, NULL);
 
-	e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
-	e_soap_message_add_attribute (msg, "Id", data->item_id, NULL, NULL);
-	e_soap_message_add_attribute (msg, "ChangeKey", data->change_key, NULL, NULL);
-	e_soap_message_end_element (msg); /* "ReferenceItemId" */
+	e_soap_request_start_element (request, "ReferenceItemId", NULL, NULL);
+	e_soap_request_add_attribute (request, "Id", data->item_id, NULL, NULL);
+	e_soap_request_add_attribute (request, "ChangeKey", data->change_key, NULL, NULL);
+	e_soap_request_end_element (request); /* "ReferenceItemId" */
 
 	/* end of "AcceptItem" */
-	e_soap_message_end_element (msg);
+	e_soap_request_end_element (request);
 
 	return TRUE;
 }

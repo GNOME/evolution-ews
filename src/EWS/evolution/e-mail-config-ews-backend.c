@@ -724,11 +724,11 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	complete = complete && correct;
 
 	if (correct) {
-		SoupURI *suri;
+		GUri *uri;
 
-		suri = soup_uri_new (hosturl);
-		if (suri) {
-			soup_uri_free (suri);
+		uri = g_uri_parse (hosturl, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+		if (uri) {
+			g_uri_unref (uri);
 			e_util_set_entry_issue_hint (ews_backend->priv->host_entry, NULL);
 		} else {
 			e_util_set_entry_issue_hint (ews_backend->priv->host_entry, _("Host URL is not valid"));
@@ -739,11 +739,11 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	}
 
 	if (oaburl && *oaburl) {
-		SoupURI *suri;
+		GUri *uri;
 
-		suri = soup_uri_new (oaburl);
-		if (suri) {
-			soup_uri_free (suri);
+		uri = g_uri_parse (oaburl, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+		if (uri) {
+			g_uri_unref (uri);
 			e_util_set_entry_issue_hint (ews_backend->priv->oab_entry, NULL);
 		} else {
 			e_util_set_entry_issue_hint (ews_backend->priv->oab_entry, _("OAB URL is not valid"));

@@ -21,19 +21,17 @@ set(SOURCES
 	e-ews-item.h
 	e-ews-item-change.c
 	e-ews-item-change.h
-	e-ews-message.c
-	e-ews-message.h
 	e-ews-notification.c
 	e-ews-notification.h
 	e-ews-oof-settings.c
 	e-ews-query-to-restriction.c
 	e-ews-query-to-restriction.h
+	e-ews-request.c
+	e-ews-request.h
 	e-oauth2-service-office365.c
 	e-oauth2-service-office365.h
-	e-soup-auth-negotiate.c
-	e-soup-auth-negotiate.h
-	e-soap-message.c
-	e-soap-message.h
+	e-soap-request.c
+	e-soap-request.h
 	e-soap-response.c
 	e-soap-response.h
 	e-source-ews-folder.c

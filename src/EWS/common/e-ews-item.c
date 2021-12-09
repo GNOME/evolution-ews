@@ -14,7 +14,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
-#include <libsoup/soup-misc.h>
+#include <libsoup/soup.h>
 #include <libedataserver/libedataserver.h>
 #include <libecal/libecal.h>
 

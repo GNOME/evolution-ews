@@ -9,7 +9,7 @@
 #include <glib/gi18n-lib.h>
 #include <libecal/libecal.h>
 
-#include "e-ews-message.h"
+#include "e-ews-request.h"
 #include "ews-errors.h"
 
 #include "e-ews-calendar-utils.h"
@@ -199,7 +199,7 @@ number_to_weekday (gint num)
 }
 
 static void
-ewscal_add_availability_rrule (ESoapMessage *msg,
+ewscal_add_availability_rrule (ESoapRequest *request,
                                ICalProperty *prop)
 {
 	ICalRecurrence *recur = i_cal_property_get_rrule (prop);
@@ -214,39 +214,39 @@ ewscal_add_availability_rrule (ESoapMessage *msg,
 
 	/* expected value is 1..5, inclusive */
 	snprintf (buffer, 16, "%d", dayorder);
-	e_ews_message_write_string_parameter (msg, "DayOrder", NULL, buffer);
+	e_ews_request_write_string_parameter (request, "DayOrder", NULL, buffer);
 
 	snprintf (buffer, 16, "%d", i_cal_recurrence_get_by_month (recur, 0));
-	e_ews_message_write_string_parameter (msg, "Month", NULL, buffer);
+	e_ews_request_write_string_parameter (request, "Month", NULL, buffer);
 
-	e_ews_message_write_string_parameter (msg, "DayOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
+	e_ews_request_write_string_parameter (request, "DayOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
 
 	g_clear_object (&recur);
 }
 
 static void
-ewscal_add_availability_default_timechange (ESoapMessage *msg)
+ewscal_add_availability_default_timechange (ESoapRequest *request)
 {
 
-	e_soap_message_start_element (msg, "StandardTime", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "Bias", NULL, "0");
-	e_ews_message_write_string_parameter (msg, "Time", NULL, "00:00:00");
-	e_ews_message_write_string_parameter (msg, "DayOrder", NULL, "0");
-	e_ews_message_write_string_parameter (msg, "Month", NULL, "0");
-	e_ews_message_write_string_parameter (msg, "DayOfWeek", NULL, "Sunday");
-	e_soap_message_end_element (msg);
+	e_soap_request_start_element (request, "StandardTime", NULL, NULL);
+	e_ews_request_write_string_parameter (request, "Bias", NULL, "0");
+	e_ews_request_write_string_parameter (request, "Time", NULL, "00:00:00");
+	e_ews_request_write_string_parameter (request, "DayOrder", NULL, "0");
+	e_ews_request_write_string_parameter (request, "Month", NULL, "0");
+	e_ews_request_write_string_parameter (request, "DayOfWeek", NULL, "Sunday");
+	e_soap_request_end_element (request);
 
-	e_soap_message_start_element (msg, "DaylightTime", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "Bias", NULL, "0");
-	e_ews_message_write_string_parameter (msg, "Time", NULL, "00:00:00");
-	e_ews_message_write_string_parameter (msg, "DayOrder", NULL, "0");
-	e_ews_message_write_string_parameter (msg, "Month", NULL, "0");
-	e_ews_message_write_string_parameter (msg, "DayOfWeek", NULL, "Sunday");
-	e_soap_message_end_element (msg);
+	e_soap_request_start_element (request, "DaylightTime", NULL, NULL);
+	e_ews_request_write_string_parameter (request, "Bias", NULL, "0");
+	e_ews_request_write_string_parameter (request, "Time", NULL, "00:00:00");
+	e_ews_request_write_string_parameter (request, "DayOrder", NULL, "0");
+	e_ews_request_write_string_parameter (request, "Month", NULL, "0");
+	e_ews_request_write_string_parameter (request, "DayOfWeek", NULL, "Sunday");
+	e_soap_request_end_element (request);
 }
 
 static void
-ewscal_add_availability_timechange (ESoapMessage *msg,
+ewscal_add_availability_timechange (ESoapRequest *request,
                                     ICalComponent *comp,
                                     gint baseoffs)
 {
@@ -261,7 +261,7 @@ ewscal_add_availability_timechange (ESoapMessage *msg,
 		utcoffs = -i_cal_property_get_tzoffsetto (prop) / 60;
 		utcoffs -= baseoffs;
 		snprintf (buffer, 16, "%d", utcoffs);
-		e_ews_message_write_string_parameter (msg, "Bias", NULL, buffer);
+		e_ews_request_write_string_parameter (request, "Bias", NULL, buffer);
 		g_object_unref (prop);
 	}
 
@@ -269,20 +269,20 @@ ewscal_add_availability_timechange (ESoapMessage *msg,
 	if (prop) {
 		dtstart = i_cal_property_get_dtstart (prop);
 		snprintf (buffer, 16, "%02d:%02d:%02d", i_cal_time_get_hour (dtstart), i_cal_time_get_minute (dtstart), i_cal_time_get_second (dtstart));
-		e_ews_message_write_string_parameter (msg, "Time", NULL, buffer);
+		e_ews_request_write_string_parameter (request, "Time", NULL, buffer);
 		g_object_unref (dtstart);
 		g_object_unref (prop);
 	}
 
 	prop = i_cal_component_get_first_property (comp, I_CAL_RRULE_PROPERTY);
 	if (prop) {
-		ewscal_add_availability_rrule (msg, prop);
+		ewscal_add_availability_rrule (request, prop);
 		g_object_unref (prop);
 	}
 }
 
 static void
-ewscal_set_availability_timezone (ESoapMessage *msg,
+ewscal_set_availability_timezone (ESoapRequest *request,
                                   ICalTimezone *icaltz)
 {
 	ICalComponent *comp;
@@ -304,7 +304,7 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 	}
 
 	/*TimeZone is the root element of GetUserAvailabilityRequest*/
-	e_soap_message_start_element (msg, "TimeZone", NULL, NULL);
+	e_soap_request_start_element (request, "TimeZone", NULL, NULL);
 
 	/* Fetch the timezone offsets for the standard (or only) zone.
 	 * Negate it, because Exchange does it backwards */
@@ -326,24 +326,24 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 	 * to the offset of the Standard zone, and the Offset in the Standard
 	 * zone to zero. So try to avoid problems by doing the same. */
 	offset = g_strdup_printf ("%d", std_utcoffs);
-	e_ews_message_write_string_parameter (msg, "Bias", NULL, offset);
+	e_ews_request_write_string_parameter (request, "Bias", NULL, offset);
 	g_free (offset);
 
 	if (xdaylight) {
 		/* Standard */
-		e_soap_message_start_element (msg, "StandardTime", NULL, NULL);
-		ewscal_add_availability_timechange (msg, xstd, std_utcoffs);
-		e_soap_message_end_element (msg); /* "StandardTime" */
+		e_soap_request_start_element (request, "StandardTime", NULL, NULL);
+		ewscal_add_availability_timechange (request, xstd, std_utcoffs);
+		e_soap_request_end_element (request); /* "StandardTime" */
 
 		/* DayLight */
-		e_soap_message_start_element (msg, "DaylightTime", NULL, NULL);
-		ewscal_add_availability_timechange (msg, xdaylight, std_utcoffs);
-		e_soap_message_end_element (msg); /* "DaylightTime" */
+		e_soap_request_start_element (request, "DaylightTime", NULL, NULL);
+		ewscal_add_availability_timechange (request, xdaylight, std_utcoffs);
+		e_soap_request_end_element (request); /* "DaylightTime" */
 	} else
 		/* Set default values*/
-		ewscal_add_availability_default_timechange (msg);
+		ewscal_add_availability_default_timechange (request);
 
-	e_soap_message_end_element (msg); /* "TimeZone" */
+	e_soap_request_end_element (request); /* "TimeZone" */
 
 	g_clear_object (&comp);
 	g_clear_object (&xstd);
@@ -351,7 +351,7 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 }
 
 gboolean
-e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
+e_ews_cal_utils_prepare_free_busy_request (ESoapRequest *request,
 					   gpointer user_data,
 					   GError **error)
 {
@@ -362,44 +362,44 @@ e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
 
 	g_return_val_if_fail (fbdata != NULL, FALSE);
 
-	ewscal_set_availability_timezone (msg, utc_zone);
+	ewscal_set_availability_timezone (request, utc_zone);
 
-	e_soap_message_start_element (msg, "MailboxDataArray", "messages", NULL);
+	e_soap_request_start_element (request, "MailboxDataArray", "messages", NULL);
 
 	for (link = (GSList *) fbdata->user_mails; link; link = g_slist_next (link)) {
 		const gchar *mail = link->data;
 
-		e_soap_message_start_element (msg, "MailboxData", NULL, NULL);
+		e_soap_request_start_element (request, "MailboxData", NULL, NULL);
 
-		e_soap_message_start_element (msg, "Email", NULL, NULL);
-		e_ews_message_write_string_parameter (msg, "Address", NULL, mail);
-		e_soap_message_end_element (msg); /* "Email" */
+		e_soap_request_start_element (request, "Email", NULL, NULL);
+		e_ews_request_write_string_parameter (request, "Address", NULL, mail);
+		e_soap_request_end_element (request); /* "Email" */
 
-		e_ews_message_write_string_parameter (msg, "AttendeeType", NULL, "Required");
-		e_ews_message_write_string_parameter (msg, "ExcludeConflicts", NULL, "false");
+		e_ews_request_write_string_parameter (request, "AttendeeType", NULL, "Required");
+		e_ews_request_write_string_parameter (request, "ExcludeConflicts", NULL, "false");
 
-		e_soap_message_end_element (msg); /* "MailboxData" */
+		e_soap_request_end_element (request); /* "MailboxData" */
 	}
 
-	e_soap_message_end_element (msg); /* "MailboxDataArray" */
+	e_soap_request_end_element (request); /* "MailboxDataArray" */
 
-	e_soap_message_start_element (msg, "FreeBusyViewOptions", NULL, NULL);
+	e_soap_request_start_element (request, "FreeBusyViewOptions", NULL, NULL);
 
 	t_start = i_cal_time_new_from_timet_with_zone (fbdata->period_start, 0, utc_zone);
 	t_end = i_cal_time_new_from_timet_with_zone (fbdata->period_end, 0, utc_zone);
 
-	e_soap_message_start_element (msg, "TimeWindow", NULL, NULL);
-	e_ews_cal_utils_set_time (msg, "StartTime", t_start, FALSE);
-	e_ews_cal_utils_set_time (msg, "EndTime", t_end, FALSE);
-	e_soap_message_end_element (msg); /* "TimeWindow" */
+	e_soap_request_start_element (request, "TimeWindow", NULL, NULL);
+	e_ews_cal_utils_set_time (request, "StartTime", t_start, FALSE);
+	e_ews_cal_utils_set_time (request, "EndTime", t_end, FALSE);
+	e_soap_request_end_element (request); /* "TimeWindow" */
 
 	g_clear_object (&t_start);
 	g_clear_object (&t_end);
 
-	e_ews_message_write_string_parameter (msg, "MergedFreeBusyIntervalInMinutes", NULL, "60");
-	e_ews_message_write_string_parameter (msg, "RequestedView", NULL, "DetailedMerged");
+	e_ews_request_write_string_parameter (request, "MergedFreeBusyIntervalInMinutes", NULL, "60");
+	e_ews_request_write_string_parameter (request, "RequestedView", NULL, "DetailedMerged");
 
-	e_soap_message_end_element (msg); /* "FreeBusyViewOptions" */
+	e_soap_request_end_element (request); /* "FreeBusyViewOptions" */
 
 	return TRUE;
 }
@@ -425,7 +425,7 @@ ews_get_configured_icaltimezone (void)
 }
 
 void
-e_ews_cal_utils_set_time (ESoapMessage *msg,
+e_ews_cal_utils_set_time (ESoapRequest *request,
 			  const gchar *name,
 			  ICalTime *tt,
 			  gboolean with_timezone)
@@ -478,7 +478,7 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 		i_cal_time_get_second (tt),
 		tz_ident ? tz_ident : "");
 
-	e_ews_message_write_string_parameter (msg, name, NULL, str);
+	e_ews_request_write_string_parameter (request, name, NULL, str);
 
 	g_clear_object (&local_tt);
 	g_free (tz_ident);
@@ -1229,13 +1229,13 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 }
 
 static void
-e_ews_cal_utils_write_days_of_week (ESoapMessage *msg,
+e_ews_cal_utils_write_days_of_week (ESoapRequest *request,
 				    guint32 days_of_week)
 {
 	GString *value;
 	guint32 weekdays, weekenddays;
 
-	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	g_return_if_fail (E_IS_SOAP_REQUEST (request));
 
 	if (days_of_week == E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN)
 		return;
@@ -1288,21 +1288,21 @@ e_ews_cal_utils_write_days_of_week (ESoapMessage *msg,
 	}
 
 	if (value->len) {
-		e_soap_message_start_element (msg, "DaysOfWeek", NULL, NULL);
-		e_soap_message_write_string (msg, value->str);
-		e_soap_message_end_element (msg); /* DaysOfWeek */
+		e_soap_request_start_element (request, "DaysOfWeek", NULL, NULL);
+		e_soap_request_write_string (request, value->str);
+		e_soap_request_end_element (request); /* DaysOfWeek */
 	}
 
 	g_string_free (value, TRUE);
 }
 
 static void
-e_ews_cal_utils_write_day_of_week_index (ESoapMessage *msg,
+e_ews_cal_utils_write_day_of_week_index (ESoapRequest *request,
 					 EEwsRecurrenceDayOfWeekIndex day_of_week_index)
 {
 	const gchar *value = NULL;
 
-	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	g_return_if_fail (E_IS_SOAP_REQUEST (request));
 
 	/* Do not localize, these are values used in XML */
 	switch (day_of_week_index) {
@@ -1326,19 +1326,19 @@ e_ews_cal_utils_write_day_of_week_index (ESoapMessage *msg,
 	}
 
 	if (value) {
-		e_soap_message_start_element (msg, "DayOfWeekIndex", NULL, NULL);
-		e_soap_message_write_string (msg, value);
-		e_soap_message_end_element (msg); /* DayOfWeekIndex */
+		e_soap_request_start_element (request, "DayOfWeekIndex", NULL, NULL);
+		e_soap_request_write_string (request, value);
+		e_soap_request_end_element (request); /* DayOfWeekIndex */
 	}
 }
 
 static void
-e_ews_cal_utils_write_month (ESoapMessage *msg,
+e_ews_cal_utils_write_month (ESoapRequest *request,
 			     GDateMonth month)
 {
 	const gchar *value = NULL;
 
-	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	g_return_if_fail (E_IS_SOAP_REQUEST (request));
 
 	/* Do not localize, these are values used in XML */
 	switch (month) {
@@ -1383,21 +1383,21 @@ e_ews_cal_utils_write_month (ESoapMessage *msg,
 	}
 
 	if (value) {
-		e_soap_message_start_element (msg, "Month", NULL, NULL);
-		e_soap_message_write_string (msg, value);
-		e_soap_message_end_element (msg); /* Month */
+		e_soap_request_start_element (request, "Month", NULL, NULL);
+		e_soap_request_write_string (request, value);
+		e_soap_request_end_element (request); /* Month */
 	}
 }
 
 static void
-e_ews_cal_util_write_utc_date (ESoapMessage *msg,
+e_ews_cal_util_write_utc_date (ESoapRequest *request,
 			       const gchar *name,
 			       time_t utc_date)
 {
 	ICalTime *itt;
 	gchar *value;
 
-	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	g_return_if_fail (E_IS_SOAP_REQUEST (request));
 	g_return_if_fail (name != NULL);
 
 	itt = i_cal_time_new_from_timet_with_zone (utc_date, 1, i_cal_timezone_get_utc_timezone ());
@@ -1407,9 +1407,9 @@ e_ews_cal_util_write_utc_date (ESoapMessage *msg,
 		i_cal_time_get_day (itt));
 	g_clear_object (&itt);
 
-	e_soap_message_start_element (msg, name, NULL, NULL);
-	e_soap_message_write_string (msg, value);
-	e_soap_message_end_element (msg);
+	e_soap_request_start_element (request, name, NULL, NULL);
+	e_soap_request_write_string (request, value);
+	e_soap_request_end_element (request);
 
 	g_free (value);
 }
@@ -1417,14 +1417,14 @@ e_ews_cal_util_write_utc_date (ESoapMessage *msg,
 /* Writes 'Recurrence' element into the @msg. Sets the @error only if the RRULE
    cannot be transformed into Recurrence */
 gboolean
-e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
+e_ews_cal_utils_set_recurrence (ESoapRequest *request,
 				ICalComponent *comp,
 				gboolean server_satisfies_2013,
 				GError **error)
 {
 	EEwsRecurrence recur;
 
-	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), FALSE);
+	g_return_val_if_fail (E_IS_SOAP_REQUEST (request), FALSE);
 	g_return_val_if_fail (comp != NULL, FALSE);
 
 	memset (&recur, 0, sizeof (EEwsRecurrence));
@@ -1440,52 +1440,52 @@ e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
 		return TRUE;
 	}
 
-	e_soap_message_start_element (msg, "Recurrence", NULL, NULL);
+	e_soap_request_start_element (request, "Recurrence", NULL, NULL);
 
 	switch (recur.type) {
 	case E_EWS_RECURRENCE_UNKNOWN:
 		g_warn_if_reached ();
 		break;
 	case E_EWS_RECURRENCE_RELATIVE_YEARLY:
-		e_soap_message_start_element (msg, "RelativeYearlyRecurrence", NULL, NULL);
-		e_ews_cal_utils_write_days_of_week (msg, recur.recur.relative_yearly.days_of_week);
-		e_ews_cal_utils_write_day_of_week_index (msg, recur.recur.relative_yearly.day_of_week_index);
-		e_ews_cal_utils_write_month (msg, recur.recur.relative_yearly.month);
-		e_soap_message_end_element (msg); /* RelativeYearlyRecurrence */
+		e_soap_request_start_element (request, "RelativeYearlyRecurrence", NULL, NULL);
+		e_ews_cal_utils_write_days_of_week (request, recur.recur.relative_yearly.days_of_week);
+		e_ews_cal_utils_write_day_of_week_index (request, recur.recur.relative_yearly.day_of_week_index);
+		e_ews_cal_utils_write_month (request, recur.recur.relative_yearly.month);
+		e_soap_request_end_element (request); /* RelativeYearlyRecurrence */
 		break;
 	case E_EWS_RECURRENCE_ABSOLUTE_YEARLY:
-		e_soap_message_start_element (msg, "AbsoluteYearlyRecurrence", NULL, NULL);
-		e_soap_message_start_element (msg, "DayOfMonth", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.absolute_yearly.day_of_month);
-		e_soap_message_end_element (msg); /* DayOfMonth */
-		e_ews_cal_utils_write_month (msg, recur.recur.absolute_yearly.month);
-		e_soap_message_end_element (msg); /* AbsoluteYearlyRecurrence */
+		e_soap_request_start_element (request, "AbsoluteYearlyRecurrence", NULL, NULL);
+		e_soap_request_start_element (request, "DayOfMonth", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.absolute_yearly.day_of_month);
+		e_soap_request_end_element (request); /* DayOfMonth */
+		e_ews_cal_utils_write_month (request, recur.recur.absolute_yearly.month);
+		e_soap_request_end_element (request); /* AbsoluteYearlyRecurrence */
 		break;
 	case E_EWS_RECURRENCE_RELATIVE_MONTHLY:
-		e_soap_message_start_element (msg, "RelativeMonthlyRecurrence", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.relative_monthly.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_ews_cal_utils_write_days_of_week (msg, recur.recur.relative_monthly.days_of_week);
-		e_ews_cal_utils_write_day_of_week_index (msg, recur.recur.relative_monthly.day_of_week_index);
-		e_soap_message_end_element (msg); /* RelativeMonthlyRecurrence */
+		e_soap_request_start_element (request, "RelativeMonthlyRecurrence", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.relative_monthly.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_ews_cal_utils_write_days_of_week (request, recur.recur.relative_monthly.days_of_week);
+		e_ews_cal_utils_write_day_of_week_index (request, recur.recur.relative_monthly.day_of_week_index);
+		e_soap_request_end_element (request); /* RelativeMonthlyRecurrence */
 		break;
 	case E_EWS_RECURRENCE_ABSOLUTE_MONTHLY:
-		e_soap_message_start_element (msg, "AbsoluteMonthlyRecurrence", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.absolute_monthly.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_soap_message_start_element (msg, "DayOfMonth", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.absolute_monthly.day_of_month);
-		e_soap_message_end_element (msg); /* DayOfMonth */
-		e_soap_message_end_element (msg); /* AbsoluteMonthlyRecurrence */
+		e_soap_request_start_element (request, "AbsoluteMonthlyRecurrence", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.absolute_monthly.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_soap_request_start_element (request, "DayOfMonth", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.absolute_monthly.day_of_month);
+		e_soap_request_end_element (request); /* DayOfMonth */
+		e_soap_request_end_element (request); /* AbsoluteMonthlyRecurrence */
 		break;
 	case E_EWS_RECURRENCE_WEEKLY:
-		e_soap_message_start_element (msg, "WeeklyRecurrence", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.weekly.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_ews_cal_utils_write_days_of_week (msg, recur.recur.weekly.days_of_week);
+		e_soap_request_start_element (request, "WeeklyRecurrence", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.weekly.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_ews_cal_utils_write_days_of_week (request, recur.recur.weekly.days_of_week);
 		if (server_satisfies_2013) {
 			const gchar *value = NULL;
 
@@ -1516,47 +1516,47 @@ e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
 			}
 
 			if (value) {
-				e_soap_message_start_element (msg, "FirstDayOfWeek", NULL, NULL);
-				e_soap_message_write_string (msg, value);
-				e_soap_message_end_element (msg); /* FirstDayOfWeek */
+				e_soap_request_start_element (request, "FirstDayOfWeek", NULL, NULL);
+				e_soap_request_write_string (request, value);
+				e_soap_request_end_element (request); /* FirstDayOfWeek */
 			}
 		}
-		e_soap_message_end_element (msg); /* WeeklyRecurrence */
+		e_soap_request_end_element (request); /* WeeklyRecurrence */
 		break;
 	case E_EWS_RECURRENCE_DAILY:
-		e_soap_message_start_element (msg, "DailyRecurrence", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_soap_message_end_element (msg); /* DailyRecurrence */
+		e_soap_request_start_element (request, "DailyRecurrence", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_soap_request_end_element (request); /* DailyRecurrence */
 		break;
 	case E_EWS_RECURRENCE_DAILY_REGENERATION:
-		e_soap_message_start_element (msg, "DailyRegeneration", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_soap_message_end_element (msg); /* DailyRegeneration */
+		e_soap_request_start_element (request, "DailyRegeneration", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_soap_request_end_element (request); /* DailyRegeneration */
 		break;
 	case E_EWS_RECURRENCE_WEEKLY_REGENERATION:
-		e_soap_message_start_element (msg, "WeeklyRegeneration", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_soap_message_end_element (msg); /* WeeklyRegeneration */
+		e_soap_request_start_element (request, "WeeklyRegeneration", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_soap_request_end_element (request); /* WeeklyRegeneration */
 		break;
 	case E_EWS_RECURRENCE_MONTHLY_REGENERATION:
-		e_soap_message_start_element (msg, "MonthlyRegeneration", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_soap_message_end_element (msg); /* MonthlyRegeneration */
+		e_soap_request_start_element (request, "MonthlyRegeneration", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_soap_request_end_element (request); /* MonthlyRegeneration */
 		break;
 	case E_EWS_RECURRENCE_YEARLY_REGENERATION:
-		e_soap_message_start_element (msg, "YearlyRegeneration", NULL, NULL);
-		e_soap_message_start_element (msg, "Interval", NULL, NULL);
-		e_soap_message_write_int (msg, recur.recur.interval);
-		e_soap_message_end_element (msg); /* Interval */
-		e_soap_message_end_element (msg); /* YearlyRegeneration */
+		e_soap_request_start_element (request, "YearlyRegeneration", NULL, NULL);
+		e_soap_request_start_element (request, "Interval", NULL, NULL);
+		e_soap_request_write_int (request, recur.recur.interval);
+		e_soap_request_end_element (request); /* Interval */
+		e_soap_request_end_element (request); /* YearlyRegeneration */
 		break;
 	}
 
@@ -1565,27 +1565,27 @@ e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
 		g_warn_if_reached ();
 		break;
 	case E_EWS_RECURRENCE_END_NO_END:
-		e_soap_message_start_element (msg, "NoEndRecurrence", NULL, NULL);
-		e_ews_cal_util_write_utc_date (msg, "StartDate", recur.utc_start_date);
-		e_soap_message_end_element (msg); /* NoEndRecurrence */
+		e_soap_request_start_element (request, "NoEndRecurrence", NULL, NULL);
+		e_ews_cal_util_write_utc_date (request, "StartDate", recur.utc_start_date);
+		e_soap_request_end_element (request); /* NoEndRecurrence */
 		break;
 	case E_EWS_RECURRENCE_END_DATE:
-		e_soap_message_start_element (msg, "EndDateRecurrence", NULL, NULL);
-		e_ews_cal_util_write_utc_date (msg, "StartDate", recur.utc_start_date);
-		e_ews_cal_util_write_utc_date (msg, "EndDate", recur.end.utc_end_date);
-		e_soap_message_end_element (msg); /* EndDateRecurrence */
+		e_soap_request_start_element (request, "EndDateRecurrence", NULL, NULL);
+		e_ews_cal_util_write_utc_date (request, "StartDate", recur.utc_start_date);
+		e_ews_cal_util_write_utc_date (request, "EndDate", recur.end.utc_end_date);
+		e_soap_request_end_element (request); /* EndDateRecurrence */
 		break;
 	case E_EWS_RECURRENCE_END_NUMBERED:
-		e_soap_message_start_element (msg, "NumberedRecurrence", NULL, NULL);
-		e_ews_cal_util_write_utc_date (msg, "StartDate", recur.utc_start_date);
-		e_soap_message_start_element (msg, "NumberOfOccurrences", NULL, NULL);
-		e_soap_message_write_int (msg, recur.end.number_of_occurrences);
-		e_soap_message_end_element (msg); /* NumberOfOccurrences */
-		e_soap_message_end_element (msg); /* NumberedRecurrence */
+		e_soap_request_start_element (request, "NumberedRecurrence", NULL, NULL);
+		e_ews_cal_util_write_utc_date (request, "StartDate", recur.utc_start_date);
+		e_soap_request_start_element (request, "NumberOfOccurrences", NULL, NULL);
+		e_soap_request_write_int (request, recur.end.number_of_occurrences);
+		e_soap_request_end_element (request); /* NumberOfOccurrences */
+		e_soap_request_end_element (request); /* NumberedRecurrence */
 		break;
 	}
 
-	e_soap_message_end_element (msg); /* Recurrence */
+	e_soap_request_end_element (request); /* Recurrence */
 
 	return TRUE;
 }

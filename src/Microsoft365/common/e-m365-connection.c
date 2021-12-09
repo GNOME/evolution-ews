@@ -34,14 +34,9 @@ struct _EM365ConnectionPrivate {
 	CamelM365Settings *settings;
 	SoupSession *soup_session;
 	GProxyResolver *proxy_resolver;
-	ESoupAuthBearer *bearer_auth;
 
 	gchar *user; /* The default user for the URL */
 	gchar *impersonate_user;
-
-	gboolean ssl_info_set;
-	gchar *ssl_certificate_pem;
-	GTlsCertificateFlags ssl_certificate_errors;
 
 	gchar *hash_key; /* in the opened connections hash */
 
@@ -49,6 +44,8 @@ struct _EM365ConnectionPrivate {
 	   This is to cover throttling and server unavailable responses.
 	   https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
 	gint64 backoff_for_usec;
+
+	guint concurrent_connections;
 };
 
 enum {
@@ -78,248 +75,6 @@ m365_log_enabled (void)
 	return log_enabled == 1;
 }
 
-static SoupSession *
-m365_connection_ref_soup_session (EM365Connection *cnc)
-{
-	SoupSession *soup_session = NULL;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), NULL);
-
-	LOCK (cnc);
-
-	if (cnc->priv->soup_session)
-		soup_session = g_object_ref (cnc->priv->soup_session);
-
-	UNLOCK (cnc);
-
-	return soup_session;
-}
-
-static void
-m365_connection_utils_ensure_bearer_auth_usage (SoupSession *session,
-						SoupMessage *message,
-						ESoupAuthBearer *bearer)
-{
-	SoupAuthManager *auth_manager;
-	SoupSessionFeature *feature;
-	SoupURI *soup_uri;
-
-	g_return_if_fail (SOUP_IS_SESSION (session));
-
-	/* Preload the SoupAuthManager with a valid "Bearer" token
-	 * when using OAuth 2.0. This avoids an extra unauthorized
-	 * HTTP round-trip, which apparently Google doesn't like. */
-
-	feature = soup_session_get_feature (SOUP_SESSION (session), SOUP_TYPE_AUTH_MANAGER);
-
-	if (!soup_session_feature_has_feature (feature, E_TYPE_SOUP_AUTH_BEARER)) {
-		/* Add the "Bearer" auth type to support OAuth 2.0. */
-		soup_session_feature_add_feature (feature, E_TYPE_SOUP_AUTH_BEARER);
-	}
-
-	soup_uri = message ? soup_message_get_uri (message) : NULL;
-	if (soup_uri && soup_uri->host && *soup_uri->host) {
-		soup_uri = soup_uri_copy_host (soup_uri);
-	} else {
-		soup_uri = NULL;
-	}
-
-	g_return_if_fail (soup_uri != NULL);
-
-	auth_manager = SOUP_AUTH_MANAGER (feature);
-
-	/* This will make sure the 'bearer' is used regardless of the current 'auth_manager' state.
-	   See https://gitlab.gnome.org/GNOME/libsoup/-/issues/196 for more information. */
-	soup_auth_manager_clear_cached_credentials (auth_manager);
-	soup_auth_manager_use_auth (auth_manager, soup_uri, SOUP_AUTH (bearer));
-
-	soup_uri_free (soup_uri);
-}
-
-static gboolean
-m365_connection_utils_setup_bearer_auth (EM365Connection *cnc,
-					 SoupSession *session,
-					 SoupMessage *message,
-					 gboolean is_in_authenticate_handler,
-					 ESoupAuthBearer *bearer,
-					 GCancellable *cancellable,
-					 GError **error)
-{
-	ESource *source;
-	gchar *access_token = NULL;
-	gint expires_in_seconds = -1;
-	gboolean success = FALSE;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (E_IS_SOUP_AUTH_BEARER (bearer), FALSE);
-
-	source = e_m365_connection_get_source (cnc);
-
-	success = e_source_get_oauth2_access_token_sync (source, cancellable,
-		&access_token, &expires_in_seconds, error);
-
-	if (success) {
-		e_soup_auth_bearer_set_access_token (bearer, access_token, expires_in_seconds);
-
-		if (!is_in_authenticate_handler) {
-			if (session)
-				g_object_ref (session);
-			else
-				session = m365_connection_ref_soup_session (cnc);
-
-			m365_connection_utils_ensure_bearer_auth_usage (session, message, bearer);
-
-			g_clear_object (&session);
-		}
-	}
-
-	g_free (access_token);
-
-	return success;
-}
-
-static gboolean
-m365_connection_utils_prepare_bearer_auth (EM365Connection *cnc,
-					   SoupSession *session,
-					   SoupMessage *message,
-					   GCancellable *cancellable)
-{
-	ESource *source;
-	ESoupAuthBearer *using_bearer_auth;
-	gboolean success;
-	GError *local_error = NULL;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-
-	source = e_m365_connection_get_source (cnc);
-	if (!source)
-		return TRUE;
-
-	using_bearer_auth = e_m365_connection_ref_bearer_auth (cnc);
-	if (using_bearer_auth) {
-		success = m365_connection_utils_setup_bearer_auth (cnc, session, message, FALSE, using_bearer_auth, cancellable, &local_error);
-		g_clear_object (&using_bearer_auth);
-	} else {
-		SoupAuth *soup_auth;
-		SoupURI *soup_uri;
-
-		soup_uri = message ? soup_message_get_uri (message) : NULL;
-		if (soup_uri && soup_uri->host && *soup_uri->host) {
-			soup_uri = soup_uri_copy_host (soup_uri);
-		} else {
-			soup_uri = NULL;
-		}
-
-		g_warn_if_fail (soup_uri != NULL);
-
-		if (!soup_uri) {
-			soup_message_set_status_full (message, SOUP_STATUS_MALFORMED, "Cannot get host from message");
-			return FALSE;
-		}
-
-		soup_auth = g_object_new (E_TYPE_SOUP_AUTH_BEARER, SOUP_AUTH_HOST, soup_uri->host, NULL);
-
-		success = m365_connection_utils_setup_bearer_auth (cnc, session, message, FALSE, E_SOUP_AUTH_BEARER (soup_auth), cancellable, &local_error);
-		if (success)
-			e_m365_connection_set_bearer_auth (cnc, E_SOUP_AUTH_BEARER (soup_auth));
-
-		g_object_unref (soup_auth);
-		soup_uri_free (soup_uri);
-	}
-
-	if (!success) {
-		if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-			soup_message_set_status (message, SOUP_STATUS_CANCELLED);
-		else if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CONNECTION_REFUSED) ||
-			 g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-			soup_message_set_status_full (message, SOUP_STATUS_UNAUTHORIZED, local_error->message);
-		else
-			soup_message_set_status_full (message, SOUP_STATUS_MALFORMED, local_error ? local_error->message : _("Unknown error"));
-	}
-
-	g_clear_error (&local_error);
-
-	return success;
-}
-
-static void
-m365_connection_authenticate (SoupSession *session,
-			      SoupMessage *msg,
-			      SoupAuth *auth,
-			      gboolean retrying,
-			      gpointer user_data)
-{
-	EM365Connection *cnc = user_data;
-	ESoupAuthBearer *using_bearer_auth;
-	GError *local_error = NULL;
-
-	g_return_if_fail (E_IS_M365_CONNECTION (cnc));
-
-	using_bearer_auth = e_m365_connection_ref_bearer_auth (cnc);
-
-	if (E_IS_SOUP_AUTH_BEARER (auth)) {
-		g_object_ref (auth);
-		g_warn_if_fail ((gpointer) using_bearer_auth == (gpointer) auth);
-
-		g_clear_object (&using_bearer_auth);
-		using_bearer_auth = E_SOUP_AUTH_BEARER (auth);
-
-		e_m365_connection_set_bearer_auth (cnc, using_bearer_auth);
-	}
-
-	if (!using_bearer_auth) {
-		g_warn_if_reached ();
-		return;
-	}
-
-	m365_connection_utils_setup_bearer_auth (cnc, session, msg, TRUE, E_SOUP_AUTH_BEARER (auth), NULL, &local_error);
-
-	if (local_error)
-		soup_message_set_status_full (msg, SOUP_STATUS_MALFORMED, local_error->message);
-
-	g_object_unref (using_bearer_auth);
-	g_clear_error (&local_error);
-}
-
-static gboolean
-m365_connection_utils_prepare_message (EM365Connection *cnc,
-				       SoupSession *session,
-				       SoupMessage *message,
-				       GCancellable *cancellable)
-{
-	ESoupAuthBearer *using_bearer_auth;
-	ESource *source;
-	GError *local_error = NULL;
-
-	source = e_m365_connection_get_source (cnc);
-	if (source)
-		e_soup_ssl_trust_connect (message, source);
-
-	if (!m365_connection_utils_prepare_bearer_auth (cnc, session, message, cancellable))
-		return FALSE;
-
-	using_bearer_auth = e_m365_connection_ref_bearer_auth (cnc);
-
-	if (using_bearer_auth &&
-	    e_soup_auth_bearer_is_expired (using_bearer_auth) &&
-	    !m365_connection_utils_setup_bearer_auth (cnc, session, message, FALSE, using_bearer_auth, cancellable, &local_error)) {
-		if (local_error) {
-			soup_message_set_status_full (message, SOUP_STATUS_BAD_REQUEST, local_error->message);
-			g_clear_error (&local_error);
-		} else {
-			soup_message_set_status (message, SOUP_STATUS_BAD_REQUEST);
-		}
-
-		g_object_unref (using_bearer_auth);
-
-		return FALSE;
-	}
-
-	g_clear_object (&using_bearer_auth);
-
-	return TRUE;
-}
-
 static void
 m365_connection_set_settings (EM365Connection *cnc,
 			      CamelM365Settings *settings)
@@ -347,6 +102,12 @@ m365_connection_set_settings (EM365Connection *cnc,
 		cnc->priv->settings, "impersonate-user",
 		cnc, "impersonate-user",
 		G_BINDING_DEFAULT);
+
+	e_binding_bind_property (
+		cnc->priv->settings, "concurrent-connections",
+		cnc, "concurrent-connections",
+		G_BINDING_DEFAULT |
+		G_BINDING_SYNC_CREATE);
 }
 
 static void
@@ -516,8 +277,14 @@ m365_connection_constructed (GObject *object)
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_m365_connection_parent_class)->constructed (object);
 
+	cnc->priv->soup_session = g_object_new (E_TYPE_SOUP_SESSION,
+		"source", cnc->priv->source,
+		"max-conns", cnc->priv->concurrent_connections,
+		"max-conns-per-host", cnc->priv->concurrent_connections,
+		NULL);
+
 	if (m365_log_enabled ()) {
-		SoupLogger *logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
+		SoupLogger *logger = soup_logger_new (SOUP_LOGGER_LOG_BODY);
 
 		soup_session_add_feature (cnc->priv->soup_session, SOUP_SESSION_FEATURE (logger));
 
@@ -526,11 +293,12 @@ m365_connection_constructed (GObject *object)
 
 	soup_session_add_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_COOKIE_JAR);
 	soup_session_add_feature_by_type (cnc->priv->soup_session, E_TYPE_SOUP_AUTH_BEARER);
-	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_BASIC);
 
-	g_signal_connect (
-		cnc->priv->soup_session, "authenticate",
-		G_CALLBACK (m365_connection_authenticate), cnc);
+	/* This can use only OAuth2 authentication, which should be set on the ESource */
+	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_BASIC);
+	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NTLM);
+	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NEGOTIATE);
+	soup_session_add_feature_by_type (cnc->priv->soup_session, E_TYPE_SOUP_AUTH_BEARER);
 
 	cnc->priv->hash_key = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (cnc->priv->settings));
 
@@ -538,8 +306,13 @@ m365_connection_constructed (GObject *object)
 		cnc->priv->hash_key = g_strdup ("no-user");
 
 	e_binding_bind_property (
+		cnc, "proxy-resolver",
+		cnc->priv->soup_session, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
 		cnc->priv->settings, "timeout",
-		cnc->priv->soup_session, SOUP_SESSION_TIMEOUT,
+		cnc->priv->soup_session, "timeout",
 		G_BINDING_SYNC_CREATE);
 }
 
@@ -564,17 +337,10 @@ m365_connection_dispose (GObject *object)
 
 	LOCK (cnc);
 
-	if (cnc->priv->soup_session) {
-		g_signal_handlers_disconnect_by_func (
-			cnc->priv->soup_session,
-			m365_connection_authenticate, object);
-	}
-
 	g_clear_object (&cnc->priv->source);
 	g_clear_object (&cnc->priv->settings);
 	g_clear_object (&cnc->priv->soup_session);
 	g_clear_object (&cnc->priv->proxy_resolver);
-	g_clear_object (&cnc->priv->bearer_auth);
 
 	UNLOCK (cnc);
 
@@ -588,7 +354,6 @@ m365_connection_finalize (GObject *object)
 	EM365Connection *cnc = E_M365_CONNECTION (object);
 
 	g_rec_mutex_clear (&cnc->priv->property_lock);
-	g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
 	g_clear_pointer (&cnc->priv->user, g_free);
 	g_clear_pointer (&cnc->priv->impersonate_user, g_free);
 	g_free (cnc->priv->hash_key);
@@ -701,24 +466,38 @@ e_m365_connection_init (EM365Connection *cnc)
 	g_rec_mutex_init (&cnc->priv->property_lock);
 
 	cnc->priv->backoff_for_usec = 0;
-	cnc->priv->soup_session = soup_session_new_with_options (
-		SOUP_SESSION_TIMEOUT, 90,
-		SOUP_SESSION_SSL_STRICT, TRUE,
-		SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
-		NULL);
-
-	/* Do not use G_BINDING_SYNC_CREATE, because we don't have a GProxyResolver yet anyway. */
-	e_binding_bind_property (
-		cnc, "proxy-resolver",
-		cnc->priv->soup_session, "proxy-resolver",
-		G_BINDING_DEFAULT);
 }
 
 gboolean
 e_m365_connection_util_delta_token_failed (const GError *error)
 {
-	return g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
-	       g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_BAD_REQUEST);
+	return g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+	       g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_BAD_REQUEST);
+}
+
+void
+e_m365_connection_util_set_message_status_code (SoupMessage *message,
+						gint status_code)
+{
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+	g_object_set_data (G_OBJECT (message), "m365-batch-status-code",
+		GINT_TO_POINTER (status_code));
+}
+
+gint
+e_m365_connection_util_get_message_status_code (SoupMessage *message)
+{
+	gint status_code;
+
+	g_return_val_if_fail (SOUP_IS_MESSAGE (message), -1);
+
+	status_code = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (message), "m365-batch-status-code"));
+
+	if (!status_code)
+		status_code = soup_message_get_status (message);
+
+	return status_code;
 }
 
 EM365Connection *
@@ -834,17 +613,9 @@ e_m365_connection_get_settings (EM365Connection *cnc)
 guint
 e_m365_connection_get_concurrent_connections (EM365Connection *cnc)
 {
-	guint current_cc = 0;
-
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), 1);
 
-	LOCK (cnc);
-
-	g_object_get (G_OBJECT (cnc->priv->soup_session), SOUP_SESSION_MAX_CONNS, &current_cc, NULL);
-
-	UNLOCK (cnc);
-
-	return current_cc;
+	return cnc->priv->concurrent_connections;
 }
 
 void
@@ -862,14 +633,9 @@ e_m365_connection_set_concurrent_connections (EM365Connection *cnc,
 	if (current_cc == concurrent_connections)
 		return;
 
-	LOCK (cnc);
-
-	g_object_set (G_OBJECT (cnc->priv->soup_session),
-		SOUP_SESSION_MAX_CONNS, concurrent_connections,
-		SOUP_SESSION_MAX_CONNS_PER_HOST, concurrent_connections,
-		NULL);
-
-	UNLOCK (cnc);
+	/* Will be updated in the priv->soup_session the next time it's created,
+	   because "max-conns" is a construct-only property */
+	cnc->priv->concurrent_connections = concurrent_connections;
 
 	g_object_notify (G_OBJECT (cnc), "concurrent-connections");
 }
@@ -921,43 +687,6 @@ e_m365_connection_set_proxy_resolver (EM365Connection *cnc,
 		g_object_notify (G_OBJECT (cnc), "proxy-resolver");
 }
 
-ESoupAuthBearer *
-e_m365_connection_ref_bearer_auth (EM365Connection *cnc)
-{
-	ESoupAuthBearer *res = NULL;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), NULL);
-
-	LOCK (cnc);
-
-	if (cnc->priv->bearer_auth)
-		res = g_object_ref (cnc->priv->bearer_auth);
-
-	UNLOCK (cnc);
-
-	return res;
-}
-
-void
-e_m365_connection_set_bearer_auth (EM365Connection *cnc,
-				   ESoupAuthBearer *bearer_auth)
-{
-	g_return_if_fail (E_IS_M365_CONNECTION (cnc));
-
-	LOCK (cnc);
-
-	if (cnc->priv->bearer_auth != bearer_auth) {
-		g_clear_object (&cnc->priv->bearer_auth);
-
-		cnc->priv->bearer_auth = bearer_auth;
-
-		if (cnc->priv->bearer_auth)
-			g_object_ref (cnc->priv->bearer_auth);
-	}
-
-	UNLOCK (cnc);
-}
-
 static void
 m365_connection_request_cancelled_cb (GCancellable *cancellable,
 				      gpointer user_data)
@@ -967,35 +696,6 @@ m365_connection_request_cancelled_cb (GCancellable *cancellable,
 	g_return_if_fail (flag != NULL);
 
 	e_flag_set (flag);
-}
-
-static void
-m365_connection_extract_ssl_data (EM365Connection *cnc,
-				  SoupMessage *message)
-{
-	GTlsCertificate *certificate = NULL;
-
-	g_return_if_fail (E_IS_M365_CONNECTION (cnc));
-	g_return_if_fail (SOUP_IS_MESSAGE (message));
-
-	LOCK (cnc);
-
-	g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
-	cnc->priv->ssl_info_set = FALSE;
-
-	g_object_get (G_OBJECT (message),
-		"tls-certificate", &certificate,
-		"tls-errors", &cnc->priv->ssl_certificate_errors,
-		NULL);
-
-	if (certificate) {
-		g_object_get (certificate, "certificate-pem", &cnc->priv->ssl_certificate_pem, NULL);
-		cnc->priv->ssl_info_set = TRUE;
-
-		g_object_unref (certificate);
-	}
-
-	UNLOCK (cnc);
 }
 
 /* An example error response:
@@ -1018,6 +718,7 @@ m365_connection_extract_error (JsonNode *node,
 			       GError **error)
 {
 	JsonObject *object;
+	GQuark domain = E_SOUP_SESSION_ERROR;
 	const gchar *code, *message;
 
 	if (!node || !JSON_NODE_HOLDS_OBJECT (node))
@@ -1034,15 +735,17 @@ m365_connection_extract_error (JsonNode *node,
 	if (!code && !message)
 		return FALSE;
 
-	if (!status_code || SOUP_STATUS_IS_SUCCESSFUL (status_code))
-		status_code = SOUP_STATUS_MALFORMED;
-	else if (g_strcmp0 (code, "ErrorInvalidUser") == 0)
+	if (!status_code || status_code == -1 || SOUP_STATUS_IS_SUCCESSFUL (status_code)) {
+		domain = G_IO_ERROR;
+		status_code = G_IO_ERROR_INVALID_DATA;
+	} else if (g_strcmp0 (code, "ErrorInvalidUser") == 0) {
 		status_code = SOUP_STATUS_UNAUTHORIZED;
+	}
 
 	if (code && message)
-		g_set_error (error, SOUP_HTTP_ERROR, status_code, "%s: %s", code, message);
+		g_set_error (error, domain, status_code, "%s: %s", code, message);
 	else
-		g_set_error_literal (error, SOUP_HTTP_ERROR, status_code, code ? code : message);
+		g_set_error_literal (error, domain, status_code, code ? code : message);
 
 	return TRUE;
 }
@@ -1079,11 +782,12 @@ e_m365_connection_json_node_from_message (SoupMessage *message,
 	if (message_json_object) {
 		*out_node = json_node_init_object (json_node_new (JSON_NODE_OBJECT), message_json_object);
 
-		success = !m365_connection_extract_error (*out_node, message->status_code, &local_error);
+		success = !m365_connection_extract_error (*out_node, e_m365_connection_util_get_message_status_code (message), &local_error);
 	} else {
 		const gchar *content_type;
 
-		content_type = message->response_headers ? soup_message_headers_get_content_type (message->response_headers, NULL) : NULL;
+		content_type = soup_message_get_response_headers (message) ?
+			soup_message_headers_get_content_type (soup_message_get_response_headers (message), NULL) : NULL;
 
 		if (content_type && g_ascii_strcasecmp (content_type, "application/json") == 0) {
 			JsonParser *json_parser;
@@ -1093,24 +797,15 @@ e_m365_connection_json_node_from_message (SoupMessage *message,
 			if (input_stream) {
 				success = json_parser_load_from_stream (json_parser, input_stream, cancellable, error);
 			} else {
-				SoupBuffer *sbuffer;
-
-				sbuffer = soup_message_body_flatten (message->response_body);
-
-				if (sbuffer) {
-					success = json_parser_load_from_data (json_parser, sbuffer->data, sbuffer->length, error);
-					soup_buffer_free (sbuffer);
-				} else {
-					/* This should not happen, it's for safety check only, thus the string is not localized */
-					success = FALSE;
-					g_set_error_literal (&local_error, G_IO_ERROR, G_IO_ERROR_FAILED, "No JSON data found");
-				}
+				/* This should not happen, it's for safety check only, thus the string is not localized */
+				success = FALSE;
+				g_set_error_literal (&local_error, G_IO_ERROR, G_IO_ERROR_FAILED, "No JSON data found");
 			}
 
 			if (success) {
 				*out_node = json_parser_steal_root (json_parser);
 
-				success = !m365_connection_extract_error (*out_node, message->status_code, &local_error);
+				success = !m365_connection_extract_error (*out_node, e_m365_connection_util_get_message_status_code (message), &local_error);
 			}
 
 			g_object_unref (json_parser);
@@ -1139,15 +834,15 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 {
 	SoupSession *soup_session;
 	gint need_retry_seconds = 5;
-	gboolean success = FALSE, need_retry = TRUE;
 	gboolean did_io_error_retry = FALSE;
+	gboolean success = FALSE, need_retry = TRUE;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
 	g_return_val_if_fail (response_func != NULL || raw_data_func != NULL, FALSE);
 	g_return_val_if_fail (response_func == NULL || raw_data_func == NULL, FALSE);
 
-	while (need_retry && !g_cancellable_is_cancelled (cancellable) && message->status_code != SOUP_STATUS_CANCELLED) {
+	while (need_retry && !g_cancellable_is_cancelled (cancellable)) {
 		need_retry = FALSE;
 
 		LOCK (cnc);
@@ -1168,7 +863,7 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 					flag, NULL);
 			}
 
-			while (wait_ms > 0 && !g_cancellable_is_cancelled (cancellable) && message->status_code != SOUP_STATUS_CANCELLED) {
+			while (wait_ms > 0 && !g_cancellable_is_cancelled (cancellable)) {
 				gint64 now = g_get_monotonic_time ();
 				gint left_minutes, left_seconds;
 
@@ -1215,50 +910,49 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 		if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
 			UNLOCK (cnc);
 
-			soup_message_set_status (message, SOUP_STATUS_CANCELLED);
+			e_m365_connection_util_set_message_status_code (message, -1);
 
 			return FALSE;
 		}
 
 		soup_session = cnc->priv->soup_session ? g_object_ref (cnc->priv->soup_session) : NULL;
 
-		g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
-		cnc->priv->ssl_certificate_errors = 0;
-		cnc->priv->ssl_info_set = FALSE;
-
 		UNLOCK (cnc);
 
-		if (soup_session &&
-		    m365_connection_utils_prepare_message (cnc, soup_session, message, cancellable)) {
+		if (soup_session) {
 			GInputStream *input_stream;
+			GError *local_error = NULL;
+			gboolean is_io_error;
 
-			input_stream = soup_session_send (soup_session, message, cancellable, error);
+			input_stream = e_soup_session_send_message_sync (E_SOUP_SESSION (soup_session), message, cancellable, &local_error);
 
 			success = input_stream != NULL;
+			is_io_error = !did_io_error_retry && g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_PARTIAL_INPUT);
 
-			if (success && m365_log_enabled ())
-				input_stream = e_soup_logger_attach (message, input_stream);
+			if (local_error) {
+				g_propagate_error (error, local_error);
+				local_error = NULL;
+			}
 
-			if ((!did_io_error_retry && message->status_code == SOUP_STATUS_IO_ERROR) ||
+			if (is_io_error ||
 			    /* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
-			    message->status_code == 429 ||
+			    e_m365_connection_util_get_message_status_code (message) == 429 ||
 			    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
-			    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
-				did_io_error_retry = did_io_error_retry || message->status_code == SOUP_STATUS_IO_ERROR;
+			    e_m365_connection_util_get_message_status_code (message) == SOUP_STATUS_SERVICE_UNAVAILABLE) {
+				did_io_error_retry = did_io_error_retry || is_io_error;
 				need_retry = TRUE;
-			} else if (message->status_code == SOUP_STATUS_SSL_FAILED) {
-				m365_connection_extract_ssl_data (cnc, message);
 			}
 
 			if (need_retry) {
 				const gchar *retry_after_str;
 				gint64 retry_after;
 
-				retry_after_str = message->response_headers ? soup_message_headers_get_one (message->response_headers, "Retry-After") : NULL;
+				retry_after_str = soup_message_get_response_headers (message) ?
+					soup_message_headers_get_one (soup_message_get_response_headers (message), "Retry-After") : NULL;
 
 				if (retry_after_str && *retry_after_str)
 					retry_after = g_ascii_strtoll (retry_after_str, NULL, 10);
-				else if (message->status_code == SOUP_STATUS_IO_ERROR)
+				else if (is_io_error)
 					retry_after = M365_RETRY_IO_ERROR_SECONDS;
 				else
 					retry_after = 0;
@@ -1273,13 +967,13 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 				if (cnc->priv->backoff_for_usec < need_retry_seconds * G_USEC_PER_SEC)
 					cnc->priv->backoff_for_usec = need_retry_seconds * G_USEC_PER_SEC;
 
-				if (message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE)
+				if (e_m365_connection_util_get_message_status_code (message) == SOUP_STATUS_SERVICE_UNAVAILABLE)
 					soup_session_abort (soup_session);
 
 				UNLOCK (cnc);
 
 				success = FALSE;
-			} else if (success && raw_data_func && SOUP_STATUS_IS_SUCCESSFUL (message->status_code)) {
+			} else if (success && raw_data_func && SOUP_STATUS_IS_SUCCESSFUL (e_m365_connection_util_get_message_status_code (message))) {
 				success = raw_data_func (cnc, message, input_stream, func_user_data, cancellable, error);
 			} else if (success) {
 				JsonNode *node = NULL;
@@ -1292,30 +986,29 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 					success = response_func && response_func (cnc, message, input_stream, node, func_user_data, &next_link, cancellable, error);
 
 					if (success && next_link && *next_link) {
-						SoupURI *suri;
+						GUri *uri;
 
-						suri = soup_uri_new (next_link);
+						uri = g_uri_parse (next_link, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
 
 						/* Check whether the server returned correct nextLink URI */
-						g_warn_if_fail (suri != NULL);
+						g_warn_if_fail (uri != NULL);
 
-						if (suri) {
+						if (uri) {
 							need_retry = TRUE;
 
-							soup_message_set_uri (message, suri);
-							soup_uri_free (suri);
+							soup_message_set_uri (message, uri);
+							g_uri_unref (uri);
 						}
 					}
 
 					g_free (next_link);
-				} else if (error && !*error && message->status_code && !SOUP_STATUS_IS_SUCCESSFUL (message->status_code)) {
-					if (message->status_code == SOUP_STATUS_CANCELLED) {
-						g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-							message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
-					} else {
-						g_set_error_literal (error, SOUP_HTTP_ERROR, message->status_code,
-							message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
-					}
+				} else if (error && !*error && e_m365_connection_util_get_message_status_code (message) && !SOUP_STATUS_IS_SUCCESSFUL (e_m365_connection_util_get_message_status_code (message))) {
+					if (e_m365_connection_util_get_message_status_code (message) == -1)
+						g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, _("Invalid data"));
+					else
+						g_set_error_literal (error, E_SOUP_SESSION_ERROR, e_m365_connection_util_get_message_status_code (message),
+							soup_message_get_reason_phrase (message) ? soup_message_get_reason_phrase (message) :
+							soup_status_get_phrase (e_m365_connection_util_get_message_status_code (message)));
 				}
 
 				if (node)
@@ -1324,15 +1017,14 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 
 			g_clear_object (&input_stream);
 		} else {
-			if (!message->status_code)
-				soup_message_set_status (message, SOUP_STATUS_CANCELLED);
-
-			if (message->status_code == SOUP_STATUS_CANCELLED) {
-				g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-					message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+			if (!e_m365_connection_util_get_message_status_code (message)) {
+				g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED, _("Operation was cancelled"));
+			} else if (e_m365_connection_util_get_message_status_code (message) == -1) {
+				g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, _("Invalid data"));
 			} else {
-				g_set_error_literal (error, SOUP_HTTP_ERROR, message->status_code,
-					message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+				g_set_error_literal (error, E_SOUP_SESSION_ERROR, e_m365_connection_util_get_message_status_code (message),
+					soup_message_get_reason_phrase (message) ? soup_message_get_reason_phrase (message) :
+					soup_status_get_phrase (e_m365_connection_util_get_message_status_code (message)));
 			}
 		}
 
@@ -1388,7 +1080,7 @@ e_m365_read_to_byte_array_cb (EM365Connection *cnc,
 	if (!*out_byte_array) {
 		goffset content_length;
 
-		content_length = soup_message_headers_get_content_length (message->response_headers);
+		content_length = soup_message_headers_get_content_length (soup_message_get_response_headers (message));
 
 		if (!content_length || content_length > 65536)
 			content_length = 65535;
@@ -1514,44 +1206,22 @@ m365_connection_new_soup_message (const gchar *method,
 	message = soup_message_new (method, uri);
 
 	if (message) {
-		soup_message_headers_append (message->request_headers, "Connection", "Close");
-		soup_message_headers_append (message->request_headers, "User-Agent", "Evolution-M365/" VERSION);
+		SoupMessageHeaders *request_headers = soup_message_get_request_headers (message);
+
+		soup_message_headers_append (request_headers, "Connection", "Close");
+		soup_message_headers_append (request_headers, "User-Agent", "Evolution-M365/" VERSION);
 
 		/* Disable caching for proxies (RFC 4918, section 10.4.5) */
-		soup_message_headers_append (message->request_headers, "Cache-Control", "no-cache");
-		soup_message_headers_append (message->request_headers, "Pragma", "no-cache");
+		soup_message_headers_append (request_headers, "Cache-Control", "no-cache");
+		soup_message_headers_append (request_headers, "Pragma", "no-cache");
 
 		if ((csm_flags & CSM_DISABLE_RESPONSE) != 0)
-			soup_message_headers_append (message->request_headers, "Prefer", "return=minimal");
+			soup_message_headers_append (request_headers, "Prefer", "return=minimal");
 	} else {
-		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+		g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, _("Malformed URI: “%s”"), uri);
 	}
 
 	return message;
-}
-
-gboolean
-e_m365_connection_get_ssl_error_details (EM365Connection *cnc,
-					 gchar **out_certificate_pem,
-					 GTlsCertificateFlags *out_certificate_errors)
-{
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (out_certificate_pem != NULL, FALSE);
-	g_return_val_if_fail (out_certificate_errors != NULL, FALSE);
-
-	LOCK (cnc);
-
-	if (!cnc->priv->ssl_info_set) {
-		UNLOCK (cnc);
-		return FALSE;
-	}
-
-	*out_certificate_pem = g_strdup (cnc->priv->ssl_certificate_pem);
-	*out_certificate_errors = cnc->priv->ssl_certificate_errors;
-
-	UNLOCK (cnc);
-
-	return TRUE;
 }
 
 ESourceAuthenticationResult
@@ -1606,35 +1276,22 @@ e_m365_connection_authenticate_sync (EM365Connection *cnc,
 	if (success) {
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
 	} else {
-		if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_CANCELLED)) {
-			local_error->domain = G_IO_ERROR;
-			local_error->code = G_IO_ERROR_CANCELLED;
-		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+		if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			/* Nothing to do */
+		} else if (e_soup_session_get_ssl_error_details (E_SOUP_SESSION (cnc->priv->soup_session), out_certificate_pem, out_certificate_errors)) {
 			result = E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED;
+		} else if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+			LOCK (cnc);
 
-			if (out_certificate_pem || out_certificate_errors)
-				e_m365_connection_get_ssl_error_details (cnc, out_certificate_pem, out_certificate_errors);
-		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
-			ESoupAuthBearer *bearer;
-
-			bearer = e_m365_connection_ref_bearer_auth (cnc);
-
-			if (bearer) {
-				LOCK (cnc);
-
-				if (cnc->priv->impersonate_user) {
-					g_propagate_error (error, local_error);
-					local_error = NULL;
-				} else {
-					result = E_SOURCE_AUTHENTICATION_REJECTED;
-				}
-
-				UNLOCK (cnc);
+			if (cnc->priv->impersonate_user) {
+				g_propagate_error (error, local_error);
+				local_error = NULL;
 			} else {
-				result = E_SOURCE_AUTHENTICATION_REQUIRED;
+				result = E_SOURCE_AUTHENTICATION_REJECTED;
 			}
 
-			g_clear_object (&bearer);
+			UNLOCK (cnc);
+
 			g_clear_error (&local_error);
 		}
 
@@ -1728,7 +1385,7 @@ e_m365_connection_construct_uri (EM365Connection *cnc,
 		if (use_user) {
 			gchar *encoded;
 
-			encoded = soup_uri_encode (use_user, NULL);
+			encoded = g_uri_escape_string (use_user, NULL, FALSE);
 
 			g_string_append_c (uri, '/');
 			g_string_append (uri, encoded);
@@ -1772,7 +1429,7 @@ e_m365_connection_construct_uri (EM365Connection *cnc,
 			if (*value) {
 				gchar *encoded;
 
-				encoded = soup_uri_encode (value, NULL);
+				encoded = g_uri_escape_string (value, NULL, FALSE);
 
 				g_string_append (uri, encoded);
 
@@ -1813,10 +1470,10 @@ e_m365_connection_set_json_body (SoupMessage *message,
 
 	data = json_generator_to_data (generator, &data_length);
 
-	soup_message_headers_set_content_type (message->request_headers, "application/json", NULL);
+	soup_message_headers_set_content_type (soup_message_get_request_headers (message), "application/json", NULL);
 
 	if (data)
-		soup_message_body_append_take (message->request_body, (guchar *) data, data_length);
+		e_soup_session_util_set_message_request_body_from_data (message, FALSE, "application/json", data, data_length, g_free);
 
 	g_object_unref (generator);
 	json_node_unref (node);
@@ -1840,7 +1497,7 @@ e_m365_fill_message_headers_cb (JsonObject *object,
 		value = json_node_get_string (member_node);
 
 		if (value)
-			soup_message_headers_replace (message->response_headers, member_name, value);
+			soup_message_headers_replace (soup_message_get_response_headers (message), member_name, value);
 	}
 }
 
@@ -1853,7 +1510,7 @@ e_m365_connection_fill_batch_response (SoupMessage *message,
 	g_return_if_fail (SOUP_IS_MESSAGE (message));
 	g_return_if_fail (object != NULL);
 
-	message->status_code = e_m365_json_get_int_member (object, "status", SOUP_STATUS_MALFORMED);
+	e_m365_connection_util_set_message_status_code (message, e_m365_json_get_int_member (object, "status", -1));
 
 	subobject = e_m365_json_get_object_member (object, "headers");
 
@@ -1964,7 +1621,9 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 	for (ii = 0; success && ii < requests->len; ii++) {
 		SoupMessageHeadersIter iter;
 		SoupMessage *submessage;
-		SoupURI *suri;
+		GUri *guri;
+		GInputStream *request_body;
+		gssize request_body_length = 0;
 		gboolean has_headers = FALSE;
 		const gchar *hdr_name, *hdr_value, *use_uri;
 		gboolean is_application_json = FALSE;
@@ -1974,13 +1633,13 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 		if (!submessage)
 			continue;
 
-		submessage->status_code = SOUP_STATUS_MALFORMED;
+		e_m365_connection_util_set_message_status_code (submessage, -1);
 
-		suri = soup_message_get_uri (submessage);
-		uri = suri ? soup_uri_to_string (suri, TRUE) : NULL;
+		guri = soup_message_get_uri (submessage);
+		uri = guri ? g_uri_to_string_partial (guri, G_URI_HIDE_PASSWORD) : NULL;
 
 		if (!uri) {
-			submessage->status_code = SOUP_STATUS_MALFORMED;
+			g_warning ("%s: Batch message ignored due to no URI", G_STRFUNC);
 			continue;
 		}
 
@@ -1996,12 +1655,12 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 		e_m365_json_begin_object_member (builder, NULL);
 
 		e_m365_json_add_string_member (builder, "id", buff);
-		e_m365_json_add_string_member (builder, "method", submessage->method);
+		e_m365_json_add_string_member (builder, "method", soup_message_get_method (submessage));
 		e_m365_json_add_string_member (builder, "url", use_uri);
 
 		g_free (uri);
 
-		soup_message_headers_iter_init (&iter, submessage->request_headers);
+		soup_message_headers_iter_init (&iter, soup_message_get_request_headers (submessage));
 
 		while (soup_message_headers_iter_next (&iter, &hdr_name, &hdr_value)) {
 			if (hdr_name && *hdr_name && hdr_value &&
@@ -2024,42 +1683,57 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 		if (has_headers)
 			e_m365_json_end_object_member (builder); /* headers */
 
-		if (submessage->request_body) {
-			SoupBuffer *sbuffer;
+		request_body = e_soup_session_util_ref_message_request_body (submessage, &request_body_length);
 
-			sbuffer = soup_message_body_flatten (submessage->request_body);
+		if (request_body && request_body_length > 0) {
+			if (is_application_json) {
+				/* The server needs it unpacked, not as a plain string */
+				JsonParser *parser;
+				JsonNode *node;
 
-			if (sbuffer && sbuffer->length > 0) {
-				if (is_application_json) {
-					/* The server needs it unpacked, not as a plain string */
-					JsonParser *parser;
-					JsonNode *node;
+				parser = json_parser_new_immutable ();
 
-					parser = json_parser_new_immutable ();
+				success = json_parser_load_from_stream (parser, request_body, cancellable, error);
 
-					success = json_parser_load_from_data (parser, sbuffer->data, sbuffer->length, error);
+				if (!success)
+					g_prefix_error (error, "%s", _("Failed to parse own Json data"));
 
-					if (!success)
-						g_prefix_error (error, "%s", _("Failed to parse own Json data"));
+				node = success ? json_parser_steal_root (parser) : NULL;
 
-					node = success ? json_parser_steal_root (parser) : NULL;
-
-					if (node) {
-						json_builder_set_member_name (builder, "body");
-						json_builder_add_value (builder, node);
-					}
-
-					g_clear_object (&parser);
-				} else {
-					e_m365_json_add_string_member (builder, "body", sbuffer->data);
+				if (node) {
+					json_builder_set_member_name (builder, "body");
+					json_builder_add_value (builder, node);
 				}
-			}
 
-			if (sbuffer)
-				soup_buffer_free (sbuffer);
+				g_clear_object (&parser);
+			} else {
+				GByteArray *array;
+				guint8 *buffer;
+				gsize n_buffer_sz = 16384;
+				gsize n_read;
+
+				buffer = g_new0 (guint8, n_buffer_sz);
+				array = g_byte_array_sized_new (request_body_length + 1);
+
+				while (g_input_stream_read_all (request_body, buffer, n_buffer_sz, &n_read, cancellable, NULL)) {
+					if (n_read > 0)
+						g_byte_array_append (array, buffer, n_read);
+				}
+
+				/* null-terminate the data, to use it as a string */
+				buffer[0] = '\0';
+				g_byte_array_append (array, buffer, 1);
+
+				e_m365_json_add_string_member (builder, "body", (const gchar *) array->data);
+
+				g_byte_array_unref (array);
+				g_free (buffer);
+			}
 		}
 
 		e_m365_json_end_object_member (builder); /* unnamed object */
+
+		g_clear_object (&request_body);
 	}
 
 	e_m365_json_end_array_member (builder);
@@ -2067,7 +1741,7 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 
 	e_m365_connection_set_json_body (message, builder);
 
-	soup_message_headers_append (message->request_headers, "Accept", "application/json");
+	soup_message_headers_append (soup_message_get_request_headers (message), "Accept", "application/json");
 
 	g_object_unref (builder);
 
@@ -2091,8 +1765,8 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 {
 	GPtrArray *use_requests;
 	gint need_retry_seconds = 5;
-	gboolean success, need_retry = TRUE;
 	gboolean did_io_error_retry = FALSE;
+	gboolean success, need_retry = TRUE;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (requests != NULL, FALSE);
@@ -2102,9 +1776,30 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 	use_requests = requests;
 
 	while (need_retry) {
-		need_retry = FALSE;
+		GError *local_error = NULL;
 
-		success = e_m365_connection_batch_request_internal_sync (cnc, api_version, use_requests, cancellable, error);
+		need_retry = FALSE;
+		g_clear_error (error);
+
+		success = e_m365_connection_batch_request_internal_sync (cnc, api_version, use_requests, cancellable, &local_error);
+
+		if (!did_io_error_retry && g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_PARTIAL_INPUT)) {
+			did_io_error_retry = TRUE;
+			success = FALSE;
+			need_retry = TRUE;
+
+			LOCK (cnc);
+
+			if (cnc->priv->backoff_for_usec < M365_RETRY_IO_ERROR_SECONDS * G_USEC_PER_SEC)
+				cnc->priv->backoff_for_usec = M365_RETRY_IO_ERROR_SECONDS * G_USEC_PER_SEC;
+
+			UNLOCK (cnc);
+		}
+
+		if (local_error) {
+			g_propagate_error (error, local_error);
+			local_error = NULL;
+		}
 
 		if (success) {
 			GPtrArray *new_requests = NULL;
@@ -2117,15 +1812,13 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 				if (!message)
 					continue;
 
-				if ((!did_io_error_retry && message->status_code == SOUP_STATUS_IO_ERROR) ||
-				    /* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
-				    message->status_code == 429 ||
+				/* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
+				if (e_m365_connection_util_get_message_status_code (message) == 429 ||
 				    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
-				    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
+				    e_m365_connection_util_get_message_status_code (message) == SOUP_STATUS_SERVICE_UNAVAILABLE) {
 					const gchar *retry_after_str;
 					gint64 retry_after;
 
-					did_io_error_retry = did_io_error_retry || message->status_code == SOUP_STATUS_IO_ERROR;
 					need_retry = TRUE;
 
 					if (!new_requests)
@@ -2133,12 +1826,11 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 
 					g_ptr_array_add (new_requests, message);
 
-					retry_after_str = message->response_headers ? soup_message_headers_get_one (message->response_headers, "Retry-After") : NULL;
+					retry_after_str = soup_message_get_response_headers (message) ?
+						soup_message_headers_get_one (soup_message_get_response_headers (message), "Retry-After") : NULL;
 
 					if (retry_after_str && *retry_after_str)
 						retry_after = g_ascii_strtoll (retry_after_str, NULL, 10);
-					else if (message->status_code == SOUP_STATUS_IO_ERROR)
-						retry_after = M365_RETRY_IO_ERROR_SECONDS;
 					else
 						retry_after = 0;
 
@@ -2356,7 +2048,7 @@ e_m365_connection_get_folders_delta_sync (EM365Connection *cnc,
 
 		prefer_value = g_strdup_printf ("odata.maxpagesize=%u", max_page_size);
 
-		soup_message_headers_append (message->request_headers, "Prefer", prefer_value);
+		soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", prefer_value);
 
 		g_free (prefer_value);
 	}
@@ -2687,7 +2379,7 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 
 		prefer_value = g_strdup_printf ("odata.maxpagesize=%u", max_page_size);
 
-		soup_message_headers_append (message->request_headers, "Prefer", prefer_value);
+		soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", prefer_value);
 
 		g_free (prefer_value);
 	}
@@ -3231,7 +2923,7 @@ e_m365_connection_send_mail_message_sync (EM365Connection *cnc,
 
 	g_free (uri);
 
-	soup_message_headers_append (message->request_headers, "Content-Length", "0");
+	soup_message_headers_append (soup_message_get_request_headers (message), "Content-Length", "0");
 
 	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
 
@@ -3401,11 +3093,11 @@ e_m365_connection_update_contact_photo_sync (EM365Connection *cnc,
 
 	g_free (uri);
 
-	soup_message_headers_set_content_type (message->request_headers, "image/jpeg", NULL);
-	soup_message_headers_set_content_length (message->request_headers, jpeg_photo ? jpeg_photo->len : 0);
+	soup_message_headers_set_content_type (soup_message_get_request_headers (message), "image/jpeg", NULL);
+	soup_message_headers_set_content_length (soup_message_get_request_headers (message), jpeg_photo ? jpeg_photo->len : 0);
 
 	if (jpeg_photo)
-		soup_message_body_append (message->request_body, SOUP_MEMORY_STATIC, jpeg_photo->data, jpeg_photo->len);
+		e_soup_session_util_set_message_request_body_from_data (message, FALSE, "image/jpeg", jpeg_photo->data, jpeg_photo->len, NULL);
 
 	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
 
@@ -4093,7 +3785,7 @@ m365_connection_prefer_outlook_timezone (SoupMessage *message,
 
 		prefer_value = g_strdup_printf ("outlook.timezone=\"%s\"", prefer_outlook_timezone);
 
-		soup_message_headers_append (message->request_headers, "Prefer", prefer_value);
+		soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", prefer_value);
 
 		g_free (prefer_value);
 	}
@@ -4142,7 +3834,7 @@ e_m365_connection_list_events_sync (EM365Connection *cnc,
 
 	m365_connection_prefer_outlook_timezone (message, prefer_outlook_timezone);
 
-	soup_message_headers_append (message->request_headers, "Prefer", "outlook.body-content-type=\"text\"");
+	soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", "outlook.body-content-type=\"text\"");
 
 	memset (&rd, 0, sizeof (EM365ResponseData));
 
@@ -4244,7 +3936,7 @@ e_m365_connection_prepare_get_event (EM365Connection *cnc,
 	g_free (uri);
 
 	m365_connection_prefer_outlook_timezone (message, prefer_outlook_timezone);
-	soup_message_headers_append (message->request_headers, "Prefer", "outlook.body-content-type=\"text\"");
+	soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", "outlook.body-content-type=\"text\"");
 
 	return message;
 }
@@ -5408,7 +5100,7 @@ e_m365_connection_list_tasks_sync (EM365Connection *cnc,
 	g_free (uri);
 
 	m365_connection_prefer_outlook_timezone (message, prefer_outlook_timezone);
-	soup_message_headers_append (message->request_headers, "Prefer", "outlook.body-content-type=\"text\"");
+	soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", "outlook.body-content-type=\"text\"");
 
 	memset (&rd, 0, sizeof (EM365ResponseData));
 
@@ -5511,7 +5203,7 @@ e_m365_connection_prepare_get_task (EM365Connection *cnc,
 	g_free (uri);
 
 	m365_connection_prefer_outlook_timezone (message, prefer_outlook_timezone);
-	soup_message_headers_append (message->request_headers, "Prefer", "outlook.body-content-type=\"text\"");
+	soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", "outlook.body-content-type=\"text\"");
 
 	return message;
 }

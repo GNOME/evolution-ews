@@ -195,11 +195,11 @@ ews_config_lookup_worker_result_from_data (EConfigLookup *config_lookup,
 		EConfigLookupResult *lookup_result;
 		GString *description;
 		const gchar *extension_name;
-		SoupURI *suri;
+		GUri *uri;
 
 		extension_name = e_source_camel_get_extension_name ("ews");
 
-		suri = soup_uri_new (hosturl);
+		uri = g_uri_parse (hosturl, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
 
 		description = g_string_new ("");
 
@@ -247,23 +247,23 @@ ews_config_lookup_worker_result_from_data (EConfigLookup *config_lookup,
 				"user", email_address);
 		}
 
-		if (suri && suri->host && *suri->host) {
+		if (uri && g_uri_get_host (uri) && *g_uri_get_host (uri)) {
 			e_config_lookup_result_simple_add_string (lookup_result,
 				E_SOURCE_EXTENSION_AUTHENTICATION,
-				"host", suri->host);
+				"host", g_uri_get_host (uri));
 		}
 
-		if (suri && suri->port) {
+		if (uri && g_uri_get_port (uri)) {
 			e_config_lookup_result_simple_add_uint (lookup_result,
 				E_SOURCE_EXTENSION_AUTHENTICATION,
-				"port", suri->port);
+				"port", g_uri_get_port (uri));
 		}
 
 		e_config_lookup_add_result (config_lookup, lookup_result);
 
 		g_string_free (description, TRUE);
-		if (suri)
-			soup_uri_free (suri);
+		if (uri)
+			g_uri_unref (uri);
 	}
 }
 
@@ -370,16 +370,16 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 		if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, &certificate_pem, &certificate_errors, cancellable, &local_error)) {
 			ews_config_lookup_worker_result_from_settings (lookup_worker, config_lookup, email_address, ews_settings, params);
-		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+		} else if (g_error_matches (local_error, G_TLS_ERROR, G_TLS_ERROR_BAD_CERTIFICATE)) {
 			const gchar *hosturl;
-			SoupURI *suri;
+			GUri *uri;
 
 			hosturl = camel_ews_settings_get_hosturl (ews_settings);
-			suri = soup_uri_new (hosturl);
-			if (suri) {
-				certificate_host = g_strdup (soup_uri_get_host (suri));
+			uri = g_uri_parse (hosturl, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+			if (uri) {
+				certificate_host = g_strdup (g_uri_get_host (uri));
 
-				soup_uri_free (suri);
+				g_uri_unref (uri);
 			}
 		} else {
 			g_clear_error (&local_error);
@@ -406,16 +406,16 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 				if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, &certificate_pem, &certificate_errors, cancellable, &local_error)) {
 					ews_config_lookup_worker_result_from_settings (lookup_worker, config_lookup, email_address, ews_settings, params);
-				} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+				} else if (g_error_matches (local_error, G_TLS_ERROR, G_TLS_ERROR_BAD_CERTIFICATE)) {
 					const gchar *hosturl;
-					SoupURI *suri;
+					GUri *uri;
 
 					hosturl = camel_ews_settings_get_hosturl (ews_settings);
-					suri = soup_uri_new (hosturl);
-					if (suri) {
-						certificate_host = g_strdup (soup_uri_get_host (suri));
+					uri = g_uri_parse (hosturl, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+					if (uri) {
+						certificate_host = g_strdup (g_uri_get_host (uri));
 
-						soup_uri_free (suri);
+						g_uri_unref (uri);
 					}
 				} else {
 					g_clear_error (&local_error);
@@ -427,7 +427,7 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 			g_strfreev (servers_strv);
 		}
 
-		if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+		if (g_error_matches (local_error, G_TLS_ERROR, G_TLS_ERROR_BAD_CERTIFICATE) &&
 		    certificate_pem && *certificate_pem && certificate_errors) {
 			gchar *description = e_trust_prompt_describe_certificate_errors (certificate_errors);
 

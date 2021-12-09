@@ -7,7 +7,6 @@
 #ifndef E_EWS_OOF_SETTINGS_H
 #define E_EWS_OOF_SETTINGS_H
 
-#include <common/e-ews-connection.h>
 #include <common/e-ews-enums.h>
 
 /* Standard GObject macros */
@@ -31,6 +30,8 @@
 
 G_BEGIN_DECLS
 
+struct _EEwsConnection;
+
 typedef struct _EEwsOofSettings EEwsOofSettings;
 typedef struct _EEwsOofSettingsClass EEwsOofSettingsClass;
 typedef struct _EEwsOofSettingsPrivate EEwsOofSettingsPrivate;
@@ -46,18 +47,10 @@ struct _EEwsOofSettingsClass {
 
 GType		e_ews_oof_settings_get_type	(void) G_GNUC_CONST;
 EEwsOofSettings *
-		e_ews_oof_settings_new_sync	(EEwsConnection *connection,
+		e_ews_oof_settings_new_sync	(struct _EEwsConnection *connection,
 						 GCancellable *cancellable,
 						 GError **error);
-void		e_ews_oof_settings_new		(EEwsConnection *connection,
-						 gint io_priority,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-EEwsOofSettings *
-		e_ews_oof_settings_new_finish	(GAsyncResult *result,
-						 GError **error);
-EEwsConnection *
+struct _EEwsConnection *
 		e_ews_oof_settings_get_connection
 						(EEwsOofSettings *settings);
 EEwsOofState	e_ews_oof_settings_get_state	(EEwsOofSettings *settings);

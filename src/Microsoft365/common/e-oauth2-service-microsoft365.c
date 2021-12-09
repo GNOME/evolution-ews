@@ -333,7 +333,7 @@ eos_microsoft365_extract_authorization_code (EOAuth2Service *service,
 					     const gchar *page_content,
 					     gchar **out_authorization_code)
 {
-	SoupURI *suri;
+	GUri *uri;
 	gboolean known = FALSE;
 
 	g_return_val_if_fail (out_authorization_code != NULL, FALSE);
@@ -343,12 +343,12 @@ eos_microsoft365_extract_authorization_code (EOAuth2Service *service,
 	if (!page_uri || !*page_uri)
 		return FALSE;
 
-	suri = soup_uri_new (page_uri);
-	if (!suri)
+	uri = g_uri_parse (page_uri, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+	if (!uri)
 		return FALSE;
 
-	if (suri->query) {
-		GHashTable *uri_query = soup_form_decode (suri->query);
+	if (g_uri_get_query (uri)) {
+		GHashTable *uri_query = soup_form_decode (g_uri_get_query (uri));
 
 		if (uri_query) {
 			const gchar *code;
@@ -376,7 +376,7 @@ eos_microsoft365_extract_authorization_code (EOAuth2Service *service,
 		}
 	}
 
-	soup_uri_free (suri);
+	g_uri_unref (uri);
 
 	return known;
 }

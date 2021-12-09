@@ -7,7 +7,7 @@
 #include "evolution-ews-config.h"
 
 #include "e-ews-debug.h"
-#include "e-ews-message.h"
+#include "e-ews-request.h"
 
 gint
 e_ews_debug_get_log_level (void)
@@ -85,74 +85,6 @@ e_ews_debug_get_server_version_from_string (const gchar *version)
 		return E_EWS_EXCHANGE_2013;
 	else
 		return E_EWS_EXCHANGE_FUTURE;
-}
-
-static void
-print_header (const gchar *name,
-	      const gchar *value,
-	      gpointer user_data)
-{
-	gchar *header = g_strconcat (name, ": ", value, NULL);
-
-	fprintf (user_data, "%s\n", e_ews_debug_redact_headers ('<', header));
-
-	g_free (header);
-}
-
-static void
-e_ews_debug_dump_raw_soup_message (FILE *out,
-				   SoupMessageHeaders *hdrs,
-				   SoupMessageBody *body)
-{
-	if (body && soup_message_body_get_accumulate (body)) {
-		SoupBuffer *buffer;
-
-		buffer = soup_message_body_flatten (body);
-		soup_buffer_free (buffer);
-	}
-
-	/* print body */
-	fprintf (out, " =====================\n");
-	if (hdrs)
-		soup_message_headers_foreach (hdrs, print_header, out);
-	else
-		fprintf (out, " null headers\n");
-	fputc ('\n', out);
-	if (body && body->data) {
-		fputs (body->data, out);
-		fputc ('\n', out);
-	}
-	fflush (out);
-}
-
-void
-e_ews_debug_dump_raw_soup_request (SoupMessage *msg)
-{
-	gint log_level;
-
-	log_level = e_ews_debug_get_log_level ();
-	if (log_level == 1) {
-		/* print request body */
-		printf ("\n URI: %s\n", soup_uri_to_string (soup_message_get_uri (msg),
-							  TRUE));
-		printf (" The request headers for message %p\n", msg);
-		e_ews_debug_dump_raw_soup_message (stdout, msg->request_headers,
-						   msg->request_body);
-	}
-}
-
-void
-e_ews_debug_dump_raw_soup_response (SoupMessage *msg)
-{
-	gint log_level;
-
-	log_level = e_ews_debug_get_log_level ();
-	if (log_level >= 1) {
-		printf ("\n The response code: %d\n", msg->status_code);
-		printf (" The response headers for message %p\n", msg);
-		e_ews_debug_dump_raw_soup_message (stdout, msg->response_headers,
-						   msg->response_body);
-	}
 }
 
 const gchar *

@@ -7,9 +7,9 @@
 #ifndef E_EWS_ITEM_H
 #define E_EWS_ITEM_H
 
-#include "e-soap-message.h"
+#include "e-soap-request.h"
 #include "e-soap-response.h"
-#include "e-ews-message.h"
+#include "e-ews-request.h"
 
 G_BEGIN_DECLS
 

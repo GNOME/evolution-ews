@@ -85,19 +85,19 @@ ews_settings_transform_host_url_to_host_cb (GBinding *binding,
 
 	host_url = g_value_get_string (host_url_value);
 	if (host_url && *host_url) {
-		SoupURI *uri;
+		GUri *uri;
 
-		uri = soup_uri_new (host_url);
+		uri = g_uri_parse (host_url, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
 		if (uri) {
 			const gchar *host;
 
-			host = soup_uri_get_host (uri);
+			host = g_uri_get_host (uri);
 			if (!host || !*host)
 				host = "";
 
 			g_value_set_string (host_value, host);
 
-			soup_uri_free (uri);
+			g_uri_unref (uri);
 		}
 	}
 

@@ -391,10 +391,10 @@ m365_folder_download_message_cb (EM365Connection *cnc,
 	g_return_val_if_fail (CAMEL_IS_STREAM (cache_stream), FALSE);
 	g_return_val_if_fail (G_IS_INPUT_STREAM (raw_data_stream), FALSE);
 
-	if (message && message->response_headers) {
+	if (message && soup_message_get_response_headers (message)) {
 		const gchar *content_length_str;
 
-		content_length_str = soup_message_headers_get_one (message->response_headers, "Content-Length");
+		content_length_str = soup_message_headers_get_one (soup_message_get_response_headers (message), "Content-Length");
 
 		if (content_length_str && *content_length_str)
 			expected_size = (gssize) g_ascii_strtoll (content_length_str, NULL, 10);

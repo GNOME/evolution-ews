@@ -17,7 +17,7 @@
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-camel-common.h"
 #include "common/e-ews-item-change.h"
-#include "common/e-ews-message.h"
+#include "common/e-ews-request.h"
 
 #include "camel-ews-utils.h"
 
@@ -515,7 +515,7 @@ camel_ews_utils_decode_category_name (const gchar *flag)
 /* free with g_slist_free_full (flags, g_free);
    the lists' members are values for the String xml element. */
 GSList *
-ews_utils_gather_server_user_flags (ESoapMessage *msg,
+ews_utils_gather_server_user_flags (ESoapRequest *request,
 				    CamelMessageInfo *mi)
 {
 	GSList *out_user_flags = NULL;
@@ -1288,13 +1288,13 @@ camel_ews_utils_get_host_name (CamelSettings *settings)
 }
 
 void
-ews_utils_update_followup_flags (ESoapMessage *msg,
+ews_utils_update_followup_flags (ESoapRequest *request,
 				 CamelMessageInfo *mi)
 {
 	const gchar *followup, *completed, *dueby;
 	time_t completed_tt = (time_t) 0 , dueby_tt = (time_t) 0;
 
-	g_return_if_fail (msg != NULL);
+	g_return_if_fail (request != NULL);
 	g_return_if_fail (mi != NULL);
 
 	followup = camel_message_info_get_user_tag (mi, "follow-up");
@@ -1312,66 +1312,66 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 
 	if (followup) {
 		/* PidTagFlagStatus */
-		e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1090,
+		e_ews_request_add_set_item_field_extended_tag_int (request, NULL, "Message", 0x1090,
 			completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */);
 
 		/* PidLidFlagRequest */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_string (msg, NULL, "Message", "Common", 0x8530, followup);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_string (request, NULL, "Message", "Common", 0x8530, followup);
 
 		/* PidTagToDoItemFlags */
-		e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x0e2b, 1);
+		e_ews_request_add_set_item_field_extended_tag_int (request, NULL, "Message", 0x0e2b, 1);
 
 		if (completed_tt == (time_t) 0 && dueby_tt == (time_t) 0) {
 			time_t now_tt = time (NULL);
 
 			/* PidLidTaskStatus */
-			e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 0);
+			e_ews_request_add_set_item_field_extended_distinguished_tag_int (request, NULL, "Message", "Task", 0x8101, 0);
 
 			/* PidLidPercentComplete */
-			e_ews_message_add_set_item_field_extended_distinguished_tag_double (msg, NULL, "Message", "Task", 0x8102, 0.0);
+			e_ews_request_add_set_item_field_extended_distinguished_tag_double (request, NULL, "Message", "Task", 0x8102, 0.0);
 
 			/* PidLidTaskStartDate */
-			e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8104, now_tt);
+			e_ews_request_add_set_item_field_extended_distinguished_tag_time (request, NULL, "Message", "Task", 0x8104, now_tt);
 
 			/* PidLidTaskComplete */
-			e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
+			e_ews_request_add_set_item_field_extended_distinguished_tag_boolean (request, NULL, "Message", "Task", 0x811c, FALSE);
 		}
 	} else {
 		/* PidTagFlagStatus */
-		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1090, E_EWS_MESSAGE_DATA_TYPE_INT);
+		e_ews_request_add_delete_item_field_extended_tag (request, 0x1090, E_EWS_MESSAGE_DATA_TYPE_INT);
 
 		/* PidTagFlagCompleteTime */
-		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1091, E_EWS_MESSAGE_DATA_TYPE_TIME);
+		e_ews_request_add_delete_item_field_extended_tag (request, 0x1091, E_EWS_MESSAGE_DATA_TYPE_TIME);
 
 		/* PidTagToDoItemFlags */
-		e_ews_message_add_delete_item_field_extended_tag (msg, 0x0e2b, E_EWS_MESSAGE_DATA_TYPE_INT);
+		e_ews_request_add_delete_item_field_extended_tag (request, 0x0e2b, E_EWS_MESSAGE_DATA_TYPE_INT);
 
 		/* PidTagFollowupIcon */
-		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1095, E_EWS_MESSAGE_DATA_TYPE_INT);
+		e_ews_request_add_delete_item_field_extended_tag (request, 0x1095, E_EWS_MESSAGE_DATA_TYPE_INT);
 
 		/* PidLidFlagRequest */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Common", 0x8530, E_EWS_MESSAGE_DATA_TYPE_STRING);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Common", 0x8530, E_EWS_MESSAGE_DATA_TYPE_STRING);
 
 		/* PidLidFlagString */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Common", 0x85c0, E_EWS_MESSAGE_DATA_TYPE_INT);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Common", 0x85c0, E_EWS_MESSAGE_DATA_TYPE_INT);
 
 		/* PidLidTaskStatus */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8101, E_EWS_MESSAGE_DATA_TYPE_INT);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x8101, E_EWS_MESSAGE_DATA_TYPE_INT);
 
 		/* PidLidPercentComplete */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8102, E_EWS_MESSAGE_DATA_TYPE_DOUBLE);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x8102, E_EWS_MESSAGE_DATA_TYPE_DOUBLE);
 
 		/* PidLidTaskStartDate */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8104, E_EWS_MESSAGE_DATA_TYPE_TIME);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x8104, E_EWS_MESSAGE_DATA_TYPE_TIME);
 
 		/* PidLidTaskDueDate */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8105, E_EWS_MESSAGE_DATA_TYPE_TIME);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x8105, E_EWS_MESSAGE_DATA_TYPE_TIME);
 
 		/* PidLidTaskDateCompleted */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x810f, E_EWS_MESSAGE_DATA_TYPE_TIME);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x810f, E_EWS_MESSAGE_DATA_TYPE_TIME);
 
 		/* PidLidTaskComplete */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x811c, E_EWS_MESSAGE_DATA_TYPE_BOOLEAN);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x811c, E_EWS_MESSAGE_DATA_TYPE_BOOLEAN);
 	}
 
 	if (followup && completed_tt != (time_t) 0) {
@@ -1379,22 +1379,22 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 		completed_tt = completed_tt - (completed_tt % 60);
 
 		/* PidTagFlagCompleteTime */
-		e_ews_message_add_set_item_field_extended_tag_time (msg, NULL, "Message", 0x1091, completed_tt);
+		e_ews_request_add_set_item_field_extended_tag_time (request, NULL, "Message", 0x1091, completed_tt);
 
 		/* PidTagFollowupIcon */
-		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1095, E_EWS_MESSAGE_DATA_TYPE_INT);
+		e_ews_request_add_delete_item_field_extended_tag (request, 0x1095, E_EWS_MESSAGE_DATA_TYPE_INT);
 
 		/* PidLidTaskDateCompleted */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x810f, completed_tt);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_time (request, NULL, "Message", "Task", 0x810f, completed_tt);
 
 		/* PidLidTaskStatus */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 2);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_int (request, NULL, "Message", "Task", 0x8101, 2);
 
 		/* PidLidPercentComplete */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_double (msg, NULL, "Message", "Task", 0x8102, 1.0);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_double (request, NULL, "Message", "Task", 0x8102, 1.0);
 
 		/* PidLidTaskComplete */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, TRUE);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_boolean (request, NULL, "Message", "Task", 0x811c, TRUE);
 	}
 
 	if (followup && dueby_tt != (time_t) 0 && completed_tt == (time_t) 0) {
@@ -1404,22 +1404,22 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 			now_tt = dueby_tt - 1;
 
 		/* PidLidTaskStatus */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 0);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_int (request, NULL, "Message", "Task", 0x8101, 0);
 
 		/* PidLidPercentComplete */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_double (msg, NULL, "Message", "Task", 0x8102, 0.0);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_double (request, NULL, "Message", "Task", 0x8102, 0.0);
 
 		/* PidLidTaskStartDate */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8104, now_tt);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_time (request, NULL, "Message", "Task", 0x8104, now_tt);
 
 		/* PidLidTaskDueDate */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8105, dueby_tt);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_time (request, NULL, "Message", "Task", 0x8105, dueby_tt);
 
 		/* PidLidTaskComplete */
-		e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
+		e_ews_request_add_set_item_field_extended_distinguished_tag_boolean (request, NULL, "Message", "Task", 0x811c, FALSE);
 	} else if (followup && dueby_tt == (time_t) 0) {
 		/* PidLidTaskDueDate */
-		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8105, E_EWS_MESSAGE_DATA_TYPE_TIME);
+		e_ews_request_add_delete_item_field_extended_distinguished_tag (request, "Task", 0x8105, E_EWS_MESSAGE_DATA_TYPE_TIME);
 	}
 }
 gboolean

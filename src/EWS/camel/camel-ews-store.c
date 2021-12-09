@@ -20,7 +20,7 @@
 
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-item-change.h"
-#include "common/e-ews-message.h"
+#include "common/e-ews-request.h"
 #include "common/e-ews-oof-settings.h"
 
 #include "camel-ews-folder.h"
@@ -2216,7 +2216,7 @@ ews_authenticate_sync (CamelService *service,
 
 	g_slist_free_full (created_folder_ids, g_free);
 
-	if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+	if (g_error_matches (local_error, G_TLS_ERROR, G_TLS_ERROR_BAD_CERTIFICATE) &&
 	    e_ews_connection_get_ssl_error_details (connection, &certificate_pem, &certificate_errors)) {
 		source = e_ews_connection_get_source (connection);
 
@@ -3144,27 +3144,27 @@ struct _rename_cb_data {
 };
 
 static gboolean
-rename_folder_cb (ESoapMessage *msg,
+rename_folder_cb (ESoapRequest *request,
                   gpointer user_data,
 		  GError **error)
 {
 	struct _rename_cb_data *rename_data = user_data;
 
-	e_ews_message_start_item_change (
-		msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
+	e_ews_request_start_item_change (
+		request, E_EWS_ITEMCHANGE_TYPE_FOLDER,
 		rename_data->folder_id, rename_data->change_key, 0);
-	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (
-		msg, "FieldURI", NULL, NULL,
+	e_soap_request_start_element (request, "SetFolderField", NULL, NULL);
+	e_ews_request_write_string_parameter_with_attribute (
+		request, "FieldURI", NULL, NULL,
 		"FieldURI", "folder:DisplayName");
 
-	e_soap_message_start_element (msg, "Folder", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, rename_data->display_name);
-	e_soap_message_end_element (msg); /* Folder */
+	e_soap_request_start_element (request, "Folder", NULL, NULL);
+	e_ews_request_write_string_parameter (request, "DisplayName", NULL, rename_data->display_name);
+	e_soap_request_end_element (request); /* Folder */
 
-	e_soap_message_end_element (msg); /* SetFolderField */
+	e_soap_request_end_element (request); /* SetFolderField */
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	return TRUE;
 }

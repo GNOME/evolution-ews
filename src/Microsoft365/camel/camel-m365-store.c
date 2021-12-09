@@ -195,7 +195,7 @@ m365_store_read_default_folders (CamelM365Store *m365_store,
 		message = soup_message_new (SOUP_METHOD_GET, uri);
 
 		if (!message) {
-			g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, _("Malformed URI: “%s”"), uri);
 
 			g_ptr_array_unref (requests);
 			g_free (uri);
@@ -219,7 +219,8 @@ m365_store_read_default_folders (CamelM365Store *m365_store,
 			SoupMessage *message = g_ptr_array_index (requests, ii);
 			JsonNode *node = NULL;
 
-			if (message->status_code > 0 && SOUP_STATUS_IS_SUCCESSFUL (message->status_code) &&
+			if (e_m365_connection_util_get_message_status_code (message) > 0 &&
+			    SOUP_STATUS_IS_SUCCESSFUL (e_m365_connection_util_get_message_status_code (message)) &&
 			    e_m365_connection_json_node_from_message (message, NULL, &node, cancellable, NULL) &&
 			    node && JSON_NODE_HOLDS_OBJECT (node)) {
 				JsonObject *object = json_node_get_object (node);
@@ -1806,7 +1807,7 @@ camel_m365_store_maybe_disconnect (CamelM365Store *m365_store,
 	if (camel_service_get_connection_status (service) != CAMEL_SERVICE_CONNECTED)
 		return;
 
-	if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	if (g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		ESourceRegistry *registry = NULL;
 
 		camel_service_disconnect_sync (service, FALSE, NULL, NULL);

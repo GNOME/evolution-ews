@@ -76,6 +76,11 @@ struct _EM365ConnectionClass {
 
 gboolean	e_m365_connection_util_delta_token_failed
 						(const GError *error);
+void		e_m365_connection_util_set_message_status_code
+						(SoupMessage *message,
+						 gint status_code);
+gint		e_m365_connection_util_get_message_status_code
+						(SoupMessage *message);
 
 GType		e_m365_connection_get_type	(void) G_GNUC_CONST;
 
@@ -105,16 +110,6 @@ GProxyResolver *e_m365_connection_ref_proxy_resolver
 void		e_m365_connection_set_proxy_resolver
 						(EM365Connection *cnc,
 						 GProxyResolver *proxy_resolver);
-ESoupAuthBearer *
-		e_m365_connection_ref_bearer_auth
-						(EM365Connection *cnc);
-void		e_m365_connection_set_bearer_auth
-						(EM365Connection *cnc,
-						 ESoupAuthBearer *bearer_auth);
-gboolean	e_m365_connection_get_ssl_error_details
-						(EM365Connection *cnc,
-						 gchar **out_certificate_pem,
-						 GTlsCertificateFlags *out_certificate_errors);
 ESourceAuthenticationResult
 		e_m365_connection_authenticate_sync
 						(EM365Connection *cnc,

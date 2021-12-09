@@ -226,8 +226,8 @@ search_thread (gpointer user_data)
 
 		if (e_ews_connection_resolve_names_sync (
 			sid->conn, EWS_PRIORITY_MEDIUM, sid->search_text,
-			EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-			&sid->includes_last_item, sid->cancellable, &error)) {
+			EWS_SEARCH_AD, NULL, FALSE, &sid->includes_last_item, &mailboxes, NULL,
+			sid->cancellable, &error)) {
 			GSList *iter;
 
 			sid->found_contacts = 0;

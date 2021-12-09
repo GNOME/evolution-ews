@@ -344,8 +344,8 @@ m365_backend_sync_contact_folders_sync (EM365Backend *m365_backend,
 			id, NULL, display_name, TRUE, NULL);
 
 		json_object_unref (user_contacts);
-	} else if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_NOT_FOUND) ||
-		   g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	} else if (g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_FOUND) ||
+		   g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		m365_backend_remove_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, NULL);
 	}
 
@@ -569,19 +569,26 @@ m365_backend_child_added (ECollectionBackend *backend,
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
-	if (e_source_has_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION) && (
-	    e_source_has_extension (child_source, E_SOURCE_EXTENSION_MAIL_ACCOUNT) ||
-	    e_source_has_extension (child_source, E_SOURCE_EXTENSION_MAIL_IDENTITY) ||
-	    e_source_has_extension (child_source, E_SOURCE_EXTENSION_MAIL_TRANSPORT))) {
+	if (e_source_has_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
 		ESourceAuthentication *auth_child_extension;
-		ESourceCollection *collection_extension;
+		ESourceAuthentication *auth_collection_extension;
 
-		collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION);
 		auth_child_extension = e_source_get_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+		auth_collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_AUTHENTICATION);
 
 		e_binding_bind_property (
-			collection_extension, "identity",
+			auth_collection_extension, "host",
+			auth_child_extension, "host",
+			G_BINDING_SYNC_CREATE);
+
+		e_binding_bind_property (
+			auth_collection_extension, "user",
 			auth_child_extension, "user",
+			G_BINDING_SYNC_CREATE);
+
+		e_binding_bind_property (
+			auth_collection_extension, "method",
+			auth_child_extension, "method",
 			G_BINDING_SYNC_CREATE);
 	}
 

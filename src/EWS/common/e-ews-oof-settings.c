@@ -6,21 +6,20 @@
 
 #include "evolution-ews-config.h"
 
-#include "e-ews-oof-settings.h"
-
 #include <glib/gi18n-lib.h>
 
 #include <libedataserver/libedataserver.h>
 
 #include "ews-errors.h"
+#include "e-ews-connection.h"
 #include "e-ews-enumtypes.h"
-#include "e-ews-message.h"
+#include "e-ews-request.h"
+
+#include "e-ews-oof-settings.h"
 
 /* Forward Declarations */
 static void	e_ews_oof_settings_initable_init
 					(GInitableIface *iface);
-static void	e_ews_oof_settings_async_initable_init
-					(GAsyncInitableIface *iface);
 
 struct _EEwsOofSettingsPrivate {
 	GMutex property_lock;
@@ -46,203 +45,7 @@ enum {
 
 G_DEFINE_TYPE_WITH_CODE (EEwsOofSettings, e_ews_oof_settings, G_TYPE_OBJECT,
 	G_ADD_PRIVATE (EEwsOofSettings)
-	G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, e_ews_oof_settings_initable_init)
-	G_IMPLEMENT_INTERFACE (G_TYPE_ASYNC_INITABLE, e_ews_oof_settings_async_initable_init))
-
-static GDateTime *
-ews_oof_settings_string_to_date_time (const gchar *string)
-{
-	GTimeVal tv = { 0, 0 };
-	GDateTime *date_time = NULL;
-
-	if (g_time_val_from_iso8601 (string, &tv))
-		date_time = g_date_time_new_from_timeval_utc (&tv);
-
-	return date_time;
-}
-
-static gchar *
-ews_oof_settings_date_time_to_string (GDateTime *date_time)
-{
-	GTimeVal tv = { 0, 0 };
-	gchar *string = NULL;
-
-	if (g_date_time_to_timeval (date_time, &tv))
-		string = g_time_val_to_iso8601 (&tv);
-
-	return string;
-}
-
-static gchar *
-ews_oof_settings_text_from_html (gchar *html_text)
-{
-	gsize haystack_len;
-	gchar *plain_text;
-	gchar *start, *end;
-	gchar *ii, *jj;
-
-	g_return_val_if_fail (html_text != NULL, NULL);
-
-	haystack_len = strlen (html_text);
-	start = g_strstr_len (html_text, haystack_len, "<body");
-	end = g_strstr_len (html_text, haystack_len, "</body>");
-
-	/* Parse the status set by Outlook Web Access. */
-	if (g_strrstr (html_text, "BodyFragment") != NULL && start == NULL) {
-		start = html_text;
-		end = html_text + haystack_len;
-	}
-
-	/* Strip HTML tags. */
-	plain_text = jj = g_malloc (end - start);
-	for (ii = start; ii < end; ii++) {
-		if (*ii == '<') {
-			while (*ii != '>')
-				ii++;
-		} else {
-			*jj++ = *ii;
-		}
-	}
-	*jj = '\0';
-
-	return plain_text;
-}
-
-static void
-ews_oof_settings_get_response_cb (ESoapResponse *response,
-                                  GSimpleAsyncResult *simple)
-{
-	GAsyncResult *result;
-	GObject *source_object;
-	EEwsOofSettings *settings;
-	ESoapParameter *param;
-	ESoapParameter *subparam;
-	ESoapParameter *subsubparam;
-	GDateTime *date_time;
-	gchar *string;
-	gchar *text;
-	GError *error = NULL;
-
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessage", &error);
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		return;
-	}
-
-	if (!ews_get_response_status (param, &error)) {
-		g_simple_async_result_take_error (simple, error);
-		return;
-	}
-
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "OofSettings", &error);
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		return;
-	}
-
-	result = G_ASYNC_RESULT (simple);
-	source_object = g_async_result_get_source_object (result);
-	settings = E_EWS_OOF_SETTINGS (source_object);
-
-	subparam = e_soap_parameter_get_first_child_by_name (
-		param, "OofState");
-	string = e_soap_parameter_get_string_value (subparam);
-	if (g_strcmp0 (string, "Disabled") == 0)
-		e_ews_oof_settings_set_state (
-			settings, E_EWS_OOF_STATE_DISABLED);
-	else if (g_strcmp0 (string, "Enabled") == 0)
-		e_ews_oof_settings_set_state (
-			settings, E_EWS_OOF_STATE_ENABLED);
-	else if (g_strcmp0 (string, "Scheduled") == 0)
-		e_ews_oof_settings_set_state (
-			settings, E_EWS_OOF_STATE_SCHEDULED);
-	g_free (string);
-
-	subparam = e_soap_parameter_get_first_child_by_name (
-		param, "ExternalAudience");
-	string = e_soap_parameter_get_string_value (subparam);
-	if (g_strcmp0 (string, "None") == 0)
-		e_ews_oof_settings_set_external_audience (
-			settings, E_EWS_EXTERNAL_AUDIENCE_NONE);
-	else if (g_strcmp0 (string, "Known") == 0)
-		e_ews_oof_settings_set_external_audience (
-			settings, E_EWS_EXTERNAL_AUDIENCE_KNOWN);
-	else if (g_strcmp0 (string, "All") == 0)
-		e_ews_oof_settings_set_external_audience (
-			settings, E_EWS_EXTERNAL_AUDIENCE_ALL);
-	g_free (string);
-
-	subparam = e_soap_parameter_get_first_child_by_name (
-		param, "Duration");
-	subsubparam = e_soap_parameter_get_first_child_by_name (
-		subparam, "StartTime");
-	string = e_soap_parameter_get_string_value (subsubparam);
-	date_time = ews_oof_settings_string_to_date_time (string);
-	if (date_time != NULL) {
-		e_ews_oof_settings_set_start_time (settings, date_time);
-		g_date_time_unref (date_time);
-	}
-	g_free (string);
-	subsubparam = e_soap_parameter_get_first_child_by_name (
-		subparam, "EndTime");
-	string = e_soap_parameter_get_string_value (subsubparam);
-	date_time = ews_oof_settings_string_to_date_time (string);
-	if (date_time != NULL) {
-		e_ews_oof_settings_set_end_time (settings, date_time);
-		g_date_time_unref (date_time);
-	}
-	g_free (string);
-
-	subparam = e_soap_parameter_get_first_child_by_name (
-		param, "InternalReply");
-	subsubparam = e_soap_parameter_get_first_child_by_name (
-		subparam, "Message");
-	string = e_soap_parameter_get_string_value (subsubparam);
-	if (string == NULL)
-		text = NULL;
-	else if (g_strrstr (string, "</body>") != NULL)
-		text = ews_oof_settings_text_from_html (string);
-	else if (g_strrstr (string, "BodyFragment") != NULL)
-		text = ews_oof_settings_text_from_html (string);
-	else
-		text = g_strdup (string);
-	e_ews_oof_settings_set_internal_reply (settings, text ? text : "");
-	g_free (string);
-	g_free (text);
-
-	subparam = e_soap_parameter_get_first_child_by_name (
-		param, "ExternalReply");
-	subsubparam = e_soap_parameter_get_first_child_by_name (
-		subparam, "Message");
-	string = e_soap_parameter_get_string_value (subsubparam);
-	if (string == NULL)
-		text = NULL;
-	else if (g_strrstr (string, "</body>") != NULL)
-		text = ews_oof_settings_text_from_html (string);
-	else if (g_strrstr (string, "BodyFragment") != NULL)
-		text = ews_oof_settings_text_from_html (string);
-	else
-		text = g_strdup (string);
-	e_ews_oof_settings_set_external_reply (settings, text ? text : "");
-	g_free (string);
-	g_free (text);
-
-	g_object_unref (source_object);
-}
+	G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, e_ews_oof_settings_initable_init))
 
 static void
 ews_oof_settings_set_connection (EEwsOofSettings *settings,
@@ -400,103 +203,12 @@ ews_oof_settings_initable_init (GInitable *initable,
                                 GCancellable *cancellable,
                                 GError **error)
 {
-	EAsyncClosure *closure;
-	GAsyncResult *result;
-	gboolean success;
+	EEwsOofSettings *settings = E_EWS_OOF_SETTINGS (initable);
 
-	closure = e_async_closure_new ();
+	g_return_val_if_fail (settings->priv->connection != NULL, FALSE);
 
-	g_async_initable_init_async (
-		G_ASYNC_INITABLE (initable),
-		G_PRIORITY_DEFAULT, cancellable,
-		e_async_closure_callback, closure);
-
-	result = e_async_closure_wait (closure);
-
-	success = g_async_initable_init_finish (
-		G_ASYNC_INITABLE (initable), result, error);
-
-	e_async_closure_free (closure);
-
-	return success;
-}
-
-static void
-ews_oof_settings_initable_init_async (GAsyncInitable *initable,
-                                      gint io_priority,
-                                      GCancellable *cancellable,
-                                      GAsyncReadyCallback callback,
-                                      gpointer user_data)
-{
-	GSimpleAsyncResult *simple;
-	EEwsOofSettings *settings;
-	EEwsConnection *connection;
-	ESoapMessage *message;
-	CamelEwsSettings *ews_settings;
-	const gchar *uri, *impersonate_user;
-	const gchar *mailbox;
-	EEwsServerVersion version;
-
-	settings = E_EWS_OOF_SETTINGS (initable);
-	connection = e_ews_oof_settings_get_connection (settings);
-
-	uri = e_ews_connection_get_uri (connection);
-	impersonate_user = e_ews_connection_get_impersonate_user (connection);
-	mailbox = e_ews_connection_get_mailbox (connection);
-	version = e_ews_connection_get_server_version (connection);
-	ews_settings = e_ews_connection_ref_settings (connection);
-
-	message = e_ews_message_new_with_header (
-		ews_settings,
-		uri,
-		impersonate_user,
-		"GetUserOofSettingsRequest",
-		NULL,
-		NULL,
-		version,
-		E_EWS_EXCHANGE_2007_SP1,
-		FALSE,
-		TRUE);
-
-	g_clear_object (&ews_settings);
-
-	e_soap_message_start_element (message, "Mailbox", NULL, NULL);
-	e_ews_message_write_string_parameter (
-		message, "Address", NULL, mailbox);
-	e_soap_message_end_element (message);
-
-	e_ews_message_write_footer (message);
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (initable), callback, user_data,
-		ews_oof_settings_initable_init_async);
-
-	g_simple_async_result_set_check_cancellable (simple, cancellable);
-
-	e_ews_connection_queue_request (
-		connection, message,
-		ews_oof_settings_get_response_cb,
-		EWS_PRIORITY_MEDIUM, cancellable, simple);
-
-	g_object_unref (simple);
-}
-
-static gboolean
-ews_oof_settings_initable_init_finish (GAsyncInitable *initable,
-                                       GAsyncResult *result,
-                                       GError **error)
-{
-	GSimpleAsyncResult *simple;
-
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (initable),
-		ews_oof_settings_initable_init_async), FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-
-	/* Assume success unless a GError is set. */
-	return !g_simple_async_result_propagate_error (simple, error);
+	return e_ews_connection_get_user_oof_settings_sync (settings->priv->connection,
+		G_PRIORITY_DEFAULT, settings, cancellable, error);
 }
 
 static void
@@ -611,13 +323,6 @@ e_ews_oof_settings_initable_init (GInitableIface *iface)
 	iface->init = ews_oof_settings_initable_init;
 }
 
-static void
-e_ews_oof_settings_async_initable_init (GAsyncInitableIface *iface)
-{
-	iface->init_async = ews_oof_settings_initable_init_async;
-	iface->init_finish = ews_oof_settings_initable_init_finish;
-}
-
 EEwsOofSettings *
 e_ews_oof_settings_new_sync (EEwsConnection *connection,
                              GCancellable *cancellable,
@@ -628,41 +333,6 @@ e_ews_oof_settings_new_sync (EEwsConnection *connection,
 	return g_initable_new (
 		E_TYPE_EWS_OOF_SETTINGS, cancellable, error,
 		"connection", connection, NULL);
-}
-
-void
-e_ews_oof_settings_new (EEwsConnection *connection,
-                        gint io_priority,
-                        GCancellable *cancellable,
-                        GAsyncReadyCallback callback,
-                        gpointer user_data)
-{
-	g_return_if_fail (E_IS_EWS_CONNECTION (connection));
-
-	g_async_initable_new_async (
-		E_TYPE_EWS_OOF_SETTINGS, io_priority,
-		cancellable, callback, user_data,
-		"connection", connection, NULL);
-}
-
-EEwsOofSettings *
-e_ews_oof_settings_new_finish (GAsyncResult *result,
-                               GError **error)
-{
-	GObject *source_object;
-	GObject *object;
-
-	g_return_val_if_fail (G_IS_ASYNC_RESULT (result), NULL);
-
-	source_object = g_async_result_get_source_object (result);
-	g_return_val_if_fail (source_object != NULL, NULL);
-
-	object = g_async_initable_new_finish (
-		G_ASYNC_INITABLE (source_object), result, error);
-
-	g_object_unref (source_object);
-
-	return (object != NULL) ? E_EWS_OOF_SETTINGS (object) : NULL;
 }
 
 EEwsConnection *
@@ -879,51 +549,92 @@ e_ews_oof_settings_set_external_reply (EEwsOofSettings *settings,
 	g_object_notify (G_OBJECT (settings), "external-reply");
 }
 
+typedef struct _SubmitData {
+	EEwsOofState state;
+	EEwsExternalAudience external_audience;
+	GDateTime *date_start;
+	GDateTime *date_end;
+	gchar *internal_reply;
+	gchar *external_reply;
+} SubmitData;
+
+static SubmitData *
+submit_data_new (EEwsOofSettings *settings)
+{
+	SubmitData *sd;
+
+	sd = g_slice_new0 (SubmitData);
+	sd->state = e_ews_oof_settings_get_state (settings);
+	sd->external_audience = e_ews_oof_settings_get_external_audience (settings);
+	sd->date_start = e_ews_oof_settings_ref_start_time (settings);
+	sd->date_end = e_ews_oof_settings_ref_end_time (settings);
+	sd->internal_reply = e_ews_oof_settings_dup_internal_reply (settings);
+	sd->external_reply = e_ews_oof_settings_dup_external_reply (settings);
+
+	return sd;
+}
+
+static void
+submit_data_free (gpointer ptr)
+{
+	SubmitData *sd = ptr;
+
+	if (sd) {
+		g_clear_pointer (&sd->date_start, g_date_time_unref);
+		g_clear_pointer (&sd->date_end, g_date_time_unref);
+		g_clear_pointer (&sd->internal_reply, g_free);
+		g_clear_pointer (&sd->external_reply, g_free);
+		g_slice_free (SubmitData, sd);
+	}
+}
+
+static gboolean
+ews_oof_settings_call_submit_sync (EEwsOofSettings *settings,
+				   SubmitData *sd,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	EEwsConnection *cnc = e_ews_oof_settings_get_connection (settings);
+
+	g_return_val_if_fail (sd != NULL, FALSE);
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	return e_ews_connection_set_user_oof_settings_sync (cnc,
+		G_PRIORITY_DEFAULT, sd->state, sd->external_audience, sd->date_start,
+		sd->date_end, sd->internal_reply, sd->external_reply,
+		cancellable, error);
+}
+
 gboolean
 e_ews_oof_settings_submit_sync (EEwsOofSettings *settings,
                                 GCancellable *cancellable,
                                 GError **error)
 {
-	EAsyncClosure *closure;
-	GAsyncResult *result;
+	SubmitData *sd;
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_EWS_OOF_SETTINGS (settings), FALSE);
 
-	closure = e_async_closure_new ();
-
-	e_ews_oof_settings_submit (
-		settings, cancellable, e_async_closure_callback, closure);
-
-	result = e_async_closure_wait (closure);
-
-	success = e_ews_oof_settings_submit_finish (settings, result, error);
-
-	e_async_closure_free (closure);
+	sd = submit_data_new (settings);
+	success = ews_oof_settings_call_submit_sync (settings, sd, cancellable, error);
+	submit_data_free (sd);
 
 	return success;
 }
 
 static void
-ews_oof_settings_submit_response_cb (ESoapResponse *response,
-                                     GSimpleAsyncResult *simple)
+ews_oof_settings_submit_thread (GTask *task,
+				gpointer source_object,
+				gpointer task_data,
+				GCancellable *cancellable)
 {
-	ESoapParameter *param;
+	SubmitData *sd = task_data;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessage", &error);
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL)
-		g_simple_async_result_take_error (simple, error);
-
-	else if (!ews_get_response_status (param, &error))
-		g_simple_async_result_take_error (simple, error);
+	if (ews_oof_settings_call_submit_sync (E_EWS_OOF_SETTINGS (source_object), sd, cancellable, &error))
+		g_task_return_boolean (task, TRUE);
+	else
+		g_task_return_error (task, error);
 }
 
 void
@@ -932,158 +643,20 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
                            GAsyncReadyCallback callback,
                            gpointer user_data)
 {
-	ESoapMessage *message;
-	EEwsConnection *connection;
-	GSimpleAsyncResult *simple;
-	GDateTime *date_time;
-	const gchar *mailbox;
-	const gchar *string;
-	const gchar *uri, *impersonate_user;
-	gchar *internal_reply;
-	gchar *external_reply;
-	gchar *start_time;
-	gchar *end_time;
-	EEwsServerVersion version;
-	CamelEwsSettings *ews_settings;
+	GTask *task;
+	SubmitData *sd;
 
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 
-	connection = e_ews_oof_settings_get_connection (settings);
-	mailbox = e_ews_connection_get_mailbox (connection);
-	uri = e_ews_connection_get_uri (connection);
-	impersonate_user = e_ews_connection_get_impersonate_user (connection);
-	version = e_ews_connection_get_server_version (connection);
-	ews_settings = e_ews_connection_ref_settings (connection);
+	task = g_task_new (settings, cancellable, callback, user_data);
+	g_task_set_source_tag (task, e_ews_oof_settings_submit);
 
-	internal_reply = e_ews_oof_settings_dup_internal_reply (settings);
-	external_reply = e_ews_oof_settings_dup_external_reply (settings);
+	sd = submit_data_new (settings);
+	g_task_set_task_data (task, sd, submit_data_free);
 
-	date_time = e_ews_oof_settings_ref_start_time (settings);
-	start_time = ews_oof_settings_date_time_to_string (date_time);
-	g_date_time_unref (date_time);
+	g_task_run_in_thread (task, ews_oof_settings_submit_thread);
 
-	date_time = e_ews_oof_settings_ref_end_time (settings);
-	end_time = ews_oof_settings_date_time_to_string (date_time);
-	g_date_time_unref (date_time);
-
-	message = e_ews_message_new_with_header (
-		ews_settings,
-		uri,
-		impersonate_user,
-		"SetUserOofSettingsRequest",
-		NULL,
-		NULL,
-		version,
-		E_EWS_EXCHANGE_2007_SP1,
-		FALSE,
-		TRUE);
-
-	g_clear_object (&ews_settings);
-
-	/* <Mailbox> */
-
-	e_soap_message_start_element (
-		message, "Mailbox", NULL, NULL);
-	e_ews_message_write_string_parameter (
-		message, "Address", NULL, mailbox);
-	e_soap_message_end_element (message);
-
-	/* </Mailbox> */
-
-	/* <UserOofSettings> */
-
-	e_soap_message_start_element (
-		message, "UserOofSettings", NULL, NULL);
-
-	switch (e_ews_oof_settings_get_state (settings)) {
-		default:
-			g_warn_if_reached ();
-			/* fall through */
-		case E_EWS_OOF_STATE_DISABLED:
-			string = "Disabled";
-			break;
-		case E_EWS_OOF_STATE_ENABLED:
-			string = "Enabled";
-			break;
-		case E_EWS_OOF_STATE_SCHEDULED:
-			string = "Scheduled";
-			break;
-	}
-
-	e_ews_message_write_string_parameter (
-		message, "OofState", NULL, string);
-
-	switch (e_ews_oof_settings_get_external_audience (settings)) {
-		default:
-			g_warn_if_reached ();
-			/* fall through */
-		case E_EWS_EXTERNAL_AUDIENCE_NONE:
-			string = "None";
-			break;
-		case E_EWS_EXTERNAL_AUDIENCE_KNOWN:
-			string = "Known";
-			break;
-		case E_EWS_EXTERNAL_AUDIENCE_ALL:
-			string = "All";
-			break;
-	}
-
-	e_ews_message_write_string_parameter (
-		message, "ExternalAudience", NULL, string);
-
-	/* <Duration> */
-
-	e_soap_message_start_element (
-		message, "Duration", NULL, NULL);
-	e_ews_message_write_string_parameter (
-		message, "StartTime", NULL, start_time);
-	e_ews_message_write_string_parameter (
-		message, "EndTime", NULL, end_time);
-	e_soap_message_end_element (message);
-
-	/* </Duration> */
-
-	/* <InternalReply> */
-
-	e_soap_message_start_element (
-		message, "InternalReply", NULL, NULL);
-	e_ews_message_write_string_parameter (
-		message, "Message", NULL, internal_reply);
-	e_soap_message_end_element (message);
-
-	/* </InternalReply> */
-
-	/* <ExternalReply> */
-
-	e_soap_message_start_element (
-		message, "ExternalReply", NULL, NULL);
-	e_ews_message_write_string_parameter (
-		message, "Message", NULL, external_reply);
-	e_soap_message_end_element (message);
-
-	/* </ExternalReply> */
-
-	e_soap_message_end_element (message);
-
-	/* </UserOofSettings> */
-
-	e_ews_message_write_footer (message);
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (settings), callback,
-		user_data, e_ews_oof_settings_submit);
-
-	e_ews_connection_queue_request (
-		connection, message,
-		ews_oof_settings_submit_response_cb,
-		EWS_PRIORITY_MEDIUM, cancellable, simple);
-
-	g_object_unref (simple);
-
-	g_free (internal_reply);
-	g_free (external_reply);
-	g_free (start_time);
-	g_free (end_time);
+	g_object_unref (task);
 }
 
 gboolean
@@ -1091,16 +664,7 @@ e_ews_oof_settings_submit_finish (EEwsOofSettings *settings,
                                   GAsyncResult *result,
                                   GError **error)
 {
-	GSimpleAsyncResult *simple;
+	g_return_val_if_fail (g_task_is_valid (result, settings), FALSE);
 
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (settings),
-		e_ews_oof_settings_submit), FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-
-	/* Assume success unless a GError is set. */
-	return !g_simple_async_result_propagate_error (simple, error);
+	return g_task_propagate_boolean (G_TASK (result), error);
 }
-

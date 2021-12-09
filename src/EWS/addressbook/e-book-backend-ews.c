@@ -28,7 +28,7 @@
 #include <libedata-book/libedata-book.h>
 
 #include "common/e-ews-item-change.h"
-#include "common/e-ews-message.h"
+#include "common/e-ews-request.h"
 #include "common/e-ews-connection.h"
 #include "common/e-ews-connection-utils.h"
 #include "common/e-ews-item.h"
@@ -757,7 +757,7 @@ ebews_find_cert_base64_data (EContact *contact,
 
 static void
 ebews_set_cert (EBookBackendEws *bbews,
-		ESoapMessage *message,
+		ESoapRequest *request,
 		EContact *contact,
 		const gchar *kind,
 		gint fallback_index)
@@ -772,31 +772,31 @@ ebews_set_cert (EBookBackendEws *bbews,
 	if (!base64_data)
 		return;
 
-	e_soap_message_start_element (message, kind, NULL, NULL);
-	e_ews_message_write_string_parameter (message, "Base64Binary", NULL, base64_data);
-	e_soap_message_end_element (message);
+	e_soap_request_start_element (request, kind, NULL, NULL);
+	e_ews_request_write_string_parameter (request, "Base64Binary", NULL, base64_data);
+	e_soap_request_end_element (request);
 }
 
 static void
 ebews_set_user_cert (EBookBackendEws *bbews,
-		     ESoapMessage *message,
+		     ESoapRequest *request,
 		     EContact *contact)
 {
-	ebews_set_cert (bbews, message, contact, E_EWS_CERT_KIND_USER, 0);
+	ebews_set_cert (bbews, request, contact, E_EWS_CERT_KIND_USER, 0);
 }
 
 
 static void
 ebews_set_msex_cert (EBookBackendEws *bbews,
-		     ESoapMessage *message,
+		     ESoapRequest *request,
 		     EContact *contact)
 {
-	ebews_set_cert (bbews, message, contact, E_EWS_CERT_KIND_MSEX, 1);
+	ebews_set_cert (bbews, request, contact, E_EWS_CERT_KIND_MSEX, 1);
 }
 
 static void
 ebews_set_cert_changes (EBookBackendEws *bbews,
-			ESoapMessage *message,
+			ESoapRequest *request,
 			EContact *new,
 			EContact *old,
 			const gchar *kind,
@@ -805,7 +805,7 @@ ebews_set_cert_changes (EBookBackendEws *bbews,
 	const gchar *new_base64_data, *old_base64_data;
 
 	/* The first pass */
-	if (!message)
+	if (!request)
 		return;
 
 	/* Support for certificates was added in Exchange 2010 SP2. */
@@ -820,38 +820,38 @@ ebews_set_cert_changes (EBookBackendEws *bbews,
 		return;
 
 	if (new_base64_data) {
-		e_ews_message_start_set_item_field (message, kind, "contacts", "Contact");
-		e_soap_message_start_element (message, kind, NULL, NULL);
-		e_ews_message_write_string_parameter (message, "Base64Binary", NULL, new_base64_data);
-		e_soap_message_end_element (message);
-		e_ews_message_end_set_item_field (message);
+		e_ews_request_start_set_item_field (request, kind, "contacts", "Contact");
+		e_soap_request_start_element (request, kind, NULL, NULL);
+		e_ews_request_write_string_parameter (request, "Base64Binary", NULL, new_base64_data);
+		e_soap_request_end_element (request);
+		e_ews_request_end_set_item_field (request);
 	} else {
-		e_ews_message_add_delete_item_field (message, kind, "contacts");
+		e_ews_request_add_delete_item_field (request, kind, "contacts");
 	}
 }
 
 static void
 ebews_set_user_cert_changes (EBookBackendEws *bbews,
-			     ESoapMessage *message,
+			     ESoapRequest *request,
 			     EContact *new,
 			     EContact *old,
 			     gchar **out_new_change_key,
 			     GCancellable *cancellable,
 			     GError **error)
 {
-	ebews_set_cert_changes (bbews, message, new, old, E_EWS_CERT_KIND_USER, 0);
+	ebews_set_cert_changes (bbews, request, new, old, E_EWS_CERT_KIND_USER, 0);
 }
 
 static void
 ebews_set_msex_cert_changes (EBookBackendEws *bbews,
-			     ESoapMessage *message,
+			     ESoapRequest *request,
 			     EContact *new,
 			     EContact *old,
 			     gchar **out_new_change_key,
 			     GCancellable *cancellable,
 			     GError **error)
 {
-	ebews_set_cert_changes (bbews, message, new, old, E_EWS_CERT_KIND_MSEX, 1);
+	ebews_set_cert_changes (bbews, request, new, old, E_EWS_CERT_KIND_MSEX, 1);
 }
 
 static void
@@ -1020,7 +1020,7 @@ ebews_populate_emails (EBookBackendEws *bbews,
 
 static void
 ebews_set_item_id (EBookBackendEws *bbews,
-		   ESoapMessage *message,
+		   ESoapRequest *request,
 		   EContact *contact)
 {
 
@@ -1028,7 +1028,7 @@ ebews_set_item_id (EBookBackendEws *bbews,
 
 static void
 ebews_set_full_name (EBookBackendEws *bbews,
-		     ESoapMessage *msg,
+		     ESoapRequest *request,
 		     EContact *contact)
 {
 	EContactName *name;
@@ -1038,16 +1038,16 @@ ebews_set_full_name (EBookBackendEws *bbews,
 		return;
 
 	if (name->given)
-		e_ews_message_write_string_parameter (msg, "GivenName", NULL, name->given);
+		e_ews_request_write_string_parameter (request, "GivenName", NULL, name->given);
 
 	if (name->additional && *name->additional)
-		e_ews_message_write_string_parameter (msg, "MiddleName", NULL, name->additional);
+		e_ews_request_write_string_parameter (request, "MiddleName", NULL, name->additional);
 
 	e_contact_name_free (name);
 }
 
 static void
-ebews_set_date_value (ESoapMessage *message,
+ebews_set_date_value (ESoapRequest *request,
 		      EContact *contact,
 		      EContactField field,
 		      const gchar *element_name)
@@ -1063,7 +1063,7 @@ ebews_set_date_value (ESoapMessage *message,
 	value = g_strdup_printf ("%04d-%02d-%02dT00:00:00Z",
 		date->year, date->month, date->day);
 
-	e_ews_message_write_string_parameter (message, element_name, NULL, value);
+	e_ews_request_write_string_parameter (request, element_name, NULL, value);
 
 	e_contact_date_free (date);
 	g_free (value);
@@ -1071,30 +1071,30 @@ ebews_set_date_value (ESoapMessage *message,
 
 static void
 ebews_set_birth_date (EBookBackendEws *bbews,
-		      ESoapMessage *message,
+		      ESoapRequest *request,
 		      EContact *contact)
 {
-	ebews_set_date_value (message, contact, E_CONTACT_BIRTH_DATE, "Birthday");
+	ebews_set_date_value (request, contact, E_CONTACT_BIRTH_DATE, "Birthday");
 }
 
 static void
 ebews_set_anniversary (EBookBackendEws *bbews,
-		       ESoapMessage *message,
+		       ESoapRequest *request,
 		       EContact *contact)
 {
-	ebews_set_date_value (message, contact, E_CONTACT_ANNIVERSARY, "WeddingAnniversary");
+	ebews_set_date_value (request, contact, E_CONTACT_ANNIVERSARY, "WeddingAnniversary");
 }
 
 static void
 ebews_set_photo (EBookBackendEws *bbews,
-		 ESoapMessage *message,
+		 ESoapRequest *request,
 		 EContact *contact)
 {
 
 }
 
 static gboolean
-add_entry (ESoapMessage *msg,
+add_entry (ESoapRequest *request,
            EContact *contact,
            EContactField field,
            const gchar *entry_name,
@@ -1106,9 +1106,9 @@ add_entry (ESoapMessage *msg,
 
 	if (entry_val && *entry_val) {
 		if (include_hdr)
-			e_soap_message_start_element (msg, include_hdr, NULL, NULL);
+			e_soap_request_start_element (request, include_hdr, NULL, NULL);
 
-		e_ews_message_write_string_parameter_with_attribute (msg, "Entry", NULL, entry_val, "Key", entry_name);
+		e_ews_request_write_string_parameter_with_attribute (request, "Entry", NULL, entry_val, "Key", entry_name);
 
 		g_free (entry_val);
 		return TRUE;
@@ -1120,23 +1120,23 @@ add_entry (ESoapMessage *msg,
 
 static void
 ebews_set_phone_numbers (EBookBackendEws *bbews,
-			 ESoapMessage *msg,
+			 ESoapRequest *request,
 			 EContact *contact)
 {
 	gint i;
 	const gchar *include_hdr = "PhoneNumbers";
 
 	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++) {
-		if (add_entry (msg, contact, phone_field_map[i].field, phone_field_map[i].element, include_hdr))
+		if (add_entry (request, contact, phone_field_map[i].field, phone_field_map[i].element, include_hdr))
 			include_hdr = NULL;
 	}
 
 	if (!include_hdr)
-		e_soap_message_end_element (msg);
+		e_soap_request_end_element (request);
 }
 
 static gboolean
-add_physical_address (ESoapMessage *msg,
+add_physical_address (ESoapRequest *request,
                       EContact *contact,
                       EContactField field,
                       const gchar *entry_name,
@@ -1149,18 +1149,18 @@ add_physical_address (ESoapMessage *msg,
 		return FALSE;
 
 	if (include_start_hdr)
-		e_soap_message_start_element (msg, "PhysicalAddresses", NULL, NULL);
+		e_soap_request_start_element (request, "PhysicalAddresses", NULL, NULL);
 
-	e_soap_message_start_element (msg, "Entry", NULL, NULL);
+	e_soap_request_start_element (request, "Entry", NULL, NULL);
 
-	e_soap_message_add_attribute (msg, "Key", entry_name, NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "Street", NULL, contact_addr->street);
-	e_ews_message_write_string_parameter (msg, "City", NULL, contact_addr->locality);
-	e_ews_message_write_string_parameter (msg, "State", NULL, contact_addr->region);
-	e_ews_message_write_string_parameter (msg, "CountryOrRegion", NULL, contact_addr->country);
-	e_ews_message_write_string_parameter (msg, "PostalCode", NULL, contact_addr->code);
+	e_soap_request_add_attribute (request, "Key", entry_name, NULL, NULL);
+	e_ews_request_write_string_parameter (request, "Street", NULL, contact_addr->street);
+	e_ews_request_write_string_parameter (request, "City", NULL, contact_addr->locality);
+	e_ews_request_write_string_parameter (request, "State", NULL, contact_addr->region);
+	e_ews_request_write_string_parameter (request, "CountryOrRegion", NULL, contact_addr->country);
+	e_ews_request_write_string_parameter (request, "PostalCode", NULL, contact_addr->code);
 
-	e_soap_message_end_element (msg);
+	e_soap_request_end_element (request);
 	e_contact_address_free (contact_addr);
 
 	return TRUE;
@@ -1168,25 +1168,25 @@ add_physical_address (ESoapMessage *msg,
 
 static void
 ebews_set_address (EBookBackendEws *bbews,
-		   ESoapMessage *msg,
+		   ESoapRequest *request,
 		   EContact *contact)
 {
 	gboolean include_hdr = TRUE;
 
-	if (add_physical_address (msg, contact, E_CONTACT_ADDRESS_WORK, "Business", include_hdr))
+	if (add_physical_address (request, contact, E_CONTACT_ADDRESS_WORK, "Business", include_hdr))
 		include_hdr = FALSE;
-	if (add_physical_address (msg, contact, E_CONTACT_ADDRESS_HOME, "Home", include_hdr))
+	if (add_physical_address (request, contact, E_CONTACT_ADDRESS_HOME, "Home", include_hdr))
 		include_hdr = FALSE;
-	if (add_physical_address (msg, contact, E_CONTACT_ADDRESS_OTHER, "Other", include_hdr))
+	if (add_physical_address (request, contact, E_CONTACT_ADDRESS_OTHER, "Other", include_hdr))
 		include_hdr = FALSE;
 
 	if (!include_hdr)
-		e_soap_message_end_element (msg);
+		e_soap_request_end_element (request);
 }
 
 static void
 ebews_set_ims (EBookBackendEws *bbews,
-	       ESoapMessage *message,
+	       ESoapRequest *request,
 	       EContact *contact)
 {
 
@@ -1194,51 +1194,51 @@ ebews_set_ims (EBookBackendEws *bbews,
 
 static void
 ebews_set_notes (EBookBackendEws *bbews,
-		 ESoapMessage *msg,
+		 ESoapRequest *request,
 		 EContact *contact)
 {
 	gchar *notes = e_contact_get (contact, E_CONTACT_NOTE);
 	if (!notes)
 		return;
 
-	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, notes, "BodyType", "Text");
+	e_ews_request_write_string_parameter_with_attribute (request, "Body", NULL, notes, "BodyType", "Text");
 
 	g_free (notes);
 }
 
 static void
 ebews_set_emails (EBookBackendEws *bbews,
-		  ESoapMessage *msg,
+		  ESoapRequest *request,
 		  EContact *contact)
 {
 	const gchar *include_hdr = "EmailAddresses";
 
-	if (add_entry (msg, contact, E_CONTACT_EMAIL_1, "EmailAddress1", include_hdr))
+	if (add_entry (request, contact, E_CONTACT_EMAIL_1, "EmailAddress1", include_hdr))
 		include_hdr = NULL;
-	if (add_entry (msg, contact, E_CONTACT_EMAIL_2, "EmailAddress2", include_hdr))
+	if (add_entry (request, contact, E_CONTACT_EMAIL_2, "EmailAddress2", include_hdr))
 		include_hdr = NULL;
-	if (add_entry (msg, contact, E_CONTACT_EMAIL_3, "EmailAddress3", include_hdr))
+	if (add_entry (request, contact, E_CONTACT_EMAIL_3, "EmailAddress3", include_hdr))
 		include_hdr = NULL;
 
 	if (!include_hdr)
-		e_soap_message_end_element (msg);
+		e_soap_request_end_element (request);
 }
 
 static void
-convert_contact_property_to_updatexml (ESoapMessage *msg,
+convert_contact_property_to_updatexml (ESoapRequest *request,
                                        const gchar *name,
                                        const gchar *value,
                                        const gchar *prefix,
                                        const gchar *attr_name,
                                        const gchar *attr_value)
 {
-	e_ews_message_start_set_item_field (msg, name, prefix, "Contact");
-	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
-	e_ews_message_end_set_item_field (msg);
+	e_ews_request_start_set_item_field (request, name, prefix, "Contact");
+	e_ews_request_write_string_parameter_with_attribute (request, name, NULL, value, attr_name, attr_value);
+	e_ews_request_end_set_item_field (request);
 }
 
 static void
-convert_indexed_contact_property_to_updatexml (ESoapMessage *message,
+convert_indexed_contact_property_to_updatexml (ESoapRequest *request,
                                                const gchar *name,
                                                const gchar *value,
                                                const gchar *prefix,
@@ -1249,20 +1249,19 @@ convert_indexed_contact_property_to_updatexml (ESoapMessage *message,
 
 	if (!value || !*value)
 		delete_field = TRUE;
-	e_ews_message_start_set_indexed_item_field (message, name , prefix, "Contact", key, delete_field);
+	e_ews_request_start_set_indexed_item_field (request, name , prefix, "Contact", key, delete_field);
 
-	if (!delete_field)
-	{
-		e_soap_message_start_element (message, element_name, NULL, NULL);
-		e_ews_message_write_string_parameter_with_attribute (message, "Entry", NULL, value, "Key", key);
-		e_soap_message_end_element (message);
+	if (!delete_field) {
+		e_soap_request_start_element (request, element_name, NULL, NULL);
+		e_ews_request_write_string_parameter_with_attribute (request, "Entry", NULL, value, "Key", key);
+		e_soap_request_end_element (request);
 	}
-	e_ews_message_end_set_indexed_item_field (message, delete_field);
+	e_ews_request_end_set_indexed_item_field (request, delete_field);
 }
 
 static void
 ebews_set_full_name_changes (EBookBackendEws *bbews,
-			     ESoapMessage *message,
+			     ESoapRequest *request,
 			     EContact *new,
 			     EContact *old,
 			     gchar **out_new_change_key,
@@ -1271,7 +1270,7 @@ ebews_set_full_name_changes (EBookBackendEws *bbews,
 {
 	EContactName *name, *old_name;
 
-	if (!message)
+	if (!request)
 		return;
 
 	name = e_contact_get (new, E_CONTACT_NAME);
@@ -1280,17 +1279,17 @@ ebews_set_full_name_changes (EBookBackendEws *bbews,
 		return;
 
 	if (!old_name) {
-		convert_contact_property_to_updatexml (message, "GivenName", name->given, "contacts", NULL, NULL);
-		convert_contact_property_to_updatexml (message, "MiddleName", name->additional, "contacts", NULL, NULL);
+		convert_contact_property_to_updatexml (request, "GivenName", name->given, "contacts", NULL, NULL);
+		convert_contact_property_to_updatexml (request, "MiddleName", name->additional, "contacts", NULL, NULL);
 	} else if (!name) {
-		convert_contact_property_to_updatexml (message, "GivenName", "", "contacts", NULL, NULL);
+		convert_contact_property_to_updatexml (request, "GivenName", "", "contacts", NULL, NULL);
 
-		convert_contact_property_to_updatexml (message, "MiddleName", "", "contacts", NULL, NULL);
+		convert_contact_property_to_updatexml (request, "MiddleName", "", "contacts", NULL, NULL);
 	} else {
 		if (g_strcmp0 (name->given, old_name->given) != 0)
-			convert_contact_property_to_updatexml (message, "GivenName", name->given, "contacts", NULL, NULL);
+			convert_contact_property_to_updatexml (request, "GivenName", name->given, "contacts", NULL, NULL);
 		if (g_strcmp0 (name->additional, old_name->additional) != 0)
-			convert_contact_property_to_updatexml (message, "MiddleName", name->additional, "contacts", NULL, NULL);
+			convert_contact_property_to_updatexml (request, "MiddleName", name->additional, "contacts", NULL, NULL);
 	}
 
 	e_contact_name_free (name);
@@ -1299,7 +1298,7 @@ ebews_set_full_name_changes (EBookBackendEws *bbews,
 }
 
 static void
-ebews_set_date_value_changes (ESoapMessage *message,
+ebews_set_date_value_changes (ESoapRequest *request,
 			      EContact *new,
 			      EContact *old,
 			      EContactField field,
@@ -1307,7 +1306,7 @@ ebews_set_date_value_changes (ESoapMessage *message,
 {
 	EContactDate *new_date, *old_date;
 
-	if (!message)
+	if (!request)
 		return;
 
 	new_date = e_contact_get (new, field);
@@ -1320,11 +1319,11 @@ ebews_set_date_value_changes (ESoapMessage *message,
 			value = g_strdup_printf ("%04d-%02d-%02dT00:00:00Z",
 				new_date->year, new_date->month, new_date->day);
 
-			convert_contact_property_to_updatexml (message, element_name, value, "contacts", NULL, NULL);
+			convert_contact_property_to_updatexml (request, element_name, value, "contacts", NULL, NULL);
 
 			g_free (value);
 		} else {
-			e_ews_message_add_delete_item_field (message, element_name, "contacts");
+			e_ews_request_add_delete_item_field (request, element_name, "contacts");
 		}
 	}
 
@@ -1334,26 +1333,26 @@ ebews_set_date_value_changes (ESoapMessage *message,
 
 static void
 ebews_set_birth_date_changes (EBookBackendEws *bbews,
-			      ESoapMessage *message,
+			      ESoapRequest *request,
 			      EContact *new,
 			      EContact *old,
 			      gchar **out_new_change_key,
 			      GCancellable *cancellable,
 			      GError **error)
 {
-	ebews_set_date_value_changes (message, new, old, E_CONTACT_BIRTH_DATE, "Birthday");
+	ebews_set_date_value_changes (request, new, old, E_CONTACT_BIRTH_DATE, "Birthday");
 }
 
 static void
 ebews_set_anniversary_changes (EBookBackendEws *bbews,
-			       ESoapMessage *message,
+			       ESoapRequest *request,
 			       EContact *new,
 			       EContact *old,
 			       gchar **out_new_change_key,
 			       GCancellable *cancellable,
 			       GError **error)
 {
-	ebews_set_date_value_changes (message, new, old, E_CONTACT_ANNIVERSARY, "WeddingAnniversary");
+	ebews_set_date_value_changes (request, new, old, E_CONTACT_ANNIVERSARY, "WeddingAnniversary");
 }
 
 static void
@@ -1472,7 +1471,7 @@ ebb_ews_photo_changed (EBookMetaBackend *meta_backend,
 
 static void
 ebews_set_photo_changes (EBookBackendEws *bbews,
-			 ESoapMessage *message,
+			 ESoapRequest *request,
 			 EContact *new,
 			 EContact *old,
 			 gchar **out_new_change_key,
@@ -1494,7 +1493,7 @@ ebews_set_photo_changes (EBookBackendEws *bbews,
 		return;
 	}
 
-	if (message) {
+	if (request) {
 		/* Photo changes can be done only in pre-flight stage,
 		   because it modifies ChangeKey */
 		return;
@@ -1579,7 +1578,7 @@ ebews_set_photo_changes (EBookBackendEws *bbews,
 
 static void
 ebews_set_phone_number_changes (EBookBackendEws *bbews,
-				ESoapMessage *message,
+				ESoapRequest *request,
 				EContact *new,
 				EContact *old,
 				gchar **out_new_change_key,
@@ -1589,7 +1588,7 @@ ebews_set_phone_number_changes (EBookBackendEws *bbews,
 	gint i;
 	gchar *new_value, *old_value;
 
-	if (!message)
+	if (!request)
 		return;
 
 	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++) {
@@ -1597,7 +1596,7 @@ ebews_set_phone_number_changes (EBookBackendEws *bbews,
 		old_value = e_contact_get (old, phone_field_map[i].field);
 
 		if (g_strcmp0 (new_value, old_value) != 0)
-			convert_indexed_contact_property_to_updatexml (message, "PhoneNumber", new_value, "contacts", "PhoneNumbers", phone_field_map[i].element);
+			convert_indexed_contact_property_to_updatexml (request, "PhoneNumber", new_value, "contacts", "PhoneNumbers", phone_field_map[i].element);
 
 		g_free (new_value);
 		g_free (old_value);
@@ -1605,7 +1604,7 @@ ebews_set_phone_number_changes (EBookBackendEws *bbews,
 }
 
 static void
-convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *message,
+convert_indexed_contact_property_to_updatexml_physical_address (ESoapRequest *request,
                                                                 const gchar *name,
                                                                 const gchar *uri_element,
                                                                 const gchar *value,
@@ -1621,26 +1620,25 @@ convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *me
 
 	fielduri = g_strconcat (name, ":", uri_element, NULL);
 
-	e_ews_message_start_set_indexed_item_field (message, fielduri , prefix, "Contact", key, delete_field);
+	e_ews_request_start_set_indexed_item_field (request, fielduri , prefix, "Contact", key, delete_field);
 
-	if (!delete_field)
-	{
-		e_soap_message_start_element (message, element_name, NULL, NULL);
+	if (!delete_field) {
+		e_soap_request_start_element (request, element_name, NULL, NULL);
 
-		e_soap_message_start_element (message, "Entry", NULL, NULL);
-		e_soap_message_add_attribute (message, "Key", key, NULL, NULL);
-		e_ews_message_write_string_parameter (message, uri_element, NULL, value);
-		e_soap_message_end_element (message);
+		e_soap_request_start_element (request, "Entry", NULL, NULL);
+		e_soap_request_add_attribute (request, "Key", key, NULL, NULL);
+		e_ews_request_write_string_parameter (request, uri_element, NULL, value);
+		e_soap_request_end_element (request);
 
-		e_soap_message_end_element (message);
+		e_soap_request_end_element (request);
 	}
-	e_ews_message_end_set_indexed_item_field (message, delete_field);
+	e_ews_request_end_set_indexed_item_field (request, delete_field);
 
 	g_free (fielduri);
 }
 
 static void
-compare_address (ESoapMessage *message,
+compare_address (ESoapRequest *request,
                  EContact *new,
                  EContact *old,
                  EContactField field,
@@ -1665,15 +1663,15 @@ compare_address (ESoapMessage *message,
 	}
 
 	if (set || g_strcmp0 (new_address->street, old_address->street) != 0)
-		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "Street", new_address->street, "contacts", "PhysicalAddresses", key);
+		convert_indexed_contact_property_to_updatexml_physical_address (request, "PhysicalAddress", "Street", new_address->street, "contacts", "PhysicalAddresses", key);
 	if (set || g_strcmp0 (new_address->locality, old_address->locality) != 0)
-		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "City", new_address->locality, "contacts", "PhysicalAddresses", key);
+		convert_indexed_contact_property_to_updatexml_physical_address (request, "PhysicalAddress", "City", new_address->locality, "contacts", "PhysicalAddresses", key);
 	if (set || g_strcmp0 (new_address->region, old_address->region) != 0)
-		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "State", new_address->region, "contacts", "PhysicalAddresses", key);
+		convert_indexed_contact_property_to_updatexml_physical_address (request, "PhysicalAddress", "State", new_address->region, "contacts", "PhysicalAddresses", key);
 	if (set || g_strcmp0 (new_address->country, old_address->country) != 0)
-		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "CountryOrRegion", new_address->country, "contacts", "PhysicalAddresses", key);
+		convert_indexed_contact_property_to_updatexml_physical_address (request, "PhysicalAddress", "CountryOrRegion", new_address->country, "contacts", "PhysicalAddresses", key);
 	if (set || g_strcmp0 (new_address->code, old_address->code) != 0)
-		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "PostalCode", new_address->code, "contacts", "PhysicalAddresses", key);
+		convert_indexed_contact_property_to_updatexml_physical_address (request, "PhysicalAddress", "PostalCode", new_address->code, "contacts", "PhysicalAddresses", key);
 
 	e_contact_address_free (old_address);
 	e_contact_address_free (new_address);
@@ -1681,24 +1679,24 @@ compare_address (ESoapMessage *message,
 
 static void
 ebews_set_address_changes (EBookBackendEws *bbews,
-			   ESoapMessage *message,
+			   ESoapRequest *request,
 			   EContact *new,
 			   EContact *old,
 			   gchar **out_new_change_key,
 			   GCancellable *cancellable,
 			   GError **error)
 {
-	if (!message)
+	if (!request)
 		return;
 
-	compare_address (message, new, old, E_CONTACT_ADDRESS_WORK, "Business");
-	compare_address (message, new, old, E_CONTACT_ADDRESS_HOME, "Home");
-	compare_address (message, new, old, E_CONTACT_ADDRESS_OTHER, "Other");
+	compare_address (request, new, old, E_CONTACT_ADDRESS_WORK, "Business");
+	compare_address (request, new, old, E_CONTACT_ADDRESS_HOME, "Home");
+	compare_address (request, new, old, E_CONTACT_ADDRESS_OTHER, "Other");
 }
 
 static void
 ebews_set_im_changes (EBookBackendEws *bbews,
-		      ESoapMessage *message,
+		      ESoapRequest *request,
 		      EContact *new,
 		      EContact *old,
 		      gchar **out_new_change_key,
@@ -1710,7 +1708,7 @@ ebews_set_im_changes (EBookBackendEws *bbews,
 
 static void
 ebews_set_notes_changes (EBookBackendEws *bbews,
-			 ESoapMessage *message,
+			 ESoapRequest *request,
 			 EContact *new,
 			 EContact *old,
 			 gchar **out_new_change_key,
@@ -1719,7 +1717,7 @@ ebews_set_notes_changes (EBookBackendEws *bbews,
 {
 	gchar *old_notes, *new_notes;
 
-	if (!message)
+	if (!request)
 		return;
 
 	old_notes = e_contact_get (old, E_CONTACT_NOTE);
@@ -1727,7 +1725,7 @@ ebews_set_notes_changes (EBookBackendEws *bbews,
 
 	if (g_strcmp0 (old_notes, new_notes) != 0) {
 		convert_contact_property_to_updatexml (
-				message, "Body", new_notes ? new_notes : "", "item", "BodyType", "Text");
+				request, "Body", new_notes ? new_notes : "", "item", "BodyType", "Text");
 	}
 
 	g_free (old_notes);
@@ -1736,7 +1734,7 @@ ebews_set_notes_changes (EBookBackendEws *bbews,
 
 static void
 ebews_set_email_changes (EBookBackendEws *bbews,
-			 ESoapMessage *message,
+			 ESoapRequest *request,
 			 EContact *new,
 			 EContact *old,
 			 gchar **out_new_change_key,
@@ -1745,27 +1743,27 @@ ebews_set_email_changes (EBookBackendEws *bbews,
 {
 	gchar *new_value, *old_value;
 
-	if (!message)
+	if (!request)
 		return;
 
 	new_value = e_contact_get (new, E_CONTACT_EMAIL_1);
 	old_value = e_contact_get (old, E_CONTACT_EMAIL_1);
 	if (g_strcmp0 (new_value, old_value) != 0)
-		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress1");
+		convert_indexed_contact_property_to_updatexml (request, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress1");
 	g_free (new_value);
 	g_free (old_value);
 
 	new_value = e_contact_get (new, E_CONTACT_EMAIL_2);
 	old_value = e_contact_get (old, E_CONTACT_EMAIL_2);
 	if (g_strcmp0 (new_value, old_value) != 0)
-		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress2");
+		convert_indexed_contact_property_to_updatexml (request, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress2");
 	g_free (new_value);
 	g_free (old_value);
 
 	new_value = e_contact_get (new, E_CONTACT_EMAIL_3);
 	old_value = e_contact_get (old, E_CONTACT_EMAIL_3);
 	if (g_strcmp0 (new_value, old_value) != 0)
-		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress3");
+		convert_indexed_contact_property_to_updatexml (request, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress3");
 	g_free (new_value);
 	g_free (old_value);
 }
@@ -1786,7 +1784,7 @@ ebews_populate_givenname (EBookBackendEws *bbews,
 
 static void
 ebews_set_givenname (EBookBackendEws *bbews,
-		     ESoapMessage *message,
+		     ESoapRequest *request,
 		     EContact *contact)
 {
 	/* Does nothing, the "GivenName" is filled by the "FullName" code */
@@ -1794,7 +1792,7 @@ ebews_set_givenname (EBookBackendEws *bbews,
 
 static void
 ebews_set_givenname_changes (EBookBackendEws *bbews,
-			     ESoapMessage *message,
+			     ESoapRequest *request,
 			     EContact *new,
 			     EContact *old,
 			     gchar **out_new_change_key,
@@ -1839,7 +1837,7 @@ ebews_populate_categories (EBookBackendEws *bbews,
 
 static void
 ebews_set_categories (EBookBackendEws *bbews,
-		      ESoapMessage *message,
+		      ESoapRequest *request,
 		      EContact *contact)
 {
 	GList *values;
@@ -1848,13 +1846,13 @@ ebews_set_categories (EBookBackendEws *bbews,
 	if (values) {
 		GList *link;
 
-		e_soap_message_start_element (message, "Categories", NULL, NULL);
+		e_soap_request_start_element (request, "Categories", NULL, NULL);
 		for (link = values; link; link = g_list_next (link)) {
 			const gchar *category = link->data;
 			if (category && *category)
-				e_ews_message_write_string_parameter (message, "String", NULL, category);
+				e_ews_request_write_string_parameter (request, "String", NULL, category);
 		}
-		e_soap_message_end_element (message);
+		e_soap_request_end_element (request);
 	}
 
 	g_list_free_full (values, g_free);
@@ -1862,7 +1860,7 @@ ebews_set_categories (EBookBackendEws *bbews,
 
 static void
 ebews_set_categories_changes (EBookBackendEws *bbews,
-			      ESoapMessage *message,
+			      ESoapRequest *request,
 			      EContact *new,
 			      EContact *old,
 			      gchar **out_new_change_key,
@@ -1871,7 +1869,7 @@ ebews_set_categories_changes (EBookBackendEws *bbews,
 {
 	gchar *old_categories, *new_categories;
 
-	if (!message)
+	if (!request)
 		return;
 
 	old_categories = e_contact_get (old, E_CONTACT_CATEGORIES);
@@ -1882,27 +1880,27 @@ ebews_set_categories_changes (EBookBackendEws *bbews,
 
 		values = e_contact_get (new, E_CONTACT_CATEGORY_LIST);
 		if (values) {
-			e_soap_message_start_element (message, "SetItemField", NULL, NULL);
+			e_soap_request_start_element (request, "SetItemField", NULL, NULL);
 
-			e_soap_message_start_element (message, "FieldURI", NULL, NULL);
-			e_soap_message_add_attribute (message, "FieldURI", "item:Categories", NULL, NULL);
-			e_soap_message_end_element (message);
+			e_soap_request_start_element (request, "FieldURI", NULL, NULL);
+			e_soap_request_add_attribute (request, "FieldURI", "item:Categories", NULL, NULL);
+			e_soap_request_end_element (request);
 
-			e_soap_message_start_element (message, "Contact", NULL, NULL);
-			e_soap_message_start_element (message, "Categories", NULL, NULL);
+			e_soap_request_start_element (request, "Contact", NULL, NULL);
+			e_soap_request_start_element (request, "Categories", NULL, NULL);
 
 			for (link = values; link; link = g_list_next (link)) {
 				const gchar *category = link->data;
 
 				if (category && *category)
-					e_ews_message_write_string_parameter (message, "String", NULL, category);
+					e_ews_request_write_string_parameter (request, "String", NULL, category);
 			}
 
-			e_soap_message_end_element (message); /* Categories */
-			e_soap_message_end_element (message); /* Contact */
-			e_soap_message_end_element (message); /* SetItemField */
+			e_soap_request_end_element (request); /* Categories */
+			e_soap_request_end_element (request); /* Contact */
+			e_soap_request_end_element (request); /* SetItemField */
 		} else {
-			e_ews_message_add_delete_item_field (message, "Categories", "item");
+			e_ews_request_add_delete_item_field (request, "Categories", "item");
 		}
 
 		g_list_free_full (values, g_free);
@@ -1919,8 +1917,8 @@ static const struct field_element_mapping {
 	/* set function for simple string type values */
 	const gchar * (*get_simple_prop_func) (EEwsItem *item);
 	void (*populate_contact_func)(EBookBackendEws *bbews, EContact *contact, EEwsItem *item, GCancellable *cancellable, GError **error);
-	void (*set_value_in_soap_message) (EBookBackendEws *bbews, ESoapMessage *message, EContact *contact);
-	void (*set_changes) (EBookBackendEws *bbews, ESoapMessage *message, EContact *new, EContact *old, gchar **out_new_change_key, GCancellable *cancellable, GError **error);
+	void (*set_value_in_soap_request) (EBookBackendEws *bbews, ESoapRequest *request, EContact *contact);
+	void (*set_changes) (EBookBackendEws *bbews, ESoapRequest *request, EContact *new, EContact *old, gchar **out_new_change_key, GCancellable *cancellable, GError **error);
 
 } mappings[] = {
 	/* The order should be maintained for create contacts to work */
@@ -1959,12 +1957,12 @@ static const struct field_element_mapping {
 };
 
 static void
-ebb_ews_write_dl_members (ESoapMessage *msg,
+ebb_ews_write_dl_members (ESoapRequest *request,
 			  EContact *contact)
 {
 	GSList *emails, *l;
 
-	e_soap_message_start_element (msg, "Members", NULL, NULL);
+	e_soap_request_start_element (request, "Members", NULL, NULL);
 
 	emails = e_contact_get (contact, E_CONTACT_EMAIL);
 	for (l = emails; l; l = l->next) {
@@ -1978,19 +1976,19 @@ ebb_ews_write_dl_members (ESoapMessage *msg,
 			const gchar *name = NULL, *email = NULL;
 
 			if (camel_internet_address_get (addr, 0, &name, &email) && email) {
-				e_soap_message_start_element (msg, "Member", NULL, NULL);
-				e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
-				e_ews_message_write_string_parameter (msg, "Name", NULL, name ? name : email);
-				e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, email);
-				e_soap_message_end_element (msg); /* Mailbox */
-				e_soap_message_end_element (msg); /* Member */
+				e_soap_request_start_element (request, "Member", NULL, NULL);
+				e_soap_request_start_element (request, "Mailbox", NULL, NULL);
+				e_ews_request_write_string_parameter (request, "Name", NULL, name ? name : email);
+				e_ews_request_write_string_parameter (request, "EmailAddress", NULL, email);
+				e_soap_request_end_element (request); /* Mailbox */
+				e_soap_request_end_element (request); /* Member */
 			}
 		}
 		g_object_unref (addr);
 	}
 
 	g_slist_free_full (emails, g_free);
-	e_soap_message_end_element (msg); /* Members */
+	e_soap_request_end_element (request); /* Members */
 }
 
 typedef struct _CreateItemsData
@@ -2000,7 +1998,7 @@ typedef struct _CreateItemsData
 } CreateItemsData;
 
 static gboolean
-ebb_ews_convert_dl_to_xml_cb (ESoapMessage *msg,
+ebb_ews_convert_dl_to_xml_cb (ESoapRequest *request,
 			      gpointer user_data,
 			      GError **error)
 {
@@ -2009,22 +2007,22 @@ ebb_ews_convert_dl_to_xml_cb (ESoapMessage *msg,
 	EVCardAttribute *attribute;
 	GList *values;
 
-	/* Prepare DistributionList node in the SOAP message */
-	e_soap_message_start_element (msg, "DistributionList", NULL, NULL);
+	/* Prepare DistributionList node in the SOAP request */
+	e_soap_request_start_element (request, "DistributionList", NULL, NULL);
 
 	attribute = e_vcard_get_attribute (E_VCARD (contact), EVC_FN);
 	values = e_vcard_attribute_get_values (attribute);
-	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, values->data);
+	e_ews_request_write_string_parameter (request, "DisplayName", NULL, values->data);
 
-	ebb_ews_write_dl_members (msg, contact);
+	ebb_ews_write_dl_members (request, contact);
 
-	e_soap_message_end_element (msg); /* DistributionList */
+	e_soap_request_end_element (request); /* DistributionList */
 
 	return TRUE;
 }
 
 static gboolean
-ebb_ews_convert_contact_to_xml_cb (ESoapMessage *msg,
+ebb_ews_convert_contact_to_xml_cb (ESoapRequest *request,
 				   gpointer user_data,
 				   GError **error)
 {
@@ -2032,8 +2030,8 @@ ebb_ews_convert_contact_to_xml_cb (ESoapMessage *msg,
 	EContact *contact = cid->contact;
 	gint i, element_type;
 
-	/* Prepare Contact node in the SOAP message */
-	e_soap_message_start_element (msg, "Contact", NULL, NULL);
+	/* Prepare Contact node in the SOAP request */
+	e_soap_request_start_element (request, "Contact", NULL, NULL);
 
 	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
 		element_type = mappings[i].element_type;
@@ -2047,14 +2045,14 @@ ebb_ews_convert_contact_to_xml_cb (ESoapMessage *msg,
 
 			val = e_contact_get (contact, mappings[i].field_id);
 			if (val && *val)
-				e_ews_message_write_string_parameter (msg, mappings[i].element_name, NULL, val);
+				e_ews_request_write_string_parameter (request, mappings[i].element_name, NULL, val);
 			g_free (val);
 		} else
-			mappings[i].set_value_in_soap_message (cid->bbews, msg, contact);
+			mappings[i].set_value_in_soap_request (cid->bbews, request, contact);
 	}
 
 	/* end of "Contact" */
-	e_soap_message_end_element (msg);
+	e_soap_request_end_element (request);
 
 	return TRUE;
 }
@@ -2070,7 +2068,7 @@ typedef struct _ConvertData {
 } ConvertData;
 
 static gboolean
-ebb_ews_convert_dl_to_updatexml_cb (ESoapMessage *msg,
+ebb_ews_convert_dl_to_updatexml_cb (ESoapRequest *request,
 				    gpointer user_data,
 				    GError **error)
 {
@@ -2085,14 +2083,14 @@ ebb_ews_convert_dl_to_updatexml_cb (ESoapMessage *msg,
 			change_key = e_contact_get (old_contact, E_CONTACT_REV);
 	}
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+	e_ews_request_start_item_change (request, E_EWS_ITEMCHANGE_TYPE_ITEM,
 		e_contact_get_const (old_contact, E_CONTACT_UID),
 		cd->change_key ? cd->change_key : change_key,
 		0);
-	e_ews_message_start_set_item_field (msg, "Members", "distributionlist", "DistributionList");
-	ebb_ews_write_dl_members (msg, new_contact);
-	e_ews_message_end_set_item_field (msg);
-	e_ews_message_end_item_change (msg);
+	e_ews_request_start_set_item_field (request, "Members", "distributionlist", "DistributionList");
+	ebb_ews_write_dl_members (request, new_contact);
+	e_ews_request_end_set_item_field (request);
+	e_ews_request_end_item_change (request);
 
 	g_free (change_key);
 
@@ -2100,7 +2098,7 @@ ebb_ews_convert_dl_to_updatexml_cb (ESoapMessage *msg,
 }
 
 static gboolean
-ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
+ebb_ews_convert_contact_to_updatexml_cb (ESoapRequest *request,
 					 gpointer user_data,
 					 GError **error)
 {
@@ -2136,7 +2134,7 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 			change_key = e_contact_get (old_contact, E_CONTACT_REV);
 	}
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+	e_ews_request_start_item_change (request, E_EWS_ITEMCHANGE_TYPE_ITEM,
 		e_contact_get_const (old_contact, E_CONTACT_UID),
 		cd->change_key ? cd->change_key : change_key,
 		0);
@@ -2149,7 +2147,7 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 			value =  e_contact_get (new_contact, mappings[i].field_id);
 			old_value =  e_contact_get (old_contact, mappings[i].field_id);
 			if (g_strcmp0 (value, old_value) != 0)
-				convert_contact_property_to_updatexml (msg, mappings[i].element_name, value, "contacts", NULL, NULL);
+				convert_contact_property_to_updatexml (request, mappings[i].element_name, value, "contacts", NULL, NULL);
 			if (value)
 				g_free (value);
 			if (old_value)
@@ -2160,7 +2158,7 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 			if (mappings[i].field_id == E_CONTACT_UID)
 				continue;
 
-			mappings[i].set_changes (cd->bbews, msg, new_contact, old_contact, &new_change_key, cd->cancellable, cd->error);
+			mappings[i].set_changes (cd->bbews, request, new_contact, old_contact, &new_change_key, cd->cancellable, cd->error);
 
 			if (new_change_key) {
 				g_free (cd->change_key);
@@ -2169,7 +2167,7 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 		}
 	}
 
-	e_ews_message_end_item_change (msg);
+	e_ews_request_end_item_change (request);
 
 	g_free (change_key);
 
@@ -2300,8 +2298,8 @@ ebb_ews_traverse_dl (EBookBackendEws *bbews,
 			bbews->priv->cnc,
 			EWS_PRIORITY_MEDIUM,
 			mb,
-			&members,
 			&includes_last,
+			&members,
 			cancellable,
 			&local_error);
 
@@ -2505,8 +2503,8 @@ ebb_ews_fetch_items_sync (EBookBackendEws *bbews,
 
 		d_name = e_ews_item_get_subject (item);
 		if (e_ews_connection_expand_dl_sync (
-			bbews->priv->cnc, EWS_PRIORITY_MEDIUM, mb, &members,
-			&includes_last, cancellable, &local_error)) {
+			bbews->priv->cnc, EWS_PRIORITY_MEDIUM, mb, &includes_last, &members,
+			cancellable, &local_error)) {
 			ret = ebb_ews_contacts_append_dl (bbews, item, id, d_name, members, contacts, cancellable, error);
 			g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
 		} else {
@@ -3462,7 +3460,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 		success = ebb_ews_build_restriction (expr, &restriction_expr) &&
 			e_book_meta_backend_ensure_connected_sync (meta_backend, cancellable, error) &&
 			e_ews_connection_resolve_names_sync (bbews->priv->cnc, EWS_PRIORITY_MEDIUM, restriction_expr,
-				EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts, &includes_last_item, cancellable, error);
+				EWS_SEARCH_AD, NULL, TRUE, &includes_last_item, &mailboxes, &contacts, cancellable, error);
 
 		if (success) {
 			EBookCache *book_cache;
@@ -4001,7 +3999,7 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 
 			d (printf ("Ewsgal: Fetching oal full details file\n"));
 			if (!e_ews_connection_get_oal_detail_sync (oab_cnc, bbews->priv->folder_id, NULL, last_sync_tag, &full_l, &etag, cancellable, &local_error)) {
-				if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_NOT_MODIFIED)) {
+				if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_MODIFIED)) {
 					g_clear_error (&local_error);
 				} else {
 					success = FALSE;
@@ -4554,7 +4552,7 @@ ebb_ews_get_destination_address (EBackend *backend,
 				 guint16 *port)
 {
 	CamelEwsSettings *ews_settings;
-	SoupURI *soup_uri;
+	GUri *uri;
 	gchar *host_url;
 	gboolean result = FALSE;
 
@@ -4572,10 +4570,10 @@ ebb_ews_get_destination_address (EBackend *backend,
 	host_url = camel_ews_settings_dup_hosturl (ews_settings);
 	g_return_val_if_fail (host_url != NULL, FALSE);
 
-	soup_uri = soup_uri_new (host_url);
-	if (soup_uri) {
-		*host = g_strdup (soup_uri_get_host (soup_uri));
-		*port = soup_uri_get_port (soup_uri);
+	uri = g_uri_parse (host_url, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+	if (uri) {
+		*host = g_strdup (g_uri_get_host (uri));
+		*port = g_uri_get_port (uri);
 
 		result = *host && **host;
 		if (!result) {
@@ -4583,7 +4581,7 @@ ebb_ews_get_destination_address (EBackend *backend,
 			*host = NULL;
 		}
 
-		soup_uri_free (soup_uri);
+		g_uri_unref (uri);
 	}
 
 	g_free (host_url);

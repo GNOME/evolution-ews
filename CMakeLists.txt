@@ -18,16 +18,16 @@ set(PROJECT_DISTCONFIGURE_PARAMS
 )
 
 # Keep these two definitions in agreement.
-set(glib_minimum_version 2.62)
-set(glib_encoded_version GLIB_VERSION_2_62)
+set(glib_minimum_version 2.68)
+set(glib_encoded_version GLIB_VERSION_2_68)
 
 # Keep these two definitions in agreement.
 set(gdk_minimum_version 3.10)
 set(gdk_encoded_version GDK_VERSION_3_10)
 
 # Keep these two definitions in agreement.
-set(soup_minimum_version 2.58)
-set(soup_encoded_version SOUP_VERSION_2_58)
+set(soup_minimum_version 3.0)
+set(soup_encoded_version SOUP_VERSION_3_0)
 
 # Warn about API usage that violates our minimum requirements.
 add_definitions(-DGLIB_VERSION_MAX_ALLOWED=${glib_encoded_version})
@@ -139,7 +139,7 @@ pkg_check_modules(GNOME_PLATFORM REQUIRED
 	gtk+-3.0>=${gdk_minimum_version}
 )
 
-pkg_check_modules(SOUP REQUIRED libsoup-2.4>=${soup_minimum_version})
+pkg_check_modules(SOUP REQUIRED libsoup-3.0>=${soup_minimum_version})
 
 pkg_check_modules(LIBICAL_GLIB REQUIRED libical-glib>=${libical_glib_minimum_version})
 
@@ -287,5 +287,6 @@ add_subdirectory(po)
 add_subdirectory(src)
 
 if(ENABLE_TESTS)
-	add_subdirectory(tests)
+	message(WARNING "tests are disabled until uhttpmock is ported to libsoup3")
+	#add_subdirectory(tests)
 endif(ENABLE_TESTS)

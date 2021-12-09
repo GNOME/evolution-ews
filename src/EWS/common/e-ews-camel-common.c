@@ -9,7 +9,7 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include "common/e-ews-message.h"
+#include "common/e-ews-request.h"
 #include "common/e-ews-item-change.h"
 
 #include "e-ews-camel-common.h"
@@ -63,7 +63,7 @@ filter_recipients (CamelMimeMessage *message,
 }
 
 static void
-write_recipients (ESoapMessage *msg,
+write_recipients (ESoapRequest *request,
 		  const gchar *elem_name,
 		  GHashTable *recips,
 		  gboolean is_resend)
@@ -71,23 +71,23 @@ write_recipients (ESoapMessage *msg,
 	GHashTableIter iter;
 	gpointer key, value;
 
-	g_return_if_fail (msg != NULL);
+	g_return_if_fail (request != NULL);
 	g_return_if_fail (elem_name != NULL);
 	g_return_if_fail (recips != NULL);
 
 	if (!is_resend && !g_hash_table_size (recips))
 		return;
 
-	e_soap_message_start_element (msg, elem_name, NULL, NULL);
+	e_soap_request_start_element (request, elem_name, NULL, NULL);
 
 	g_hash_table_iter_init (&iter, recips);
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
-		e_ews_message_write_string_parameter_with_attribute (msg, "EmailAddress", NULL, key, NULL, NULL);
-		e_soap_message_end_element (msg); /* Mailbox */
+		e_soap_request_start_element (request, "Mailbox", NULL, NULL);
+		e_ews_request_write_string_parameter_with_attribute (request, "EmailAddress", NULL, key, NULL, NULL);
+		e_soap_request_end_element (request); /* Mailbox */
 	}
 
-	e_soap_message_end_element (msg); /* elem_name */
+	e_soap_request_end_element (request); /* elem_name */
 }
 
 static gboolean
@@ -101,7 +101,7 @@ is_any_address_filled (CamelInternetAddress *addrs)
 #define MAPI_MSGFLAG_UNSENT	0x08
 
 static gboolean
-create_mime_message_cb (ESoapMessage *msg,
+create_mime_message_cb (ESoapRequest *request,
                         gpointer user_data,
 			GError **error)
 {
@@ -132,10 +132,10 @@ create_mime_message_cb (ESoapMessage *msg,
 		}
 	}
 
-	e_soap_message_start_element (msg, "Message", NULL, NULL);
-	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
+	e_soap_request_start_element (request, "Message", NULL, NULL);
+	e_soap_request_start_element (request, "MimeContent", NULL, NULL);
 
-	/* This is horrid. We really need to extend ESoapMessage to allow us
+	/* This is horrid. We really need to extend ESoapRequest to allow us
 	 * to stream this directly rather than storing it in RAM. Which right
 	 * now we are doing about four times: the GByteArray in the mem stream,
 	 * then the base64 version, then the xmlDoc, then the soup request. */
@@ -160,28 +160,27 @@ create_mime_message_cb (ESoapMessage *msg,
 	g_object_unref (mem);
 	g_object_unref (filtered);
 
-	e_soap_message_write_string (msg, base64);
+	e_soap_request_write_string (request, base64);
 	g_free (base64);
 
-	e_soap_message_end_element (msg); /* MimeContent */
+	e_soap_request_end_element (request); /* MimeContent */
 
 	content_type = camel_mime_part_get_content_type (CAMEL_MIME_PART (create_data->message));
 	if (content_type && camel_content_type_is (content_type, "multipart", "report") &&
 	    camel_content_type_param (content_type, "report-type") &&
 	    g_ascii_strcasecmp (camel_content_type_param (content_type, "report-type"), "disposition-notification") == 0) {
 		/* it's a disposition notification reply, set ItemClass too */
-		e_soap_message_start_element (msg, "ItemClass", NULL, NULL);
-		e_soap_message_write_string (msg, "REPORT.IPM.NOTE.IPNRN");
-		e_soap_message_end_element (msg); /* ItemClass */
+		e_soap_request_start_element (request, "ItemClass", NULL, NULL);
+		e_soap_request_write_string (request, "REPORT.IPM.NOTE.IPNRN");
+		e_soap_request_end_element (request); /* ItemClass */
 	}
 
-	e_ews_message_write_string_parameter_with_attribute (
-			msg,
-			"Importance",
-			NULL,
-			(message_camel_flags & CAMEL_MESSAGE_FLAGGED) != 0 ? "High" : "Normal",
-			NULL,
-			NULL);
+	e_ews_request_write_string_parameter_with_attribute (request,
+		"Importance",
+		NULL,
+		(message_camel_flags & CAMEL_MESSAGE_FLAGGED) != 0 ? "High" : "Normal",
+		NULL,
+		NULL);
 
 	/* more MAPI crap.  You can't just set the IsDraft property
 	 * here you have to use the MAPI MSGFLAG_UNSENT extended
@@ -192,14 +191,14 @@ create_mime_message_cb (ESoapMessage *msg,
 	if ((message_camel_flags & CAMEL_MESSAGE_DRAFT) != 0)
 		msgflag |= MAPI_MSGFLAG_UNSENT;
 
-	e_ews_message_add_extended_property_tag_int (msg, 0x0e07, msgflag);
+	e_ews_request_add_extended_property_tag_int (request, 0x0e07, msgflag);
 
 	if ((message_camel_flags & (CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_ANSWERED)) != 0) {
 		gint icon;
 
 		icon = (message_camel_flags & CAMEL_MESSAGE_ANSWERED) != 0 ? 0x105 : 0x106;
 
-		e_ews_message_add_extended_property_tag_int (msg, 0x1080, icon);
+		e_ews_request_add_extended_property_tag_int (request, 0x1080, icon);
 	}
 
 	if (create_data->info) {
@@ -221,15 +220,15 @@ create_mime_message_cb (ESoapMessage *msg,
 			dueby_tt = camel_header_decode_date (dueby, NULL);
 
 		/* PidTagFlagStatus */
-		e_ews_message_add_extended_property_tag_int (msg, 0x1090,
+		e_ews_request_add_extended_property_tag_int (request, 0x1090,
 			followup ? (completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */) : 0x0);
 
 		if (followup) {
 			/* PidLidFlagRequest */
-			e_ews_message_add_extended_property_distinguished_tag_string (msg, "Common", 0x8530, followup);
+			e_ews_request_add_extended_property_distinguished_tag_string (request, "Common", 0x8530, followup);
 
 			/* PidTagToDoItemFlags */
-			e_ews_message_add_extended_property_tag_int (msg, 0x0e2b, 1);
+			e_ews_request_add_extended_property_tag_int (request, 0x0e2b, 1);
 		}
 
 		if (followup && completed_tt != (time_t) 0) {
@@ -237,33 +236,33 @@ create_mime_message_cb (ESoapMessage *msg,
 			completed_tt = completed_tt - (completed_tt % 60);
 
 			/* PidTagFlagCompleteTime */
-			e_ews_message_add_extended_property_tag_time (msg, 0x1091, completed_tt);
+			e_ews_request_add_extended_property_tag_time (request, 0x1091, completed_tt);
 
 			/* PidLidTaskDateCompleted */
-			e_ews_message_add_extended_property_distinguished_tag_time (msg, "Task", 0x810f, completed_tt);
+			e_ews_request_add_extended_property_distinguished_tag_time (request, "Task", 0x810f, completed_tt);
 
 			/* PidLidTaskStatus */
-			e_ews_message_add_extended_property_distinguished_tag_int (msg, "Task", 0x8101, 2);
+			e_ews_request_add_extended_property_distinguished_tag_int (request, "Task", 0x8101, 2);
 
 			/* PidLidPercentComplete */
-			e_ews_message_add_extended_property_distinguished_tag_double (msg, "Task", 0x8102, 1.0);
+			e_ews_request_add_extended_property_distinguished_tag_double (request, "Task", 0x8102, 1.0);
 
 			/* PidLidTaskComplete */
-			e_ews_message_add_extended_property_distinguished_tag_boolean (msg, "Task", 0x811c, TRUE);
+			e_ews_request_add_extended_property_distinguished_tag_boolean (request, "Task", 0x811c, TRUE);
 		}
 
 		if (followup && dueby_tt != (time_t) 0 && completed_tt == (time_t) 0) {
 			/* PidLidTaskStatus */
-			e_ews_message_add_extended_property_distinguished_tag_int (msg, "Task", 0x8101, 0);
+			e_ews_request_add_extended_property_distinguished_tag_int (request, "Task", 0x8101, 0);
 
 			/* PidLidPercentComplete */
-			e_ews_message_add_extended_property_distinguished_tag_double (msg, "Task", 0x8102, 0.0);
+			e_ews_request_add_extended_property_distinguished_tag_double (request, "Task", 0x8102, 0.0);
 
 			/* PidLidTaskDueDate */
-			e_ews_message_add_extended_property_distinguished_tag_time (msg, "Task", 0x8105, dueby_tt);
+			e_ews_request_add_extended_property_distinguished_tag_time (request, "Task", 0x8105, dueby_tt);
 
 			/* PidLidTaskComplete */
-			e_ews_message_add_extended_property_distinguished_tag_boolean (msg, "Task", 0x811c, FALSE);
+			e_ews_request_add_extended_property_distinguished_tag_boolean (request, "Task", 0x811c, FALSE);
 		}
 	}
 
@@ -272,13 +271,13 @@ create_mime_message_cb (ESoapMessage *msg,
 
 		settings = e_ews_connection_ref_settings (create_data->cnc);
 		if (settings) {
-			e_soap_message_start_element (msg, "Sender", NULL, NULL);
+			e_soap_request_start_element (request, "Sender", NULL, NULL);
 
-			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
-			e_ews_message_write_string_parameter_with_attribute (msg, "EmailAddress", NULL, camel_ews_settings_get_email (settings), NULL, NULL);
-			e_soap_message_end_element (msg); /* Mailbox */
+			e_soap_request_start_element (request, "Mailbox", NULL, NULL);
+			e_ews_request_write_string_parameter_with_attribute (request, "EmailAddress", NULL, camel_ews_settings_get_email (settings), NULL, NULL);
+			e_soap_request_end_element (request); /* Mailbox */
 
-			e_soap_message_end_element (msg); /* Sender */
+			e_soap_request_end_element (request); /* Sender */
 		}
 		g_clear_object (&settings);
 	}
@@ -297,9 +296,9 @@ create_mime_message_cb (ESoapMessage *msg,
 
 		filter_recipients (create_data->message, create_data->recipients, recip_to, recip_cc, recip_bcc);
 
-		write_recipients (msg, "ToRecipients", recip_to, is_resend);
-		write_recipients (msg, "CcRecipients", recip_cc, is_resend);
-		write_recipients (msg, "BccRecipients", recip_bcc, is_resend);
+		write_recipients (request, "ToRecipients", recip_to, is_resend);
+		write_recipients (request, "CcRecipients", recip_cc, is_resend);
+		write_recipients (request, "BccRecipients", recip_bcc, is_resend);
 
 		g_hash_table_destroy (recip_to);
 		g_hash_table_destroy (recip_cc);
@@ -310,27 +309,27 @@ create_mime_message_cb (ESoapMessage *msg,
 		const gchar *from_name = NULL, *from_email = NULL;
 
 		if (camel_internet_address_get (CAMEL_INTERNET_ADDRESS (create_data->from), 0, &from_name, &from_email) && from_email) {
-			e_soap_message_start_element (msg, "From", NULL, NULL);
+			e_soap_request_start_element (request, "From", NULL, NULL);
 
-			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+			e_soap_request_start_element (request, "Mailbox", NULL, NULL);
 			if (from_name && *from_name)
-				e_ews_message_write_string_parameter_with_attribute (msg, "Name", NULL, from_name, NULL, NULL);
-			e_ews_message_write_string_parameter_with_attribute (msg, "EmailAddress", NULL, from_email, NULL, NULL);
-			e_soap_message_end_element (msg); /* Mailbox */
+				e_ews_request_write_string_parameter_with_attribute (request, "Name", NULL, from_name, NULL, NULL);
+			e_ews_request_write_string_parameter_with_attribute (request, "EmailAddress", NULL, from_email, NULL, NULL);
+			e_soap_request_end_element (request); /* Mailbox */
 
-			e_soap_message_end_element (msg); /* From */
+			e_soap_request_end_element (request); /* From */
 		}
 	}
 
-	e_ews_message_write_string_parameter_with_attribute (
-			msg,
+	e_ews_request_write_string_parameter_with_attribute (
+			request,
 			"IsRead",
 			NULL,
 			(message_camel_flags & CAMEL_MESSAGE_SEEN) != 0 ? "true" : "false",
 			NULL,
 			NULL);
 
-	e_soap_message_end_element (msg); /* Message */
+	e_soap_request_end_element (request); /* Message */
 
 	g_free (create_data);
 

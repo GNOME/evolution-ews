@@ -1121,104 +1121,58 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	e_mail_config_ews_delegates_page_refresh (page);
 }
 
-#define REMOVED_SLIST_KEY	"ews-delegate-removed-slist"
-#define ADDED_SLIST_KEY		"ews-delegate-added-slist"
-#define CANCELLABLE_KEY		"ews-delegate-cancellable"
+typedef struct _SubmitData {
+	EEwsConnection *cnc;
+	gboolean deliver_to_changed;
+	EwsDelegateDeliver deliver_to;
+	GSList *added; /* const EwsDelegateInfo * */
+	GSList *updated; /* const EwsDelegateInfo * */
+	GSList *removed; /* const gchar * */
+} SubmitData;
 
 static void
-mail_config_ews_delegates_page_add_delegate_cb (GObject *source_object,
-                                                GAsyncResult *result,
-                                                gpointer user_data)
+submit_data_free (gpointer ptr)
 {
-	GSimpleAsyncResult *simple;
-	GError *error = NULL;
+	SubmitData *sd = ptr;
 
-	simple = G_SIMPLE_ASYNC_RESULT (user_data);
-
-	e_ews_connection_add_delegate_finish (
-		E_EWS_CONNECTION (source_object), result, &error);
-
-	if (error != NULL)
-		g_simple_async_result_take_error (simple, error);
-
-	g_simple_async_result_complete (simple);
-
-	g_object_unref (simple);
+	if (sd) {
+		g_clear_object (&sd->cnc);
+		g_slist_free (sd->added);
+		g_slist_free (sd->updated);
+		g_slist_free (sd->removed);
+		g_slice_free (SubmitData, sd);
+	}
 }
 
 static void
-mail_config_ews_delegates_page_remove_delegate_cb (GObject *source_object,
-                                                   GAsyncResult *result,
-                                                   gpointer user_data)
+mail_config_ews_delegates_page_submit_thread (GTask *task,
+					      gpointer source_object,
+					      gpointer task_data,
+					      GCancellable *cancellable)
 {
-	GSimpleAsyncResult *simple;
-	GError *error = NULL;
-
-	simple = G_SIMPLE_ASYNC_RESULT (user_data);
-
-	e_ews_connection_remove_delegate_finish (
-		E_EWS_CONNECTION (source_object), result, &error);
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		g_simple_async_result_complete (simple);
-	} else {
-		GCancellable *cancellable;
-		GSList *list;
-
-		cancellable = g_object_get_data (G_OBJECT (simple), CANCELLABLE_KEY);
-		list = g_object_get_data (G_OBJECT (simple), ADDED_SLIST_KEY);
-		if (list) {
-			e_ews_connection_add_delegate (
-				E_EWS_CONNECTION (source_object), G_PRIORITY_DEFAULT, NULL, list,
-				cancellable, mail_config_ews_delegates_page_add_delegate_cb, g_object_ref (simple));
-		} else {
-			g_simple_async_result_complete (simple);
-		}
+	SubmitData *sd = task_data;
+	gboolean success = TRUE;
+	GError *local_error = NULL;
+	
+	if (sd->deliver_to_changed || sd->updated) {
+		success = e_ews_connection_update_delegate_sync (sd->cnc, G_PRIORITY_DEFAULT, NULL, sd->deliver_to, sd->updated,
+			cancellable, &local_error);
 	}
 
-	g_object_unref (simple);
-}
-
-static void
-mail_config_ews_delegates_page_update_delegate_cb (GObject *source_object,
-                                                   GAsyncResult *result,
-                                                   gpointer user_data)
-{
-	GSimpleAsyncResult *simple;
-	GError *error = NULL;
-
-	simple = G_SIMPLE_ASYNC_RESULT (user_data);
-
-	e_ews_connection_update_delegate_finish (
-		E_EWS_CONNECTION (source_object), result, &error);
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		g_simple_async_result_complete (simple);
-	} else {
-		GCancellable *cancellable;
-		GSList *list;
-
-		cancellable = g_object_get_data (G_OBJECT (simple), CANCELLABLE_KEY);
-		list = g_object_get_data (G_OBJECT (simple), REMOVED_SLIST_KEY);
-		if (list) {
-			e_ews_connection_remove_delegate (
-				E_EWS_CONNECTION (source_object), G_PRIORITY_DEFAULT, NULL, list,
-				cancellable, mail_config_ews_delegates_page_remove_delegate_cb, g_object_ref (simple));
-		} else {
-			list = g_object_get_data (G_OBJECT (simple), ADDED_SLIST_KEY);
-			if (list) {
-				e_ews_connection_add_delegate (
-					E_EWS_CONNECTION (source_object), G_PRIORITY_DEFAULT, NULL, list,
-					cancellable, mail_config_ews_delegates_page_add_delegate_cb, g_object_ref (simple));
-			} else {
-				g_simple_async_result_complete (simple);
-			}
-		}
+	if (success && sd->removed) {
+		success = e_ews_connection_remove_delegate_sync (sd->cnc, G_PRIORITY_DEFAULT, NULL, sd->removed,
+			cancellable, &local_error);
 	}
 
-	g_object_unref (simple);
+	if (success && sd->added) {
+		success = e_ews_connection_add_delegate_sync (sd->cnc, G_PRIORITY_DEFAULT, NULL, sd->added,
+			cancellable, &local_error);
+	}
+
+	if (local_error)
+		g_task_return_error (task, local_error);
+	else
+		g_task_return_boolean (task, success);
 }
 
 static gboolean
@@ -1246,25 +1200,29 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
                                        gpointer user_data)
 {
 	EMailConfigEwsDelegatesPage *ews_page;
-	GSimpleAsyncResult *simple;
-	EwsDelegateDeliver deliver_to;
-	GSList *added = NULL, *updated = NULL, *removed = NULL, *iter;
+	GTask *task;
+	SubmitData *sd;
+	GSList *iter;
 	GHashTable *oldies;
 	GHashTableIter titer;
 	gpointer key, value;
 
 	ews_page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (page);
 
+	sd = g_slice_new0 (SubmitData);
+
+	task = g_task_new (ews_page, cancellable, callback, user_data);
+	g_task_set_source_tag (task, mail_config_ews_delegates_page_submit);
+	g_task_set_task_data (task, sd, submit_data_free);
+	g_task_set_check_cancellable (task, TRUE);
+
 	g_mutex_lock (&ews_page->priv->delegates_lock);
 
 	if (!ews_page->priv->connection) {
 		g_mutex_unlock (&ews_page->priv->delegates_lock);
 
-		simple = g_simple_async_result_new (
-			G_OBJECT (page), callback, user_data,
-			mail_config_ews_delegates_page_submit);
-		g_simple_async_result_complete (simple);
-		g_object_unref (simple);
+		g_task_return_boolean (task, TRUE);
+		g_object_unref (task);
 
 		return;
 	}
@@ -1292,10 +1250,10 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 
 		orig_di = g_hash_table_lookup (oldies, di->user_id->primary_smtp);
 		if (!orig_di) {
-			added = g_slist_prepend (added, di);
+			sd->added = g_slist_prepend (sd->added, di);
 		} else {
 			if (!delegate_infos_equal (orig_di, di))
-				updated = g_slist_prepend (updated, di);
+				sd->updated = g_slist_prepend (sd->updated, di);
 			g_hash_table_remove (oldies, di->user_id->primary_smtp);
 		}
 	}
@@ -1304,61 +1262,36 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 	while (g_hash_table_iter_next (&titer, &key, &value)) {
 		EwsDelegateInfo *di = value;
 
-		removed = g_slist_prepend (removed, di->user_id);
+		sd->removed = g_slist_prepend (sd->removed, di->user_id);
 	}
 
 	g_hash_table_destroy (oldies);
 
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (ews_page->priv->deliver_copy_me_radio)))
-		deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
+		sd->deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
 	else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (ews_page->priv->deliver_delegates_only_radio)))
-		deliver_to = EwsDelegateDeliver_DelegatesOnly;
+		sd->deliver_to = EwsDelegateDeliver_DelegatesOnly;
 	else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (ews_page->priv->deliver_delegates_and_me_radio)))
-		deliver_to = EwsDelegateDeliver_DelegatesAndMe;
+		sd->deliver_to = EwsDelegateDeliver_DelegatesAndMe;
 	else
-		deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
+		sd->deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
 
-	if (deliver_to == ews_page->priv->deliver_to && !added && !updated && !removed) {
+	if (sd->deliver_to == ews_page->priv->deliver_to && !sd->added && !sd->updated && !sd->removed) {
 		/* nothing changed, bye bye */
 		g_mutex_unlock (&ews_page->priv->delegates_lock);
 
-		simple = g_simple_async_result_new (
-			G_OBJECT (page), callback, user_data,
-			mail_config_ews_delegates_page_submit);
-		g_simple_async_result_complete (simple);
-		g_object_unref (simple);
+		g_task_return_boolean (task, TRUE);
+		g_object_unref (task);
 
 		return;
 	}
 
-	simple = g_simple_async_result_new (
-		G_OBJECT (page), callback, user_data,
-		mail_config_ews_delegates_page_submit);
+	sd->cnc = g_object_ref (ews_page->priv->connection);
+	sd->deliver_to_changed = sd->deliver_to != ews_page->priv->deliver_to;
 
-	g_simple_async_result_set_check_cancellable (simple, cancellable);
+	g_task_run_in_thread (task, mail_config_ews_delegates_page_submit_thread);
 
-	g_object_set_data_full (G_OBJECT (simple), REMOVED_SLIST_KEY, removed, (GDestroyNotify) g_slist_free);
-	g_object_set_data_full (G_OBJECT (simple), ADDED_SLIST_KEY, added, (GDestroyNotify) g_slist_free);
-	if (cancellable)
-		g_object_set_data_full (G_OBJECT (simple), CANCELLABLE_KEY, g_object_ref (cancellable), g_object_unref);
-
-	if (deliver_to != ews_page->priv->deliver_to || updated) {
-		e_ews_connection_update_delegate (
-			ews_page->priv->connection, G_PRIORITY_DEFAULT, NULL, deliver_to, updated,
-			cancellable, mail_config_ews_delegates_page_update_delegate_cb, g_object_ref (simple));
-	} else if (removed) {
-		e_ews_connection_remove_delegate (
-			ews_page->priv->connection, G_PRIORITY_DEFAULT, NULL, removed,
-			cancellable, mail_config_ews_delegates_page_remove_delegate_cb, g_object_ref (simple));
-	} else {
-		g_warn_if_fail (added != NULL);
-
-		e_ews_connection_add_delegate (
-			ews_page->priv->connection, G_PRIORITY_DEFAULT, NULL, added,
-			cancellable, mail_config_ews_delegates_page_add_delegate_cb, g_object_ref (simple));
-	}
-
-	g_object_unref (simple);
+	g_object_unref (task);
 
 	g_mutex_unlock (&ews_page->priv->delegates_lock);
 }
@@ -1368,17 +1301,9 @@ mail_config_ews_delegates_page_submit_finish (EMailConfigPage *page,
                                               GAsyncResult *result,
                                               GError **error)
 {
-	GSimpleAsyncResult *simple;
+	g_return_val_if_fail (g_task_is_valid (result, page), FALSE);
 
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (page),
-		mail_config_ews_delegates_page_submit), FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-
-	/* Assume success unless a GError is set. */
-	return !g_simple_async_result_propagate_error (simple, error);
+	return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 static gint
@@ -1451,7 +1376,7 @@ mail_config_ews_delegates_page_try_credentials_sync (EEwsConnection *connection,
 		async_context->page->priv->orig_delegates = g_slist_sort (delegates, sort_by_display_name_cb);
 		g_mutex_unlock (&async_context->page->priv->delegates_lock);
 
-	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	} else if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
 		g_clear_object (&async_context->page->priv->connection);
 		g_error_free (local_error);

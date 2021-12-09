@@ -189,6 +189,9 @@ ews_backend_sync_authentication (EEwsBackend *ews_backend,
 
 	e_source_authentication_set_user (child_authentication_extension,
 		e_source_authentication_get_user (coll_authentication_extension));
+
+	e_source_authentication_set_method (child_authentication_extension,
+		e_source_authentication_get_method (coll_authentication_extension));
 }
 
 static ESource *
@@ -711,6 +714,7 @@ ews_backend_constructed (GObject *object)
 	EBackend *backend;
 	ESource *source;
 	ESourceAuthentication *auth_extension;
+	CamelEwsSettings *settings;
 	const gchar *extension_name;
 	gchar *host = NULL;
 	guint16 port = 0;
@@ -738,6 +742,14 @@ ews_backend_constructed (GObject *object)
 	}
 
 	g_free (host);
+
+	settings = ews_backend_get_settings (E_EWS_BACKEND (backend));
+
+	/* NTLM is a fallback, for any unknown value, but ESoupSession requires it
+	   explicitly set, to use it for authentication, thus make sure it is set */
+	if (camel_ews_settings_get_auth_mechanism (settings) == EWS_AUTH_TYPE_NTLM &&
+	    g_strcmp0 (e_source_authentication_get_method (auth_extension), "NTLM") != 0)
+		e_source_authentication_set_method (auth_extension, "NTLM");
 
 	/* Reset the connectable, it steals data from Authentication extension,
 	   where is written incorrect address */
@@ -864,36 +876,30 @@ ews_backend_child_added (ECollectionBackend *backend,
 {
 	ESource *collection_source;
 	const gchar *extension_name;
-	gboolean is_mail = FALSE;
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
-	extension_name = E_SOURCE_EXTENSION_MAIL_ACCOUNT;
-	is_mail |= e_source_has_extension (child_source, extension_name);
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_IDENTITY;
-	is_mail |= e_source_has_extension (child_source, extension_name);
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_TRANSPORT;
-	is_mail |= e_source_has_extension (child_source, extension_name);
-
-	/* Synchronize mail-related user with the collection identity. */
 	extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
-	if (is_mail && e_source_has_extension (child_source, extension_name)) {
+	if (e_source_has_extension (child_source, extension_name)) {
 		ESourceAuthentication *auth_child_extension;
-		ESourceCollection *collection_extension;
+		ESourceAuthentication *auth_collection_extension;
 
-		extension_name = E_SOURCE_EXTENSION_COLLECTION;
-		collection_extension = e_source_get_extension (
-			collection_source, extension_name);
-
-		extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
-		auth_child_extension = e_source_get_extension (
-			child_source, extension_name);
+		auth_child_extension = e_source_get_extension (child_source, extension_name);
+		auth_collection_extension = e_source_get_extension (collection_source, extension_name);
 
 		e_binding_bind_property (
-			collection_extension, "identity",
+			auth_collection_extension, "host",
+			auth_child_extension, "host",
+			G_BINDING_SYNC_CREATE);
+
+		e_binding_bind_property (
+			auth_collection_extension, "user",
 			auth_child_extension, "user",
+			G_BINDING_SYNC_CREATE);
+
+		e_binding_bind_property (
+			auth_collection_extension, "method",
+			auth_child_extension, "method",
 			G_BINDING_SYNC_CREATE);
 	}
 
@@ -1125,7 +1131,7 @@ ews_backend_get_destination_address (EBackend *backend,
 				     guint16 *port)
 {
 	CamelEwsSettings *ews_settings;
-	SoupURI *soup_uri;
+	GUri *uri;
 	gchar *host_url;
 	gboolean result = FALSE;
 
@@ -1149,10 +1155,10 @@ ews_backend_get_destination_address (EBackend *backend,
 		return *host && **host;
 	}
 
-	soup_uri = soup_uri_new (host_url);
-	if (soup_uri) {
-		*host = g_strdup (soup_uri_get_host (soup_uri));
-		*port = soup_uri_get_port (soup_uri);
+	uri = g_uri_parse (host_url, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+	if (uri) {
+		*host = g_strdup (g_uri_get_host (uri));
+		*port = g_uri_get_port (uri);
 
 		result = *host && **host;
 		if (!result) {
@@ -1160,7 +1166,7 @@ ews_backend_get_destination_address (EBackend *backend,
 			*host = NULL;
 		}
 
-		soup_uri_free (soup_uri);
+		g_uri_unref (uri);
 	}
 
 	g_free (host_url);

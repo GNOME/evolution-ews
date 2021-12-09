@@ -41,6 +41,9 @@ struct _EEwsNotificationClass {
 };
 
 GType		e_ews_notification_get_type	(void);
+const gchar * const *
+		e_ews_notification_get_event_names
+						(void);
 EEwsNotification *
 		e_ews_notification_new		(EEwsConnection *connection,
 						 gchar *last_subscription_id); /* assumes ownership of it */

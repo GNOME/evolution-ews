@@ -806,7 +806,7 @@ e_ews_subscribe_foreign_folder_resolve_name_sync (EEwsConnection *cnc,
 
 	if (!e_ews_connection_resolve_names_sync (cnc, G_PRIORITY_DEFAULT,
 		name, EWS_SEARCH_AD, NULL, FALSE,
-		&mailboxes, NULL, &includes_last_item,
+		&includes_last_item, &mailboxes, NULL,
 		cancellable, &local_error)) {
 		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS) ||
 		    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNOMAILBOX)) {

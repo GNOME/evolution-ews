@@ -7,6 +7,7 @@
 #include "evolution-ews-config.h"
 
 #include <libedataserver/eds-version.h>
+#include <libedataserver/libedataserver.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,22 @@ struct _ESoapResponsePrivate {
 	xmlNodePtr xml_method;
 	xmlNodePtr soap_fault;
 	GList *parameters;
+
+	/* Serialization fields */
+	xmlParserCtxtPtr ctxt;
+
+	/* Content stealing */
+	gchar *steal_node;
+	gchar *steal_dir;
+	gboolean steal_base64;
+
+	gint steal_b64_state;
+	guint steal_b64_save;
+	gint steal_fd;
+
+	/* Progress callbacks */
+	ESoapResponseProgressFn progress_fn;
+	gpointer progress_data;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ESoapResponse, e_soap_response, G_TYPE_OBJECT)
@@ -43,6 +60,18 @@ soap_response_finalize (GObject *object)
 	g_clear_pointer (&resp->priv->xmldoc, xmlFreeDoc);
 	g_list_free (resp->priv->parameters);
 
+	if (resp->priv->ctxt) {
+		if (resp->priv->ctxt->myDoc)
+			xmlFreeDoc (resp->priv->ctxt->myDoc);
+		xmlFreeParserCtxt (resp->priv->ctxt);
+	}
+
+	g_free (resp->priv->steal_node);
+	g_free (resp->priv->steal_dir);
+
+	if (resp->priv->steal_fd != -1)
+		close (resp->priv->steal_fd);
+
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_soap_response_parent_class)->finalize (object);
 }
@@ -62,6 +91,7 @@ e_soap_response_init (ESoapResponse *response)
 	response->priv = e_soap_response_get_instance_private (response);
 
 	response->priv->xmldoc = xmlNewDoc ((const xmlChar *)"1.0");
+	response->priv->steal_fd = -1;
 }
 
 /**
@@ -241,6 +271,284 @@ e_soap_response_from_xmldoc (ESoapResponse *response,
 	response->priv->xml_method = xml_method;
 
 	return TRUE;
+}
+
+static void
+soap_sax_startElementNs (gpointer _ctxt,
+                         const xmlChar *localname,
+                         const xmlChar *prefix,
+                         const xmlChar *uri,
+                         gint nb_namespaces,
+                         const xmlChar **namespaces,
+                         gint nb_attributes,
+                         gint nb_defaulted,
+                         const xmlChar **attributes)
+{
+	xmlParserCtxt *ctxt = _ctxt;
+	ESoapResponse *response = ctxt->_private;
+	gchar *fname;
+
+	xmlSAX2StartElementNs (
+		ctxt, localname, prefix, uri, nb_namespaces,
+		namespaces, nb_attributes, nb_defaulted,
+		attributes);
+
+	/* steal_node can contain multiple node name separated by " " */
+	if (response->priv->steal_node && *response->priv->steal_node) {
+		gchar **prop = g_strsplit (response->priv->steal_node, " ", 0);
+		gint i = 0;
+		gboolean isnode = FALSE;
+
+		while (prop[i]) {
+			if (strcmp ((const gchar *) localname, prop[i]) == 0) {
+				isnode = TRUE;
+				break;
+			}
+			i++;
+		}
+		g_strfreev (prop);
+
+		if (!isnode) return;
+	} else
+		return;
+
+	fname = g_build_filename (response->priv->steal_dir, "XXXXXX", NULL);
+	response->priv->steal_fd = g_mkstemp (fname);
+	if (response->priv->steal_fd != -1) {
+		if (response->priv->steal_base64) {
+			gchar *enc = g_base64_encode ((guchar *) fname, strlen (fname));
+			xmlSAX2Characters (ctxt, (xmlChar *) enc, strlen (enc));
+			g_free (enc);
+		} else
+			xmlSAX2Characters (ctxt, (xmlChar *) fname, strlen (fname));
+	} else {
+		gint err = errno;
+
+		g_warning ("%s: Failed to create temp file '%s': %s\n", G_STRFUNC, fname, g_strerror (err));
+	}
+	g_free (fname);
+}
+
+static void
+soap_sax_endElementNs (gpointer _ctxt,
+                       const xmlChar *localname,
+                       const xmlChar *prefix,
+                       const xmlChar *uri)
+{
+	xmlParserCtxt *ctxt = _ctxt;
+	ESoapResponse *response = ctxt->_private;
+
+	if (response->priv->steal_fd != -1) {
+		close (response->priv->steal_fd);
+		response->priv->steal_fd = -1;
+	}
+	xmlSAX2EndElementNs (ctxt, localname, prefix, uri);
+}
+
+static void
+soap_sax_characters (gpointer _ctxt,
+                     const xmlChar *ch,
+                     gint len)
+{
+	xmlParserCtxt *ctxt = _ctxt;
+	ESoapResponse *response = ctxt->_private;
+
+	if (response->priv->steal_fd == -1)
+		xmlSAX2Characters (ctxt, ch, len);
+	else if (!response->priv->steal_base64) {
+		if (write (response->priv->steal_fd, (const gchar *) ch, len) != len) {
+		write_err:
+			/* Handle error better */
+			g_warning ("Failed to write streaming data to file");
+		}
+	} else {
+		guchar *bdata = g_malloc ((len * 3 / 4) + 3);
+		gsize blen;
+
+		blen = g_base64_decode_step (
+			(const gchar *) ch, len,
+			bdata, &response->priv->steal_b64_state,
+			&response->priv->steal_b64_save);
+		if (write (response->priv->steal_fd, (const gchar *) bdata, blen) != blen) {
+			g_free (bdata);
+			goto write_err;
+		}
+		g_free (bdata);
+	}
+}
+
+#define BUFFER_SIZE 16384
+
+xmlDoc *
+e_soap_response_xmldoc_from_message_sync (ESoapResponse *response,
+					  SoupMessage *msg,
+					  GInputStream *response_data,
+					  GCancellable *cancellable,
+					  GError **error)
+{
+	const gchar *size;
+	xmlDoc *xmldoc = NULL;
+	gboolean success;
+	gpointer buffer;
+	gsize response_size = 0;
+	gsize response_received = 0;
+	gsize progress_percent = 0;
+	gsize nread = 0;
+
+	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), FALSE);
+	g_return_val_if_fail (SOUP_IS_MESSAGE (msg), FALSE);
+	g_return_val_if_fail (G_IS_INPUT_STREAM (response_data), FALSE);
+
+	/* Discard the existing context, if there is one, and start again */
+	if (response->priv->ctxt) {
+		if (response->priv->ctxt->myDoc)
+			xmlFreeDoc (response->priv->ctxt->myDoc);
+		xmlFreeParserCtxt (response->priv->ctxt);
+		response->priv->ctxt = NULL;
+	}
+
+	if (response->priv->steal_fd != -1) {
+		close (response->priv->steal_fd);
+		response->priv->steal_fd = -1;
+	}
+
+	if (!SOUP_STATUS_IS_SUCCESSFUL (soup_message_get_status (msg))) {
+		g_set_error_literal (error, E_SOUP_SESSION_ERROR, soup_message_get_status (msg), soup_message_get_reason_phrase (msg));
+		return NULL;
+	}
+
+	size = soup_message_headers_get_one (soup_message_get_response_headers (msg), "Content-Length");
+
+	if (size)
+		response_size = g_ascii_strtoll (size, NULL, 10);
+
+	buffer = g_malloc (BUFFER_SIZE);
+
+	while (success = g_input_stream_read_all (response_data, buffer, BUFFER_SIZE, &nread, cancellable, error),
+	       success && nread > 0) {
+		response_received += nread;
+
+		if (response_size && response->priv->progress_fn) {
+			gint pc = response_received * 100 / response_size;
+			if (progress_percent != pc) {
+				progress_percent = pc;
+				response->priv->progress_fn (response->priv->progress_data, progress_percent);
+			}
+		}
+
+		if (!response->priv->ctxt) {
+			response->priv->ctxt = xmlCreatePushParserCtxt (NULL, response, buffer, nread, NULL);
+			response->priv->ctxt->_private = response;
+			response->priv->ctxt->sax->startElementNs = soap_sax_startElementNs;
+			response->priv->ctxt->sax->endElementNs = soap_sax_endElementNs;
+			response->priv->ctxt->sax->characters = soap_sax_characters;
+		} else {
+			xmlParseChunk (response->priv->ctxt, buffer, nread, 0);
+		}
+	}
+
+	g_free (buffer);
+
+	if (success) {
+		if (response->priv->ctxt) {
+			xmlParseChunk (response->priv->ctxt, 0, 0, 1);
+
+			xmldoc = response->priv->ctxt->myDoc;
+
+			xmlFreeParserCtxt (response->priv->ctxt);
+			response->priv->ctxt = NULL;
+		} else {
+			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, "No data read");
+			success = FALSE;
+		}
+	}
+
+	if (response->priv->ctxt) {
+		if (response->priv->ctxt->myDoc)
+			xmlFreeDoc (response->priv->ctxt->myDoc);
+		xmlFreeParserCtxt (response->priv->ctxt);
+		response->priv->ctxt = NULL;
+	}
+
+	if (response->priv->steal_fd != -1) {
+		close (response->priv->steal_fd);
+		response->priv->steal_fd = -1;
+	}
+
+	return xmldoc;
+}
+
+gboolean
+e_soap_response_from_message_sync (ESoapResponse *response,
+				   SoupMessage *msg,
+				   GInputStream *response_data,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	xmlDoc *xmldoc;
+	gboolean success = FALSE;
+
+	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), FALSE);
+	g_return_val_if_fail (SOUP_IS_MESSAGE (msg), FALSE);
+	g_return_val_if_fail (G_IS_INPUT_STREAM (response_data), FALSE);
+
+	xmldoc = e_soap_response_xmldoc_from_message_sync (response, msg, response_data, cancellable, error);
+
+	if (xmldoc) {
+		success = e_soap_response_from_xmldoc (response, xmldoc);
+		if (!success)
+			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, "Received invalid SOAP response");
+	}
+
+	return success;
+}
+
+/**
+ * e_soap_response_set_store_node_data:
+ * @response: the %ESoapResponse
+ * @nodename: the name of the XML node from which to store data
+ * @directory: cache directory in which to create data files
+ * @base64: flag to request base64 decoding of node content
+ *
+ * This requests that character data for certain XML nodes should
+ * be streamed directly to a disk file as it arrives, rather than
+ * being stored in memory.
+ *
+ * It is used only with e_soap_response_from_message_sync().
+ */
+void
+e_soap_response_set_store_node_data (ESoapResponse *response,
+				     const gchar *nodename,
+				     const gchar *directory,
+				     gboolean base64)
+{
+	g_return_if_fail (E_IS_SOAP_RESPONSE (response));
+	g_return_if_fail (response->priv->steal_node == NULL);
+
+	response->priv->steal_node = g_strdup (nodename);
+	response->priv->steal_dir = g_strdup (directory);
+	response->priv->steal_base64 = base64;
+}
+
+/**
+ * e_soap_response_set_progress_fn:
+ * @response: the %ESoapResponse
+ * @fn: callback function to be given progress updates
+ * @object: first argument to callback function
+ *
+ * Starts the top level SOAP Envelope element.
+ *
+ * It is used only with e_soap_response_from_message_sync().
+ */
+void
+e_soap_response_set_progress_fn (ESoapResponse *response,
+				 ESoapResponseProgressFn fn,
+				 gpointer object)
+{
+	g_return_if_fail (E_IS_SOAP_RESPONSE (response));
+
+	response->priv->progress_fn = fn;
+	response->priv->progress_data = object;
 }
 
 /**
@@ -586,11 +894,8 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
 
 			string = e_soap_parameter_get_string_value (param);
 
-			g_set_error (
-				error,
-				SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
-				"%s", (string != NULL) ? string :
-				"<faultstring> in SOAP response");
+			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+				(string != NULL) ? string : "<faultstring> in SOAP response");
 
 			g_free (string);
 
@@ -598,9 +903,7 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
 		}
 	}
 
-	g_set_error (
-		error,
-		SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
+	g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
 		"Missing <%s> in SOAP response", name);
 
 	return NULL;

@@ -103,7 +103,7 @@ mail_config_ews_autodiscover_run_cb (GObject *source_object,
 
 	if (e_activity_handle_cancellation (async_context->activity, error)) {
 		/* Do nothing, just free the error below */
-	} else if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+	} else if (g_error_matches (error, G_TLS_ERROR, G_TLS_ERROR_BAD_CERTIFICATE) &&
 		   async_context->certificate_pem && *async_context->certificate_pem && async_context->certificate_errors) {
 		ETrustPromptResponse response;
 		GtkWidget *parent;
@@ -182,7 +182,7 @@ mail_config_ews_autodiscover_sync (ECredentialsPrompter *prompter,
 
 	if (local_error == NULL) {
 		*out_authenticated = TRUE;
-	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	} else if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		*out_authenticated = FALSE;
 		g_error_free (local_error);
 	} else {
@@ -214,7 +214,7 @@ mail_config_ews_autodiscover_run_thread (GTask *task,
 				cancellable, &local_error);
 		}
 
-		if (!without_password || g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		if (!without_password || g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 			EShell *shell;
 
 			e_ews_connection_utils_force_off_ntlm_auth_check ();
@@ -249,17 +249,11 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 
 	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
 	page = e_mail_config_service_backend_get_page (backend);
-	source = e_mail_config_service_backend_get_source (backend);
+	source = e_mail_config_service_backend_get_collection (backend);
 	settings = e_mail_config_service_backend_get_settings (backend);
 
-	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
-		ESource *collection;
-
-		collection = e_mail_config_service_backend_get_collection (backend);
-		if (collection && e_source_has_extension (collection, E_SOURCE_EXTENSION_AUTHENTICATION)) {
-			source = collection;
-		}
-	}
+	if (!source)
+		source = e_mail_config_service_backend_get_source (backend);
 
 	activity = e_mail_config_activity_page_new_activity (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
 	cancellable = e_activity_get_cancellable (activity);

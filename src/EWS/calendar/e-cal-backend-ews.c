@@ -528,8 +528,8 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			/* get delegator mail box*/
 			e_ews_connection_resolve_names_sync (
 				cbews->priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
-				EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-				&includes_last_item, cancellable, error);
+				EWS_SEARCH_AD, NULL, FALSE, &includes_last_item, &mailboxes, NULL,
+				cancellable, error);
 
 			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
 				EwsMailbox *mb = l->data;
@@ -4546,7 +4546,7 @@ ecb_ews_get_destination_address (EBackend *backend,
 				 guint16 *port)
 {
 	CamelEwsSettings *ews_settings;
-	SoupURI *soup_uri;
+	GUri *uri;
 	gchar *host_url;
 	gboolean result = FALSE;
 
@@ -4564,10 +4564,10 @@ ecb_ews_get_destination_address (EBackend *backend,
 	host_url = camel_ews_settings_dup_hosturl (ews_settings);
 	g_return_val_if_fail (host_url != NULL, FALSE);
 
-	soup_uri = soup_uri_new (host_url);
-	if (soup_uri) {
-		*host = g_strdup (soup_uri_get_host (soup_uri));
-		*port = soup_uri_get_port (soup_uri);
+	uri = g_uri_parse (host_url, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+	if (uri) {
+		*host = g_strdup (g_uri_get_host (uri));
+		*port = g_uri_get_port (uri);
 
 		result = *host && **host;
 		if (!result) {
@@ -4575,7 +4575,7 @@ ecb_ews_get_destination_address (EBackend *backend,
 			*host = NULL;
 		}
 
-		soup_uri_free (soup_uri);
+		g_uri_unref (uri);
 	}
 
 	g_free (host_url);

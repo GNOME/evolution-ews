@@ -66,9 +66,9 @@ void		camel_ews_utils_sync_updated_items
 						 CamelFolderChangeInfo *change_info,
 						 GCancellable *cancellable);
 GSList *	ews_utils_gather_server_user_flags
-						(ESoapMessage *msg,
+						(ESoapRequest *request,
 						 CamelMessageInfo *mi);
-void		ews_utils_update_followup_flags (ESoapMessage *msg,
+void		ews_utils_update_followup_flags (ESoapRequest *request,
 						 CamelMessageInfo *mi);
 gchar *		camel_ews_utils_get_host_name	(CamelSettings *settings);
 gboolean	camel_ews_utils_delete_folders_from_summary_recursive

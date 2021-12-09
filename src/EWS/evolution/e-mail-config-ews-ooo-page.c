@@ -767,7 +767,7 @@ mail_config_ews_ooo_page_try_credentials_sync (EEwsConnection *connection,
 		page->priv->changed = FALSE;
 		g_mutex_unlock (&page->priv->oof_settings_lock);
 
-	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+	} else if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
 		g_error_free (local_error);
 

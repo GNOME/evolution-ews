@@ -27,7 +27,7 @@ which needs to be better organized via functions */
 #include "common/e-ews-camel-common.h"
 #include "common/e-ews-connection.h"
 #include "common/e-ews-item-change.h"
-#include "common/e-ews-message.h"
+#include "common/e-ews-request.h"
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
@@ -345,7 +345,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 	gint fd_old;
 	gchar *mime_fname_new = NULL;
 
-	// original mime file
+	/* original mime file */
 	fd_old = open (mime_fname, O_RDONLY);
 	if (fd_old == -1) {
 		g_set_error (
@@ -485,7 +485,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 	g_object_unref (mimeparser);
 	close (fd_old);
 
-	// must be freed in the caller
+	/* must be freed in the caller */
 	return mime_fname_new;
 }
 
@@ -792,7 +792,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		cnc, pri, ids, "IdOnly", add_props,
 		TRUE, mime_dir, E_EWS_BODY_TYPE_ANY,
 		&items,
-		(ESoapProgressFn) camel_operation_progress,
+		(ESoapResponseProgressFn) camel_operation_progress,
 		(gpointer) cancellable,
 		cancellable, &local_error);
 	e_ews_additional_props_free (add_props);
@@ -831,7 +831,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	g_free (mime_dir);
 
 	/* The mime_content actually contains the *filename*, due to the
-	 * streaming hack in ESoapMessage */
+	 * streaming hack in ESoapResponse */
 	mime_content = e_ews_item_get_mime_content (items->data);
 	if (!mime_content)
 		goto exit;
@@ -858,7 +858,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			cnc, pri, ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY,
 			&items_req,
-			(ESoapProgressFn) camel_operation_progress,
+			(ESoapResponseProgressFn) camel_operation_progress,
 			(gpointer) cancellable,
 			cancellable, &local_error);
 
@@ -894,7 +894,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			cnc, pri, html_body_ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_BEST,
 			&html_body_resp,
-			(ESoapProgressFn) camel_operation_progress,
+			(ESoapResponseProgressFn) camel_operation_progress,
 			(gpointer) cancellable,
 			cancellable, NULL) && html_body_resp && e_ews_item_get_item_type (html_body_resp->data) != E_EWS_ITEM_TYPE_ERROR) {
 			EEwsItem *item = html_body_resp->data;
@@ -1263,7 +1263,7 @@ ews_folder_search_free (CamelFolder *folder,
 /********************* folder functions*************************/
 
 static gboolean
-msg_update_flags (ESoapMessage *msg,
+msg_update_flags (ESoapRequest *request,
                   gpointer user_data,
 		  GError **error)
 {
@@ -1291,8 +1291,8 @@ msg_update_flags (ESoapMessage *msg,
 		mi_flags = camel_message_info_get_flags (mi);
 		flags_changed = camel_ews_message_info_get_server_flags (emi) ^ mi_flags;
 
-		e_ews_message_start_item_change (
-			msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+		e_ews_request_start_item_change (
+			request, E_EWS_ITEMCHANGE_TYPE_ITEM,
 			camel_message_info_get_uid (mi), camel_ews_message_info_get_change_key (emi), 0);
 		if (flags_changed & CAMEL_MESSAGE_FLAGGED) {
 			const gchar *flag;
@@ -1302,33 +1302,33 @@ msg_update_flags (ESoapMessage *msg,
 			else
 				flag = "Normal";
 
-			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+			e_soap_request_start_element (request, "SetItemField", NULL, NULL);
 
-			e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
-			e_soap_message_add_attribute (msg, "FieldURI", "item:Importance", NULL, NULL);
-			e_soap_message_end_element (msg);
+			e_soap_request_start_element (request, "FieldURI", NULL, NULL);
+			e_soap_request_add_attribute (request, "FieldURI", "item:Importance", NULL, NULL);
+			e_soap_request_end_element (request);
 
-			e_soap_message_start_element (msg, "Message", NULL, NULL);
+			e_soap_request_start_element (request, "Message", NULL, NULL);
 
-			e_ews_message_write_string_parameter (msg, "Importance", NULL, flag);
+			e_ews_request_write_string_parameter (request, "Importance", NULL, flag);
 
-			e_soap_message_end_element (msg); /* Message */
-			e_soap_message_end_element (msg); /* SetItemField */
+			e_soap_request_end_element (request); /* Message */
+			e_soap_request_end_element (request); /* SetItemField */
 		}
 
 		if (flags_changed & CAMEL_MESSAGE_SEEN) {
-			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+			e_soap_request_start_element (request, "SetItemField", NULL, NULL);
 
-			e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
-			e_soap_message_add_attribute (msg, "FieldURI", "message:IsRead", NULL, NULL);
-			e_soap_message_end_element (msg);
+			e_soap_request_start_element (request, "FieldURI", NULL, NULL);
+			e_soap_request_add_attribute (request, "FieldURI", "message:IsRead", NULL, NULL);
+			e_soap_request_end_element (request);
 
-			e_soap_message_start_element (msg, "Message", NULL, NULL);
-			e_ews_message_write_string_parameter (msg, "IsRead", NULL,
+			e_soap_request_start_element (request, "Message", NULL, NULL);
+			e_ews_request_write_string_parameter (request, "IsRead", NULL,
 				(mi_flags & CAMEL_MESSAGE_SEEN) ? "true" : "false");
 
-			e_soap_message_end_element (msg); /* Message */
-			e_soap_message_end_element (msg); /* SetItemField */
+			e_soap_request_end_element (request); /* Message */
+			e_soap_request_end_element (request); /* SetItemField */
 		}
 		/* Ick Ick Ick. Why in hell is there a field in the database for the Icon
 		 * *anyway*? Why isn't there a better place for forwarded/answered status? */
@@ -1340,41 +1340,41 @@ msg_update_flags (ESoapMessage *msg,
 			if (mi_flags & CAMEL_MESSAGE_FORWARDED)
 				icon = 0x106;
 
-			e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1080, icon);
+			e_ews_request_add_set_item_field_extended_tag_int (request, NULL, "Message", 0x1080, icon);
 		}
 
 		/* now update the Categories */
-		user_flags = ews_utils_gather_server_user_flags (msg, mi);
+		user_flags = ews_utils_gather_server_user_flags (request, mi);
 		if (user_flags) {
 			GSList *link;
 
-			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+			e_soap_request_start_element (request, "SetItemField", NULL, NULL);
 
-			e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
-			e_soap_message_add_attribute (msg, "FieldURI", "item:Categories", NULL, NULL);
-			e_soap_message_end_element (msg);
+			e_soap_request_start_element (request, "FieldURI", NULL, NULL);
+			e_soap_request_add_attribute (request, "FieldURI", "item:Categories", NULL, NULL);
+			e_soap_request_end_element (request);
 
-			e_soap_message_start_element (msg, "Message", NULL, NULL);
-			e_soap_message_start_element (msg, "Categories", NULL, NULL);
+			e_soap_request_start_element (request, "Message", NULL, NULL);
+			e_soap_request_start_element (request, "Categories", NULL, NULL);
 
 			for (link = user_flags; link; link = g_slist_next (link)) {
 				const gchar *user_flag = link->data;
 
-				e_ews_message_write_string_parameter (msg, "String", NULL, user_flag);
+				e_ews_request_write_string_parameter (request, "String", NULL, user_flag);
 			}
 
-			e_soap_message_end_element (msg); /* Categories */
-			e_soap_message_end_element (msg); /* Message */
-			e_soap_message_end_element (msg); /* SetItemField */
+			e_soap_request_end_element (request); /* Categories */
+			e_soap_request_end_element (request); /* Message */
+			e_soap_request_end_element (request); /* SetItemField */
 		} else {
-			e_ews_message_add_delete_item_field (msg, "Categories", "item");
+			e_ews_request_add_delete_item_field (request, "Categories", "item");
 		}
 
 		g_slist_free_full (user_flags, g_free);
 
-		ews_utils_update_followup_flags (msg, mi);
+		ews_utils_update_followup_flags (request, mi);
 
-		e_ews_message_end_item_change (msg);
+		e_ews_request_end_item_change (request);
 
 		camel_message_info_set_folder_flagged (mi, FALSE);
 
@@ -1388,7 +1388,7 @@ msg_update_flags (ESoapMessage *msg,
 }
 
 static gboolean
-ews_suppress_read_receipt (ESoapMessage *msg,
+ews_suppress_read_receipt (ESoapRequest *request,
 			   gpointer user_data,
 			   GError **error)
 {
@@ -1411,12 +1411,12 @@ ews_suppress_read_receipt (ESoapMessage *msg,
 
 		/* There was requested a read-receipt, but it is handled by evolution-ews,
 		   thus prevent an automatic send of it by the server */
-		e_soap_message_start_element (msg, "SuppressReadReceipt", NULL, NULL);
-		e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
-		e_soap_message_add_attribute (msg, "Id", camel_message_info_get_uid (mi), NULL, NULL);
-		e_soap_message_add_attribute (msg, "ChangeKey", camel_ews_message_info_get_change_key (CAMEL_EWS_MESSAGE_INFO (mi)), NULL, NULL);
-		e_soap_message_end_element (msg); /* "ReferenceItemId" */
-		e_soap_message_end_element (msg); /* SuppressReadReceipt */
+		e_soap_request_start_element (request, "SuppressReadReceipt", NULL, NULL);
+		e_soap_request_start_element (request, "ReferenceItemId", NULL, NULL);
+		e_soap_request_add_attribute (request, "Id", camel_message_info_get_uid (mi), NULL, NULL);
+		e_soap_request_add_attribute (request, "ChangeKey", camel_ews_message_info_get_change_key (CAMEL_EWS_MESSAGE_INFO (mi)), NULL, NULL);
+		e_soap_request_end_element (request); /* "ReferenceItemId" */
+		e_soap_request_end_element (request); /* SuppressReadReceipt */
 
 		camel_message_info_set_flags (mi, CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING, 0);
 
