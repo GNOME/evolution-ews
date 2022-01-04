@@ -330,7 +330,7 @@ e_soap_message_new (const gchar *method,
 	 * Don't use streaming-based messages when we are loggin the traffic
 	 * to generate trace files for tests
 	 */
-	if (e_ews_debug_get_log_level () <= 2) {
+	if (e_ews_debug_get_log_level () <= 3) {
 		/* Don't accumulate body data into a huge buffer.
 		 * Instead, parse it as it arrives. */
 		soup_message_body_set_accumulate (

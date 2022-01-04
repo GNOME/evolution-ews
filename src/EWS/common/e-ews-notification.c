@@ -258,6 +258,9 @@ e_ews_notification_init (EEwsNotification *notification)
 		SoupLogger *logger;
 		logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
 
+		if (log_level == 2)
+			soup_logger_set_printer (logger, e_ews_debug_soup_log_printer_stdout, NULL, NULL);
+
 		soup_session_add_feature (notification->priv->soup_session, SOUP_SESSION_FEATURE (logger));
 		g_object_unref (logger);
 	}
@@ -356,7 +359,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		return FALSE;
 	}
 
-	if (log_level >= 1 && log_level < 3) {
+	if (log_level >= 1 && log_level != 2 && log_level < 4) {
 		e_ews_debug_dump_raw_soup_request (SOUP_MESSAGE (msg));
 	}
 
@@ -380,7 +383,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 
 	response = e_soap_response_new_from_xmldoc (doc);
 
-	if (log_level >= 1 && log_level < 3) {
+	if (log_level >= 1 && log_level != 2 && log_level < 4) {
 		e_ews_debug_dump_raw_soup_response (SOUP_MESSAGE (msg));
 	}
 	g_object_unref (msg);
@@ -740,7 +743,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		if (response == NULL)
 			break;
 
-		if (log_level >= 1 && log_level < 3) {
+		if (log_level >= 1 && log_level != 2 && log_level < 4) {
 			e_ews_debug_dump_raw_soup_response (msg);
 			e_soap_response_dump_response (response, stdout);
 		}
@@ -871,7 +874,7 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 
 	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
 
-	if (e_ews_debug_get_log_level () <= 2)
+	if (e_ews_debug_get_log_level () <= 3)
 		soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, FALSE);
 
 	handler_id = g_signal_connect (

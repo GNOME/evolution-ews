@@ -22,6 +22,13 @@ void		e_ews_debug_dump_raw_soup_request
 							(SoupMessage *msg);
 void		e_ews_debug_dump_raw_soup_response
 							(SoupMessage *msg);
+const gchar *	e_ews_debug_redact_headers		(gchar direction,
+							 const gchar *data);
+void		e_ews_debug_soup_log_printer_stdout	(SoupLogger *logger,
+							 SoupLoggerLogLevel level,
+							 char direction,
+							 const gchar *data,
+							 gpointer user_data);
 G_END_DECLS
 
 #endif /* E_EWS_DEBUG_H */
