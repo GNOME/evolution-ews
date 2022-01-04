@@ -1006,7 +1006,7 @@ ews_response_cb (SoupSession *session,
 	 * Logging framework also */
 
 	log_level = e_ews_debug_get_log_level ();
-	if (log_level >= 1 && log_level < 3) {
+	if (log_level == 1) {
 		/* This will dump only the headers, since we stole the body.
 		 * And only if EWS_DEBUG=1, since higher levels will have dumped
 		 * it directly from libsoup anyway. */
@@ -1818,7 +1818,7 @@ e_ews_debug_handler (const gchar *log_domain,
 		     const gchar *message,
 		     gpointer user_data)
 {
-	if (e_ews_debug_get_log_level () >= 3)
+	if (e_ews_debug_get_log_level () >= 4)
 		g_log_default_handler (log_domain, log_level, message, NULL);
 }
 
@@ -1835,20 +1835,7 @@ e_ews_soup_log_printer (SoupLogger *logger,
 			const gchar *data,
 			gpointer user_data)
 {
-	const gchar *filtered_data = NULL;
-
-	if (e_ews_debug_get_log_level () >= 3) {
-		if (direction == '>' && g_ascii_strncasecmp (data, "Host:", 5) == 0)
-			filtered_data = "Host: <redacted>";
-		else if (direction == '>' && g_ascii_strncasecmp (data, "Authorization:", 14) == 0)
-			filtered_data = "Authorization: <redacted>";
-		else if (direction == '<' && g_ascii_strncasecmp (data, "Set-Cookie:", 11) == 0)
-			filtered_data = "Set-Cookie: <redacted>";
-		else
-			filtered_data = data;
-	}
-
-	g_debug ("%c %s", direction, filtered_data ? filtered_data : data);
+	g_debug ("%c %s", direction, e_ews_debug_redact_headers (direction, data));
 }
 
 static void
@@ -1998,13 +1985,15 @@ ews_connection_constructed (GObject *object)
 		SoupLogger *logger;
 		logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
 
-		if (log_level >= 3) {
+		if (log_level >= 4) {
 			soup_logger_set_printer (logger, e_ews_soup_log_printer, NULL, NULL);
 			g_log_set_handler (
 				G_LOG_DOMAIN,
 				G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
 				G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO,
 				e_ews_debug_handler, cnc);
+		} else if (log_level == 2) {
+			soup_logger_set_printer (logger, e_ews_debug_soup_log_printer_stdout, NULL, NULL);
 		}
 
 		soup_session_add_feature (
@@ -4556,7 +4545,7 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 	 * Don't use streaming-based messages when we are loggin the traffic
 	 * to generate trace files for tests
 	 */
-	if (e_ews_debug_get_log_level () <= 2)
+	if (e_ews_debug_get_log_level () <= 3)
 		soup_message_body_set_accumulate (soup_message->response_body, FALSE);
 
 	g_signal_connect (
