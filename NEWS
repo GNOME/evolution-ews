@@ -1,3 +1,33 @@
+Evolution-EWS 3.43.1 2022-01-07
+-------------------------------
+
+Bug Fixes:
+	I#3 - Contacts: Retrieve user certificate
+	I#163 - GAL: Postpone user photo download
+	I#165 - Contacts: Support categories
+	I#166 - Unable to set follow-up flag without a due date
+	I#174 - Silently retry on I/O errors (like 'Connection terminated unexpectedly')
+	evo-I#1637 - EMailAutoconfig: Autoconfig with Exchange accounts
+
+Miscellaneous:
+	ConfigLookup: Change values saved to the lookup result
+	ConfigLookup: Remove duplicated 'if'
+	Addressbook: Fix two memory leaks
+	Use `g_assert_true()` instead of `g_assert()` in the unit tests
+	Misc: Hide some headers' value in EWS_DEBUG=2 output
+
+Translations:
+	Anders Jonsson (sv)
+	Andika Triwidada (id)
+	Aurimas Černius (lt)
+	Enrico Nicoletto (pt_BR)
+	Goran Vidović (hr)
+	Jordi Mas (ca)
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+	Yuri Chornoivan (uk)
+	Мирослав Николић (sr)
+
 Evolution-EWS 3.42.0 2021-09-17
 -------------------------------
 
