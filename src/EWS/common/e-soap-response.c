@@ -562,7 +562,7 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
 
 			g_set_error (
 				error,
-				SOUP_HTTP_ERROR, SOUP_STATUS_IO_ERROR,
+				SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
 				"%s", (string != NULL) ? string :
 				"<faultstring> in SOAP response");
 

@@ -877,15 +877,15 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 	if (e_ews_debug_get_log_level () <= 3)
 		soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, FALSE);
 
-	handler_id = g_signal_connect (
-		SOUP_MESSAGE (msg), "got-chunk",
-		G_CALLBACK (ews_notification_soup_got_chunk), notification);
-
 	if (!e_ews_connection_utils_prepare_message (cnc, notification->priv->soup_session, SOUP_MESSAGE (msg), notification->priv->cancellable)) {
 		g_object_unref (msg);
 		g_object_unref (cnc);
 		return FALSE;
 	}
+
+	handler_id = g_signal_connect (
+		SOUP_MESSAGE (msg), "got-chunk",
+		G_CALLBACK (ews_notification_soup_got_chunk), notification);
 
 	/* Unref it early, thus it doesn't keep the connection alive after all backends are freed */
 	g_object_unref (cnc);

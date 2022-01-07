@@ -30,6 +30,8 @@
 
 #define d(x) x
 
+#define EWS_RETRY_IO_ERROR_SECONDS 3
+
 /* A chunk size limit when moving items in chunks. */
 #define EWS_MOVE_ITEMS_CHUNK_SIZE 500
 
@@ -153,6 +155,8 @@ struct _EwsNode {
 
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
+
+	gboolean retrying_after_network_error;
 };
 
 struct _EwsUrls {
@@ -922,7 +926,7 @@ ews_response_cb (SoupSession *session,
                  gpointer data)
 {
 	EwsNode *enode = (EwsNode *) data;
-	ESoapResponse *response;
+	ESoapResponse *response = NULL;
 	ESoapParameter *param;
 	const gchar *persistent_auth;
 	gint log_level;
@@ -978,6 +982,11 @@ ews_response_cb (SoupSession *session,
 			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
 			_("Authentication failed"));
 		goto exit;
+	} else if (!enode->retrying_after_network_error &&
+		   msg->status_code == SOUP_STATUS_IO_ERROR) {
+		wait_ms = EWS_RETRY_IO_ERROR_SECONDS * 1000;
+		enode->retrying_after_network_error = TRUE;
+		goto retrylbl;
 	} else if (msg->status_code == SOUP_STATUS_CANT_RESOLVE ||
 		   msg->status_code == SOUP_STATUS_CANT_RESOLVE_PROXY ||
 		   msg->status_code == SOUP_STATUS_CANT_CONNECT ||
@@ -1015,7 +1024,10 @@ ews_response_cb (SoupSession *session,
 		e_soap_response_dump_response (response, stdout);
 	}
 
-	param = e_soap_response_get_first_parameter_by_name (response, "detail", NULL);
+	if (!wait_ms && e_ews_connection_get_backoff_enabled (enode->cnc))
+		param = e_soap_response_get_first_parameter_by_name (response, "detail", NULL);
+	else
+		param = NULL;
 	if (param)
 		param = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
 	if (param) {
@@ -1042,7 +1054,8 @@ ews_response_cb (SoupSession *session,
 		g_free (value);
 	}
 
-	if (wait_ms > 0 && e_ews_connection_get_backoff_enabled (enode->cnc)) {
+ retrylbl:
+	if (wait_ms > 0) {
 		GCancellable *cancellable = enode->cancellable;
 		EFlag *flag;
 
@@ -1086,7 +1099,7 @@ ews_response_cb (SoupSession *session,
 
 		e_flag_free (flag);
 
-		g_object_unref (response);
+		g_clear_object (&response);
 
 		if (g_cancellable_is_cancelled (cancellable) ||
 		    msg->status_code == SOUP_STATUS_CANCELLED) {
@@ -1101,6 +1114,7 @@ ews_response_cb (SoupSession *session,
 			new_node->cb = enode->cb;
 			new_node->cnc = enode->cnc;
 			new_node->simple = enode->simple;
+			new_node->retrying_after_network_error = enode->retrying_after_network_error;
 
 			enode->simple = NULL;
 
@@ -1123,7 +1137,7 @@ ews_response_cb (SoupSession *session,
 	if (enode->cb != NULL)
 		enode->cb (response, enode->simple);
 
-	g_object_unref (response);
+	g_clear_object (&response);
 
 exit:
 	if (enode->simple)
