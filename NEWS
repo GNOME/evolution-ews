@@ -1,3 +1,12 @@
+Evolution-EWS 3.42.3 2022-01-07
+-------------------------------
+
+Bug Fixes:
+	I#174 - Silently retry on I/O errors (like 'Connection terminated unexpectedly')
+
+Miscellaneous:
+	Misc: Hide some headers' value in EWS_DEBUG=2 output
+
 Evolution-EWS 3.42.1 2021-10-29
 -------------------------------
 
