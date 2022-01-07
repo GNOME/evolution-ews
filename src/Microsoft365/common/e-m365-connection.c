@@ -19,6 +19,7 @@
 #define LOCK(x) g_rec_mutex_lock (&(x->priv->property_lock))
 #define UNLOCK(x) g_rec_mutex_unlock (&(x->priv->property_lock))
 
+#define M365_RETRY_IO_ERROR_SECONDS 3
 #define X_EVO_M365_DATA "X-EVO-M365-DATA"
 
 typedef enum _CSMFlags {
@@ -274,7 +275,7 @@ m365_connection_authenticate (SoupSession *session,
 	m365_connection_utils_setup_bearer_auth (cnc, session, msg, TRUE, E_SOUP_AUTH_BEARER (auth), NULL, &local_error);
 
 	if (local_error)
-		soup_message_set_status_full (msg, SOUP_STATUS_IO_ERROR, local_error->message);
+		soup_message_set_status_full (msg, SOUP_STATUS_MALFORMED, local_error->message);
 
 	g_object_unref (using_bearer_auth);
 	g_clear_error (&local_error);
@@ -1139,6 +1140,7 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 	SoupSession *soup_session;
 	gint need_retry_seconds = 5;
 	gboolean success = FALSE, need_retry = TRUE;
+	gboolean did_io_error_retry = FALSE;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
@@ -1237,10 +1239,12 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 			if (success && m365_log_enabled ())
 				input_stream = e_soup_logger_attach (message, input_stream);
 
-			/* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
-			if (message->status_code == 429 ||
+			if ((!did_io_error_retry && message->status_code == SOUP_STATUS_IO_ERROR) ||
+			    /* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
+			    message->status_code == 429 ||
 			    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
 			    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
+				did_io_error_retry = did_io_error_retry || message->status_code == SOUP_STATUS_IO_ERROR;
 				need_retry = TRUE;
 			} else if (message->status_code == SOUP_STATUS_SSL_FAILED) {
 				m365_connection_extract_ssl_data (cnc, message);
@@ -1254,6 +1258,8 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 
 				if (retry_after_str && *retry_after_str)
 					retry_after = g_ascii_strtoll (retry_after_str, NULL, 10);
+				else if (message->status_code == SOUP_STATUS_IO_ERROR)
+					retry_after = M365_RETRY_IO_ERROR_SECONDS;
 				else
 					retry_after = 0;
 
@@ -1968,7 +1974,7 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 		if (!submessage)
 			continue;
 
-		submessage->status_code = SOUP_STATUS_IO_ERROR;
+		submessage->status_code = SOUP_STATUS_MALFORMED;
 
 		suri = soup_message_get_uri (submessage);
 		uri = suri ? soup_uri_to_string (suri, TRUE) : NULL;
@@ -2086,6 +2092,7 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 	GPtrArray *use_requests;
 	gint need_retry_seconds = 5;
 	gboolean success, need_retry = TRUE;
+	gboolean did_io_error_retry = FALSE;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (requests != NULL, FALSE);
@@ -2110,13 +2117,15 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 				if (!message)
 					continue;
 
-				/* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
-				if (message->status_code == 429 ||
+				if ((!did_io_error_retry && message->status_code == SOUP_STATUS_IO_ERROR) ||
+				    /* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
+				    message->status_code == 429 ||
 				    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
 				    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
 					const gchar *retry_after_str;
 					gint64 retry_after;
 
+					did_io_error_retry = did_io_error_retry || message->status_code == SOUP_STATUS_IO_ERROR;
 					need_retry = TRUE;
 
 					if (!new_requests)
@@ -2128,6 +2137,8 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 
 					if (retry_after_str && *retry_after_str)
 						retry_after = g_ascii_strtoll (retry_after_str, NULL, 10);
+					else if (message->status_code == SOUP_STATUS_IO_ERROR)
+						retry_after = M365_RETRY_IO_ERROR_SECONDS;
 					else
 						retry_after = 0;
 

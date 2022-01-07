@@ -463,7 +463,7 @@ e_ews_connection_utils_authenticate (EEwsConnection *cnc,
 		ews_connection_utils_setup_bearer_auth (cnc, session, msg, TRUE, E_SOUP_AUTH_BEARER (auth), NULL, &local_error);
 
 		if (local_error)
-			soup_message_set_status_full (msg, SOUP_STATUS_IO_ERROR, local_error->message);
+			soup_message_set_status_full (msg, SOUP_STATUS_MALFORMED, local_error->message);
 
 		g_object_unref (using_bearer_auth);
 		g_clear_error (&local_error);
@@ -477,7 +477,7 @@ e_ews_connection_utils_authenticate (EEwsConnection *cnc,
 		e_ews_connection_utils_expired_password_to_error (service_url, &local_error);
 
 		if (local_error)
-			soup_message_set_status_full (msg, SOUP_STATUS_IO_ERROR, local_error->message);
+			soup_message_set_status_full (msg, SOUP_STATUS_MALFORMED, local_error->message);
 
 		g_clear_error (&local_error);
 		g_free (service_url);
