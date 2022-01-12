@@ -13,6 +13,8 @@
 G_BEGIN_DECLS
 
 gint		e_ews_debug_get_log_level		(void);
+void		e_ews_debug_print			(const gchar *format,
+							 ...) G_GNUC_PRINTF (1, 2);
 const gchar *	e_ews_connection_get_server_version_string
 							(EEwsConnection *cnc);
 EEwsServerVersion

@@ -28,6 +28,19 @@ e_ews_debug_get_log_level (void)
 	return level;
 }
 
+void
+e_ews_debug_print (const gchar *format,
+		   ...)
+{
+	if (e_ews_debug_get_log_level () != 0) {
+		va_list args;
+
+		va_start (args, format);
+		e_util_debug_printv ("EWS", format, args);
+		va_end (args);
+	}
+}
+
 const gchar *
 e_ews_connection_get_server_version_string (EEwsConnection *cnc)
 {

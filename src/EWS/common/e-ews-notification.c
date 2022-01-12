@@ -13,6 +13,8 @@
 #include "e-ews-notification.h"
 #include "e-soup-auth-negotiate.h"
 
+#define EWS_NOTIFICATION_CANCEL_KEY "ews-notification-cancel-key"
+
 struct _EEwsNotificationPrivate {
 	GMutex thread_lock;
 	SoupSession *soup_session;
@@ -314,7 +316,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	g_clear_object (&settings);
 
 	if (!msg) {
-		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (cnc));
+		e_ews_debug_print ("%s: Failed to create Soup message for URI '%s'\n", G_STRFUNC, e_ews_connection_get_uri (cnc));
 		g_object_unref (cnc);
 		return FALSE;
 	}
@@ -395,7 +397,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	g_warn_if_fail ((param != NULL && error == NULL) || (param == NULL && error != NULL));
 
 	if (error != NULL) {
-		g_warning (G_STRLOC ": %s\n", error->message);
+		e_ews_debug_print (G_STRLOC ": %s\n", error->message);
 		g_error_free (error);
 
 		g_object_unref (response);
@@ -408,7 +410,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		const gchar *name = (const gchar *) subparam->name;
 
 		if (!ews_get_response_status (subparam, &error)) {
-			g_warning (G_STRLOC ": %s\n", error->message);
+			e_ews_debug_print (G_STRLOC ": %s\n", error->message);
 			g_error_free (error);
 
 			g_object_unref (response);
@@ -470,7 +472,7 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 	g_clear_object (&settings);
 
 	if (!msg) {
-		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (cnc));
+		e_ews_debug_print ("%s: Failed to create Soup message for URI '%s'\n", G_STRFUNC, e_ews_connection_get_uri (cnc));
 		g_object_unref (cnc);
 		return FALSE;
 	}
@@ -512,7 +514,7 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 	g_object_unref (response);
 
 	if (error != NULL) {
-		g_warning (G_STRLOC ": %s\n", error->message);
+		e_ews_debug_print (G_STRLOC ": %s\n", error->message);
 		g_error_free (error);
 		return FALSE;
 	}
@@ -623,7 +625,7 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	g_warn_if_fail ((param != NULL && error == NULL) || (param == NULL && error != NULL));
 
 	if (error != NULL) {
-		g_warning (G_STRLOC ": %s\n", error->message);
+		e_ews_debug_print (G_STRLOC ": %s\n", error->message);
 		g_error_free (error);
 		return FALSE;
 	}
@@ -634,7 +636,7 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 		const gchar *name = (const gchar *) subparam->name;
 
 		if (!ews_get_response_status (subparam, &error)) {
-			g_warning (G_STRLOC ": %s\n", error->message);
+			e_ews_debug_print (G_STRLOC ": %s\n", error->message);
 			g_error_free (error);
 			g_slist_free_full (events, (GDestroyNotify) e_ews_notification_event_free);
 			return FALSE;
@@ -749,6 +751,8 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		}
 
 		if (!ews_notification_fire_events_from_response (notification, response)) {
+			/* Mark the cancellation as not being fatal */
+			g_object_set_data (G_OBJECT (msg), EWS_NOTIFICATION_CANCEL_KEY, GINT_TO_POINTER (1));
 			ews_notification_schedule_abort (notification->priv->soup_session);
 
 			g_object_unref (response);
@@ -861,7 +865,7 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 	g_clear_object (&settings);
 
 	if (!msg) {
-		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (cnc));
+		e_ews_debug_print ("%s: Failed to create Soup message for URI '%s'\n", G_STRFUNC, e_ews_connection_get_uri (cnc));
 		g_object_unref (cnc);
 		return FALSE;
 	}
@@ -902,7 +906,8 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		g_cancellable_disconnect (cancellable, cancel_handler_id);
 
 	ret = SOUP_STATUS_IS_SUCCESSFUL (status_code);
-	*out_fatal_error = SOUP_STATUS_IS_CLIENT_ERROR (status_code) || SOUP_STATUS_IS_SERVER_ERROR (status_code) || status_code == SOUP_STATUS_CANCELLED;
+	*out_fatal_error = SOUP_STATUS_IS_CLIENT_ERROR (status_code) || SOUP_STATUS_IS_SERVER_ERROR (status_code) ||
+		(status_code == SOUP_STATUS_CANCELLED && !g_object_get_data (G_OBJECT (msg), EWS_NOTIFICATION_CANCEL_KEY));
 
 	g_signal_handler_disconnect (msg, handler_id);
 	g_object_unref (msg);
@@ -953,18 +958,21 @@ e_ews_notification_get_events_thread (gpointer user_data)
 		ret = e_ews_notification_get_events_sync (td->notification, subscription_id, &fatal_error, td->cancellable);
 
 		if (!ret && !g_cancellable_is_cancelled (td->cancellable)) {
-			g_debug ("%s: Failed to get notification events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
+			e_ews_debug_print ("%s: Failed to get notification events (SubscriptionId: '%s')\n", G_STRFUNC, subscription_id);
 
 			e_ews_notification_unsubscribe_folder_sync (td->notification, subscription_id);
 			g_free (subscription_id);
 			subscription_id = NULL;
 
 			if (!fatal_error) {
+				/* This will cause reconnect */
+				soup_session_abort (td->notification->priv->soup_session);
+
 				ret = e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable);
 				if (ret) {
-					g_debug ("%s: Re-subscribed to get notifications events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
+					e_ews_debug_print ("%s: Re-subscribed to get notifications events (SubscriptionId: '%s')\n", G_STRFUNC, subscription_id);
 				} else {
-					g_debug ("%s: Failed to re-subscribed to get notifications events", G_STRFUNC);
+					e_ews_debug_print ("%s: Failed to re-subscribed to get notifications events\n", G_STRFUNC);
 				}
 			}
 		}
