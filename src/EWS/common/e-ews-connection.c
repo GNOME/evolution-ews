@@ -1015,11 +1015,12 @@ ews_response_cb (SoupSession *session,
 	 * Logging framework also */
 
 	log_level = e_ews_debug_get_log_level ();
-	if (log_level == 1) {
+	if (log_level >= 1 && log_level < 4) {
 		/* This will dump only the headers, since we stole the body.
 		 * And only if EWS_DEBUG=1, since higher levels will have dumped
 		 * it directly from libsoup anyway. */
-		e_ews_debug_dump_raw_soup_response (msg);
+		if (log_level == 1)
+			e_ews_debug_dump_raw_soup_response (msg);
 		/* And this will dump the body... */
 		e_soap_response_dump_response (response, stdout);
 	}
