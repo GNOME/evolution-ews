@@ -92,7 +92,11 @@ print_header (const gchar *name,
 	      const gchar *value,
 	      gpointer user_data)
 {
-	fprintf (user_data, "%s: %s\n", name, value);
+	gchar *header = g_strconcat (name, ": ", value, NULL);
+
+	fprintf (user_data, "%s\n", e_ews_debug_redact_headers ('<', header));
+
+	g_free (header);
 }
 
 static void

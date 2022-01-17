@@ -361,7 +361,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		return FALSE;
 	}
 
-	if (log_level >= 1 && log_level != 2 && log_level < 4) {
+	if (log_level >= 1 && log_level < 4) {
 		e_ews_debug_dump_raw_soup_request (SOUP_MESSAGE (msg));
 	}
 
@@ -385,7 +385,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 
 	response = e_soap_response_new_from_xmldoc (doc);
 
-	if (log_level >= 1 && log_level != 2 && log_level < 4) {
+	if (log_level >= 1 && log_level < 4) {
 		e_ews_debug_dump_raw_soup_response (SOUP_MESSAGE (msg));
 	}
 	g_object_unref (msg);
@@ -745,7 +745,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		if (response == NULL)
 			break;
 
-		if (log_level >= 1 && log_level != 2 && log_level < 4) {
+		if (log_level >= 1 && log_level < 4) {
 			e_ews_debug_dump_raw_soup_response (msg);
 			e_soap_response_dump_response (response, stdout);
 		}
