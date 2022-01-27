@@ -31,6 +31,7 @@
 #define d(x) x
 
 #define EWS_RETRY_IO_ERROR_SECONDS 3
+#define EWS_RETRY_AUTH_ERROR_SECONDS 0.1
 
 /* A chunk size limit when moving items in chunks. */
 #define EWS_MOVE_ITEMS_CHUNK_SIZE 500
@@ -955,6 +956,14 @@ ews_response_cb (SoupSession *session,
 			"%s", msg->reason_phrase);
 		goto exit;
 	} else if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
+		/* This can happen when the server terminated the connection before the request started */
+		if (!enode->retrying_after_network_error &&
+		    !soup_message_headers_get_one (msg->request_headers, "Authorization")) {
+			wait_ms = EWS_RETRY_AUTH_ERROR_SECONDS * 1000;
+			enode->retrying_after_network_error = TRUE;
+			goto retrylbl;
+		}
+
 		if (msg->response_headers) {
 			const gchar *diagnostics;
 
