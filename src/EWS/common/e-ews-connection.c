@@ -98,6 +98,9 @@ struct _EEwsConnectionPrivate {
 	/* Set to TRUE when this connection had been disconnected and cannot be used anymore */
 	gboolean disconnected_flag;
 
+	/* Do that before a request is sent, rather than on request end, to avoid deadlock in libsoup */
+	gboolean clear_cached_credentials;
+
 	gboolean ssl_info_set;
 	gchar *ssl_certificate_pem;
 	GTlsCertificateFlags ssl_certificate_errors;
@@ -727,6 +730,17 @@ ews_next_request (gpointer _cnc)
 			ews_response_cb (cnc->priv->soup_session, msg, node);
 		} else {
 			e_ews_debug_dump_raw_soup_request (msg);
+
+			if (cnc->priv->clear_cached_credentials) {
+				SoupSessionFeature *feature;
+
+				cnc->priv->clear_cached_credentials = FALSE;
+
+				feature = soup_session_get_feature (cnc->priv->soup_session, SOUP_TYPE_AUTH_MANAGER);
+				if (feature)
+					soup_auth_manager_clear_cached_credentials (SOUP_AUTH_MANAGER (feature));
+			}
+
 			soup_session_queue_message (cnc->priv->soup_session, msg, ews_response_cb, node);
 		}
 	} else {
@@ -935,12 +949,7 @@ ews_response_cb (SoupSession *session,
 
 	persistent_auth = soup_message_headers_get_one (msg->response_headers, "Persistent-Auth");
 	if (persistent_auth && g_ascii_strcasecmp (persistent_auth, "false") == 0) {
-		SoupSessionFeature *feature;
-
-		feature = soup_session_get_feature (session, SOUP_TYPE_AUTH_MANAGER);
-		if (feature) {
-			soup_auth_manager_clear_cached_credentials (SOUP_AUTH_MANAGER (feature));
-		}
+		enode->cnc->priv->clear_cached_credentials = TRUE;
 	}
 
 	if (g_cancellable_is_cancelled (enode->cancellable))
