@@ -7,14 +7,14 @@
 #
 # Javier Mazorra Rodríguez <mazi.debian@gmail.com>, 2012.
 # facundo Dario Illanes <fdillanes@gmail.com>, 2013.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011-2021.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011-2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-06-09 16:57+0000\n"
-"PO-Revision-Date: 2021-08-26 17:36+0200\n"
+"POT-Creation-Date: 2021-09-17 14:25+0000\n"
+"PO-Revision-Date: 2022-02-07 09:22+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0\n"
+"X-Generator: Gtranslator 41.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -36,18 +36,23 @@ msgstr "Servicios web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acceder a servidores Exchange usando servicios web"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2796
+#| msgid "_Fetch contact photos"
+msgid "Fetching contact photos…"
+msgstr "Obteniendo fotos del contacto…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3988
 msgid "Failed to update GAL:"
 msgstr "Falló al actualizar GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4153
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "No se puede guardar la lista de contactos. Esto sólo se soporta en EWS "
 "server 2010 o posterior"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4251
 msgid "Failed to set contact photo:"
 msgstr "Falló al establecer la foto del contacto:"
 
@@ -504,25 +509,25 @@ msgstr ""
 "No se puede guardar esta repetición. Cámbiela a de un sólo día, semanal, "
 "mensual o anual sin excepciones y con fecha de inicio."
 
-#: ../src/EWS/common/e-ews-camel-common.c:392
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
 
-#: ../src/EWS/common/e-ews-connection.c:811
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "Operación cancelada"
 
-#: ../src/EWS/common/e-ews-connection.c:981
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "Falló la autenticación"
 
-#: ../src/EWS/common/e-ews-connection.c:1003
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Sin respuesta: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1066
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -533,7 +538,7 @@ msgstr[1] ""
 "El servidor de Exchange está ocupado, esperando para reintentar (%d:%02d "
 "minutos)"
 
-#: ../src/EWS/common/e-ews-connection.c:1072
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -542,57 +547,57 @@ msgstr[0] ""
 msgstr[1] ""
 "El servidor de Exchange está ocupado, esperando para reintentar (%d segundos)"
 
-#: ../src/EWS/common/e-ews-connection.c:3215
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falló al analizar la respuesta XML de la autodetección"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falló al buscar el elemento <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Falló al buscar el elemento<Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:3244
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Falló al buscar el elemento <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:3290
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Falló al buscar <ASUrl> en la respuesta de la autodetección"
 
-#: ../src/EWS/common/e-ews-connection.c:3476
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "El URL no puede ser NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "El URL «%s» no es válido"
 
-#: ../src/EWS/common/e-ews-connection.c:3781
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
 msgstr "Falta el dominio en la dirección de correo-e"
 
-#: ../src/EWS/common/e-ews-connection.c:4090
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "Falló al analizar el XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5387
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
 msgstr "No se encontraron elementos"
 
-#: ../src/EWS/common/e-ews-connection.c:11838
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Requiere al menos un servidor Microsoft Exchange 2007 SP1"
 
@@ -1591,12 +1596,12 @@ msgstr ""
 "El origen de los datos «%s» no representa una carpeta de servicios web de "
 "Exchange"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "El ID de la carpeta no existe"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr ""
 "No se puede guardar la lista de contactos en una libreta de direcciones de "
