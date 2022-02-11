@@ -1,3 +1,18 @@
+Evolution-EWS 3.43.2 2022-02-11
+-------------------------------
+
+Bug Fixes:
+	I#77 - Can sometimes stop listening for server notifications
+
+Miscellaneous:
+	Misc: Correct response print in debug output
+	Retry on Unauthorized response when server disconnected
+	e-ews-connection: Clear cached connection before sending a request
+
+Translations:
+	Daniel Mustieles (es)
+	Daniel Șerbănescu (ro)
+
 Evolution-EWS 3.43.1 2022-01-07
 -------------------------------
 
