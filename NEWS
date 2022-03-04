@@ -1,3 +1,9 @@
+Evolution-EWS 3.43.3 2022-03-04
+-------------------------------
+
+Bug Fixes:
+	M!7 - OAuth2: Remove prompt=login parameter from auth URL (Brian J. Murrell)
+
 Evolution-EWS 3.43.2 2022-02-11
 -------------------------------
 
