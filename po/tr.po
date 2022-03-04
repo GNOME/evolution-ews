@@ -6,14 +6,14 @@
 # Muhammet Kara <muhammetk@gmail.com>, 2015, 2016.
 # Serdar Sağlam <teknomobil@yandex.com>, 2019.
 # Sabri Ünal <libreajans@gmail.com>, 2019.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2020, 2021.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2020, 2021, 2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-02-16 15:55+0000\n"
-"PO-Revision-Date: 2021-02-28 13:02+0300\n"
+"POT-Creation-Date: 2021-09-17 10:36+0000\n"
+"PO-Revision-Date: 2022-03-05 01:37+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-POOTLE-MTIME: 1434380104.000000\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
@@ -36,60 +36,64 @@ msgstr "Exchange Web Servisleri"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Web Servisleri kullanarak Exchange sunucularına ulaşmak için"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2796
+msgid "Fetching contact photos…"
+msgstr "Kişi fotoğrafları alınıyor…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3988
 msgid "Failed to update GAL:"
 msgstr "GAL güncellenemedi:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4153
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
-"Kişi listesi kaydedilemiyor, bu yalnızca EWS Sunucusu 2010 veya sonrası "
-"tarafından desktekleniyor"
+"Kişi listesi kaydedilemiyor, bu yalnızca EWS Sunucusu 2010 veya sonrasınca "
+"destekleniyor"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4251
 msgid "Failed to set contact photo:"
 msgstr "Kişi fotoğrafı ayarlanamadı:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Uygun"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Meşgul"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ofis Dışında"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Belirsiz"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "EWS ItemId belirlenemedi"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr ""
-"Exchange Web Servisleri takvimindeki diğer kullanıcılarca organize edilen "
+"Exchange Web Servisleri takviminde diğer kullanıcılarca düzenlenen "
 "toplantılar oluşturulamaz."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "“%s” kullanıcısı, katılımcılar arasında bulunamıyor"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2114
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Geçersiz eşleşme kimliği"
 
@@ -133,12 +137,12 @@ msgstr "İleti önbellek dosyası “%s” konumundan “%s” konumuna taşına
 msgid "Could not load summary for %s"
 msgstr "%s için özet yüklenemedi"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "“%s” klasörü tazeleniyor"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Çevrim dışı kipte klasörde eylemler gerçekleştirilemiyor"
@@ -146,12 +150,12 @@ msgstr "Çevrim dışı kipte klasörde eylemler gerçekleştirilemiyor"
 #: ../src/EWS/camel/camel-ews-provider.c:30
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Checking for new mail"
-msgstr "Yeni posta kontrol ediliyor"
+msgstr "Yeni posta için denetleniyor"
 
 #: ../src/EWS/camel/camel-ews-provider.c:32
 #: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "C_heck for new messages in all folders"
-msgstr "Tüm klasörlerde yeni iletileri _kontrol et"
+msgstr "Tüm klasörlerde yeni iletileri _denetle"
 
 #: ../src/EWS/camel/camel-ews-provider.c:34
 msgid "_Listen for server change notifications"
@@ -165,23 +169,22 @@ msgstr "Seçenekler"
 #: ../src/EWS/camel/camel-ews-provider.c:39
 #: ../src/Microsoft365/camel/camel-m365-provider.c:32
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "Bu sunucudaki Gelen Kutusu içindeki iletilere filtreleri _uygula"
+msgstr "Bu sunucudaki Gelen Kutusu içindeki yeni iletilere filtre _uygula"
 
 #: ../src/EWS/camel/camel-ews-provider.c:41
 #: ../src/Microsoft365/camel/camel-m365-provider.c:34
 msgid "Check new messages for _Junk contents"
-msgstr "_Gereksiz içerikleri için yeni iletileri kontrol et"
+msgstr "_Gereksiz içerikleri için yeni iletileri denetle"
 
 #: ../src/EWS/camel/camel-ews-provider.c:43
 #: ../src/Microsoft365/camel/camel-m365-provider.c:36
 msgid "Only check for Junk messages in the IN_BOX folder"
-msgstr ""
-"Önemsiz içerikleri yalnızca IN_BOX klasöründeki iletiler için kontrol et"
+msgstr "Yalnızca GELEN _KUTUSU klasöründeki Gereksiz iletileri denetle"
 
 #: ../src/EWS/camel/camel-ews-provider.c:45
 #: ../src/Microsoft365/camel/camel-m365-provider.c:38
 msgid "Synchroni_ze remote mail locally in all folders"
-msgstr "Tüm postalarda uzak postaları yerel olarak _eşitle"
+msgstr "Uzaktaki _mektupları yerel ile tüm klasörlerde eşitle"
 
 #: ../src/EWS/camel/camel-ews-provider.c:48
 msgid "Show _Public Folders beside user folders"
@@ -198,7 +201,7 @@ msgstr "Bağlantı"
 #: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
-msgstr "Bağlantı _zaman aşımı (saniyede cinsinden) %s"
+msgstr "Bağlantı _zaman aşımı (saniye türünde) %s"
 
 #: ../src/EWS/camel/camel-ews-provider.c:57
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
@@ -207,7 +210,7 @@ msgstr "Kullanılacak eş zamanlı bağlantı _sayısı"
 
 #: ../src/EWS/camel/camel-ews-provider.c:59
 msgid "Override _User-Agent header value"
-msgstr "_User-Agent başık değerini geçersiz kıl"
+msgstr "_User-Agent başlık değerini geçersiz kıl"
 
 #: ../src/EWS/camel/camel-ews-provider.c:85
 msgid "NTLM"
@@ -274,7 +277,7 @@ msgstr "%s_%d"
 #: ../src/EWS/camel/camel-ews-store.c:654
 #: ../src/EWS/camel/camel-ews-store.c:1481
 msgid "Checking “Out of Office” settings"
-msgstr "“Ofis Dışı” ayarları kontrol ediliyor"
+msgstr "“Ofis Dışı” ayarları denetleniyor"
 
 #: ../src/EWS/camel/camel-ews-store.c:1487
 msgid "Look up Exchange server categories"
@@ -296,11 +299,11 @@ msgstr[0] "Parola %d gün içinde sona erecek."
 
 #: ../src/EWS/camel/camel-ews-store.c:1795
 msgid "Updating foreign folder structure"
-msgstr "Yapancı klasör yapısını güncelle"
+msgstr "Yabancı klasör yapısını güncelle"
 
 #: ../src/EWS/camel/camel-ews-store.c:1931
 msgid "Updating foreign folders"
-msgstr "Yapancı klasörleri güncelleme"
+msgstr "Yabancı klasörleri güncelle"
 
 #: ../src/EWS/camel/camel-ews-store.c:2347
 #: ../src/Microsoft365/camel/camel-m365-store.c:631
@@ -374,7 +377,7 @@ msgstr "%s klasörü için değişim anahtarı kaydı yok"
 #: ../src/EWS/camel/camel-ews-store.c:3260
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
-msgstr "Bir klasörü aynı anda hem yeniden adlandırıp hem de taşıyamassınız"
+msgstr "Bir klasörü aynı anda hem yeniden adlandırıp hem de taşıyamazsınız"
 
 #: ../src/EWS/camel/camel-ews-store.c:3291
 #: ../src/EWS/camel/camel-ews-store.c:3314
@@ -399,7 +402,7 @@ msgstr "Exchange sunucu %s"
 #: ../src/EWS/camel/camel-ews-store.c:3366
 #, c-format
 msgid "Exchange service for %s on %s"
-msgstr "%s için %s üzerindeki Exchange servisi"
+msgstr "%2$s üzerinde %1$s için Exchange servisi"
 
 #: ../src/EWS/camel/camel-ews-store.c:3410
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
@@ -476,7 +479,7 @@ msgstr "Gönderen adresini okuma başarısız"
 #: ../src/Microsoft365/camel/camel-m365-transport.c:316
 #, c-format
 msgid "Service not connected"
-msgstr "Service bağlı değil"
+msgstr "Servis bağlı değil"
 
 #: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
 msgid "OAuth2 (Office365)"
@@ -496,98 +499,98 @@ msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
 "monthly or yearly recurrence without exceptions and with start date."
 msgstr ""
-"Bu yinelemeyi saklayamıyorum. İstisnasız ve başlangıç ​​tarihi olan basit "
-"tekil günlük, haftalık, aylık veya yıllık yinelenme biçimine değiştirin."
+"Bu yineleme saklanamaz. İstisnasız ve başlangıç ​​tarihi olan basit tekil "
+"günlük, haftalık, aylık veya yıllık yinelenme biçimine değiştirin."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem çağrısı, yeni ileti için kimlik döndürmesi başarısız"
 
-#: ../src/EWS/common/e-ews-connection.c:811
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "İşlem İptal Edildi"
 
-#: ../src/EWS/common/e-ews-connection.c:981
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "Kimlik doğrulama başarısız"
 
-#: ../src/EWS/common/e-ews-connection.c:1003
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Yanıt yok: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1066
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Exchange sunucusu meşgul, yeniden denemeyi bekliyor (%d:%02d dakika)"
 
-#: ../src/EWS/common/e-ews-connection.c:1072
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Exchange sunucusu meşgul, yeniden denemeyi bekliyor (%d saniye)"
 
-#: ../src/EWS/common/e-ews-connection.c:3215
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Kendiliğinden keşifin XML yanıtı ayrıştırılamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "<Response> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3244
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "<Account> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3290
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "<ASUrl> ögesi kendiliğinden keşif yanıtında bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3476
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "Adres NULL olamaz"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "“%s” adresi geçerli değil"
 
-#: ../src/EWS/common/e-ews-connection.c:3781
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
-msgstr "Eposta adresinde alan adı kısmı eksik"
+msgstr "E-posta adresinde etki alanı bölümü eksik"
 
-#: ../src/EWS/common/e-ews-connection.c:4090
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "OAB XML ayrıştırılamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> ögesi bulunamadı\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5387
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
-msgstr "Hiç bir öge bulunamadı"
+msgstr "Öge bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:11838
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "En az Microsoft Exchange 2007 SP1 sunucusu gerektirir"
 
 #: ../src/EWS/common/e-ews-connection-utils.c:185
 #, c-format
 msgid "Password expired. Change password at “%s”."
-msgstr "Parolanın süresi doldu. Adresteki parolayı değiştir “%s”."
+msgstr "Parolanın süresi doldu. Parolayı değiştir: “%s”."
 
 #: ../src/EWS/common/e-ews-connection-utils.c:188
 msgid "Password expired."
@@ -610,7 +613,7 @@ msgstr "Klasör eklenemiyor, ana kaynak bulunamadı"
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:86
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
-msgstr "Klasör eklenemiyor, klasör zaten “%s” olarak mevcut"
+msgstr "Klasör eklenemiyor, klasör zaten “%s” olarak var"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/EWS/common/e-oauth2-service-office365.c:144
@@ -620,7 +623,7 @@ msgstr "Office365"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:88
 msgid "Use only _primary contact email address"
-msgstr "Yalnızca _birincil iletişim e-posta adresini kullanın"
+msgstr "Yalnızca _birincil iletişim e-posta adresini kullan"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:89
 msgid ""
@@ -696,7 +699,7 @@ msgstr "Diğer EWS kullanıcısının klasörüne abone ol…"
 #: ../src/EWS/evolution/e-ews-config-utils.c:1009
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr "“%s” klasörünün izinleri düzenlenemiyor, başka bir klasör seçin."
+msgstr "“%s” klasörünün izinleri düzenlenemiyor, başka klasör seç."
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1088
 msgid "Folder Sizes…"
@@ -704,7 +707,7 @@ msgstr "Klasör Boyutları…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1095
 msgid "Subscribe to folder of other user…"
-msgstr "Diğer bir kullanıcının klasörüne abone ol…"
+msgstr "Diğer kullanıcının klasörüne abone ol…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1104
 #: ../src/EWS/evolution/e-ews-config-utils.c:1440
@@ -823,7 +826,7 @@ msgstr "Ad"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:860
 msgid "Permission level"
-msgstr "İzin seviyesi"
+msgstr "İzin düzeyi"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:912
 msgid "Edit EWS folder permissions…"
@@ -848,7 +851,7 @@ msgstr "İzinler"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1076
 msgid "Permi_ssion level:"
-msgstr "İz_in seviyesi:"
+msgstr "İz_in düzeyi:"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1110
 msgctxt "Permissions"
@@ -942,7 +945,7 @@ msgstr "Klasör izinleri okunuyor, lütfen bekleyiniz…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
 msgid "Unset on Server"
-msgstr "Sunucuda Ayarı Kaldı"
+msgstr "Sunucuda Belirlenmedi"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
 msgid "Unset the “Out of Office” status"
@@ -974,7 +977,7 @@ msgstr[0] ""
 #: ../src/EWS/evolution/e-ews-search-user.c:338
 #: ../src/EWS/evolution/e-ews-search-user.c:523
 msgid "Search for a user"
-msgstr "Bir kullanıcı ara"
+msgstr "Kullanıcı ara"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:346
 msgid "Searching…"
@@ -986,7 +989,7 @@ msgstr "E-posta"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:457
 msgid "Choose EWS user…"
-msgstr "EWS kullanıcısı seçin…"
+msgstr "EWS kullanıcısı seç…"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:480
 msgid "_Search:"
@@ -1017,8 +1020,7 @@ msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"“%s” klasörü bulunamadı. Ya yok ya da erişebilmeniz için gerekli olan izine "
-"sahip değilsiniz."
+"“%s” klasörü bulunamadı. Ya yok ya da erişebilmeniz için gerekli izniniz yok."
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
@@ -1276,7 +1278,8 @@ msgstr "T_akvim"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:518
 msgid "_Delegate receives copies of meeting-related messages sent to me"
-msgstr "Bana gönderilen konuşma iletilerinin kopyasını almayı _temsil et"
+msgstr ""
+"_Temsilci bana gönderilen toplantıyla ilgili iletilerin kopyasını teslim alır"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:523
 msgid "_Tasks"
@@ -1301,7 +1304,7 @@ msgstr "_Günlük"
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:538
 #, c-format
 msgid "Delegate “%s” has the following permissions"
-msgstr "“%s” temsilcisi şu izinlere sahip"
+msgstr "“%s” temsilcisinin şu izinleri var"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:556
 msgid "Delegate can see my _private items"
@@ -1323,9 +1326,9 @@ msgid ""
 "send-on-behalf-of permissions, close this dialog box, right-click the "
 "folder, click Permissions and change the options there."
 msgstr ""
-"Temsilciler, ögeleri kendilerine gönderebilir, konuşma istekleri için "
-"oluşturma ve yanıtlamayı sağlayabilirler. send-on-behalg-of izinleri hariç "
-"tüm klasör izinlerine sahip olmak için, pencereyi kapatın, klasöre sağ "
+"Temsilciler ögeleri kendilerine gönderebilir, konuşma istekleri için "
+"oluşturma ve yanıtlamayı sağlayabilirler. send-on-behalf-of izinleri dışında "
+"tüm klasör izinlerine sahip olmak için pencereyi kapatın, klasöre sağ "
 "tıklayın, İzinler 'e tıklayın ve oradaki seçeneği değiştirin."
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1076
@@ -1342,33 +1345,51 @@ msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
 msgstr ""
-"Sadece temsilcilerim, ancak konuşma isteklerinin bir kopyasını _göder\n"
-"ve bana yanıtla (tavsiye edilen)"
+"Yalnızca temsilcilerim, ancak konuşma isteklerinin kopyasını _gönder\n"
+"ve bana yanıtla (önerilen)"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1094
 msgid "My d_elegates only"
-msgstr "Sadece benim t_emsilcilerim"
+msgstr "Yalnızca benim t_emsilcilerim"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1101
 msgid "My delegates a_nd me"
-msgstr "Benim temsilcilerim _ve ben"
+msgstr "Temsilcilerim _ve ben"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1695
 msgid "Retrieving “Delegates” settings"
 msgstr "“Temsilciler“ ayarları alınıyor"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "EWS Ayarları"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "Klasör _Boyutları"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Tüm Exchange klasörlerinin boyutunu göster"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "Klasör _Boyutları"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "Eşitleme Etiketlerini _Sıfırla"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Uzun bir süre sunucuya bağlanılmadığında klasörler bazen eşitliğini "
+"yitirebilir. Eşitleme etiketlerini sıfırlayarak klasörler tümüyle "
+"güncellenebilir. Bu, halihazırda yerel olarak depolanan iletilerin "
+"indirilmesine neden olmaz. Değişiklik, klasörlerin bir sonraki tazelenişinde "
+"geçerli olacaktır."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1401,8 +1422,8 @@ msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr ""
-"Aşağıda belirtilmiş iletiler, otomatik olarak size bir posta göndermiş olan "
-"iç ve dış her bir kişiye gönderilecektir."
+"Aşağıda belirtilmiş iletiler, size bir posta göndermiş olan iç ve dış her "
+"bir kişiye kendiliğinden gönderilecektir."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:395
 msgid "Do _not send Out of Office replies"
@@ -1539,12 +1560,12 @@ msgstr "“%s” adlı yeni klasör için uygun bir klasör sınıfına karar ve
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "“%s”veri kaynağı, bir Exchange Web Servisleri klasörünü temsil etmiyor"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "Klasör kimliği belirlenmedi"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Kişi listesi Microsofft 365 adres defterine kaydedilemedi"
 
