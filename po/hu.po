@@ -1,16 +1,16 @@
 # Hungarian translation for evolution-ews.
-# Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021 Free Software Foundation, Inc.
+# Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-ews package.
 #
 # Mézi Zoltán <mezi dot zoltan at gmail dot com>, 2011.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2011, 2012, 2013, 2018.
-# Balázs Úr <ur.balazs at fsf dot hu>, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021.
+# Balázs Úr <ur.balazs at fsf dot hu>, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-06-09 16:57+0000\n"
-"PO-Revision-Date: 2021-09-10 21:50+0200\n"
+"POT-Creation-Date: 2021-09-17 14:25+0000\n"
+"PO-Revision-Date: 2022-03-07 20:47+0100\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -32,17 +32,22 @@ msgstr "Exchange webszolgáltatások"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange kiszolgálók eléréséhez webszolgáltatások használatával"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3564
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2796
+#| msgid "_Fetch contact photos"
+msgid "Fetching contact photos…"
+msgstr "Kapcsolati fényképek lekérése…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3988
 msgid "Failed to update GAL:"
 msgstr "Nem sikerült a GAL frissítése:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3729
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4153
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nem menthető a névjegylista, csak az EWS Server 2010 vagy újabb támogatja"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3822
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4251
 msgid "Failed to set contact photo:"
 msgstr "Nem sikerült a kapcsolati fénykép beállítása:"
 
@@ -500,25 +505,25 @@ msgstr ""
 "Nem tárolható ez az előfordulás. Módosítsa egy egyszerű naponta, hetente, "
 "havonta vagy évente ismétlődővé, kivételek nélkül és egy kezdődátummal."
 
-#: ../src/EWS/common/e-ews-camel-common.c:392
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A CreateItem hívás nem adott vissza új üzenetazonosítót"
 
-#: ../src/EWS/common/e-ews-connection.c:811
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "Művelet megszakítva"
 
-#: ../src/EWS/common/e-ews-connection.c:981
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "A hitelesítés sikertelen"
 
-#: ../src/EWS/common/e-ews-connection.c:1003
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Nincs válasz: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1066
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -529,7 +534,7 @@ msgstr[1] ""
 "Az Exchange kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:%02d "
 "perc)"
 
-#: ../src/EWS/common/e-ews-connection.c:1072
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -540,57 +545,57 @@ msgstr[1] ""
 "Az Exchange kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d "
 "másodperc)"
 
-#: ../src/EWS/common/e-ews-connection.c:3215
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Az automatikus felderítésre adott válasz XML feldolgozása sikertelen"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nem sikerült megtalálni az <Autodiscover> elemet"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Nem sikerült megtalálni a <Response> elemet"
 
-#: ../src/EWS/common/e-ews-connection.c:3244
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Nem sikerült megtalálni az <Account> elemet"
 
-#: ../src/EWS/common/e-ews-connection.c:3290
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Az <ASUrl> nem található az automatikus felderítésre adott válaszban"
 
-#: ../src/EWS/common/e-ews-connection.c:3476
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "Az URL nem lehet NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "A(z) „%s” URL nem érvényes"
 
-#: ../src/EWS/common/e-ews-connection.c:3781
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
 msgstr "Az e-mail címből hiányzik a tartomány rész"
 
-#: ../src/EWS/common/e-ews-connection.c:4090
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "Nem sikerült feldolgozni az oab XML-t"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "Nem sikerült megtalálni az <OAB> elemet\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5387
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
 msgstr "Nem találhatók elemek"
 
-#: ../src/EWS/common/e-ews-connection.c:11838
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Legalább Microsoft Exchange 2007 SP1 kiszolgálót igényel"
 
@@ -1399,10 +1404,10 @@ msgid ""
 "already locally stored messages. The change will take effect the next time "
 "the folders are refreshed."
 msgstr ""
-"Néha a mappák elveszíthetik a szinkronizációt, például ha hosszabb ideig nem"
-" csatlakozik a kiszolgálóhoz. A szinkronizálási címkék visszaállításával a"
-" mappák teljesen frissülnek. Ez nem okozza a már helyileg tárolt üzenetek"
-" letöltését. A változtatás a mappák következő frissítésekor lép hatályba."
+"Néha a mappák elveszíthetik a szinkronizációt, például ha hosszabb ideig nem "
+"csatlakozik a kiszolgálóhoz. A szinkronizálási címkék visszaállításával a "
+"mappák teljesen frissülnek. Ez nem okozza a már helyileg tárolt üzenetek "
+"letöltését. A változtatás a mappák következő frissítésekor lép hatályba."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1577,12 +1582,12 @@ msgstr ""
 "A(z) „%s” adatforrás nem az Exchange webszolgáltatások egyik mappáját "
 "képviseli"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "A mappaazonosító nincs beállítva"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Nem lehet elmenteni a partnerlistát egy Microsoft 365 címjegyzékbe"
 
