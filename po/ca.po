@@ -8,21 +8,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-11-26 20:35+0000\n"
-"PO-Revision-Date: 2020-12-24 13:10+0100\n"
-"Last-Translator: Miquel-Àngel Burgos i Fradeja <miquel.angel.burgos@gmail."
-"com>\n"
+"POT-Creation-Date: 2021-10-13 08:44+0000\n"
+"PO-Revision-Date: 2021-11-04 16:59+0100\n"
+"Last-Translator: maite guix <maite.guix@me.com>\n"
 "Language-Team: Catalan <info@softcatala.org>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 3.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
-#: ../src/EWS/evolution/e-ews-config-lookup.c:240
+#: ../src/EWS/evolution/e-ews-config-lookup.c:227
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Serveis web de l'Exchange"
@@ -32,47 +31,47 @@ msgstr "Serveis web de l'Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Per a accedir a servidors Exchange usant serveis web"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4072
 msgid "Failed to update GAL:"
 msgstr "Errada en actualitzar GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4237
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "No es pot desar la llista de contactes, sols està suportat en servidors EWS "
 "2010 o superiors"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4335
 msgid "Failed to set contact photo:"
 msgstr "Errada en configurar la foto de contacte:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1957
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Lliure"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1960
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupat"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fora de l'oficina"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1964
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Provisionalment"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2540
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2719
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "No es pot determinar l'identificador d'element EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3010
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -80,12 +79,12 @@ msgstr ""
 "No es poden crear reunions organitzades per altres usuaris en un calendari "
 "dels Serveis web de l'Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3720
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "No s'ha pogut trobar l'usuari «%s» entre els assistents"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Identificador d'ocurrència no vàlid"
 
@@ -131,12 +130,12 @@ msgstr ""
 msgid "Could not load summary for %s"
 msgstr "No s'ha pogut carregar el resum per a %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2349
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "S'està refrescant la carpeta «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2533
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
@@ -253,9 +252,9 @@ msgid "Session has no storage path"
 msgstr "La sessió no té camí al magatzem"
 
 #. Translators: This composes a "Public Folders" folder name for case when
-#. * user has such in his store already. The %s is replaced with "Public
-#. Folders",
+#. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
+#.
 #: ../src/EWS/camel/camel-ews-store.c:353
 #, c-format
 msgctxt "PublicFolders"
@@ -263,9 +262,9 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #. Translators: This composes a "Foreign Folders" folder name for case when
-#. * user has such in his store already. The %s is replaced with "Foreign
-#. Folders",
+#. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
+#.
 #: ../src/EWS/camel/camel-ews-store.c:508
 #, c-format
 msgctxt "ForeignFolders"
@@ -364,6 +363,7 @@ msgstr ""
 "No s'ha pogut suprimir la carpeta «%s», sols s'usa per carpetes públiques"
 
 #: ../src/EWS/camel/camel-ews-store.c:3208
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existeix"
@@ -379,64 +379,73 @@ msgid "Cannot both rename and move a folder at the same time"
 msgstr "No es pot canviar el nom i moure a una carpeta al mateix temps"
 
 #: ../src/EWS/camel/camel-ews-store.c:3291
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "No es pot trobar l'ID de la carpeta per a la carpeta pare %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3343
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Safata d'entrada"
+
+#: ../src/EWS/camel/camel-ews-store.c:3363
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3366
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Servei Exchange per %s en %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3390
+#: ../src/EWS/camel/camel-ews-store.c:3410
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "No es pot ubicar la carpeta de la paperera"
 
-#: ../src/EWS/camel/camel-ews-store.c:3450
+#: ../src/EWS/camel/camel-ews-store.c:3470
 #: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "No es pot ubicar la carpeta del correu brossa"
 
-#: ../src/EWS/camel/camel-ews-store.c:3641
+#: ../src/EWS/camel/camel-ews-store.c:3661
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "No s'han pogut subscriure les carpetes EWS en el mode fora de línia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3664
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "No s'han pogut subscriure la carpeta «%s», no hi ha carpeta pública "
 "disponible"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3694
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "No s'han pogut subscriure la carpeta «%s», no s'ha trobat la carpeta"
 
-#: ../src/EWS/camel/camel-ews-store.c:3765
+#: ../src/EWS/camel/camel-ews-store.c:3785
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr ""
 "No es pot cancel·lar la subscripció de carpetes EWS en el mode fora de línia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3902
 #: ../src/Microsoft365/camel/camel-m365-store.c:1774
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Heu d'estar en línia per a completar aquesta operació"
 
-#: ../src/EWS/camel/camel-ews-store.c:3959
-#: ../src/EWS/camel/camel-ews-store.c:3996
+#: ../src/EWS/camel/camel-ews-store.c:3979
+#: ../src/EWS/camel/camel-ews-store.c:4016
 msgid "Unsetting the “Out of Office” status"
 msgstr "Desmarcant el paràmetre de l'estat «Fora de l'oficina»"
 
@@ -495,25 +504,25 @@ msgstr ""
 "No es pot emmagatzemar aquesta periodicitat. Canvieu-la a diària, setmanal, "
 "mensual o anual sense excepcions i amb data d'inici."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "La crida CreateItem ha fallat al retornar l'ID per al nou missatge"
 
-#: ../src/EWS/common/e-ews-connection.c:811
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "Operació cancel·lada"
 
-#: ../src/EWS/common/e-ews-connection.c:981
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "Ha fallat l'autenticació"
 
-#: ../src/EWS/common/e-ews-connection.c:1003
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Sense resposta: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1066
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -522,7 +531,7 @@ msgstr[0] ""
 msgstr[1] ""
 "El servidor Exchange és ocupat, esperant per a provar de nou (%d:%02d minuts)"
 
-#: ../src/EWS/common/e-ews-connection.c:1072
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -531,57 +540,57 @@ msgstr[0] ""
 msgstr[1] ""
 "El servidor Exchange és ocupat, esperant per a provar de nou (%d segons)"
 
-#: ../src/EWS/common/e-ews-connection.c:3215
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "No s'ha pogut analitzar l'XML de la resposta d'autodescoberta"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Errada en trobar l'element <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Errada en trobar l'element <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:3244
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Errada en trobar l'element <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:3290
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "No s'ha pogut trobar <ASUrl> a la resposta d'autodescoberta"
 
-#: ../src/EWS/common/e-ews-connection.c:3476
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "L'URL no pot ser NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "L'URL «%s» no és vàlida"
 
-#: ../src/EWS/common/e-ews-connection.c:3781
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
 msgstr "Falta una part del domini a l'adreça de correu"
 
-#: ../src/EWS/common/e-ews-connection.c:4090
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "Errada en analitzar XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "Errada en trobar l'element <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5387
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
 msgstr "No s'ha trobat cap element"
 
-#: ../src/EWS/common/e-ews-connection.c:11838
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Requereix almenys un servidor Microsoft Exchange 2007 SP1"
 
@@ -613,8 +622,7 @@ msgstr "No es pot afegir la carpeta, la font mestra no s'ha trobat"
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "No s'ha pogut afegir la carpeta, la carpeta existeix com «%s»"
 
-#. Translators: This is a user-visible string, display name of an OAuth2
-#. service.
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/EWS/common/e-oauth2-service-office365.c:144
 msgctxt "OAuth2Service"
 msgid "Office365"
@@ -644,22 +652,22 @@ msgstr "Tracta de cercar fofos d'usuari"
 msgid "Exchange Web Services autodiscovery"
 msgstr "Descobreix de forma automàtica serveis web Exchange"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:224
+#: ../src/EWS/evolution/e-ews-config-lookup.c:211
 #, c-format
 msgid "User: %s"
 msgstr "Usuari: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:229
+#: ../src/EWS/evolution/e-ews-config-lookup.c:216
 #, c-format
 msgid "Host URL: %s"
 msgstr "URL de l'amfitrió: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:234
+#: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #, c-format
 msgid "OAB URL: %s"
 msgstr "URL OAB: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:311
+#: ../src/EWS/evolution/e-ews-config-lookup.c:300
 #, c-format
 msgid "Requires password to continue."
 msgstr "Requereix la contrasenya per a continuar."
@@ -998,9 +1006,9 @@ msgstr "Tria l'usuari EWS..."
 msgid "_Search:"
 msgstr "_Cerca:"
 
-#. Translators: The '%s' is replaced with user name, to whom the foreign
-#. mailbox belongs.
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
+#.
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:96
 #, c-format
 msgctxt "ForeignFolder"
@@ -1013,8 +1021,7 @@ msgstr ""
 "No es pot provar la disponibilitat de la carpeta aliena mentre el compte "
 "estigui fora de línia"
 
-#. Translators: This is used as a calendar name; it constructs "User Name -
-#. Availability" string shown in UI
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:314
 msgid "Availability"
 msgstr "Disponibilitat"
@@ -1033,12 +1040,6 @@ msgstr ""
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta"
-
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
-msgid "Inbox"
-msgstr "Safata d'entrada"
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
@@ -1105,6 +1106,7 @@ msgstr "L'usuari amb nom «%s» és ambigu, especifiqueu-lo de forma més precis
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
+#.
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:879
 #, c-format
 msgctxt "ForeignFolder"
@@ -1178,32 +1180,23 @@ msgstr "No hi ha configurada cap ID d'aplicació per defecte"
 msgid "Default application ID is “%s”"
 msgstr "L'ID de l'aplicació per defecte és «%s»"
 
-#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a
-#. company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here:
-#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a
-#. company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here:
-#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "Identificador del _tenant:"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a
-#. company or organization in an Office 365 world. Same for 'common', it's a
-#. default URL path.
-#. You probably do not want to translate it. More for example here:
-#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 msgid "Default tenant ID is “common“"
 msgstr "L'identificador del tenant per defecte és «common»"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a
-#. company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here:
-#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
 msgid "Default tenant ID is “%s”"
@@ -1362,8 +1355,7 @@ msgstr ""
 "Proporcioneu les sol·licituds de reunió adreçades a mi i les respostes a les "
 "sol·licituds de reunió on soc l'organitzador de:"
 
-#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner
-#. label
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1087
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
@@ -1384,18 +1376,36 @@ msgstr "Els meus delegats i _jo"
 msgid "Retrieving “Delegates” settings"
 msgstr "S'estan recuperant els paràmetres dels «delegats»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:171
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "Configuració d'EWS"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
+msgid "Folder _Sizes"
+msgstr "Mide_s de la carpeta"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
 msgid "View the size of all Exchange folders"
 msgstr "Mostra la mida de totes les carpetes Exchange"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:182
-msgid "Folder _Sizes"
-msgstr "Mide_s de la carpeta"
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "_Restablir les etiquetes de sincronització"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Les carpetes de vegades poden sortir de la sincronització, per exemple "
+"després de molt de temps sense estar connectades al servidor. En restablir "
+"les etiquetes de sincronització, les carpetes s'actualitzen completament. "
+"Això no provoca la descàrrega de cap missatge ja emmagatzemat localment. El "
+"canvi tindrà efecte la propera vegada que s'actualitzin les carpetes."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1483,16 +1493,14 @@ msgstr "Contesteu a qualsevol remitent fora de l'organització"
 msgid "Retrieving “Out of Office” settings"
 msgstr "S'estan recuperant els paràmetres de «Fora de l'oficina»"
 
-#. Translators: the first %s is replaced with a user name, the second %s is
-#. replaced with an email address of that user
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
 msgstr ""
 "%s (%s) us ha convidat a visualitzar el seu calendari de Microsoft Exchange."
 
-#. Translators: the first %s is replaced with a user name, the second %s is
-#. replaced with an email address of that user
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
@@ -1563,26 +1571,26 @@ msgstr "S'ha subscrit la carpeta."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "La carpeta de l'usuari «{0}» s'ha subscrit correctament."
 
-#: ../src/EWS/registry/e-ews-backend.c:999
-#: ../src/Microsoft365/registry/e-m365-backend.c:688
+#: ../src/EWS/registry/e-ews-backend.c:1000
+#: ../src/Microsoft365/registry/e-m365-backend.c:689
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "No s'ha pogut determinar una classe de carpeta adequada per a una carpeta "
 "nova anomenada «%s»"
 
-#: ../src/EWS/registry/e-ews-backend.c:1088
+#: ../src/EWS/registry/e-ews-backend.c:1089
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
 "La font de dades «%s» no representa una carpeta de serveis web Exchange"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "No s'ha establert l'identificador de la carpeta"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr ""
 "No es pot desar la llista de contactes en una llibreta d'adreces del "
@@ -1658,7 +1666,7 @@ msgstr "L'estat de carpeta no és vàlid (manca el magatzem pare)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
 msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
+"Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
 "folders."
 msgstr ""
@@ -1745,8 +1753,7 @@ msgstr ""
 "Aquesta opció usarà un testimoni d'accés OAuth 2.0 per a connectar-se al "
 "servidor del Microsoft 365"
 
-#. Translators: This is a user-visible string, display name of an OAuth2
-#. service.
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
@@ -1782,19 +1789,14 @@ msgstr "No s'han pogut analitzar les dades JSON pròpies"
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "S_obreescriu els paràmetres OAuth2 del Microsoft 365"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a
-#. company or organization in a Microsoft 365 world. Same for 'common', it's a
-#. default URL path.
-#. You probably do not want to translate it. More for example here:
-#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
 msgid "Default tenant is “common“"
 msgstr "El tenant per defecte és «common»"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a
-#. company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here:
-#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:277
 #, c-format
 msgid "Default tenant is “%s”"
@@ -1804,7 +1806,7 @@ msgstr "El tenant per defecte és «%s»"
 msgid "_Redirect URI:"
 msgstr "URI de _redirecció:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:779
+#: ../src/Microsoft365/registry/e-m365-backend.c:780
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "La font de dades «%s» no representa una carpeta del Microsoft 365"
