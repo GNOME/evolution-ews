@@ -323,6 +323,32 @@ e_soap_parameter_get_int_value (ESoapParameter *param)
 }
 
 /**
+ * e_soap_parameter_get_uint64_value:
+ * @param: the parameter
+ *
+ * Returns: the parameter value as a 64-bit unsigned integer
+ */
+guint64
+e_soap_parameter_get_uint64_value (ESoapParameter *param)
+{
+	xmlChar *str;
+
+	g_return_val_if_fail (param != NULL, G_MAXUINT64);
+
+	str = xmlNodeGetContent (param);
+	if (str) {
+		guint64 val;
+
+		val = g_ascii_strtoull ((gchar *) str, NULL, 10);
+		xmlFree (str);
+
+		return val;
+	}
+
+	return G_MAXUINT64;
+}
+
+/**
  * e_soap_parameter_get_string_value:
  * @param: the parameter
  *

@@ -202,7 +202,7 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 			if (prop_tag && g_ascii_strcasecmp (prop_tag, "0xe08") == 0) {
 				subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Value");
 				if (subparam1)
-					priv->size = e_soap_parameter_get_int_value (subparam1);
+					priv->size = e_soap_parameter_get_uint64_value (subparam1);
 			} else if (prop_tag && g_ascii_strcasecmp (prop_tag, "0x10f4") == 0) { /* PidTagAttributeHidden */
 				subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Value");
 				if (subparam1) {
