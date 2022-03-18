@@ -658,9 +658,11 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 
 		/* Use MAPI property to retrieve folder size */
 		add_props = e_ews_additional_props_new ();
+
+		/* PidTagMessageSizeExtended */
 		ext_uri = e_ews_extended_field_uri_new ();
-		ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e08); /* Folder size property tag */
-		ext_uri->prop_type = g_strdup ("Integer");
+		ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e08);
+		ext_uri->prop_type = g_strdup ("Long");
 		add_props->extended_furis = g_slist_prepend (add_props->extended_furis, ext_uri);
 
 		ids = camel_ews_store_summary_get_folders (fsd->ews_store->summary, NULL, FALSE);
@@ -691,7 +693,7 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 
 			folder_full_name = camel_ews_store_summary_get_folder_full_name (
 				fsd->ews_store->summary, folder_id->id, NULL);
-			folder_size = g_format_size (e_ews_folder_get_size (folder));
+			folder_size = g_format_size_full (e_ews_folder_get_size (folder), G_FORMAT_SIZE_IEC_UNITS);
 
 			g_hash_table_insert (fsd->folder_sizes, folder_full_name, folder_size);
 		}

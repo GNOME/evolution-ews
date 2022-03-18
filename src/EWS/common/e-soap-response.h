@@ -62,6 +62,8 @@ typedef xmlNode ESoapParameter;
 
 const gchar *	e_soap_parameter_get_name	(ESoapParameter *param);
 gint		e_soap_parameter_get_int_value	(ESoapParameter *param);
+guint64		e_soap_parameter_get_uint64_value
+						(ESoapParameter *param);
 gchar *		e_soap_parameter_get_string_value
 						(ESoapParameter *param);
 ESoapParameter *
