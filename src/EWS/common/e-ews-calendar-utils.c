@@ -1778,7 +1778,7 @@ e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
 	}
 
 	if (usable) {
-		if (recur_start && !i_cal_time_is_null_time (recur_start) && i_cal_time_is_valid_time (recur_start)) {
+		if (!i_cal_time_is_null_time (recur_start) && i_cal_time_is_valid_time (recur_start)) {
 			ICalProperty *prop;
 
 			i_cal_component_set_dtstart (comp, recur_start);

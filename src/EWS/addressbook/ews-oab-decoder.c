@@ -1071,7 +1071,7 @@ gchar *
 ews_oab_decoder_get_oab_prop_string (EwsOabDecoder *eod,
                                      GError **error)
 {
-	GString *str = g_string_new (NULL);
+	GString *str;
 	GSList *l;
 
 	if (!eod->priv->oab_props) {
@@ -1080,6 +1080,8 @@ ews_oab_decoder_get_oab_prop_string (EwsOabDecoder *eod,
 			"Oab props not found");
 		return NULL;
 	}
+
+	str = g_string_new (NULL);
 
 	/* Ideally i would liked to store int as int instead of converting to
 	 * string, but sqlite db doesn't yet support storing keys as blob. */

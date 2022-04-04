@@ -1077,7 +1077,7 @@ ebb_m365_contact_photo_equal (EContactPhoto *photo1,
 	if (!data1 && !data2)
 		return TRUE;
 
-	return len1 == len2 &&
+	return len1 == len2 && data1 && data2 &&
 		memcmp (data1, data2, len1) == 0;
 }
 

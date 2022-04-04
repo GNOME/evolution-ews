@@ -277,6 +277,18 @@ check_foreign_folder_thread (GObject *with_object,
 			g_object_unref (conn);
 			return;
 		}
+
+		if (!cffd->user_displayname)
+			cffd->user_displayname = display_name;
+		else
+			g_free (display_name);
+
+		if (email_address && *email_address) {
+			g_free (cffd->email);
+			cffd->email = email_address;
+		} else {
+			g_free (email_address);
+		}
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {

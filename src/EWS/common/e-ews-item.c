@@ -2313,8 +2313,10 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 		param_name = e_soap_parameter_get_name (subparam);
 
 		if (g_ascii_strcasecmp (param_name, "Name") == 0) {
+			g_free (name);
 			name = e_soap_parameter_get_string_value (subparam);
 		} else if (g_ascii_strcasecmp (param_name, "Content") == 0) {
+			g_free (content);
 			value = e_soap_parameter_get_string_value (subparam);
 			content = g_base64_decode (value, &data_len);
 			g_free (value);

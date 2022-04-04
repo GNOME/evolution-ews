@@ -183,10 +183,10 @@ ews_data_cache_add (CamelDataCache *cdc,
 		cdc, path, g_checksum_get_string (sha), error);
 	g_checksum_free (sha);
 
-	if (base_stream != NULL)
+	if (base_stream != NULL) {
 		stream = camel_stream_new (base_stream);
-
-	g_object_unref (base_stream);
+		g_object_unref (base_stream);
+	}
 
 	return stream;
 }
