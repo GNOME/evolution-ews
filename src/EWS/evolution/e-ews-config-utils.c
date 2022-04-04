@@ -1036,22 +1036,24 @@ action_folder_permissions_mail_cb (GtkAction *action,
 		service = CAMEL_SERVICE (store);
 		uid = camel_service_get_uid (service);
 		source = e_source_registry_ref_source (registry, uid);
-		g_return_if_fail (source != NULL);
+		if (source) {
+			settings = camel_service_ref_settings (service);
 
-		settings = camel_service_ref_settings (service);
+			e_ews_edit_folder_permissions (
+				parent,
+				registry,
+				source,
+				CAMEL_EWS_SETTINGS (settings),
+				camel_service_get_display_name (service),
+				folder_path ? folder_path : camel_service_get_display_name (service),
+				folder_id,
+				E_EWS_FOLDER_TYPE_MAILBOX);
 
-		e_ews_edit_folder_permissions (
-			parent,
-			registry,
-			source,
-			CAMEL_EWS_SETTINGS (settings),
-			camel_service_get_display_name (service),
-			folder_path ? folder_path : camel_service_get_display_name (service),
-			folder_id,
-			E_EWS_FOLDER_TYPE_MAILBOX);
-
-		g_object_unref (settings);
-		g_object_unref (source);
+			g_object_unref (settings);
+			g_object_unref (source);
+		} else {
+			g_warn_if_reached ();
+		}
 	}
 
 	g_object_unref (store);

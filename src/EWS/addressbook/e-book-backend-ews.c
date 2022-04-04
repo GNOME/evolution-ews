@@ -1635,6 +1635,8 @@ convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *me
 		e_soap_message_end_element (message);
 	}
 	e_ews_message_end_set_indexed_item_field (message, delete_field);
+
+	g_free (fielduri);
 }
 
 static void

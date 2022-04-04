@@ -2098,11 +2098,13 @@ ews_connection_dispose (GObject *object)
 
 	e_ews_connection_set_password (cnc, NULL);
 
+	QUEUE_LOCK (cnc);
 	g_slist_free (cnc->priv->jobs);
 	cnc->priv->jobs = NULL;
 
 	g_slist_free (cnc->priv->active_job_queue);
 	cnc->priv->active_job_queue = NULL;
+	QUEUE_UNLOCK (cnc);
 
 	g_slist_free_full (cnc->priv->subscribed_folders, g_free);
 	cnc->priv->subscribed_folders = NULL;
@@ -3594,6 +3596,8 @@ autodiscover_srv_record_resolved_cb (GObject *source,
 		/* The callback also frees the 'simple' */
 		autodiscover_response_cb (NULL, ad->msgs[5], simple);
 	}
+
+	g_free (new_uri);
 }
 
 gboolean
@@ -3724,7 +3728,7 @@ e_ews_discover_prepare_messages_and_send (GSimpleAsyncResult *simple,
 	ad->msgs[3] = e_ews_get_msg_for_url (ad->cnc, url4, ad->buf, local_error ? NULL : &local_error);
 	ad->msgs[4] = e_ews_get_msg_for_url (ad->cnc, url5, ad->buf, local_error ? NULL : &local_error);
 
-	if (!is_outlook && *domain && (ad->msgs[0] || ad->msgs[1] || ad->msgs[2] || ad->msgs[3] || ad->msgs[4])) {
+	if (!is_outlook && domain && (ad->msgs[0] || ad->msgs[1] || ad->msgs[2] || ad->msgs[3] || ad->msgs[4])) {
 		gchar *tmp;
 
 		tmp = g_strdup_printf ("http%s://%s/", use_secure ? "s" : "", domain);
@@ -8538,16 +8542,22 @@ ews_handle_free_busy_view (ESoapParameter *param,
 				ESoapParameter *dparam;
 
 				dparam = e_soap_parameter_get_first_child_by_name (subparam, "ID");
-				if (dparam)
+				if (dparam) {
+					g_clear_pointer (&id, g_free);
 					id = e_soap_parameter_get_string_value (dparam);
+				}
 
 				dparam = e_soap_parameter_get_first_child_by_name (subparam, "Subject");
-				if (dparam)
+				if (dparam) {
+					g_clear_pointer (&summary, g_free);
 					summary = e_soap_parameter_get_string_value (dparam);
+				}
 
 				dparam = e_soap_parameter_get_first_child_by_name (subparam, "Location");
-				if (dparam)
+				if (dparam) {
+					g_clear_pointer (&location, g_free);
 					location = e_soap_parameter_get_string_value (dparam);
+				}
 			}
 		}
 

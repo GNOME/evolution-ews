@@ -1004,6 +1004,7 @@ e_ews_extract_attachment_id_from_uri (const gchar *uri)
 	attachment_id = g_strdup (dirs[n - 1]);
 
 	g_strfreev (dirs);
+	g_free (filepath);
 
 	return attachment_id;
 }
