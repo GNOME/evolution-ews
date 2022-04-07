@@ -22,8 +22,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-10-09 09:32+0000\n"
-"PO-Revision-Date: 2020-11-09 19:20+0100\n"
+"POT-Creation-Date: 2021-09-17 10:36+0000\n"
+"PO-Revision-Date: 2022-03-17 19:37+0100\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Dansk-gruppen <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
@@ -36,7 +36,7 @@ msgstr ""
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
 #: ../src/EWS/evolution/e-ews-config-lookup.c:240
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:122
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Exchange Web-tjenester"
 
@@ -45,47 +45,51 @@ msgstr "Exchange Web-tjenester"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "For adgang til Exchangeservere der bruger internettjenester"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3512
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2796
+msgid "Fetching contact photos…"
+msgstr "Henter kontaktfotoer …"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:3988
 msgid "Failed to update GAL:"
 msgstr "Kunne ikke opdatere GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3674
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4153
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kan ikke gemme kontaktliste. Dette er kun understøttet på EWS Server 2010 "
 "eller senere"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3767
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4251
 msgid "Failed to set contact photo:"
 msgstr "Kunne ikke sætte kontaktfoto:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1943
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Ledig"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1946
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Optaget"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ikke på kontoret"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Foreløbig"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2526
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2705
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
 msgid "Cannot determine EWS ItemId"
 msgstr "Kan ikke bestemme EWS-elementID"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2996
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -93,38 +97,38 @@ msgstr ""
 "Kan ikke oprette møder arrangeret af andre brugere i en Exchange Web "
 "Services-kalender."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3706
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan ikke finde brugeren “%s” mellem deltagerne"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
 msgid "Invalid occurrence ID"
 msgstr "Ugyldig hændelses-ID"
 
-#: ../src/EWS/camel/camel-ews-folder.c:357
+#: ../src/EWS/camel/camel-ews-folder.c:353
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Kan ikke åbne midlertidig fil for MIME-indhold (mimecontent)!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:365
+#: ../src/EWS/camel/camel-ews-folder.c:361
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Kan ikke oprette fortolker fra MIME-indhold (mimecontent)!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:374
+#: ../src/EWS/camel/camel-ews-folder.c:370
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Kan ikke fortolke mødeanmodning fra MIME-indhold (mimecontent)!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:458
-#: ../src/EWS/camel/camel-ews-folder.c:668
+#: ../src/EWS/camel/camel-ews-folder.c:454
+#: ../src/EWS/camel/camel-ews-folder.c:664
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Kan ikke oprette cachefil"
 
-#: ../src/EWS/camel/camel-ews-folder.c:785
-#: ../src/EWS/camel/camel-ews-folder.c:929
+#: ../src/EWS/camel/camel-ews-folder.c:781
+#: ../src/EWS/camel/camel-ews-folder.c:925
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Kan ikke oprette cachestien “%s”: %s"
@@ -132,22 +136,22 @@ msgstr "Kan ikke oprette cachestien “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:943
+#: ../src/EWS/camel/camel-ews-folder.c:939
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Kunne ikke flytte beskedcachefilen fra “%s” til “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1882
+#: ../src/EWS/camel/camel-ews-folder.c:1878
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunne ikke indlæse referat for %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2353
+#: ../src/EWS/camel/camel-ews-folder.c:2350
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Opdaterer mappen “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2537
+#: ../src/EWS/camel/camel-ews-folder.c:2543
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan ikke udføre handlinger på mappen i frakoblet tilstand"
@@ -253,7 +257,7 @@ msgstr ""
 "Denne indstilling vil forbinde til Exchangeserveren med brug af Kerberos/"
 "GSSAPI-godkendelse."
 
-#: ../src/EWS/camel/camel-ews-store.c:323
+#: ../src/EWS/camel/camel-ews-store.c:316
 #: ../src/Microsoft365/camel/camel-m365-store.c:76
 #, c-format
 msgid "Session has no storage path"
@@ -263,7 +267,7 @@ msgstr "Session har ingen lagersti"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:360
+#: ../src/EWS/camel/camel-ews-store.c:353
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -273,70 +277,70 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:515
+#: ../src/EWS/camel/camel-ews-store.c:508
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/EWS/camel/camel-ews-store.c:661
-#: ../src/EWS/camel/camel-ews-store.c:1488
+#: ../src/EWS/camel/camel-ews-store.c:654
+#: ../src/EWS/camel/camel-ews-store.c:1481
 msgid "Checking “Out of Office” settings"
 msgstr "Kontrollerer indstillinger for “Ikke på kontoret”"
 
-#: ../src/EWS/camel/camel-ews-store.c:1494
+#: ../src/EWS/camel/camel-ews-store.c:1487
 msgid "Look up Exchange server categories"
 msgstr "Slå Exchange-serverkategorier op"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1570
+#: ../src/EWS/camel/camel-ews-store.c:1563
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Adgangskoden udløber om %d dag. Åbn “%s” for at ændre det."
 msgstr[1] "Adgangskoden udløber om %d dage. Åbn “%s” for at ændre det."
 
-#: ../src/EWS/camel/camel-ews-store.c:1576
+#: ../src/EWS/camel/camel-ews-store.c:1569
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Adgangskoden udløber om en dag."
 msgstr[1] "Adgangskoden udløber om %d dage."
 
-#: ../src/EWS/camel/camel-ews-store.c:1802
+#: ../src/EWS/camel/camel-ews-store.c:1795
 msgid "Updating foreign folder structure"
 msgstr "Opdaterer fremmed mappestruktur"
 
-#: ../src/EWS/camel/camel-ews-store.c:1938
+#: ../src/EWS/camel/camel-ews-store.c:1931
 msgid "Updating foreign folders"
 msgstr "Opdaterer fremmede mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:2354
+#: ../src/EWS/camel/camel-ews-store.c:2347
 #: ../src/Microsoft365/camel/camel-m365-store.c:631
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ingen sådan mappe: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2707
+#: ../src/EWS/camel/camel-ews-store.c:2700
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Kan ikke vise offentlige EWS-mapper i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-store.c:2780
+#: ../src/EWS/camel/camel-ews-store.c:2773
 msgid "Cannot find any EWS public folders"
 msgstr "Kan ikke finde offentlige EWS-mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:2893
+#: ../src/EWS/camel/camel-ews-store.c:2886
 #: ../src/Microsoft365/camel/camel-m365-store.c:694
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Kan ikke oprette mappen “%s”. Mappen findes allerede"
 
-#: ../src/EWS/camel/camel-ews-store.c:2908
+#: ../src/EWS/camel/camel-ews-store.c:2901
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Overmappe %s findes ikke"
 
-#: ../src/EWS/camel/camel-ews-store.c:2918
+#: ../src/EWS/camel/camel-ews-store.c:2911
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -344,101 +348,111 @@ msgstr ""
 "Kan ikke oprette mappen under “%s”. Den bruges kun for mapper til andre "
 "brugere"
 
-#: ../src/EWS/camel/camel-ews-store.c:2928
+#: ../src/EWS/camel/camel-ews-store.c:2921
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Kan ikke oprette mappen under “%s”. Den bruges kun for offentlige mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:3035
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #: ../src/Microsoft365/camel/camel-m365-store.c:882
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mappe findes ikke"
 
-#: ../src/EWS/camel/camel-ews-store.c:3045
+#: ../src/EWS/camel/camel-ews-store.c:3038
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Kan ikke fjerne mappen “%s”. Den bruges kun for mapper til andre brugere"
 
-#: ../src/EWS/camel/camel-ews-store.c:3056
+#: ../src/EWS/camel/camel-ews-store.c:3049
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Kan ikke fjerne mappen “%s”. Den bruges kun for offentlige mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:3215
+#: ../src/EWS/camel/camel-ews-store.c:3208
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mappen %s findes ikke"
 
-#: ../src/EWS/camel/camel-ews-store.c:3224
+#: ../src/EWS/camel/camel-ews-store.c:3217
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ingen change-nøglepost for mappe %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3267
+#: ../src/EWS/camel/camel-ews-store.c:3260
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Kan ikke både omdøbe og flytte en mappe på samme tid"
 
-#: ../src/EWS/camel/camel-ews-store.c:3298
+#: ../src/EWS/camel/camel-ews-store.c:3291
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Kan ikke finde mappe-ID for overmappe %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3350
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+msgid "Inbox"
+msgstr "Indbakke"
+
+#: ../src/EWS/camel/camel-ews-store.c:3363
 #: ../src/EWS/camel/camel-ews-transport.c:302
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchangeserver %s"
 
 # på eller den?
-#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-store.c:3366
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchangetjeneste for %s på %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3397
+#: ../src/EWS/camel/camel-ews-store.c:3410
 #: ../src/Microsoft365/camel/camel-m365-store.c:1456
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Kunne ikke finde papirkurvens mappe"
 
-#: ../src/EWS/camel/camel-ews-store.c:3457
+#: ../src/EWS/camel/camel-ews-store.c:3470
 #: ../src/Microsoft365/camel/camel-m365-store.c:1514
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Kunne ikke finde mappe for spam"
 
-#: ../src/EWS/camel/camel-ews-store.c:3648
+#: ../src/EWS/camel/camel-ews-store.c:3661
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Kan ikke abonnere på EWS-mapper i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-store.c:3671
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Kan ikke abonnere på mappen “%s”, ingen offentlig mappe tilgængelig"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3694
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Kan ikke abonnere på mappen “%s”, mappen blev ikke fundet"
 
-#: ../src/EWS/camel/camel-ews-store.c:3772
+#: ../src/EWS/camel/camel-ews-store.c:3785
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Kan ikke fjerne abonnement for EWS-mapper i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-store.c:3889
+#: ../src/EWS/camel/camel-ews-store.c:3902
 #: ../src/Microsoft365/camel/camel-m365-store.c:1774
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Du skal være på nettet for at fuldføre denne handling"
 
-#: ../src/EWS/camel/camel-ews-store.c:3966
-#: ../src/EWS/camel/camel-ews-store.c:4003
+#: ../src/EWS/camel/camel-ews-store.c:3979
+#: ../src/EWS/camel/camel-ews-store.c:4016
 msgid "Unsetting the “Out of Office” status"
 msgstr "Nulstil status for “Ikke på kontoret”"
 
@@ -496,25 +510,25 @@ msgstr ""
 "Kan ikke gemme denne gentagelse. Ændr den til simpel enkel daglig, ugentlig, "
 "månedlig eller årlig gentagelse uden undtagelser og med begyndelsesdato."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:388
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem-kald returnerede ikke ID for ny besked"
 
-#: ../src/EWS/common/e-ews-connection.c:815
+#: ../src/EWS/common/e-ews-connection.c:809
 msgid "Operation Cancelled"
 msgstr "Handling afbrudt"
 
-#: ../src/EWS/common/e-ews-connection.c:985
+#: ../src/EWS/common/e-ews-connection.c:979
 msgid "Authentication failed"
 msgstr "Godkendelse mislykkedes"
 
-#: ../src/EWS/common/e-ews-connection.c:1007
+#: ../src/EWS/common/e-ews-connection.c:1001
 #, c-format
 msgid "No response: %s"
 msgstr "Intet svar: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1070
+#: ../src/EWS/common/e-ews-connection.c:1064
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -523,7 +537,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-serveren er optaget. Venter på at forsøge igen (%d:%02d minutter)"
 
-#: ../src/EWS/common/e-ews-connection.c:1076
+#: ../src/EWS/common/e-ews-connection.c:1070
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -531,57 +545,57 @@ msgstr[0] "Exchange-serveren er optaget. Venter på at forsøge igen (%d sekund)
 msgstr[1] ""
 "Exchange-serveren er optaget. Venter på at forsøge igen (%d sekunder)"
 
-#: ../src/EWS/common/e-ews-connection.c:3223
+#: ../src/EWS/common/e-ews-connection.c:3214
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Kunne ikke fortolke svar-XML for autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:3230
+#: ../src/EWS/common/e-ews-connection.c:3221
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Kunne ikke finde <Autodiscover>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:3241
+#: ../src/EWS/common/e-ews-connection.c:3232
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Kunne ikke finde <Response>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:3252
+#: ../src/EWS/common/e-ews-connection.c:3243
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Kunne ikke finde <Account>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:3298
+#: ../src/EWS/common/e-ews-connection.c:3289
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Kunne ikke finde <ASUrl> i autodiscoversvar"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:3475
 msgid "URL cannot be NULL"
 msgstr "Adresse kan ikke være NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3492
+#: ../src/EWS/common/e-ews-connection.c:3483
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adressen “%s” er ikke gyldig"
 
-#: ../src/EWS/common/e-ews-connection.c:3789
+#: ../src/EWS/common/e-ews-connection.c:3780
 msgid "Email address is missing a domain part"
 msgstr "E-post-adresse mangler en domænedel"
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:4089
 msgid "Failed to parse oab XML"
 msgstr "Kunne ikke fortolke oab-XML"
 
-#: ../src/EWS/common/e-ews-connection.c:4106
+#: ../src/EWS/common/e-ews-connection.c:4097
 msgid "Failed to find <OAB> element\n"
 msgstr "Kunne ikke finde <OAB>-element\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5395
+#: ../src/EWS/common/e-ews-connection.c:5386
 msgid "No items found"
 msgstr "Ingen punkter fundet"
 
-#: ../src/EWS/common/e-ews-connection.c:11846
+#: ../src/EWS/common/e-ews-connection.c:11851
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Kræver mindst Microsoft Exchange 2007 SP1-server"
 
@@ -599,23 +613,23 @@ msgstr "Adgangskode udløbet."
 msgid "Unknown error"
 msgstr "Ukendt fejl"
 
-#: ../src/EWS/common/e-ews-folder.c:782
+#: ../src/EWS/common/e-ews-folder.c:781
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Kan ikke tilføje mappe. Mappetype er ikke understøttet"
 
 # måske standardkilde
-#: ../src/EWS/common/e-ews-folder.c:787
+#: ../src/EWS/common/e-ews-folder.c:786
 msgid "Cannot add folder, master source not found"
 msgstr "Kan ikke tilføje mappe. Hovedkilde blev ikke fundet"
 
-#: ../src/EWS/common/e-ews-folder.c:827
+#: ../src/EWS/common/e-ews-folder.c:826
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:86
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Kan ikke tilføje mappe. Mappe findes allerede som “%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:116
+#: ../src/EWS/common/e-oauth2-service-office365.c:144
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -737,7 +751,7 @@ msgid "Edit EWS contacts permissions"
 msgstr "Rediger EWS-kontaktrettigheder"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:68
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:404
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:389
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Ingen"
@@ -795,7 +809,7 @@ msgstr "Ledig/optaget tid, emne, sted"
 # hvis vi skal læse denne her kontekst som "rettigheder", sådan som det
 # blev gjort til "None" bør det vel også være "Tilpassede" her
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:124
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:427
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:412
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Tilpassede"
@@ -821,7 +835,7 @@ msgstr "Ukendt"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
 #: ../src/EWS/evolution/e-ews-search-user.c:414
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:983
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Navn"
 
@@ -946,11 +960,11 @@ msgstr "Mappe synlig"
 msgid "Reading folder permissions, please wait…"
 msgstr "Læser mapperettigheder, vent venligst …"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:170
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
 msgid "Unset on Server"
 msgstr "Nulstil på server"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:171
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
 msgid "Unset the “Out of Office” status"
 msgstr "Nulstil status for “Ikke på kontoret”"
 
@@ -1034,12 +1048,6 @@ msgstr ""
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappens type"
 
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
-msgid "Inbox"
-msgstr "Indbakke"
-
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
 msgid "Contacts"
@@ -1111,69 +1119,69 @@ msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:270
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:267
 msgid "Querying Autodiscover service"
 msgstr "Forespørger autoopdagtjeneste"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:369
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:360
 msgid "Fetch _URL"
 msgstr "Hent _URL"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:174
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:112
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:169
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:192
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:130
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:187
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "_Brugernavn:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:206
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:201
 msgid "_Host URL:"
 msgstr "_Værts-URL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:220
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:239
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:144
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:234
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Åbn _postkasse for anden bruger"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:273
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:278
 msgid "S_earch…"
 msgstr "_Søg …"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:284
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:178
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:289
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Godkendelse"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:311
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
 msgid "_Override Office365 OAuth2 settings"
 msgstr "_Tilsidesæt Office365-indstillinger for OAuth2"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:315
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:393
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:203
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:281
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:320
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:398
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Hjælp …"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:322
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:327
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "Program-i_d:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:233
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Der er ikke angivet et standard-id for programmet"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:234
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Standard-id for programmet er “%s”"
@@ -1183,60 +1191,60 @@ msgstr "Standard-id for programmet er “%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:238
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "_Lejer-ID:"
 
 # almindelig?
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 msgid "Default tenant ID is “common“"
 msgstr "Standardlejer-ID er “fælles”"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Standardlejer-ID er “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:271
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Avancerede indstillinger"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:401
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:406
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "_Slutpunktsvært:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:424
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:312
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:315
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:429
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:432
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Standardslutpunktsvært er “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
 msgid "Red_irect URI:"
 msgstr "_Omdirigerings-URI:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:341
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:344
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Standardomdirigerings-URI er “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
 msgid "Re_source URI:"
 msgstr "_Ressource-URI:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1245,94 +1253,94 @@ msgstr ""
 "Standardressource-URI'en afledes fra værts-URL'en, eller kan i sidste ende "
 "blive “%s”."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:720
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
 msgid "Host URL is not valid"
 msgstr "Værts-URL'en er ikke gyldig"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:724
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
 msgid "Host URL cannot be empty"
 msgstr "Værtsadressen kan ikke være tom"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:735
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
 msgid "OAB URL is not valid"
 msgstr "OAB-URL'en er ikke gyldig"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:745
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:500
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Brugernavn kan ikke være tomt"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:515
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Program-id kan ikke være tomt"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:405
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:390
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Gennemlæser (kan læse punkter)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:406
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:391
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Forfatter (kan læse og oprette punkter)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:407
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:392
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Redaktør (kan læse, oprette og ændre punkter)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:512
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:497
 msgid "Delegate permissions"
 msgstr "Delegerets rettigheder"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:530
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:515
 msgid "C_alendar"
 msgstr "_Kalender"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:533
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:518
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr "_Delegeret modtager kopier af møderelaterede beskeder sendt til mig"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:538
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:523
 msgid "_Tasks"
 msgstr "_Opgaver"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:541
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:526
 msgid "_Inbox"
 msgstr "_Indbakke"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:544
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:529
 msgid "C_ontacts"
 msgstr "K_ontakter"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:547
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:532
 msgid "_Notes"
 msgstr "_Noter"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:550
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:535
 msgid "_Journal"
 msgstr "_Journal"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:553
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:538
 #, c-format
 msgid "Delegate “%s” has the following permissions"
 msgstr "Delegeret “%s” har følgende rettigheder"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:571
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:556
 msgid "Delegate can see my _private items"
 msgstr "Delegeret kan se mine _private punkter"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:893
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:878
 msgid "Retrieving current user permissions, please wait…"
 msgstr "Modtager nuværende brugerrettigheder, vent venligst …"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1016
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1641
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1001
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1623
 msgid "Delegates"
 msgstr "Delegerede"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1040
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1025
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -1348,7 +1356,7 @@ msgstr ""
 # jeg tror der skal være et "til" på til sidst og så skal der ikke være
 # noget "også" i den sidste del. Men jeg måtte godt nok også læse den
 # engelske et par gange for at forstå den.
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1091
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1076
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -1357,7 +1365,7 @@ msgstr ""
 "jeg er organisator til:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1102
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1087
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -1365,58 +1373,75 @@ msgstr ""
 "Kun mine delegerede, men _send en kopi af mødeforespørgsler\n"
 "og svar til mig (anbefales)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1109
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1094
 msgid "My d_elegates only"
 msgstr "Kun mine _delegerede"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1116
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1101
 msgid "My delegates a_nd me"
 msgstr "Mine delegerede og _mig"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1713
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1695
 msgid "Retrieving “Delegates” settings"
 msgstr "Modtager indstillinger for “Delegerede”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:181
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:245
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "EWS-indstillinger"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:188
-msgid "View the size of all Exchange folders"
-msgstr "Vis størrelsen for alle Exchangemapper"
-
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:192
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
 msgid "Folder _Sizes"
 msgstr "Mappe_størrelser"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:210
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
+msgid "View the size of all Exchange folders"
+msgstr "Vis størrelsen for alle Exchangemapper"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "_Nulstil synkroniseringsmærker"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Det kan ske, at mapper ikke længere er synkroniserede, f.eks. efter i lang "
+"tid ikke at have været forbundet til serveren. Ved at nulstille "
+"synkroniseringsmærkerne opdateres mapperne helt. Lokalt gemte breve hentes "
+"ikke igen. Ændringen vil træde i kraft, næste gange mapperne genopfriskes."
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
 msgstr "Finder frakoblede adressebøger"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:262
-#: ../src/EWS/registry/e-ews-backend.c:493
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
+#: ../src/EWS/registry/e-ews-backend.c:546
 msgid "Global Address List"
 msgstr "Global adresseliste"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:283
 msgid "Cache o_ffline address book"
 msgstr "Cache _frakoblet adressebog"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:315
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:309
 msgid "Select ad_dress list:"
 msgstr "Vælg _adresseliste:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:339
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:333
 msgid "Fetch List"
 msgstr "Hent liste"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:922
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:369
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:904
 msgid "Out of Office"
 msgstr "Ikke på kontoret"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:400
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:385
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1424,55 +1449,55 @@ msgstr ""
 "Beskederne angivet nedenfor vil automatisk blive sendt til hver intern og "
 "ekstern person, som sender post til dig."
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:395
 msgid "Do _not send Out of Office replies"
 msgstr "Undlad at sende _Ikke på kontoret-svar"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:418
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:403
 msgid "_Send Out of Office replies"
 msgstr "_Send Ikke på kontoret-svar"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:426
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:411
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Send kun Ikke på kontoret-svar _i denne tidsperiode:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:446
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:431
 msgid "_From:"
 msgstr "_Fra:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:471
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:456
 msgid "_To:"
 msgstr "_Til:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:496
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:481
 msgid "I_nternal:"
 msgstr "I_ntern:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:505
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:490
 msgid "Message to be sent within the organization"
 msgstr "Besked der skal sendes inden for organisationen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:533
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:518
 msgid "E_xternal:"
 msgstr "E_kstern:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:526
 msgid "Message to be sent outside the organization"
 msgstr "Besked der skal sendes uden for organisationen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:551
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:536
 msgid "Do not reply to senders outside the organization"
 msgstr "Svar ikke på afsendere uden for organisationen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:554
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:539
 msgid "Reply only to known senders outside the organization"
 msgstr "Svar kun på kendte afsendere uden for organisationen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:557
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:542
 msgid "Reply to any sender outside the organization"
 msgstr "Svar alle afsendere uden for organisationen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:994
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:976
 msgid "Retrieving “Out of Office” settings"
 msgstr "Henter indstillinger for “Ikke på kontoret”"
 
@@ -1550,24 +1575,24 @@ msgstr "Mappen er blevet tilmeldt."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Mappe tilhørende brugeren “{0}” er blevet tilmeldt."
 
-#: ../src/EWS/registry/e-ews-backend.c:956
-#: ../src/Microsoft365/registry/e-m365-backend.c:688
+#: ../src/EWS/registry/e-ews-backend.c:1000
+#: ../src/Microsoft365/registry/e-m365-backend.c:689
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Kunne ikke bestemme en egnet mappeklasse for en ny mappe navngivet “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1044
+#: ../src/EWS/registry/e-ews-backend.c:1089
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Datakilden “%s” repræsenterer ikke en mappe for Exchange Web Services"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
 msgid "Folder ID is not set"
 msgstr "Mappe-ID er ikke angivet"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Kan ikke gemme kontaktlisten i en Microsoft 365-adressebog"
 
@@ -1580,8 +1605,8 @@ msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
 msgstr ""
-"Microsoft 365-kalender kan ikke gemme komponent med RDATE-, EXDATE- eller RRULE-"
-"egenskaber"
+"Microsoft 365-kalender kan ikke gemme komponent med RDATE-, EXDATE- eller "
+"RRULE-egenskaber"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
 #, c-format
@@ -1634,7 +1659,7 @@ msgstr "Ugyldig mappetilstand (manglende ophavslager)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
 msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
+"Cannot add messages into a Microsoft 365 account from another account. Only "
 "messages from the same account can be moved/copied between the Microsoft 365 "
 "folders."
 msgstr ""
@@ -1720,7 +1745,7 @@ msgstr ""
 "Microsoft 365-serveren"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:134
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
@@ -1748,28 +1773,28 @@ msgstr[1] ""
 msgid "Failed to parse own Json data"
 msgstr "Kunne ikke fortolke egne Json-data"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:199
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Tilsidesæt Microsoft 365-indstillinger for OAuth2"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
 msgid "Default tenant is “common“"
 msgstr "Standardlejer er “fælles”"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:266
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:277
 #, c-format
 msgid "Default tenant is “%s”"
 msgstr "Standardlejer er “%s”"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:318
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:329
 msgid "_Redirect URI:"
 msgstr "_Omdirigerings-URI:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:779
+#: ../src/Microsoft365/registry/e-m365-backend.c:780
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Datakilden “%s” repræsenterer ikke en Microsoft 365-mappe"
