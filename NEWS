@@ -1,3 +1,15 @@
+Evolution-EWS 3.44.1 2022-04-22
+-------------------------------
+
+Bug Fixes:
+	I#178 - Correct display of folder size
+
+Miscellaneous:
+	Address some of the static analyzers warnings
+
+Translations:
+	Nathan Follens (nl)
+
 Evolution-EWS 3.44.0 2022-03-18
 -------------------------------
 
