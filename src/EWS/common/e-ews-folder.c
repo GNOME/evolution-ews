@@ -846,8 +846,7 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
 }
 
 gboolean
-e_ews_folder_utils_remove_as_esource (ESourceRegistry *pregistry,
-                                      const gchar *master_hosturl,
+e_ews_folder_utils_remove_as_esource (const gchar *master_hosturl,
                                       const gchar *master_username,
                                       const gchar *folder_id,
                                       GCancellable *cancellable,
@@ -858,12 +857,9 @@ e_ews_folder_utils_remove_as_esource (ESourceRegistry *pregistry,
 	GList *sources;
 	gboolean res = TRUE;
 
-	registry = pregistry;
-	if (!registry) {
-		registry = e_source_registry_new_sync (cancellable, perror);
-		if (!registry)
-			return FALSE;
-	}
+	registry = e_source_registry_new_sync (cancellable, perror);
+	if (!registry)
+		return FALSE;
 
 	sources = e_source_registry_list_sources (registry, NULL);
 	source = e_ews_folder_utils_get_source_for_folder (sources, master_hosturl, master_username, folder_id);
@@ -876,15 +872,13 @@ e_ews_folder_utils_remove_as_esource (ESourceRegistry *pregistry,
 	}
 
 	g_list_free_full (sources, g_object_unref);
-	if (!pregistry)
-		g_object_unref (registry);
+	g_object_unref (registry);
 
 	return res;
 }
 
 GList *
-e_ews_folder_utils_get_esources (ESourceRegistry *pregistry,
-				 const gchar *master_hosturl,
+e_ews_folder_utils_get_esources (const gchar *master_hosturl,
 				 const gchar *master_username,
 				 GCancellable *cancellable,
 				 GError **perror)
@@ -892,19 +886,15 @@ e_ews_folder_utils_get_esources (ESourceRegistry *pregistry,
 	ESourceRegistry *registry;
 	GList *all_sources, *esources = NULL;
 
-	registry = pregistry;
-	if (!registry) {
-		registry = e_source_registry_new_sync (cancellable, perror);
-		if (!registry)
-			return NULL;
-	}
+	registry = e_source_registry_new_sync (cancellable, perror);
+	if (!registry)
+		return NULL;
 
 	all_sources = e_source_registry_list_sources (registry, NULL);
 	esources = e_ews_folder_utils_filter_sources_for_account (all_sources, master_hosturl, master_username);
 
 	g_list_free_full (all_sources, g_object_unref);
-	if (!pregistry)
-		g_object_unref (registry);
+	g_object_unref (registry);
 
 	return esources;
 }

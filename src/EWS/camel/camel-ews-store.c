@@ -18,8 +18,6 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include <libemail-engine/libemail-engine.h>
-
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-item-change.h"
 #include "common/e-ews-message.h"
@@ -2545,23 +2543,17 @@ folder_info_from_store_summary (CamelEwsStore *store,
 			if (!(fi->flags & CAMEL_FOLDER_SUBSCRIBED) &&
 			    e_ews_folder_get_folder_type (folder) != E_EWS_FOLDER_TYPE_MAILBOX) {
 				if (!hosturl && !username && !esources) {
-					CamelSession *session;
 					CamelSettings *settings;
 					CamelEwsSettings *ews_settings;
-					ESourceRegistry *registry = NULL;
 
 					settings = camel_service_ref_settings (CAMEL_SERVICE (store));
 					ews_settings = CAMEL_EWS_SETTINGS (settings);
-					session = camel_service_ref_session (CAMEL_SERVICE (store));
-					if (E_IS_MAIL_SESSION (session))
-						registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
 					hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 					username = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (ews_settings));
-					esources = e_ews_folder_utils_get_esources (registry, hosturl, username, cancellable, NULL);
+					esources = e_ews_folder_utils_get_esources (hosturl, username, cancellable, NULL);
 
 					g_object_unref (settings);
-					g_object_unref (session);
 				}
 
 				if (e_ews_folder_utils_is_subscribed_as_esource (esources, hosturl, username, fid->id))
@@ -3711,18 +3703,13 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 	}
 
 	if (e_ews_folder_get_folder_type (folder) != E_EWS_FOLDER_TYPE_MAILBOX) {
-		CamelSession *session;
 		CamelSettings *settings;
 		CamelEwsSettings *ews_settings;
-		ESourceRegistry *registry = NULL;
 
 		settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 		ews_settings = CAMEL_EWS_SETTINGS (settings);
-		session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
-		if (E_IS_MAIL_SESSION (session))
-			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
-		res = e_ews_folder_utils_add_as_esource (registry,
+		res = e_ews_folder_utils_add_as_esource (NULL,
 			camel_ews_settings_get_hosturl (ews_settings),
 			camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
 			folder,
@@ -3731,7 +3718,6 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 			cancellable,
 			error);
 
-		g_object_unref (session);
 		g_object_unref (settings);
 	}
 
@@ -3846,25 +3832,19 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 		}
 
 		if (folder_type != E_EWS_FOLDER_TYPE_MAILBOX) {
-			CamelSession *session;
 			CamelSettings *settings;
 			CamelEwsSettings *ews_settings;
-			ESourceRegistry *registry = NULL;
 
 			settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 			ews_settings = CAMEL_EWS_SETTINGS (settings);
-			session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
-			if (E_IS_MAIL_SESSION (session))
-				registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
-			res = e_ews_folder_utils_remove_as_esource (registry,
+			res = e_ews_folder_utils_remove_as_esource (
 				camel_ews_settings_get_hosturl (ews_settings),
 				camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
 				fid,
 				cancellable,
 				error);
 
-			g_object_unref (session);
 			g_object_unref (settings);
 		}
 
@@ -3932,16 +3912,12 @@ camel_ews_store_maybe_disconnect (CamelEwsStore *store,
 		camel_service_disconnect_sync (service, FALSE, NULL, NULL);
 
 	if (is_auth_failed) {
-		CamelSession *session;
-		ESourceRegistry *registry = NULL;
+		ESourceRegistry *registry;
 
 		error->domain = CAMEL_SERVICE_ERROR;
 		error->code = CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE;
 
-		session = camel_service_ref_session (service);
-
-		if (E_IS_MAIL_SESSION (session))
-			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+		registry = e_source_registry_new_sync (NULL, NULL);
 
 		if (registry) {
 			ESource *source, *collection = NULL;
@@ -3957,9 +3933,8 @@ camel_ews_store_maybe_disconnect (CamelEwsStore *store,
 
 			g_clear_object (&collection);
 			g_clear_object (&source);
+			g_clear_object (&registry);
 		}
-
-		g_clear_object (&session);
 	}
 }
 

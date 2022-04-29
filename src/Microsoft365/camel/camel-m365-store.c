@@ -9,9 +9,6 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include <libemail-engine/libemail-engine.h>
-#include <e-util/e-util.h>
-
 #include "common/camel-m365-settings.h"
 #include "common/e-m365-connection.h"
 #include "camel-m365-folder.h"
@@ -311,7 +308,7 @@ m365_store_save_category_changes (GHashTable *old_categories, /* gchar *id ~> Ca
 
 	evo_labels = g_ptr_array_new_full (5, g_free);
 
-	settings = e_util_ref_settings ("org.gnome.evolution.mail");
+	settings = g_settings_new ("org.gnome.evolution.mail");
 	strv = g_settings_get_strv (settings, "labels");
 
 	for (ii = 0; strv && strv[ii]; ii++) {
@@ -1810,7 +1807,6 @@ camel_m365_store_maybe_disconnect (CamelM365Store *m365_store,
 		return;
 
 	if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
-		CamelSession *session;
 		ESourceRegistry *registry = NULL;
 
 		camel_service_disconnect_sync (service, FALSE, NULL, NULL);
@@ -1818,10 +1814,7 @@ camel_m365_store_maybe_disconnect (CamelM365Store *m365_store,
 		error->domain = CAMEL_SERVICE_ERROR;
 		error->code = CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE;
 
-		session = camel_service_ref_session (service);
-
-		if (E_IS_MAIL_SESSION (session))
-			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+		registry = e_source_registry_new_sync (NULL, NULL);
 
 		if (registry) {
 			ESource *source, *collection = NULL;
@@ -1839,7 +1832,7 @@ camel_m365_store_maybe_disconnect (CamelM365Store *m365_store,
 			g_clear_object (&source);
 		}
 
-		g_clear_object (&session);
+		g_clear_object (&registry);
 	}
 }
 

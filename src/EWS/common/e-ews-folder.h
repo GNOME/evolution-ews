@@ -108,14 +108,12 @@ gboolean	e_ews_folder_utils_add_as_esource		(ESourceRegistry *pregistry,
 								 gint color_seed,
 								 GCancellable *cancellable,
 								 GError **perror);
-gboolean	e_ews_folder_utils_remove_as_esource		(ESourceRegistry *pregistry,
-								 const gchar *master_hosturl,
+gboolean	e_ews_folder_utils_remove_as_esource		(const gchar *master_hosturl,
 								 const gchar *master_username,
 								 const gchar *folder_id,
 								 GCancellable *cancellable,
 								 GError **perror);
-GList *		e_ews_folder_utils_get_esources			(ESourceRegistry *pregistry,
-								 const gchar *master_hosturl,
+GList *		e_ews_folder_utils_get_esources			(const gchar *master_hosturl,
 								 const gchar *master_username,
 								 GCancellable *cancellable,
 								 GError **perror);

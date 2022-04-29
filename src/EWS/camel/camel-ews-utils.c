@@ -14,9 +14,6 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include <libemail-engine/libemail-engine.h>
-#include <e-util/e-util.h>
-
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-camel-common.h"
 #include "common/e-ews-item-change.h"
@@ -1467,23 +1464,12 @@ ESource *
 camel_ews_utils_ref_corresponding_source (CamelService *service,
 					  GCancellable *cancellable)
 {
-	ESourceRegistry *registry = NULL;
-	CamelSession *session;
+	ESourceRegistry *registry;
 	ESource *source = NULL;
 
 	g_return_val_if_fail (CAMEL_IS_SERVICE (service), NULL);
 
-	session = camel_service_ref_session (service);
-	if (E_IS_MAIL_SESSION (session)) {
-		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
-		if (registry)
-			g_object_ref (registry);
-	}
-
-	g_clear_object (&session);
-
-	if (!registry)
-		registry = e_source_registry_new_sync (cancellable, NULL);
+	registry = e_source_registry_new_sync (cancellable, NULL);
 
 	if (registry) {
 		source = e_source_registry_ref_source (registry, camel_service_get_uid (service));
@@ -1566,7 +1552,7 @@ ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> C
 
 	evo_labels = g_ptr_array_new_full (5, g_free);
 
-	settings = e_util_ref_settings ("org.gnome.evolution.mail");
+	settings = g_settings_new ("org.gnome.evolution.mail");
 	strv = g_settings_get_strv (settings, "labels");
 
 	for (ii = 0; strv && strv[ii]; ii++) {

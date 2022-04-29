@@ -54,7 +54,6 @@ target_compile_definitions(evolution-ews PRIVATE
 
 target_compile_options(evolution-ews PUBLIC
 	${CAMEL_CFLAGS}
-	${EVOLUTION_CALENDAR_CFLAGS}
 	${LIBEBACKEND_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBEDATACAL_CFLAGS}
@@ -70,7 +69,6 @@ target_include_directories(evolution-ews PUBLIC
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CAMEL_INCLUDE_DIRS}
-	${EVOLUTION_CALENDAR_INCLUDE_DIRS}
 	${LIBEBACKEND_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBEDATACAL_INCLUDE_DIRS}
@@ -80,7 +78,6 @@ target_include_directories(evolution-ews PUBLIC
 
 target_link_libraries(evolution-ews
 	${CAMEL_LDFLAGS}
-	${EVOLUTION_CALENDAR_LDFLAGS}
 	${LIBEBACKEND_LDFLAGS}
 	${LIBECAL_LDFLAGS}
 	${LIBEDATACAL_LDFLAGS}

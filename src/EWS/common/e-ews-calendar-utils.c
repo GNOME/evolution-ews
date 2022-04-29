@@ -8,7 +8,6 @@
 
 #include <glib/gi18n-lib.h>
 #include <libecal/libecal.h>
-#include <calendar/gui/calendar-config.h>
 
 #include "e-ews-message.h"
 #include "ews-errors.h"
@@ -405,6 +404,26 @@ e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
 	return TRUE;
 }
 
+/* This corresponds to calendar_config_get_icaltimezone(), to not depend on the evolution code
+   in the library code (and to not bring gtk+ into random processes). */
+static ICalTimezone *
+ews_get_configured_icaltimezone (void)
+{
+	GSettings *settings;
+	gchar *location;
+	ICalTimezone *zone = NULL;
+
+	settings = g_settings_new ("org.gnome.evolution.calendar");
+	location = g_settings_get_string (settings, "timezone");
+	if (location) {
+		zone = i_cal_timezone_get_builtin_timezone (location);
+
+		g_free (location);
+	}
+	g_object_unref (settings);
+	return zone;
+}
+
 void
 e_ews_cal_utils_set_time (ESoapMessage *msg,
 			  const gchar *name,
@@ -444,7 +463,7 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 	if (i_cal_time_is_date (tt)) {
 		ICalTimezone *cfg_zone;
 
-		cfg_zone = calendar_config_get_icaltimezone ();
+		cfg_zone = ews_get_configured_icaltimezone ();
 		local_tt = i_cal_time_new_from_timet_with_zone (i_cal_time_as_timet_with_zone (tt, cfg_zone), FALSE, i_cal_timezone_get_utc_timezone ());
 		tt = local_tt;
 	}
