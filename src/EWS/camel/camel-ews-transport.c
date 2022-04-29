@@ -12,8 +12,6 @@
 
 #include <glib/gi18n-lib.h>
 
-#include <libemail-engine/libemail-engine.h>
-
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-camel-common.h"
 
@@ -31,12 +29,166 @@ struct _CamelEwsTransportPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
 
+/* This is copy of e_mail_folder_uri_parse(), to not depend on the evolution code
+   in the library code (and to not bring gtk+ into random processes). */
+static gboolean
+ews_transport_mail_folder_uri_parse (CamelSession *session,
+				     const gchar *folder_uri,
+				     CamelStore **out_store,
+				     gchar **out_folder_name,
+				     GError **error)
+{
+	CamelURL *url;
+	CamelService *service = NULL;
+	gchar *folder_name = NULL;
+	gboolean success = FALSE;
+
+	g_return_val_if_fail (CAMEL_IS_SESSION (session), FALSE);
+	g_return_val_if_fail (folder_uri != NULL, FALSE);
+
+	url = camel_url_new (folder_uri, error);
+	if (url == NULL)
+		return FALSE;
+
+	/* Current URI Format: 'folder://' STORE_UID '/' FOLDER_PATH */
+	if (g_strcmp0 (url->protocol, "folder") == 0) {
+
+		if (url->host != NULL) {
+			gchar *uid;
+
+			if (url->user == NULL || *url->user == '\0')
+				uid = g_strdup (url->host);
+			else
+				uid = g_strconcat (
+					url->user, "@", url->host, NULL);
+
+			service = camel_session_ref_service (session, uid);
+			g_free (uid);
+		}
+
+		if (url->path != NULL && *url->path == '/')
+			folder_name = camel_url_decode_path (url->path + 1);
+
+	/* This style was used to reference accounts by UID before
+	 * CamelServices themselves had UIDs.  Some examples are:
+	 *
+	 * Special cases:
+	 *
+	 *   'email://local@local/' FOLDER_PATH
+	 *   'email://vfolder@local/' FOLDER_PATH
+	 *
+	 * General case:
+	 *
+	 *   'email://' ACCOUNT_UID '/' FOLDER_PATH
+	 *
+	 * Note: ACCOUNT_UID is now equivalent to STORE_UID, and
+	 *       the STORE_UIDs for the special cases are 'local'
+	 *       and 'vfolder'.
+	 */
+	} else if (g_strcmp0 (url->protocol, "email") == 0) {
+		gchar *uid = NULL;
+
+		/* Handle the special cases. */
+		if (g_strcmp0 (url->host, "local") == 0) {
+			if (g_strcmp0 (url->user, "local") == 0)
+				uid = g_strdup ("local");
+			if (g_strcmp0 (url->user, "vfolder") == 0)
+				uid = g_strdup ("vfolder");
+		}
+
+		/* Handle the general case. */
+		if (uid == NULL && url->host != NULL) {
+			if (url->user == NULL)
+				uid = g_strdup (url->host);
+			else
+				uid = g_strdup_printf (
+					"%s@%s", url->user, url->host);
+		}
+
+		if (uid != NULL) {
+			service = camel_session_ref_service (session, uid);
+			g_free (uid);
+		}
+
+		if (url->path != NULL && *url->path == '/')
+			folder_name = camel_url_decode_path (url->path + 1);
+
+	/* CamelFolderInfo URIs used to embed the store's URI, so the
+	 * folder name is appended as either a path part or a fragment
+	 * part, depending whether the store's URI used the path part.
+	 * To determine which it is, you have to check the provider
+	 * flags for CAMEL_URL_FRAGMENT_IS_PATH. */
+	} else {
+		gboolean local_mbox_folder;
+
+		/* In Evolution 2.x, the local mail store used mbox
+		 * format.  camel_session_ref_service_by_url() won't
+		 * match "mbox:///.../mail/local" folder URIs, since
+		 * the local mail store is now Maildir format.  Test
+		 * for this corner case and work around it.
+		 *
+		 * The folder path is kept in the fragment part of the
+		 * URL which makes it easy to test the filesystem path.
+		 * The suffix "evolution/mail/local" should match both
+		 * the current XDG-compliant location and the old "dot
+		 * folder" location (~/.evolution/mail/local). */
+		local_mbox_folder =
+			(g_strcmp0 (url->protocol, "mbox") == 0) &&
+			(url->path != NULL) &&
+			g_str_has_suffix (url->path, "evolution/mail/local");
+
+		if (local_mbox_folder) {
+			service = camel_session_ref_service (session, "local");
+		} else {
+			service = camel_session_ref_service_by_url (
+				session, url, CAMEL_PROVIDER_STORE);
+		}
+
+		if (CAMEL_IS_STORE (service)) {
+			CamelProvider *provider;
+
+			provider = camel_service_get_provider (service);
+
+			if (provider->url_flags & CAMEL_URL_FRAGMENT_IS_PATH)
+				folder_name = g_strdup (url->fragment);
+			else if (url->path != NULL && *url->path == '/')
+				folder_name = g_strdup (url->path + 1);
+		}
+	}
+
+	if (CAMEL_IS_STORE (service) && folder_name != NULL) {
+		if (out_store != NULL)
+			*out_store = CAMEL_STORE (g_object_ref (service));
+
+		if (out_folder_name != NULL) {
+			*out_folder_name = folder_name;
+			folder_name = NULL;
+		}
+
+		success = TRUE;
+	} else {
+		g_set_error (
+			error, CAMEL_FOLDER_ERROR,
+			CAMEL_FOLDER_ERROR_INVALID,
+			_("Invalid folder URI “%s”"),
+			folder_uri);
+	}
+
+	if (service != NULL)
+		g_object_unref (service);
+
+	g_free (folder_name);
+
+	camel_url_free (url);
+
+	return success;
+}
+
 static gboolean
 ews_transport_can_server_side_sent_folder (CamelService *service,
 					   EwsFolderId **folder_id,
 					   GCancellable *cancellable)
 {
-	CamelSession *session;
 	ESourceRegistry *registry;
 	ESource *sibling, *source = NULL;
 	gboolean is_server_side = FALSE;
@@ -44,21 +196,16 @@ ews_transport_can_server_side_sent_folder (CamelService *service,
 	g_return_val_if_fail (CAMEL_IS_EWS_TRANSPORT (service), FALSE);
 	g_return_val_if_fail (folder_id != NULL, FALSE);
 
-	session = camel_service_ref_session (service);
-	if (session && E_IS_MAIL_SESSION (session))
-		registry = g_object_ref (e_mail_session_get_registry (E_MAIL_SESSION (session)));
-	else
-		registry = e_source_registry_new_sync (cancellable, NULL);
-
-	if (!registry) {
-		g_clear_object (&session);
+	registry = e_source_registry_new_sync (cancellable, NULL);
+	if (!registry)
 		return FALSE;
-	}
 
 	sibling = e_source_registry_ref_source (registry, camel_service_get_uid (service));
 	if (sibling) {
+		CamelSession *session;
 		GList *sources, *siter;
 
+		session = camel_service_ref_session (service);
 		sources = e_source_registry_list_sources (registry, E_SOURCE_EXTENSION_MAIL_SUBMISSION);
 		for (siter = sources; siter; siter = siter->next) {
 			source = siter->data;
@@ -85,7 +232,7 @@ ews_transport_can_server_side_sent_folder (CamelService *service,
 			   by the evolution itself. */
 			if (!e_source_mail_submission_get_replies_to_origin_folder (subm_extension) &&
 			    e_source_mail_submission_get_sent_folder (subm_extension) &&
-			    e_mail_folder_uri_parse (session,
+			    ews_transport_mail_folder_uri_parse (session,
 				e_source_mail_submission_get_sent_folder (subm_extension),
 				&store, &folder_name, NULL) & CAMEL_IS_EWS_STORE (store)) {
 				CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
@@ -112,10 +259,10 @@ ews_transport_can_server_side_sent_folder (CamelService *service,
 
 		g_list_free_full (sources, g_object_unref);
 		g_object_unref (sibling);
+		g_clear_object (&session);
 	}
 
 	g_object_unref (registry);
-	g_clear_object (&session);
 
 	return is_server_side;
 }

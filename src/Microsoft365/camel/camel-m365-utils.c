@@ -6,8 +6,6 @@
 
 #include "evolution-ews-config.h"
 
-#include <libemail-engine/libemail-engine.h>
-
 #include "camel-m365-utils.h"
 
 /* Unref with g_object_unref() when done with it */
@@ -15,23 +13,12 @@ static ESource *
 camel_m365_utils_ref_corresponding_source (CamelService *service,
 					   GCancellable *cancellable)
 {
-	ESourceRegistry *registry = NULL;
-	CamelSession *session;
+	ESourceRegistry *registry;
 	ESource *source = NULL;
 
 	g_return_val_if_fail (CAMEL_IS_SERVICE (service), NULL);
 
-	session = camel_service_ref_session (service);
-	if (E_IS_MAIL_SESSION (session)) {
-		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
-		if (registry)
-			g_object_ref (registry);
-	}
-
-	g_clear_object (&session);
-
-	if (!registry)
-		registry = e_source_registry_new_sync (cancellable, NULL);
+	registry = e_source_registry_new_sync (cancellable, NULL);
 
 	if (registry) {
 		source = e_source_registry_ref_source (registry, camel_service_get_uid (service));
