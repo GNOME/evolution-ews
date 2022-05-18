@@ -1136,7 +1136,18 @@ ews_backend_get_destination_address (EBackend *backend,
 	g_return_val_if_fail (ews_settings != NULL, FALSE);
 
 	host_url = camel_ews_settings_dup_hosturl (ews_settings);
-	g_return_val_if_fail (host_url != NULL, FALSE);
+	if (!host_url) {
+		ESource *source;
+		ESourceAuthentication *auth_extension;
+
+		source = e_backend_get_source (backend);
+		auth_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+		*host = e_source_authentication_dup_host (auth_extension);
+		*port = e_source_authentication_get_port (auth_extension);
+
+		return *host && **host;
+	}
 
 	soup_uri = soup_uri_new (host_url);
 	if (soup_uri) {
@@ -1294,6 +1305,7 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 {
 	EEwsConnection *connection = NULL;
 	ESourceAuthenticationResult local_result;
+	ESource *source;
 	CamelEwsSettings *settings;
 	gchar *hosturl;
 	gboolean success;
@@ -1310,9 +1322,19 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 	if (connection != NULL || !backend->priv->credentials)
 		return connection;
 
+	source = e_backend_get_source (E_BACKEND (backend));
 	settings = ews_backend_get_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (settings);
-	connection = e_ews_connection_new_full (e_backend_get_source (E_BACKEND (backend)), hosturl, settings, FALSE);
+	if (!hosturl) {
+		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, "Host URL not set");
+
+		if (result)
+			*result = E_SOURCE_AUTHENTICATION_ERROR;
+
+		return NULL;
+	}
+
+	connection = e_ews_connection_new_full (source, hosturl, settings, FALSE);
 	g_free (hosturl);
 
 	e_binding_bind_property (
