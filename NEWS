@@ -1,3 +1,15 @@
+Evolution-EWS 3.44.2 2022-05-27
+-------------------------------
+
+Miscellaneous:
+	build: Limit which parts link to the evolution libraries (and gtk+)
+	EWS registry backend: Handle gracefully when Host URL is not set
+
+Translations:
+	Anders Jonsson (sv)
+	Yuri Chornoivan (uk)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.44.1 2022-04-22
 -------------------------------
 
