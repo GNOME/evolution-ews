@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-05-18 16:41+0000\n"
-"PO-Revision-Date: 2022-05-19 19:18+0300\n"
+"POT-Creation-Date: 2022-06-22 11:17+0000\n"
+"PO-Revision-Date: 2022-06-22 16:24+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -31,22 +31,22 @@ msgstr "Вебслужби Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2896
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2894
 msgid "Fetching contact photos…"
 msgstr "Отримуємо фотографії контактів…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4089
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4087
 msgid "Failed to update GAL:"
 msgstr "Не вдалося оновити GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4254
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4252
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Не вдалося зберегти список контактів, підтримку передбачено лише у EWS "
 "Server 2010 та новіших версіях"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4352
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4350
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2103
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2087
 msgid "Invalid occurrence ID"
 msgstr "Некоректний ідентифікатор повторення"
 
@@ -313,7 +313,7 @@ msgid "Updating foreign folders"
 msgstr "Оновлюємо сторонні теки"
 
 #: ../src/EWS/camel/camel-ews-store.c:2345
-#: ../src/Microsoft365/camel/camel-m365-store.c:628
+#: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Немає такої теки: %s"
@@ -328,7 +328,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Не вдалося знайти жодної загальнодоступної теки EWS"
 
 #: ../src/EWS/camel/camel-ews-store.c:2878
-#: ../src/Microsoft365/camel/camel-m365-store.c:691
+#: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Не вдалося створити теку «%s» — тека вже існує"
@@ -354,7 +354,7 @@ msgstr ""
 "загальнодоступних тек"
 
 #: ../src/EWS/camel/camel-ews-store.c:3020
-#: ../src/Microsoft365/camel/camel-m365-store.c:879
+#: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Теки не існує"
@@ -415,13 +415,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Служба Exchange для %s на %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3402
-#: ../src/Microsoft365/camel/camel-m365-store.c:1453
+#: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Не вдалося знайти теку «Смітник»"
 
 #: ../src/EWS/camel/camel-ews-store.c:3462
-#: ../src/Microsoft365/camel/camel-m365-store.c:1511
+#: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Не вдалося знайти теку «Спам»"
@@ -446,8 +446,8 @@ msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не можна скасовувати підписку на теки EWS в автономному режимі"
 
 #: ../src/EWS/camel/camel-ews-store.c:3882
-#: ../src/Microsoft365/camel/camel-m365-store.c:1771
-#: ../src/Microsoft365/camel/camel-m365-store.c:1784
+#: ../src/Microsoft365/camel/camel-m365-store.c:1772
+#: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Потрібно бути в мережі, щоб завершити цю операцію"
@@ -468,7 +468,6 @@ msgstr "Загальнодоступні теки"
 #: ../src/EWS/camel/camel-ews-transport.c:173
 #: ../src/Microsoft365/camel/camel-m365-transport.c:172
 #, c-format
-#| msgid "Malformed URI: “%s”"
 msgid "Invalid folder URI “%s”"
 msgstr "Неправильний URI теки «%s»"
 
@@ -519,25 +518,17 @@ msgstr ""
 "Не вдалося зберегти це повторення. Змініть його на одинарне щоденне, "
 "щотижневе або щорічне повторення без виключення і з початковою датою."
 
-#: ../src/EWS/common/e-ews-camel-common.c:388
+#: ../src/EWS/common/e-ews-camel-common.c:387
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Виклик CreateItem не повернув ідентифікатора нового повідомлення"
 
-#: ../src/EWS/common/e-ews-connection.c:828
-msgid "Operation Cancelled"
-msgstr "Дію скасовано"
-
-#: ../src/EWS/common/e-ews-connection.c:1001
-msgid "Authentication failed"
-msgstr "Не вдалось пройти розпізнавання"
-
-#: ../src/EWS/common/e-ews-connection.c:1028
+#: ../src/EWS/common/e-ews-connection.c:323
 #, c-format
 msgid "No response: %s"
 msgstr "Немає відповіді: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1096
+#: ../src/EWS/common/e-ews-connection.c:486
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -550,7 +541,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Exchange зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/EWS/common/e-ews-connection.c:1102
+#: ../src/EWS/common/e-ews-connection.c:492
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -559,73 +550,73 @@ msgstr[1] "Сервер Exchange зайнято, очікуємо на повт�
 msgstr[2] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунд)"
 msgstr[3] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/EWS/common/e-ews-connection.c:3238
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:621
+msgid "Authentication failed"
+msgstr "Не вдалось пройти розпізнавання"
+
+#: ../src/EWS/common/e-ews-connection.c:2338
 msgid "Failed to parse autodiscover response XML"
 msgstr "Не вдалося обробити відповідь XML autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:3245
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2344
 msgid "Failed to find <Autodiscover> element"
 msgstr "Не вдалося знайти елемент <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:3256
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2354
 msgid "Failed to find <Response> element"
 msgstr "Не вдалося знайти елемент <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:3267
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2364
 msgid "Failed to find <Account> element"
 msgstr "Не вдалося знайти елемент <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:3313
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2409
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Не вдалося знайти <ASUrl> у відповіді на автовиявлення"
 
-#: ../src/EWS/common/e-ews-connection.c:3499
+#: ../src/EWS/common/e-ews-connection.c:2485
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бути порожньою"
 
-#: ../src/EWS/common/e-ews-connection.c:3507
-#, c-format
-msgid "URL “%s” is not valid"
-msgstr "Адреса «%s» є некоректною"
-
-#: ../src/EWS/common/e-ews-connection.c:3806
+#: ../src/EWS/common/e-ews-connection.c:2903
 msgid "Email address is missing a domain part"
 msgstr "У адресі електронної пошти пропущено частину домену"
 
-#: ../src/EWS/common/e-ews-connection.c:4115
+#: ../src/EWS/common/e-ews-connection.c:3112
 msgid "Failed to parse oab XML"
 msgstr "Не вдалося обробити XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:4123
+#: ../src/EWS/common/e-ews-connection.c:3150
 msgid "Failed to find <OAB> element\n"
 msgstr "Не вдалося знайти елемент <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5412
-msgid "No items found"
-msgstr "Пункти не знайдено"
+#: ../src/EWS/common/e-ews-connection.c:8672
+#| msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgid "Requires at least Microsoft Exchange 2010 SP1 server"
+msgstr "Потребує принаймні сервера Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:11883
+#: ../src/EWS/common/e-ews-connection.c:8773
+#| msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgid "Requires at least Microsoft Exchange 2013 server"
+msgstr "Потребує принаймні сервера Microsoft Exchange 2013"
+
+#: ../src/EWS/common/e-ews-connection.c:8926
+#| msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgid "Requires at least Microsoft Exchange 2010 server"
+msgstr "Потребує принаймні сервера Microsoft Exchange 2010"
+
+#: ../src/EWS/common/e-ews-connection.c:9066
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2007 SP1"
 
-#: ../src/EWS/common/e-ews-connection-utils.c:185
+#: ../src/EWS/common/e-ews-connection-utils.c:206
 #, c-format
 msgid "Password expired. Change password at “%s”."
 msgstr "Строк дії пароля вичерпано. Змініть пароль «%s»."
 
-#: ../src/EWS/common/e-ews-connection-utils.c:188
+#: ../src/EWS/common/e-ews-connection-utils.c:209
 msgid "Password expired."
 msgstr "Строк дії пароля вичерпано."
-
-#: ../src/EWS/common/e-ews-connection-utils.c:422
-#: ../src/Microsoft365/common/e-m365-connection.c:237
-msgid "Unknown error"
-msgstr "Невідома помилка"
 
 #: ../src/EWS/common/e-ews-folder.c:781
 msgid "Cannot add folder, unsupported folder type"
@@ -1137,11 +1128,11 @@ msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:267
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:261
 msgid "Querying Autodiscover service"
 msgstr "Опитування служби автовиявлення"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:360
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:354
 msgid "Fetch _URL"
 msgstr "Отримати _адресу"
 
@@ -1353,7 +1344,7 @@ msgid "Retrieving current user permissions, please wait…"
 msgstr "Отримуємо права доступу поточного користувача, будь ласка, зачекайте…"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1001
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1623
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1548
 msgid "Delegates"
 msgstr "Делегати"
 
@@ -1395,7 +1386,7 @@ msgstr "Лише ва_ші делегати"
 msgid "My delegates a_nd me"
 msgstr "Ваші деле_гати і ви"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1695
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1620
 msgid "Retrieving “Delegates” settings"
 msgstr "Отримуємо параметри «Делегатів»"
 
@@ -1434,7 +1425,7 @@ msgid "Locating offline address books"
 msgstr "Встановлення розташування автономних адресних книг"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:546
+#: ../src/EWS/registry/e-ews-backend.c:549
 msgid "Global Address List"
 msgstr "Загальний список адрес"
 
@@ -1595,13 +1586,13 @@ msgstr "Підписку на теку оформлено."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Успішно оформлено підписку на теку користувача «{0}»."
 
-#: ../src/EWS/registry/e-ews-backend.c:1000
-#: ../src/Microsoft365/registry/e-m365-backend.c:689
+#: ../src/EWS/registry/e-ews-backend.c:1006
+#: ../src/Microsoft365/registry/e-m365-backend.c:696
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Не вдалося визначити належний клас тек для нової теки із назвою «%s»"
 
-#: ../src/EWS/registry/e-ews-backend.c:1089
+#: ../src/EWS/registry/e-ews-backend.c:1095
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Джерело даних «%s» не є відповідником теки веб служб Exchange"
@@ -1715,31 +1706,31 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Отримання пошти за допомогою Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1527
+#: ../src/Microsoft365/common/e-m365-connection.c:1221
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Помилкове форматування адреси: «%s»"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:531
+#: ../src/Microsoft365/camel/camel-m365-store.c:532
 msgid "Look up Microsoft 365 categories"
 msgstr "Пошук у категоріях Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:540
+#: ../src/Microsoft365/camel/camel-m365-store.c:541
 #: ../src/Microsoft365/camel/camel-m365-transport.c:330
 msgid "Failed to create connection"
 msgstr "Не вдалося створити з'єднання"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:705
+#: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Батьківської теки «%s» не існує"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:892
+#: ../src/Microsoft365/camel/camel-m365-store.c:893
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Не вдалося знайти теку «Вилучені записи»"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:983
-#: ../src/Microsoft365/camel/camel-m365-store.c:1021
+#: ../src/Microsoft365/camel/camel-m365-store.c:984
+#: ../src/Microsoft365/camel/camel-m365-store.c:1022
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Теки «%s» не існує"
@@ -1772,7 +1763,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1181
+#: ../src/Microsoft365/common/e-m365-connection.c:876
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1785,7 +1776,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1187
+#: ../src/Microsoft365/common/e-m365-connection.c:882
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1798,7 +1789,17 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:2043
+#: ../src/Microsoft365/common/e-m365-connection.c:1007
+#: ../src/Microsoft365/common/e-m365-connection.c:1023
+msgid "Invalid data"
+msgstr "Некоректні дані"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1021
+#| msgid "Operation Cancelled"
+msgid "Operation was cancelled"
+msgstr "Дію скасовано"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1699
 msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
@@ -1823,10 +1824,20 @@ msgstr "Типовим тенантом є «%s»"
 msgid "_Redirect URI:"
 msgstr "Адреса переспр_ямовування:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:780
+#: ../src/Microsoft365/registry/e-m365-backend.c:787
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Джерело даних «%s» не є відповідником теки Microsoft 365"
+
+#, c-format
+#~ msgid "URL “%s” is not valid"
+#~ msgstr "Адреса «%s» є некоректною"
+
+#~ msgid "No items found"
+#~ msgstr "Пункти не знайдено"
+
+#~ msgid "Unknown error"
+#~ msgstr "Невідома помилка"
 
 #~ msgid "User “%s” was not found on the server"
 #~ msgstr "Користувача «%s» на сервері не виявлено"
