@@ -227,7 +227,7 @@ e_ews_collect_attendees (ICalComponent *comp,
 	if (out_rsvp_requested)
 		*out_rsvp_requested = TRUE;
 
-	/* we need to know who the orgenizer is so we wont duplicate him/her */
+	/* we need to know who the organizer is so we wont duplicate him/her */
 	org_email_address = e_ews_collect_organizer (comp);
 
 	/* iterate over every attendee property */
@@ -247,8 +247,8 @@ e_ews_collect_attendees (ICalComponent *comp,
 		if (!*str)
 			continue;
 
-		/* if this attenddee is the orgenizer - dont add him/her
-		 in some cases there is no maito for email if meeting orginazer */
+		/* if this attenddee is the organizer - don't add him/her
+		 in some cases there is no mailto for email if meeting orginazer */
 		if (g_ascii_strcasecmp (org_email_address, str) == 0)
 			continue;
 
