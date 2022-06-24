@@ -66,6 +66,7 @@ struct _EEwsConnectionPrivate {
 	CamelEwsSettings *settings;
 	guint concurrent_connections;
 	GMutex property_lock;
+	GMutex try_credentials_lock;
 
 	/* Hash key for the loaded_connections_permissions table. */
 	gchar *hash_key;
@@ -1205,6 +1206,7 @@ ews_connection_finalize (GObject *object)
 	g_free (cnc->priv->last_subscription_id);
 
 	g_mutex_clear (&cnc->priv->property_lock);
+	g_mutex_clear (&cnc->priv->try_credentials_lock);
 	g_rec_mutex_clear (&cnc->priv->queue_lock);
 	g_mutex_clear (&cnc->priv->notification_lock);
 
@@ -1350,6 +1352,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 			NULL, e_ews_connection_folders_list_free);
 
 	g_mutex_init (&cnc->priv->property_lock);
+	g_mutex_init (&cnc->priv->try_credentials_lock);
 	g_rec_mutex_init (&cnc->priv->queue_lock);
 	g_mutex_init (&cnc->priv->notification_lock);
 }
@@ -1820,6 +1823,10 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), E_SOURCE_AUTHENTICATION_ERROR);
 
+	/* when sharing the connection between multiple sources (like in the book/calendar factory),
+	   make sure only one try_credentials() is running at a single time */
+	g_mutex_lock (&cnc->priv->try_credentials_lock);
+
 	e_ews_connection_update_credentials (cnc, credentials);
 
 	fid = g_new0 (EwsFolderId, 1);
@@ -1856,6 +1863,9 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 		gboolean auth_failed;
 
 		auth_failed = g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
+		if (!auth_failed && g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_FORBIDDEN) &&
+		    (!credentials || !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)))
+			auth_failed = TRUE;
 
 		if (auth_failed) {
 			g_clear_error (&local_error);
@@ -1874,6 +1884,8 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 
 		e_ews_connection_set_password (cnc, NULL);
 	}
+
+	g_mutex_unlock (&cnc->priv->try_credentials_lock);
 
 	return result;
 }
