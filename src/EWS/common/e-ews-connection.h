@@ -738,11 +738,20 @@ gboolean	e_ews_connection_get_oal_list_sync
 						 GError **error);
 gboolean	e_ews_connection_get_oal_detail_sync
 						(EEwsConnection *cnc,
+						 const gchar *oal_uri,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
 						 const gchar *old_etag,
 						 GSList **out_elements, /* EwsOALDetails * */
 						 gchar **out_etag,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_ews_connection_download_oal_file_sync
+						(EEwsConnection *cnc,
+						 const gchar *oal_uri,
+						 const gchar *cache_filename,
+						 ESoapResponseProgressFn progress_fn,
+						 gpointer progress_data,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_ews_connection_get_free_busy_sync
@@ -751,13 +760,6 @@ gboolean	e_ews_connection_get_free_busy_sync
 						 EEwsRequestCreationCallback free_busy_cb,
 						 gpointer create_user_data,
 						 GSList **out_free_busy, /* ICalComponent * */
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_ews_connection_download_oal_file_sync
-						(EEwsConnection *cnc,
-						 const gchar *cache_filename,
-						 ESoapResponseProgressFn progress_fn,
-						 gpointer progress_data,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_ews_connection_get_delegate_sync

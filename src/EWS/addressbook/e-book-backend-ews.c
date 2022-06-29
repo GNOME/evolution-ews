@@ -2615,10 +2615,8 @@ ebb_ews_download_gal_file (EBookBackendEws *bbews,
 			   GCancellable *cancellable,
 			   GError **error)
 {
-	EEwsConnection *oab_cnc;
 	gchar *full_url, *oab_url;
 	gchar *download_path = NULL;
-	gchar *password;
 	CamelEwsSettings *ews_settings;
 	const gchar *cache_dir;
 
@@ -2638,25 +2636,13 @@ ebb_ews_download_gal_file (EBookBackendEws *bbews,
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (bbews));
 	download_path = g_build_filename (cache_dir, full->filename, NULL);
 
-	oab_cnc = e_ews_connection_new_for_backend (E_BACKEND (bbews), e_book_backend_get_registry (E_BOOK_BACKEND (bbews)), full_url, ews_settings);
-
-	e_binding_bind_property (
-		bbews, "proxy-resolver",
-		oab_cnc, "proxy-resolver",
-		G_BINDING_SYNC_CREATE);
-
-	password = e_ews_connection_dup_password (bbews->priv->cnc);
-	e_ews_connection_set_password (oab_cnc, password);
-	g_free (password);
-
-	if (!e_ews_connection_download_oal_file_sync (oab_cnc, download_path, NULL, NULL, cancellable, error)) {
+	if (!e_ews_connection_download_oal_file_sync (bbews->priv->cnc, full_url, download_path, NULL, NULL, cancellable, error)) {
 		g_free (download_path);
 		download_path = NULL;
 	} else {
 		d (printf ("OAL file downloaded %s\n", download_path));
 	}
 
-	g_object_unref (oab_cnc);
 	g_free (oab_url);
 	g_free (full_url);
 
@@ -3976,29 +3962,17 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 
 		if (oab_url && *oab_url &&
 		    camel_ews_settings_get_oab_offline (ews_settings)) {
-			EEwsConnection *oab_cnc;
 			GSList *full_l = NULL, *deltas = NULL, *link;
 			EwsOALDetails *full = NULL;
-			gchar *password, *etag = NULL;
+			gchar *etag = NULL;
 			gint sequence;
 
 			sequence = e_cache_get_key_int (E_CACHE (book_cache), "gal-sequence", NULL);
 			if (sequence == -1)
 				sequence = 0;
 
-			oab_cnc = e_ews_connection_new_for_backend (E_BACKEND (bbews), e_book_backend_get_registry (E_BOOK_BACKEND (bbews)), oab_url, ews_settings);
-
-			e_binding_bind_property (
-				bbews, "proxy-resolver",
-				oab_cnc, "proxy-resolver",
-				G_BINDING_SYNC_CREATE);
-
-			password = e_ews_connection_dup_password (bbews->priv->cnc);
-			e_ews_connection_set_password (oab_cnc, password);
-			e_util_safe_free_string (password);
-
 			d (printf ("Ewsgal: Fetching oal full details file\n"));
-			if (!e_ews_connection_get_oal_detail_sync (oab_cnc, bbews->priv->folder_id, NULL, last_sync_tag, &full_l, &etag, cancellable, &local_error)) {
+			if (!e_ews_connection_get_oal_detail_sync (bbews->priv->cnc, oab_url, bbews->priv->folder_id, NULL, last_sync_tag, &full_l, &etag, cancellable, &local_error)) {
 				if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_MODIFIED)) {
 					g_clear_error (&local_error);
 				} else {
@@ -4076,7 +4050,6 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 
 			g_slist_free_full (full_l, (GDestroyNotify) ews_oal_details_free);
 			g_slist_free_full (deltas, (GDestroyNotify) ews_oal_details_free);
-			g_clear_object (&oab_cnc);
 
 			if (success)
 				*out_new_sync_tag = etag;

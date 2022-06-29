@@ -3211,6 +3211,7 @@ e_ews_connection_get_oal_list_sync (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_get_oal_detail_sync (EEwsConnection *cnc,
+				      const gchar *oal_uri,
                                       const gchar *oal_id,
                                       const gchar *oal_element,
 				      const gchar *old_etag,
@@ -3233,7 +3234,7 @@ e_ews_connection_get_oal_detail_sync (EEwsConnection *cnc,
 	if (out_etag)
 		*out_etag = NULL;
 
-	request = e_ews_create_request_for_url (cnc->priv->uri, NULL, error);
+	request = e_ews_create_request_for_url (oal_uri, NULL, error);
 
 	if (!request)
 		return FALSE;
@@ -3341,6 +3342,7 @@ e_ews_process_download_oal_file_response (ESoapRequest *request,
 
 gboolean
 e_ews_connection_download_oal_file_sync (EEwsConnection *cnc,
+					 const gchar *oal_uri,
                                          const gchar *cache_filename,
                                          ESoapResponseProgressFn progress_fn,
                                          gpointer progress_data,
@@ -3354,7 +3356,7 @@ e_ews_connection_download_oal_file_sync (EEwsConnection *cnc,
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
 
-	request = e_ews_create_request_for_url (cnc->priv->uri, NULL, error);
+	request = e_ews_create_request_for_url (oal_uri, NULL, error);
 
 	if (!request)
 		return FALSE;
