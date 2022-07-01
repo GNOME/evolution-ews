@@ -1,3 +1,14 @@
+Evolution-EWS 3.44.3 2022-07-01
+-------------------------------
+
+Bug Fixes:
+	I#189 - Specify FolderClass when creating generic folder only
+
+Translations:
+	Jürgen Benvenuti (de)
+	Kukuh Syafaat (id)
+	Rafael Fontenelle (pt_BR)
+
 Evolution-EWS 3.44.2 2022-05-27
 -------------------------------
 
