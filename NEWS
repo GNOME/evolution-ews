@@ -1,3 +1,33 @@
+Evolution-EWS 3.45.1 2022-07-01
+-------------------------------
+
+ * The Evolution-EWS had been ported to libsoup3, which means anything what
+   uses it, and all of its dependencies, should be libsoup3 too.
+
+Bug Fixes:
+	I#178 - Correct display of folder size
+	I#189 - Specify FolderClass when creating generic folder only
+	M!6 - Port to libsoup3
+	M!8 - Typos: dont -> don't (Дилян Палаузов)
+
+Miscellaneous:
+	Address some of the static analyzers warnings
+	build: Limit which parts link to the evolution libraries (and gtk+)
+	EWS registry backend: Handle gracefully when Host URL is not set
+	EEwsConnection: try_credentials() may end with 'Forbidden' error
+	Addressbook: Re-use authenticated connection for OAB operations
+
+Translations:
+	Alan Mortensen (da)
+	Anders Jonsson (sv)
+	Boyuan Yang (zh_CN)
+	Jürgen Benvenuti (de)
+	Nathan Follens (nl)
+	Piotr Drąg (pl)
+	Rafael Fontenelle (pt_BR)
+	Yuri Chornoivan (uk)
+	Мирослав Николић (sr)
+
 Evolution-EWS 3.44.0 2022-03-18
 -------------------------------
 
