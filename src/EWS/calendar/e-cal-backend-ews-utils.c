@@ -2077,7 +2077,8 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 	for (next = i_cal_recur_iterator_next (ritr);
 	     next && !i_cal_time_is_null_time (next);
 	     g_object_unref (next), next = i_cal_recur_iterator_next (ritr), index++) {
-		if (i_cal_time_compare_date_only (o_time, next) == 0) {
+		/* Make sure the date is compared with the expected timezone, not converted into UTC */
+		if (i_cal_time_compare_date_only_tz (o_time, next, timezone) == 0) {
 			break;
 		}
 	}
