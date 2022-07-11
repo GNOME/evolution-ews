@@ -7940,7 +7940,6 @@ ews_connection_notification_start_thread (gpointer user_data)
 		NOTIFICATION_LOCK (cnc);
 
 		if (cnc->priv->subscribed_folders) {
-			g_warn_if_fail (cnc->priv->notification == NULL);
 			g_clear_object (&cnc->priv->notification);
 
 			cnc->priv->notification = e_ews_notification_new (cnc, last_subscription_id);
