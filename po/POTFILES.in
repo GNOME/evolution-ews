@@ -38,6 +38,7 @@ src/EWS/registry/e-ews-backend.c
 src/EWS/registry/module-ews-backend.c
 src/Microsoft365/addressbook/e-book-backend-m365.c
 src/Microsoft365/calendar/e-cal-backend-m365.c
+src/Microsoft365/calendar/e-cal-backend-m365-utils.c
 src/Microsoft365/camel/camel-m365-folder.c
 src/Microsoft365/camel/camel-m365-provider.c
 src/Microsoft365/camel/camel-m365-store.c

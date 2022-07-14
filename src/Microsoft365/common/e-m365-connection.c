@@ -3854,7 +3854,7 @@ gboolean
 e_m365_connection_create_event_sync (EM365Connection *cnc,
 				     const gchar *user_override, /* for which user, NULL to use the account user */
 				     const gchar *group_id, /* nullable, then the default group is used */
-				     const gchar *calendar_id,
+				     const gchar *calendar_id, /* nullable, then the default user calendar is used */
 				     JsonBuilder *event,
 				     EM365Event **out_created_event,
 				     GCancellable *cancellable,
@@ -3869,13 +3869,18 @@ e_m365_connection_create_event_sync (EM365Connection *cnc,
 	g_return_val_if_fail (event != NULL, FALSE);
 	g_return_val_if_fail (out_created_event != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
-		group_id ? "calendarGroups" : "calendars",
-		group_id,
-		group_id ? "calendars" : NULL,
-		"", calendar_id,
-		"", "events",
-		NULL);
+	if (calendar_id) {
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+			group_id ? "calendarGroups" : "calendars",
+			group_id,
+			group_id ? "calendars" : NULL,
+			"", calendar_id,
+			"", "events",
+			NULL);
+	} else {
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "me",
+			"events", NULL, NULL, NULL);
+	}
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
 
@@ -4405,7 +4410,7 @@ gboolean
 e_m365_connection_add_event_attachment_sync (EM365Connection *cnc,
 					     const gchar *user_override, /* for which user, NULL to use the account user */
 					     const gchar *group_id, /* nullable, then the default group is used */
-					     const gchar *calendar_id,
+					     const gchar *calendar_id, /* nullable, then the default user calendar is used */
 					     const gchar *event_id,
 					     JsonBuilder *in_attachment,
 					     EM365Attachment **out_attachment, /* nullable */
@@ -4421,15 +4426,23 @@ e_m365_connection_add_event_attachment_sync (EM365Connection *cnc,
 	g_return_val_if_fail (event_id != NULL, FALSE);
 	g_return_val_if_fail (in_attachment != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
-		group_id ? "calendarGroups" : "calendars",
-		group_id,
-		group_id ? "calendars" : NULL,
-		"", calendar_id,
-		"", "events",
-		"", event_id,
-		"", "attachments",
-		NULL);
+	if (calendar_id) {
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+			group_id ? "calendarGroups" : "calendars",
+			group_id,
+			group_id ? "calendars" : NULL,
+			"", calendar_id,
+			"", "events",
+			"", event_id,
+			"", "attachments",
+			NULL);
+	} else {
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "me",
+			"events", NULL, NULL,
+			"", event_id,
+			"", "attachments",
+			NULL);
+	}
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, out_attachment ? CSM_DEFAULT : CSM_DISABLE_RESPONSE, error);
 
