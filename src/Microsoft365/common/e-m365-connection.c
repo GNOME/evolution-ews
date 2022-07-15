@@ -295,9 +295,12 @@ m365_connection_constructed (GObject *object)
 	soup_session_add_feature_by_type (cnc->priv->soup_session, E_TYPE_SOUP_AUTH_BEARER);
 
 	/* This can use only OAuth2 authentication, which should be set on the ESource */
-	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_BASIC);
-	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NTLM);
-	soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NEGOTIATE);
+	if (soup_session_has_feature (cnc->priv->soup_session, SOUP_TYPE_AUTH_BASIC))
+		soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_BASIC);
+	if (soup_session_has_feature (cnc->priv->soup_session, SOUP_TYPE_AUTH_NTLM))
+		soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NTLM);
+	if (soup_session_has_feature (cnc->priv->soup_session, SOUP_TYPE_AUTH_NEGOTIATE))
+		soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NEGOTIATE);
 	soup_session_add_feature_by_type (cnc->priv->soup_session, E_TYPE_SOUP_AUTH_BEARER);
 
 	cnc->priv->hash_key = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (cnc->priv->settings));
@@ -791,11 +794,17 @@ e_m365_connection_json_node_from_message (SoupMessage *message,
 
 		if (content_type && g_ascii_strcasecmp (content_type, "application/json") == 0) {
 			JsonParser *json_parser;
+			GByteArray *msg_bytes = NULL;
 
 			json_parser = json_parser_new_immutable ();
 
+			if (!input_stream)
+				msg_bytes = e_soup_session_util_get_message_bytes (message);
+
 			if (input_stream) {
 				success = json_parser_load_from_stream (json_parser, input_stream, cancellable, error);
+			} else if (msg_bytes) {
+				success = json_parser_load_from_data (json_parser, (const gchar *) msg_bytes->data, msg_bytes->len, error);
 			} else {
 				/* This should not happen, it's for safety check only, thus the string is not localized */
 				success = FALSE;
@@ -1013,6 +1022,17 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 
 				if (node)
 					json_node_unref (node);
+			} else if (e_soup_session_util_get_message_bytes (message)) {
+				/* Try to extract detailed error */
+				JsonNode *node = NULL;
+
+				if (!e_m365_connection_json_node_from_message (message, input_stream, &node, cancellable, &local_error) && local_error) {
+					g_clear_error (error);
+					g_propagate_error (error, local_error);
+					local_error = NULL;
+				}
+
+				g_clear_pointer (&node, json_node_unref);
 			}
 
 			g_clear_object (&input_stream);
@@ -3865,7 +3885,6 @@ e_m365_connection_create_event_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (calendar_id != NULL, FALSE);
 	g_return_val_if_fail (event != NULL, FALSE);
 	g_return_val_if_fail (out_created_event != NULL, FALSE);
 
@@ -3878,7 +3897,7 @@ e_m365_connection_create_event_sync (EM365Connection *cnc,
 			"", "events",
 			NULL);
 	} else {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "me",
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "users",
 			"events", NULL, NULL, NULL);
 	}
 
@@ -4422,7 +4441,6 @@ e_m365_connection_add_event_attachment_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (calendar_id != NULL, FALSE);
 	g_return_val_if_fail (event_id != NULL, FALSE);
 	g_return_val_if_fail (in_attachment != NULL, FALSE);
 
@@ -4437,7 +4455,7 @@ e_m365_connection_add_event_attachment_sync (EM365Connection *cnc,
 			"", "attachments",
 			NULL);
 	} else {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "me",
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "users",
 			"events", NULL, NULL,
 			"", event_id,
 			"", "attachments",

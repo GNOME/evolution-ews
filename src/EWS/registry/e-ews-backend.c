@@ -12,6 +12,9 @@
 
 #include "common/e-ews-connection-utils.h"
 #include "common/e-source-ews-folder.h"
+#include "../Microsoft365/common/camel-m365-settings.h"
+
+#define EWS_HELPER_M365_RESOURCE_ID "helper-m365-calendar"
 
 typedef struct _SyncFoldersClosure SyncFoldersClosure;
 
@@ -591,6 +594,77 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	g_object_unref (source);
 }
 
+/* This source is used by the Calendar backend, when creating online meeting */
+static void
+ews_backend_maybe_add_m365_source (EEwsBackend *ews_backend)
+{
+	CamelEwsSettings *ews_settings;
+	ECollectionBackend *collection_backend;
+	ESource *collection_source;
+	ESource *m365_source;
+	ESourceAuthentication *auth_extension;
+	ESourceAuthentication *collection_auth_extension;
+	ESourceCollection *collection_extension = NULL;
+	ESourceExtension *source_extension;
+	ESourceRegistryServer *server;
+	gboolean can_enable;
+	gchar *display_name;
+
+	ews_settings = ews_backend_get_settings (ews_backend);
+
+	if (camel_ews_settings_get_auth_mechanism (ews_settings) != EWS_AUTH_TYPE_OAUTH2)
+		return;
+
+	collection_source = e_backend_get_source (E_BACKEND (ews_backend));
+
+	if (!collection_source)
+		return;
+
+	/* Make sure the ESourceCamel knows about it, even when no Microsoft365 mail account is created */
+	e_source_camel_generate_subtype ("microsoft365", CAMEL_TYPE_M365_SETTINGS);
+
+	if (e_source_has_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION))
+		collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION);
+
+	can_enable = !collection_extension || (e_source_get_enabled (collection_source) &&
+		e_source_collection_get_contacts_enabled (collection_extension));
+
+	collection_backend = E_COLLECTION_BACKEND (ews_backend);
+	m365_source = e_collection_backend_new_child (collection_backend, EWS_HELPER_M365_RESOURCE_ID);
+	e_source_set_enabled (m365_source, can_enable);
+
+	display_name = g_strconcat (e_source_get_display_name (collection_source), " (Microsoft365)", NULL);
+
+	source_extension = e_source_get_extension (m365_source, e_source_camel_get_extension_name ("microsoft365"));
+	if (source_extension) {
+		CamelSettings *settings = e_source_camel_get_settings (E_SOURCE_CAMEL (source_extension));
+
+		if (settings) {
+			g_object_set (settings,
+				"host", "graph.microsoft.com",
+				"auth-mechanism", "Microsoft365",
+				NULL);
+		}
+	}
+
+	collection_auth_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+	e_source_set_display_name (m365_source, display_name);
+
+	auth_extension = e_source_get_extension (m365_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+	e_source_authentication_set_host (auth_extension, "graph.microsoft.com");
+	e_source_authentication_set_method (auth_extension, "Microsoft365");
+	e_source_authentication_set_user (auth_extension,
+		e_source_authentication_get_user (collection_auth_extension));
+
+	server = e_collection_backend_ref_server (collection_backend);
+	e_source_registry_server_add_source (server, m365_source);
+
+	g_object_unref (m365_source);
+	g_object_unref (server);
+	g_free (display_name);
+}
+
 static void ews_backend_populate (ECollectionBackend *backend);
 
 static void
@@ -838,6 +912,7 @@ ews_backend_populate (ECollectionBackend *collection_backend)
 	}
 
 	ews_backend_add_gal_source (ews_backend);
+	ews_backend_maybe_add_m365_source (ews_backend);
 	ews_backend_claim_old_resources (collection_backend);
 
 	if (e_backend_get_online (backend)) {
@@ -864,6 +939,15 @@ ews_backend_dup_resource_id (ECollectionBackend *backend,
 	ESourceEwsFolder *extension;
 	const gchar *extension_name;
 
+	if (e_source_has_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+		ESourceAuthentication *auth_extension;
+
+		auth_extension = e_source_get_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+		if (g_strcmp0 (e_source_authentication_get_method (auth_extension), "Microsoft365") == 0)
+			return g_strdup (EWS_HELPER_M365_RESOURCE_ID);
+	}
+
 	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 	extension = e_source_get_extension (child_source, extension_name);
 
@@ -882,25 +966,29 @@ ews_backend_child_added (ECollectionBackend *backend,
 	extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
 	if (e_source_has_extension (child_source, extension_name)) {
 		ESourceAuthentication *auth_child_extension;
-		ESourceAuthentication *auth_collection_extension;
 
 		auth_child_extension = e_source_get_extension (child_source, extension_name);
-		auth_collection_extension = e_source_get_extension (collection_source, extension_name);
 
-		e_binding_bind_property (
-			auth_collection_extension, "host",
-			auth_child_extension, "host",
-			G_BINDING_SYNC_CREATE);
+		if (g_strcmp0 (e_source_authentication_get_method (auth_child_extension), "Microsoft365") != 0) {
+			ESourceAuthentication *auth_collection_extension;
 
-		e_binding_bind_property (
-			auth_collection_extension, "user",
-			auth_child_extension, "user",
-			G_BINDING_SYNC_CREATE);
+			auth_collection_extension = e_source_get_extension (collection_source, extension_name);
 
-		e_binding_bind_property (
-			auth_collection_extension, "method",
-			auth_child_extension, "method",
-			G_BINDING_SYNC_CREATE);
+			e_binding_bind_property (
+				auth_collection_extension, "host",
+				auth_child_extension, "host",
+				G_BINDING_SYNC_CREATE);
+
+			e_binding_bind_property (
+				auth_collection_extension, "user",
+				auth_child_extension, "user",
+				G_BINDING_SYNC_CREATE);
+
+			e_binding_bind_property (
+				auth_collection_extension, "method",
+				auth_child_extension, "method",
+				G_BINDING_SYNC_CREATE);
+		}
 	}
 
 	/* We track EWS folders in a hash table by folder ID. */

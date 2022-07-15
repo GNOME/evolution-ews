@@ -35,6 +35,8 @@ set(sources
 	e-mail-parser-ews-sharing-metadata.h
 	e-mail-part-ews-sharing-metadata.c
 	e-mail-part-ews-sharing-metadata.h
+	e-ews-comp-editor-extension.c
+	e-ews-comp-editor-extension.h
 	e-ews-config-lookup.c
 	e-ews-config-lookup.h
 	e-ews-config-ui-extension.c
@@ -56,18 +58,21 @@ set(extra_defines)
 set(extra_cflags
 	${EVOLUTION_MAIL_CFLAGS}
 	${EVOLUTION_SHELL_CFLAGS}
+	${EVOLUTION_CALENDAR_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBEBOOK_CFLAGS}
 )
 set(extra_incdirs
 	${EVOLUTION_MAIL_INCLUDE_DIRS}
 	${EVOLUTION_SHELL_INCLUDE_DIRS}
+	${EVOLUTION_CALENDAR_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBEBOOK_INCLUDE_DIRS}
 )
 set(extra_ldflags
 	${EVOLUTION_MAIL_LDFLAGS}
 	${EVOLUTION_SHELL_LDFLAGS}
+	${EVOLUTION_CALENDAR_LDFLAGS}
 	${LIBECAL_LDFLAGS}
 	${LIBEBOOK_LDFLAGS}
 )

@@ -4,6 +4,7 @@
 org.gnome.Evolution-ews.metainfo.xml.in
 src/EWS/addressbook/e-book-backend-ews.c
 src/EWS/calendar/e-cal-backend-ews.c
+src/EWS/calendar/e-cal-backend-ews-m365.c
 src/EWS/calendar/e-cal-backend-ews-utils.c
 src/EWS/camel/camel-ews-folder.c
 src/EWS/camel/camel-ews-provider.c
@@ -19,6 +20,7 @@ src/EWS/common/e-ews-connection-utils.c
 src/EWS/common/e-ews-folder.c
 src/EWS/common/e-oauth2-service-office365.c
 src/EWS/evolution/e-book-config-ews.c
+src/EWS/evolution/e-ews-comp-editor-extension.c
 src/EWS/evolution/e-ews-config-lookup.c
 src/EWS/evolution/e-ews-config-utils.c
 src/EWS/evolution/e-ews-edit-folder-permissions.c

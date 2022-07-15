@@ -5,6 +5,8 @@ set(sources
 	e-ews-backend.h
 	e-ews-backend-factory.c
 	e-ews-backend-factory.h
+	${CMAKE_SOURCE_DIR}/src/Microsoft365/common/camel-m365-settings.c
+	${CMAKE_SOURCE_DIR}/src/Microsoft365/common/camel-m365-settings.h
 )
 set(extra_defines)
 set(extra_cflags)

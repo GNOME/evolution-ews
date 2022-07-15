@@ -430,6 +430,9 @@ e_oauth2_service_microsoft365_class_init (EOAuth2ServiceMicrosoft365Class *klass
 
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->finalize = eos_microsoft365_finalize;
+
+	/* Make sure the ESourceCamel knows about it, even when no Microsoft365 mail account is created */
+	e_source_camel_generate_subtype ("microsoft365", CAMEL_TYPE_M365_SETTINGS);
 }
 
 static void

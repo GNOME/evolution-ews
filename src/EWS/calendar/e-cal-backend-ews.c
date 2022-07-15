@@ -31,6 +31,7 @@
 
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
+#include "e-cal-backend-ews-m365.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -66,6 +67,8 @@ struct _ECalBackendEwsPrivate {
 	gboolean is_freebusy_calendar;
 
 	gchar *attachments_dir;
+
+	EThreeState is_user_calendar;
 };
 
 #define ECB_EWS_SYNC_TAG_STAMP_KEY "ews-sync-tag-stamp"
@@ -3089,6 +3092,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 	EwsFolderId *fid;
 	GSList *link;
 	const gchar *uid;
+	gboolean is_online_meeting;
 	gboolean success = TRUE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
@@ -3115,6 +3119,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
+	is_online_meeting = e_cal_util_component_has_x_property (e_cal_component_get_icalcomponent (master), "X-M365-ONLINE-MEETING");
 	uid = e_cal_component_get_uid (master);
 	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
 
@@ -3190,6 +3195,47 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		   !ecb_ews_organizer_is_user (cbews, master)) {
 		success = FALSE;
 		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, _("Cannot create meetings organized by other users in an Exchange Web Services calendar.")));
+	} else if (is_online_meeting && !instances->next) {
+		/* Check whether the folder is the user calendar */
+		if (cbews->priv->is_user_calendar == E_THREE_STATE_INCONSISTENT) {
+			GSList folder_ids, *folders = NULL;
+			EwsFolderId dfid;
+
+			memset (&dfid, 0, sizeof (dfid));
+			memset (&folder_ids, 0, sizeof (folder_ids));
+
+			dfid.id = (gchar *) "calendar";
+			dfid.is_distinguished_id = TRUE;
+
+			folder_ids.data = &dfid;
+
+			success = e_ews_connection_get_folder_sync (cbews->priv->cnc, G_PRIORITY_DEFAULT, "IdOnly", NULL, &folder_ids, &folders, cancellable, error);
+			if (success) {
+				gboolean is_user_calendar = FALSE;
+
+				if (folders) {
+					EEwsFolder *folder = folders->data;
+					const EwsFolderId *fid = folder ? e_ews_folder_get_id (folder) : NULL;
+
+					is_user_calendar = fid && g_strcmp0 (cbews->priv->folder_id, fid->id) == 0;
+				}
+
+				g_slist_free_full (folders, g_object_unref);
+
+				cbews->priv->is_user_calendar = is_user_calendar ? E_THREE_STATE_ON : E_THREE_STATE_OFF;
+			}
+		}
+
+		if (success) {
+			/* Verify the folder is the user calendar, the online meeting cannot be created elsewhere */
+			success = cbews->priv->is_user_calendar == E_THREE_STATE_ON;
+
+			if (!success)
+				g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, _("Online meeting can be created only in the main user Calendar.")));
+		}
+
+		success = success && ecb_ews_save_as_online_meeting_sync (e_cal_backend_get_registry (E_CAL_BACKEND (cbews)),
+			cbews->priv->cnc, E_TIMEZONE_CACHE (cbews), master, out_new_uid, cancellable, error);
 	} else {
 		GHashTable *removed_indexes;
 		EwsCalendarConvertData convert_data = { 0 };
@@ -4653,6 +4699,7 @@ static void
 e_cal_backend_ews_init (ECalBackendEws *cbews)
 {
 	cbews->priv = e_cal_backend_ews_get_instance_private (cbews);
+	cbews->priv->is_user_calendar = E_THREE_STATE_INCONSISTENT;
 
 	g_rec_mutex_init (&cbews->priv->cnc_lock);
 
