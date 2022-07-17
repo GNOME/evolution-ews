@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-26 14:50+0200\n"
-"PO-Revision-Date: 2022-06-26 14:52+0200\n"
+"POT-Creation-Date: 2022-07-17 13:02+0200\n"
+"PO-Revision-Date: 2022-07-17 13:05+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -31,51 +31,51 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2894
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
 msgid "Fetching contact photos…"
 msgstr "Pobieranie zdjęć kontaktów…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4087
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
 msgid "Failed to update GAL:"
 msgstr "Zaktualizowanie GAL się nie powiodło:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4252
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub nowszym"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4350
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2624
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2898
 msgid "Cannot determine EWS ItemId"
 msgstr "Nie można ustalić ItemId EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3197
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -83,12 +83,31 @@ msgstr ""
 "Nie można utworzyć spotkań organizowanych przez innych użytkowników "
 "w kalendarzu Exchange Web Services."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3234
+msgid "Online meeting can be created only in the main user Calendar."
+msgstr ""
+"Spotkania online mogą być tworzone tylko w głównym kalendarzu użytkownika."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3948
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2087
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:40
+msgid ""
+"Cannot connect to the server, repeat the action once you login to the server."
+msgstr ""
+"Nie można połączyć się z serwerem, należy powtórzyć działanie po zalogowaniu "
+"na serwerze."
+
+#. Translators: The '%s' is replaced with a UID of the collection source
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
+#, c-format
+msgid "Cannot find Microsoft365 helper source for calendar “%s”"
+msgstr ""
+"Nie można odnaleźć źródła pomocniczego Microsoft365 dla kalendarza „%s”"
+
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2088
 msgid "Invalid occurrence ID"
 msgstr "Nieprawidłowy identyfikator wystąpienia"
 
@@ -586,19 +605,19 @@ msgstr "Przetworzenie XML „oab” się nie powiodło"
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8684
+#: ../src/EWS/common/e-ews-connection.c:8685
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Wymaga co najmniej serwera Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8785
+#: ../src/EWS/common/e-ews-connection.c:8786
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Wymaga co najmniej serwera Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:8938
+#: ../src/EWS/common/e-ews-connection.c:8939
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Wymaga co najmniej serwera Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9078
+#: ../src/EWS/common/e-ews-connection.c:9079
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Wymaga co najmniej serwera Microsoft Exchange 2007 SP1"
 
@@ -650,6 +669,15 @@ msgstr "_Pobieranie zdjęć kontaktów"
 #: ../src/EWS/evolution/e-book-config-ews.c:102
 msgid "Tries to look up for user photo"
 msgstr "Próbuje wyszukać zdjęcie użytkownika"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+msgid "Online Meeting"
+msgstr "Spotkanie online"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+msgid "Create the meeting as an online meeting in the main user calendar"
+msgstr ""
+"Tworzy spotkanie jako spotkanie online w głównym kalendarzu użytkownika"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
@@ -1419,7 +1447,7 @@ msgid "Locating offline address books"
 msgstr "Ustalanie położenia książek adresowych w trybie offline"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:549
+#: ../src/EWS/registry/e-ews-backend.c:552
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
@@ -1580,7 +1608,7 @@ msgstr "Katalog był już subskrybowany."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Katalog użytkownika „{0}” był już pomyślnie subskrybowany."
 
-#: ../src/EWS/registry/e-ews-backend.c:1006
+#: ../src/EWS/registry/e-ews-backend.c:1094
 #: ../src/Microsoft365/registry/e-m365-backend.c:696
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
@@ -1588,13 +1616,13 @@ msgstr ""
 "Nie można ustalić odpowiedniej klasy katalogów dla nowego katalogu o nazwie "
 "„%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1095
+#: ../src/EWS/registry/e-ews-backend.c:1183
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Źródło danych „%s” nie przedstawia katalogu Exchange Web Services"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
 msgid "Folder ID is not set"
 msgstr "Identyfikator katalogu nie jest ustawiony"
 
@@ -1602,12 +1630,20 @@ msgstr "Identyfikator katalogu nie jest ustawiony"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Nie można zapisać listy kontaktów w książce adresowej Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr "W kalendarzu Microsoft 365 można przechowywać tylko proste wydarzenia"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr "W katalogu zadań Microsoft 365 można przechowywać tylko proste zadania"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr ""
 "Kalendarz Microsoft 365 nie może przechowywać więcej niż jednego powtórzenia"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1672
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1615,47 +1651,39 @@ msgstr ""
 "Kalendarz Microsoft 365 nie może przechowywać składnika z właściwościami "
 "RDATE, EXDATE lub RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Nieznana częstotliwość powtarzania (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1927
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Kalendarz Microsoft 365 nie może przechowywać więcej niż jedno przypomnienie "
 "o wydarzeniu"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Wydarzenie Microsoft 365 może mieć przypomnienie tylko przed rozpoczęciem "
 "wydarzenia"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Zadanie Microsoft 365 może mieć przypomnienie z czasem bezwzględnym"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nie można przechować załącznika o adresie URI „%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
 msgid "Failed to read attachment URI"
 msgstr "Odczytanie adresu URI załącznika się nie powiodło"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
 msgid "Failed to get inline attachment data"
 msgstr "Uzyskanie danych załącznika w treści wiadomości się nie powiodło"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
-msgid "Can store only simple events into Microsoft 365 calendar"
-msgstr "W kalendarzu Microsoft 365 można przechowywać tylko proste wydarzenia"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3226
-msgid "Can store only simple tasks into Microsoft 365 task folder"
-msgstr "W katalogu zadań Microsoft 365 można przechowywać tylko proste zadania"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
 #: ../src/Microsoft365/camel/camel-m365-folder.c:610
@@ -1703,7 +1731,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Odbieranie poczty przez Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1221
+#: ../src/Microsoft365/common/e-m365-connection.c:1241
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Błędnie sformatowany adres URI: „%s”"
@@ -1758,7 +1786,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:876
+#: ../src/Microsoft365/common/e-m365-connection.c:885
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1769,7 +1797,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Microsoft 365 jest zajęty, oczekiwanie na ponowienie (%d∶%02d minut)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:882
+#: ../src/Microsoft365/common/e-m365-connection.c:891
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1780,16 +1808,16 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Microsoft 365 jest zajęty, oczekiwanie na ponowienie (%d sekund)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1007
-#: ../src/Microsoft365/common/e-m365-connection.c:1023
+#: ../src/Microsoft365/common/e-m365-connection.c:1016
+#: ../src/Microsoft365/common/e-m365-connection.c:1043
 msgid "Invalid data"
 msgstr "Nieprawidłowe dane"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1021
+#: ../src/Microsoft365/common/e-m365-connection.c:1041
 msgid "Operation was cancelled"
 msgstr "Anulowano działanie"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1699
+#: ../src/Microsoft365/common/e-m365-connection.c:1719
 msgid "Failed to parse own Json data"
 msgstr "Przetworzenie własnych danych JSON się nie powiodło"
 
