@@ -164,10 +164,7 @@ test_create_folder_with_invalid_distinguished_parent_id (gconstpointer user_data
 		NULL, &error);
 
 	if (error != NULL) {
-		parent_folder_not_found = g_error_matches (
-			error,
-			SOUP_HTTP_ERROR,
-			SOUP_STATUS_IO_ERROR);
+		parent_folder_not_found = g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_INTERNAL_SERVER_ERROR);
 
 		if (!parent_folder_not_found)
 			g_printerr ("\n%s\n", error->message);

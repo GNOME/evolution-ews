@@ -419,6 +419,11 @@ EEwsConnection *e_ews_connection_new_for_backend(EBackend *backend,
 						 ESourceRegistry *registry,
 						 const gchar *uri,
 						 CamelEwsSettings *settings);
+void		e_ews_connection_set_testing_sources
+						(EEwsConnection *cnc,
+						 gboolean testing_sources);
+gboolean	e_ews_connection_get_testing_sources
+						(EEwsConnection *cnc);
 void		e_ews_connection_update_credentials
 						(EEwsConnection *cnc,
 						 const ENamedParameters *credentials);

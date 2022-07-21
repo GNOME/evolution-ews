@@ -231,7 +231,6 @@ ews_test_init (gint argc,
 		etd = g_new0 (EwsTestData, 1);
 		if (write_traces) {
 			CamelEwsSettings *settings = NULL;
-			SoupSession *session;
 
 			settings = g_object_new (
 				CAMEL_TYPE_EWS_SETTINGS,
@@ -240,12 +239,9 @@ ews_test_init (gint argc,
 
 			etd->version = g_list_nth_data (versions, i);
 			etd->connection = e_ews_connection_new (NULL, g_list_nth_data (server_uris, i), settings);
+			e_ews_connection_set_testing_sources (etd->connection, TRUE);
 			e_ews_connection_set_password (etd->connection, g_list_nth_data (passwords, i));
 			e_ews_connection_set_server_version_from_string (etd->connection, etd->version);
-
-			session = e_ews_connection_ref_soup_session (etd->connection);
-			g_object_set (G_OBJECT (session), SOUP_SESSION_SSL_STRICT, FALSE, NULL);
-			g_object_unref (session);
 
 			g_object_unref (settings);
 		} else {
@@ -305,7 +301,6 @@ ews_test_set_https_port (UhmServer *server,
 			 EwsTestData *etd)
 {
 	CamelEwsSettings *ews_settings;
-	SoupSession *session;
 	guint16 port;
 	gchar *uri;
 	gchar **tokens;
@@ -321,12 +316,9 @@ ews_test_set_https_port (UhmServer *server,
 		NULL);
 
 	etd->connection = e_ews_connection_new (NULL, uri, ews_settings);
+	e_ews_connection_set_testing_sources (etd->connection, TRUE);
 	e_ews_connection_set_password (etd->connection, "bar");
 	e_ews_connection_set_server_version_from_string (etd->connection, etd->version);
-
-	session = e_ews_connection_ref_soup_session (etd->connection);
-	g_object_set (G_OBJECT (session), SOUP_SESSION_SSL_STRICT, FALSE, NULL);
-	g_object_unref (session);
 
 	g_free (uri);
 	g_strfreev (tokens);

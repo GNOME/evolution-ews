@@ -47,6 +47,7 @@ set(evo_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJ
 set(mspack_minimum_version 0.4)
 set(libical_glib_minimum_version 3.0.5)
 set(json_glib_minimum_version 1.0.4)
+set(uhttpmock_minimum_version 0.9)
 
 # Load modules from the source tree
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
@@ -175,7 +176,7 @@ unset(CMAKE_REQUIRED_LIBRARIES)
 add_printable_option(ENABLE_TESTS "Enable low level tests for EwsConnection" OFF)
 
 if(ENABLE_TESTS)
-	pkg_check_modules_for_option(ENABLE_TESTS "low level tests" UHTTPMOCK libuhttpmock-0.0)
+	pkg_check_modules_for_option(ENABLE_TESTS "low level tests" UHTTPMOCK libuhttpmock-1.0>=${uhttpmock_minimum_version})
 endif(ENABLE_TESTS)
 
 # ******************************
@@ -287,6 +288,5 @@ add_subdirectory(po)
 add_subdirectory(src)
 
 if(ENABLE_TESTS)
-	message(WARNING "tests are disabled until uhttpmock is ported to libsoup3")
-	#add_subdirectory(tests)
+	add_subdirectory(tests)
 endif(ENABLE_TESTS)

@@ -92,6 +92,7 @@ struct _EEwsConnectionPrivate {
 
 	/* Set to TRUE when this connection had been disconnected and cannot be used anymore */
 	gboolean disconnected_flag;
+	gboolean testing_sources;
 
 	gboolean ssl_info_set;
 	gchar *ssl_certificate_pem;
@@ -272,6 +273,25 @@ ews_connection_credentials_failed (EEwsConnection *connection,
 	return expired;
 }
 
+static gboolean
+e_ews_connection_accept_certificate_for_testing_sources_cb (SoupMessage *message,
+							    GTlsCertificate *tls_peer_certificate,
+							    GTlsCertificateFlags tls_peer_errors,
+							    gpointer user_data)
+{
+	return TRUE;
+}
+
+static void
+e_ews_connection_maybe_prepare_message_for_testing_sources (EEwsConnection *cnc,
+							    SoupMessage *message)
+{
+	if (e_ews_connection_get_testing_sources (cnc)) {
+		g_signal_connect (message, "accept-certificate",
+			G_CALLBACK (e_ews_connection_accept_certificate_for_testing_sources_cb), NULL);
+	}
+}
+
 typedef struct _ProcessData {
 	GMutex mutex;
 	GCond cond;
@@ -397,6 +417,8 @@ e_ews_connection_process_request_sync (EEwsConnection *cnc,
 
 	if (!pd.message)
 		return NULL;
+
+	e_ews_connection_maybe_prepare_message_for_testing_sources (cnc, pd.message);
 
 	g_mutex_lock (&cnc->priv->property_lock);
 	if (cnc->priv->credentials_changed) {
@@ -1779,6 +1801,23 @@ e_ews_connection_new_for_backend (EBackend *backend,
 	g_clear_object (&source);
 
 	return cnc;
+}
+
+void
+e_ews_connection_set_testing_sources (EEwsConnection *cnc,
+				      gboolean testing_sources)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	cnc->priv->testing_sources = testing_sources;
+}
+
+gboolean
+e_ews_connection_get_testing_sources (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	return cnc->priv->testing_sources;
 }
 
 void
@@ -7850,6 +7889,8 @@ e_ews_connection_query_auth_methods_sync (EEwsConnection *cnc,
 		return FALSE;
 	}
 
+	e_ews_connection_maybe_prepare_message_for_testing_sources (cnc, message);
+
 	amd.cancellable = g_cancellable_new ();
 	amd.out_auth_methods = out_auth_methods;
 
@@ -9676,6 +9717,8 @@ e_ews_connection_prepare_streaming_events_sync (EEwsConnection *cnc,
 		g_clear_object (&request);
 		return NULL;
 	}
+
+	e_ews_connection_maybe_prepare_message_for_testing_sources (cnc, *out_message);
 
 	g_mutex_lock (&cnc->priv->property_lock);
 	e_soup_session_set_credentials (*out_session, cnc->priv->credentials);

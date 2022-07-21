@@ -20,7 +20,7 @@ macro(add_ews_test _name)
 	target_compile_definitions(${_name} PRIVATE
 		-DG_LOG_DOMAIN=\"${_name}\"
 		-DTEST_FILE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"
-		-DCALENDAR_MODULE_DIR=\"${CMAKE_BINARY_DIR}/src/calendar/\"
+		-DCALENDAR_MODULE_DIR=\"${CMAKE_BINARY_DIR}/src/EWS/calendar/\"
 	)
 
 	target_compile_options(${_name} PUBLIC

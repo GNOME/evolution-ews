@@ -47,7 +47,7 @@ static GHashTable *ical_to_msdn = NULL;
 static GHashTable *msdn_to_ical = NULL;
 static guint tables_counter = 0;
 
-void
+G_MODULE_EXPORT void
 e_cal_backend_ews_populate_windows_zones (void)
 {
 	const gchar *xpath_eval_exp;
@@ -165,7 +165,7 @@ e_cal_backend_ews_unref_windows_zones (void)
 	g_rec_mutex_unlock (&tz_mutex);
 }
 
-const gchar *
+G_MODULE_EXPORT const gchar *
 e_cal_backend_ews_tz_util_get_msdn_equivalent (const gchar *ical_tz_location)
 {
 	const gchar *msdn_tz_location = NULL;
@@ -1256,7 +1256,8 @@ convert_vevent_calcomp_to_xml (ESoapRequest *request,
 	msdn_location_end = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_end);
 	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
 
-	if (satisfies && msdn_location_start != NULL && msdn_location_end != NULL) {
+	if (satisfies && msdn_location_start != NULL && msdn_location_end != NULL &&
+	    !e_ews_connection_get_testing_sources (convert_data->connection)) {
 		GSList *msdn_locations = NULL;
 		GSList *tzds = NULL;
 
@@ -1426,7 +1427,7 @@ convert_vjournal_calcomp_to_xml (ESoapRequest *request,
 	return TRUE;
 }
 
-gboolean
+G_MODULE_EXPORT gboolean
 e_cal_backend_ews_convert_calcomp_to_xml (ESoapRequest *request,
 					  gpointer user_data,
 					  GError **error)

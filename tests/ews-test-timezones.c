@@ -13,7 +13,9 @@
 
 void (* populate_windows_zones) (void);
 const gchar * (* ical_to_msdn_equivalent) (const gchar *);
-gboolean (* convert_calcomp_to_xml) (ESoapMessage *, gpointer, GError **);
+gboolean (* convert_calcomp_to_xml) (ESoapRequest *request,
+				     gpointer user_data,
+				     GError **error);
 GType (* cal_backend_ews_get_type) (void);
 
 const gchar *str_comp =
@@ -403,7 +405,7 @@ int main (int argc,
 
 	convert_calcomp_to_xml = symbol;
 
-	if (!g_module_symbol (module, "e_cal_backend_ews_get_type", &symbol)) {
+	if (!g_module_symbol (module, "e_cal_backend_ews_get_type_for_testing_sources", &symbol)) {
 		g_printerr ("\n%s\n", g_module_error ());
 		retval = 6;
 		goto exit;
@@ -425,7 +427,6 @@ int main (int argc,
 		if (!uhm_server_get_enable_online (server))
 			g_signal_connect (server, "notify::resolver", (GCallback) server_notify_resolver_cb, etd);
 
-		/* Create folder */
 		if (e_ews_debug_get_server_version_from_string (etd->version) >= E_EWS_EXCHANGE_2010) {
 			message = g_strdup_printf ("/%s/calendar/timezones/ical_compatibility", etd->version);
 			g_test_add_data_func (message, etd, test_libical_timezones_compatibility);
