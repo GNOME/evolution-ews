@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-06-22 11:17+0000\n"
-"PO-Revision-Date: 2022-06-22 21:35+0200\n"
+"POT-Creation-Date: 2022-07-15 08:46+0000\n"
+"PO-Revision-Date: 2022-07-15 16:30+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -33,50 +33,50 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "För att nå Exchange-servrar som använder Web Services"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2894
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
 msgid "Fetching contact photos…"
 msgstr "Hämtar kontaktbilder…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4087
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
 msgid "Failed to update GAL:"
 msgstr "Misslyckades med att uppdatera GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4252
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kan inte spara kontaktlista, det stöds bara i EWS Server 2010 eller senare"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4350
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
 msgid "Failed to set contact photo:"
 msgstr "Misslyckades med att sätta kontaktbild:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Tillgänglig"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Upptagen"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ej på kontoret"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Preliminärt"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2624
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2898
 msgid "Cannot determine EWS ItemId"
 msgstr "Kan inte avgöra EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3197
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -84,12 +84,28 @@ msgstr ""
 "Kan inte skapa sammanträden som organiseras av andra användare i en Exchange "
 "Web Services-kalender."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3234
+msgid "Online meeting can be created only in the main user Calendar."
+msgstr "Nätsammanträden kan endast skapas i användarens huvudkalender."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3948
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan inte hitta deltagare ”%s” i listan över deltagare"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2087
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:40
+msgid ""
+"Cannot connect to the server, repeat the action once you login to the server."
+msgstr ""
+"Kan inte ansluta till servern, upprepa åtgärden då du loggat in på servern."
+
+#. Translators: The '%s' is replaced with a UID of the collection source
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
+#, c-format
+msgid "Cannot find Microsoft365 helper source for calendar “%s”"
+msgstr "Kan inte hitta Microsoft365-hjälpkälla för kalendern ”%s”"
+
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2088
 msgid "Invalid occurrence ID"
 msgstr "Ogiltigt förekomst-ID"
 
@@ -507,12 +523,12 @@ msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "Anrop till CreateItem misslyckades med att returnera ID för nytt meddelande"
 
-#: ../src/EWS/common/e-ews-connection.c:323
+#: ../src/EWS/common/e-ews-connection.c:324
 #, c-format
 msgid "No response: %s"
 msgstr "Inget svar: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:486
+#: ../src/EWS/common/e-ews-connection.c:487
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -521,7 +537,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-servern är upptagen, väntar med att försöka igen (%d:%02d minuter)"
 
-#: ../src/EWS/common/e-ews-connection.c:492
+#: ../src/EWS/common/e-ews-connection.c:493
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -530,59 +546,59 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-servern är upptagen, väntar med att försöka igen (%d sekunder)"
 
-#: ../src/EWS/common/e-ews-connection.c:621
+#: ../src/EWS/common/e-ews-connection.c:622
 msgid "Authentication failed"
 msgstr "Autentisering misslyckades"
 
-#: ../src/EWS/common/e-ews-connection.c:2338
+#: ../src/EWS/common/e-ews-connection.c:2350
 msgid "Failed to parse autodiscover response XML"
 msgstr "Misslyckades att tolka XML-svar från autodetektering"
 
-#: ../src/EWS/common/e-ews-connection.c:2344
+#: ../src/EWS/common/e-ews-connection.c:2356
 msgid "Failed to find <Autodiscover> element"
 msgstr "Misslyckades med att hitta <Autodiscover>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:2354
+#: ../src/EWS/common/e-ews-connection.c:2366
 msgid "Failed to find <Response> element"
 msgstr "Misslyckades med att hitta <Response>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:2364
+#: ../src/EWS/common/e-ews-connection.c:2376
 msgid "Failed to find <Account> element"
 msgstr "Misslyckades med att hitta <Account>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:2409
+#: ../src/EWS/common/e-ews-connection.c:2421
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Kunde inte hitta <ASUrl> i svar för autodetektering"
 
-#: ../src/EWS/common/e-ews-connection.c:2485
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "URL cannot be NULL"
 msgstr "URL kan inte vara NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:2903
+#: ../src/EWS/common/e-ews-connection.c:2915
 msgid "Email address is missing a domain part"
 msgstr "E-postadress saknar en domändel"
 
-#: ../src/EWS/common/e-ews-connection.c:3112
+#: ../src/EWS/common/e-ews-connection.c:3124
 msgid "Failed to parse oab XML"
 msgstr "Misslyckades med att tolka oab-XML"
 
-#: ../src/EWS/common/e-ews-connection.c:3150
+#: ../src/EWS/common/e-ews-connection.c:3162
 msgid "Failed to find <OAB> element\n"
 msgstr "Misslyckades att hitta <OAB>-element\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8672
+#: ../src/EWS/common/e-ews-connection.c:8685
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8773
+#: ../src/EWS/common/e-ews-connection.c:8786
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:8926
+#: ../src/EWS/common/e-ews-connection.c:8939
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9066
+#: ../src/EWS/common/e-ews-connection.c:9079
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2007 SP1"
 
@@ -634,6 +650,14 @@ msgstr "_Hämta kontaktbilder"
 #: ../src/EWS/evolution/e-book-config-ews.c:102
 msgid "Tries to look up for user photo"
 msgstr "Försöker slå upp användarfoto"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+msgid "Online Meeting"
+msgstr "Nätsammanträde"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+msgid "Create the meeting as an online meeting in the main user calendar"
+msgstr "Skapa sammanträdet som ett nätsammanträde i användarens huvudkalender"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
@@ -1394,7 +1418,7 @@ msgid "Locating offline address books"
 msgstr "Letar upp frånkopplade adressböcker"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:549
+#: ../src/EWS/registry/e-ews-backend.c:552
 msgid "Global Address List"
 msgstr "Global adresslista"
 
@@ -1548,19 +1572,19 @@ msgstr "Har prenumererat på mapp."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Har lyckats prenumerera på mapp för användaren ”{0}”."
 
-#: ../src/EWS/registry/e-ews-backend.c:1006
+#: ../src/EWS/registry/e-ews-backend.c:1094
 #: ../src/Microsoft365/registry/e-m365-backend.c:696
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Kunde inte bestämma en lämplig mappklass för en ny mapp vid namn ”%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1095
+#: ../src/EWS/registry/e-ews-backend.c:1183
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Datakällan ”%s” representerar inte en Exchange Web Services-mapp"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
 msgid "Folder ID is not set"
 msgstr "Mapp-ID har inte ställts in"
 
@@ -1568,11 +1592,19 @@ msgstr "Mapp-ID har inte ställts in"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Kan inte spara kontaktlista till en Microsoft 365-adressbok"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr "Kan endast lagra enkla evenemang i Microsoft 365-kalender"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr "Kan endast lagra enkla uppgifter i Microsoft 365-mapp"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365-kalender kan inte lagra mer än en upprepning"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1672
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1580,44 +1612,36 @@ msgstr ""
 "Microsoft 365-kalender kan inte lagra komponent med RDATE-, EXDATE- eller "
 "RRULE-egenskaper"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Okänd upprepningsfrekvens (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1927
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr "Microsoft 365-kalender kan inte lagra mer än en evenemangspåminnelse"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365-evenemang kan endast ha en påminnelse före evenemangets start"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365-uppgift kan endast ha en påminnelse med absolut tid"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Kan inte lagra bilaga med URI ”%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
 msgid "Failed to read attachment URI"
 msgstr "Misslyckades med att läsa URI för bilaga"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
 msgid "Failed to get inline attachment data"
 msgstr "Misslyckades med att erhålla data för infogad bilaga"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
-msgid "Can store only simple events into Microsoft 365 calendar"
-msgstr "Kan endast lagra enkla evenemang i Microsoft 365-kalender"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3226
-msgid "Can store only simple tasks into Microsoft 365 task folder"
-msgstr "Kan endast lagra enkla uppgifter i Microsoft 365-mapp"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
 #: ../src/Microsoft365/camel/camel-m365-folder.c:610
@@ -1665,7 +1689,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "E-postmottagning via Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1221
+#: ../src/Microsoft365/common/e-m365-connection.c:1241
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Felaktigt utformad URI: ”%s”"
@@ -1721,7 +1745,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:876
+#: ../src/Microsoft365/common/e-m365-connection.c:885
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1732,7 +1756,7 @@ msgstr[1] ""
 "Microsoft 365-servern är upptagen, väntar med att försöka igen (%d:%02d "
 "minuter)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:882
+#: ../src/Microsoft365/common/e-m365-connection.c:891
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1741,16 +1765,16 @@ msgstr[0] ""
 msgstr[1] ""
 "Microsoft 365-servern är upptagen, väntar med att försöka igen (%d sekunder)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1007
-#: ../src/Microsoft365/common/e-m365-connection.c:1023
+#: ../src/Microsoft365/common/e-m365-connection.c:1016
+#: ../src/Microsoft365/common/e-m365-connection.c:1043
 msgid "Invalid data"
 msgstr "Ogiltiga data"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1021
+#: ../src/Microsoft365/common/e-m365-connection.c:1041
 msgid "Operation was cancelled"
 msgstr "Operationen avbröts"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1699
+#: ../src/Microsoft365/common/e-m365-connection.c:1719
 msgid "Failed to parse own Json data"
 msgstr "Misslyckades med att tolka egna Json-data"
 
