@@ -1,3 +1,22 @@
+Evolution-EWS 3.45.2 2022-08-05
+-------------------------------
+
+Bug Fixes:
+	I#89 - Calendar: Ability to create Online meeting
+	I#191 - Calendar: Fix occurrence index counter
+
+Miscellaneous:
+	Remove false runtime check in ews_connection_notification_start_thread()
+	Microsoft365: Split iCalendar component manipulation code into separate file
+	Use uhttpmock 0.9 for internal tests
+
+Translations:
+	Anders Jonsson (sv)
+	Jürgen Benvenuti (de)
+	Kukuh Syafaat (id)
+	Piotr Drąg (pl)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.45.1 2022-07-01
 -------------------------------
 
