@@ -3,23 +3,23 @@
 # This file is distributed under the same license as the evolution-ews package.
 # Gabriel Speckhahn <gabspeck@gmail.com>, 2012.
 # Henrique Machado Campos <henriquecamposrj@gmail.com>, 2020.
-# Enrico Nicoletto <liverig@gmail.com>, 2013, 2020-2021.
 # Rafael Fontenelle <rafaelff@gnome.org>, 2012-2022.
+# Enrico Nicoletto <hiko@duck.com>, 2013, 2020-2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-05-18 16:41+0000\n"
-"PO-Revision-Date: 2022-06-15 05:26-0300\n"
-"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
+"POT-Creation-Date: 2022-07-15 08:46+0000\n"
+"PO-Revision-Date: 2022-09-10 10:38-0300\n"
+"Last-Translator: Enrico Nicoletto <hiko@duck.com>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
-"X-Generator: Gtranslator 40.0\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Project-Style: gnome\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
@@ -34,51 +34,51 @@ msgstr "Web services do Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acessar servidores Exchange usando Web services"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2896
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
 msgid "Fetching contact photos…"
 msgstr "Obtendo fotos de contatos…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4089
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
 msgid "Failed to update GAL:"
 msgstr "Falha ao atualizar GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4254
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Não foi possível salvar a lista de contatos, pois ela tem suporte apenas em "
 "servidor EWS 2010 ou posterior"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4352
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
 msgid "Failed to set contact photo:"
 msgstr "Falha ao definir a foto de contato:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Livre"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fora do escritório"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Tentativa"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2624
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2898
 msgid "Cannot determine EWS ItemId"
 msgstr "Não foi possível determinar ItemId de EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3197
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -86,12 +86,31 @@ msgstr ""
 "Não foi possível criar reuniões organizadas por outros usuários em um "
 "calendário de Web Services do Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3234
+msgid "Online meeting can be created only in the main user Calendar."
+msgstr "Reunião online somente pode ser criada no calendário principal do usuário."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3948
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Não foi possível localizar o usuário “%s” entre os participantes"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2103
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:40
+msgid ""
+"Cannot connect to the server, repeat the action once you login to the server."
+msgstr ""
+"Não foi possível conectar ao servidor, repita a ação assim que iniciar a "
+"sessão nele."
+
+#. Translators: The '%s' is replaced with a UID of the collection source
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
+#, c-format
+msgid "Cannot find Microsoft365 helper source for calendar “%s”"
+msgstr ""
+"Não foi possível localizar a fonte do helper do Microsoft365 para o calendário "
+"“%s”"
+
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2088
 msgid "Invalid occurrence ID"
 msgstr "ID de ocorrência inválida"
 
@@ -305,7 +324,7 @@ msgid "Updating foreign folders"
 msgstr "Atualizando pastas externas"
 
 #: ../src/EWS/camel/camel-ews-store.c:2345
-#: ../src/Microsoft365/camel/camel-m365-store.c:628
+#: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Pasta inexistente: %s"
@@ -319,7 +338,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Não foi possível encontrar nenhuma pasta EWS pública"
 
 #: ../src/EWS/camel/camel-ews-store.c:2878
-#: ../src/Microsoft365/camel/camel-m365-store.c:691
+#: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Não foi possível criar a pasta “%s”, pois ela já existe"
@@ -345,7 +364,7 @@ msgstr ""
 "pastas públicas"
 
 #: ../src/EWS/camel/camel-ews-store.c:3020
-#: ../src/Microsoft365/camel/camel-m365-store.c:879
+#: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "A pasta não existe"
@@ -406,13 +425,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Serviço Exchange para %s em %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3402
-#: ../src/Microsoft365/camel/camel-m365-store.c:1453
+#: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Não foi possível localizar a pasta Lixeira"
 
 #: ../src/EWS/camel/camel-ews-store.c:3462
-#: ../src/Microsoft365/camel/camel-m365-store.c:1511
+#: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Não foi possível localizar a pasta Lixo eletrônico"
@@ -444,8 +463,8 @@ msgstr ""
 "desconectado"
 
 #: ../src/EWS/camel/camel-ews-store.c:3882
-#: ../src/Microsoft365/camel/camel-m365-store.c:1771
-#: ../src/Microsoft365/camel/camel-m365-store.c:1784
+#: ../src/Microsoft365/camel/camel-m365-store.c:1772
+#: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Você precisa estar trabalhando online para completar essa operação"
@@ -466,7 +485,6 @@ msgstr "Pastas públicas"
 #: ../src/EWS/camel/camel-ews-transport.c:173
 #: ../src/Microsoft365/camel/camel-m365-transport.c:172
 #, c-format
-#| msgid "Malformed URI: “%s”"
 msgid "Invalid folder URI “%s”"
 msgstr "URI de pasta inválida: “%s”"
 
@@ -518,25 +536,17 @@ msgstr ""
 "Não foi possível armazenar essa recorrência. Altere-a para recorrência "
 "simples diária, semanal, mensal ou anual sem exceções e com data de início."
 
-#: ../src/EWS/common/e-ews-camel-common.c:388
+#: ../src/EWS/common/e-ews-camel-common.c:387
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A chamada CreateItem não retornou o ID para a mensagem nova"
 
-#: ../src/EWS/common/e-ews-connection.c:828
-msgid "Operation Cancelled"
-msgstr "Operação cancelada"
-
-#: ../src/EWS/common/e-ews-connection.c:1001
-msgid "Authentication failed"
-msgstr "Falha na autenticação"
-
-#: ../src/EWS/common/e-ews-connection.c:1028
+#: ../src/EWS/common/e-ews-connection.c:324
 #, c-format
 msgid "No response: %s"
 msgstr "Sem reposta: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1096
+#: ../src/EWS/common/e-ews-connection.c:487
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -547,7 +557,7 @@ msgstr[1] ""
 "O servidor Exchange está ocupado, aguardando para tentar novamente (%d:%02d "
 "minutos)"
 
-#: ../src/EWS/common/e-ews-connection.c:1102
+#: ../src/EWS/common/e-ews-connection.c:493
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -558,73 +568,70 @@ msgstr[1] ""
 "O servidor Exchange está ocupado, aguardando para tentar novamente (%d "
 "segundos)"
 
-#: ../src/EWS/common/e-ews-connection.c:3238
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:622
+msgid "Authentication failed"
+msgstr "Falha na autenticação"
+
+#: ../src/EWS/common/e-ews-connection.c:2350
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falha ao analisar XML de resposta da descoberta automática"
 
-#: ../src/EWS/common/e-ews-connection.c:3245
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2356
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falha ao localizar o elemento <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:3256
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2366
 msgid "Failed to find <Response> element"
 msgstr "Falha ao localizar o elemento <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:3267
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2376
 msgid "Failed to find <Account> element"
 msgstr "Falha ao localizar o elemento <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:3313
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2421
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Falha ao localizar <ASUrl> na resposta da descoberta automática"
 
-#: ../src/EWS/common/e-ews-connection.c:3499
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "URL cannot be NULL"
 msgstr "A URL não pode ser NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3507
-#, c-format
-msgid "URL “%s” is not valid"
-msgstr "A URL “%s” não é válida"
-
-#: ../src/EWS/common/e-ews-connection.c:3806
+#: ../src/EWS/common/e-ews-connection.c:2915
 msgid "Email address is missing a domain part"
 msgstr "O endereço de e-mail está sem a parte de domínio"
 
-#: ../src/EWS/common/e-ews-connection.c:4115
+#: ../src/EWS/common/e-ews-connection.c:3124
 msgid "Failed to parse oab XML"
 msgstr "Falha ao analisar o XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:4123
+#: ../src/EWS/common/e-ews-connection.c:3162
 msgid "Failed to find <OAB> element\n"
 msgstr "O elemento <OAB> não foi encontrado\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5412
-msgid "No items found"
-msgstr "Nenhum item encontrado"
+#: ../src/EWS/common/e-ews-connection.c:8685
+msgid "Requires at least Microsoft Exchange 2010 SP1 server"
+msgstr "Requer pelo menos o servidor Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:11883
+#: ../src/EWS/common/e-ews-connection.c:8786
+msgid "Requires at least Microsoft Exchange 2013 server"
+msgstr "Requer pelo menos o servidor Microsoft Exchange 2013"
+
+#: ../src/EWS/common/e-ews-connection.c:8939
+msgid "Requires at least Microsoft Exchange 2010 server"
+msgstr "Requer pelo menos o servidor Microsoft Exchange 2010"
+
+#: ../src/EWS/common/e-ews-connection.c:9079
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Requer pelo menos o servidor Microsoft Exchange 2007 SP1"
 
-#: ../src/EWS/common/e-ews-connection-utils.c:185
+#: ../src/EWS/common/e-ews-connection-utils.c:206
 #, c-format
 msgid "Password expired. Change password at “%s”."
 msgstr "Senha expirada. Altere a senha em “%s”."
 
-#: ../src/EWS/common/e-ews-connection-utils.c:188
+#: ../src/EWS/common/e-ews-connection-utils.c:209
 msgid "Password expired."
 msgstr "Senha expirada."
-
-#: ../src/EWS/common/e-ews-connection-utils.c:422
-#: ../src/Microsoft365/common/e-m365-connection.c:237
-msgid "Unknown error"
-msgstr "Erro desconhecido"
 
 #: ../src/EWS/common/e-ews-folder.c:781
 msgid "Cannot add folder, unsupported folder type"
@@ -667,6 +674,14 @@ msgstr "_Obter fotos de contato"
 #: ../src/EWS/evolution/e-book-config-ews.c:102
 msgid "Tries to look up for user photo"
 msgstr "Tenta procurar por foto do usuário"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+msgid "Online Meeting"
+msgstr "Reunião online"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+msgid "Create the meeting as an online meeting in the main user calendar"
+msgstr "Cria a reunião como online no calendário principal do usuário"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
@@ -1134,11 +1149,11 @@ msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:267
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:261
 msgid "Querying Autodiscover service"
 msgstr "Consultando o serviço de descoberta automática"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:360
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:354
 msgid "Fetch _URL"
 msgstr "Buscar _URL"
 
@@ -1354,7 +1369,7 @@ msgid "Retrieving current user permissions, please wait…"
 msgstr "Obtendo as permissões de usuário, por favor aguarde…"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1001
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1623
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1548
 msgid "Delegates"
 msgstr "Representantes"
 
@@ -1395,7 +1410,7 @@ msgstr "Somente meus _representantes"
 msgid "My delegates a_nd me"
 msgstr "Meus representantes e e_u"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1695
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1620
 msgid "Retrieving “Delegates” settings"
 msgstr "Obtendo configurações de “Representantes”"
 
@@ -1435,7 +1450,7 @@ msgid "Locating offline address books"
 msgstr "Localizando o catálogo de endereços offline"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:546
+#: ../src/EWS/registry/e-ews-backend.c:552
 msgid "Global Address List"
 msgstr "Lista de endereços global"
 
@@ -1591,22 +1606,22 @@ msgstr "Foi realizada a inscrição na pasta."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Foi realizada com sucesso a inscrição na pasta do usuário \"{0}\"."
 
-#: ../src/EWS/registry/e-ews-backend.c:1000
-#: ../src/Microsoft365/registry/e-m365-backend.c:689
+#: ../src/EWS/registry/e-ews-backend.c:1094
+#: ../src/Microsoft365/registry/e-m365-backend.c:696
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Não foi possível determinar uma classe de pasta apropriada para uma nova "
 "pasta chamada “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1089
+#: ../src/EWS/registry/e-ews-backend.c:1183
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
 "Fonte de dados “%s” não representa uma pasta de Web Services do Exchange"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
 msgid "Folder ID is not set"
 msgstr "O ID da pasta não foi definido"
 
@@ -1616,11 +1631,22 @@ msgstr ""
 "Não é possível salvar o lista de contatos no catálogo de endereços do "
 "Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr ""
+"Apenas eventos simples podem ser armazenados no calendário do Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr ""
+"Apenas tarefas simples podem ser armazenados na pasta de tarefas do "
+"Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "O calendário do Microsoft 365 não armazena mais que uma recorrência"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1672
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1628,48 +1654,37 @@ msgstr ""
 "O calendário do Microsoft 365 não armazena componentes com propriedades "
 "RDATE, EXDATE ou RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Frequência de recorrência desconhecida (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1927
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "O calendário do Microsoft 365 não armazena mais que um lembrete de evento"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Evento do Microsoft 365 só pode ter um lembrete antes do evento começar"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Tarefa do Microsoft 365 só pode ter um lembrete com hora absoluta"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Não é possível armazenar anexo com URI “%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
 msgid "Failed to read attachment URI"
 msgstr "Não foi possível ler o anexo URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
 msgid "Failed to get inline attachment data"
 msgstr "Falha ao obter informação do anexo na linha"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
-msgid "Can store only simple events into Microsoft 365 calendar"
-msgstr ""
-"Apenas eventos simples podem ser armazenados no calendário do Microsoft 365"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3226
-msgid "Can store only simple tasks into Microsoft 365 task folder"
-msgstr ""
-"Apenas tarefas simples podem ser armazenados na pasta de tarefas do "
-"Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
 #: ../src/Microsoft365/camel/camel-m365-folder.c:610
@@ -1717,31 +1732,31 @@ msgid "Mail receive via Microsoft 365"
 msgstr "E-mail recebido via Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1527
+#: ../src/Microsoft365/common/e-m365-connection.c:1241
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "URI mal formado: “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:531
+#: ../src/Microsoft365/camel/camel-m365-store.c:532
 msgid "Look up Microsoft 365 categories"
 msgstr "Procurar categorias do Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:540
+#: ../src/Microsoft365/camel/camel-m365-store.c:541
 #: ../src/Microsoft365/camel/camel-m365-transport.c:330
 msgid "Failed to create connection"
 msgstr "Falha ao criar conexão"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:705
+#: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "A pasta pai “%s” não existe"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:892
+#: ../src/Microsoft365/camel/camel-m365-store.c:893
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Não é possível encontrar a pasta “Itens excluídos”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:983
-#: ../src/Microsoft365/camel/camel-m365-store.c:1021
+#: ../src/Microsoft365/camel/camel-m365-store.c:984
+#: ../src/Microsoft365/camel/camel-m365-store.c:1022
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "A pasta “%s” não existe"
@@ -1774,7 +1789,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1181
+#: ../src/Microsoft365/common/e-m365-connection.c:885
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1785,7 +1800,7 @@ msgstr[1] ""
 "O servidor Microsoft 365 está ocupado, aguardando para tentar novamente (%d:"
 "%02d minutos)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1187
+#: ../src/Microsoft365/common/e-m365-connection.c:891
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1796,7 +1811,16 @@ msgstr[1] ""
 "O servidor Microsoft 365 está ocupado, aguardando para tentar novamente (%d "
 "segundos)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:2043
+#: ../src/Microsoft365/common/e-m365-connection.c:1016
+#: ../src/Microsoft365/common/e-m365-connection.c:1043
+msgid "Invalid data"
+msgstr "Dados inválidos"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1041
+msgid "Operation was cancelled"
+msgstr "Operação cancelada"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1719
 msgid "Failed to parse own Json data"
 msgstr "Falha ao analisar a própria informação Json"
 
@@ -1823,7 +1847,7 @@ msgstr "Locatário padrão é “%s”"
 msgid "_Redirect URI:"
 msgstr "URI de _redirecionamento:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:780
+#: ../src/Microsoft365/registry/e-m365-backend.c:787
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Fonte de dados “%s” não representa uma pasta do Microsoft 365"
