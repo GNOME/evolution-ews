@@ -28,6 +28,7 @@
 #include "e-ews-photo-source.h"
 
 #include "e-ews-comp-editor-extension.h"
+#include "e-ews-composer-extension.h"
 #include "e-ews-config-ui-extension.h"
 #include "common/camel-sasl-xoauth2-office365.h"
 #include "common/e-oauth2-service-office365.h"
@@ -59,6 +60,7 @@ e_module_load (GTypeModule *type_module)
 	e_mail_parser_ews_sharing_metadata_type_register (type_module);
 	e_mail_part_ews_sharing_metadata_type_register (type_module);
 	e_ews_comp_editor_extension_type_register (type_module);
+	e_ews_composer_extension_type_register (type_module);
 	e_ews_config_lookup_type_register (type_module);
 	e_ews_config_ui_extension_type_register (type_module);
 	e_ews_ooo_notificator_type_register (type_module);

@@ -37,6 +37,8 @@ set(sources
 	e-mail-part-ews-sharing-metadata.h
 	e-ews-comp-editor-extension.c
 	e-ews-comp-editor-extension.h
+	e-ews-composer-extension.c
+	e-ews-composer-extension.h
 	e-ews-config-lookup.c
 	e-ews-config-lookup.h
 	e-ews-config-ui-extension.c

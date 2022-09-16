@@ -30,6 +30,53 @@ typedef struct _EEwsCompEditorExtensionClass {
 G_DEFINE_DYNAMIC_TYPE (EEwsCompEditorExtension, e_ews_comp_editor_extension, E_TYPE_EXTENSION)
 
 static void
+e_ews_comp_editor_extension_target_client_changed_cb (ECompEditor *comp_editor)
+{
+	ECalClient *target_client;
+	ECompEditorPropertyPart *part;
+	gboolean can_use;
+
+	target_client = e_comp_editor_get_target_client (comp_editor);
+
+	can_use = target_client != NULL;
+
+	if (can_use) {
+		ESource *source;
+
+		source = e_client_get_source (E_CLIENT (target_client));
+
+		#define check_is_ews_backend(ext) (e_source_has_extension (source, ext) && \
+			g_strcmp0 (e_source_backend_get_backend_name (e_source_get_extension (source, ext)), "ews") == 0)
+
+		can_use = source && (
+			check_is_ews_backend (E_SOURCE_EXTENSION_CALENDAR) ||
+			check_is_ews_backend (E_SOURCE_EXTENSION_MEMO_LIST) ||
+			check_is_ews_backend (E_SOURCE_EXTENSION_TASK_LIST));
+
+		#undef check_is_ews_backend
+	}
+
+	/* These two have limited length on the EWS server */
+	part = e_comp_editor_get_property_part (comp_editor, I_CAL_SUMMARY_PROPERTY);
+	if (part) {
+		GtkWidget *edit_widget;
+
+		edit_widget = e_comp_editor_property_part_get_edit_widget (part);
+		if (GTK_IS_ENTRY (edit_widget))
+			gtk_entry_set_max_length (GTK_ENTRY (edit_widget), can_use ? 255 : 0);
+	}
+
+	part = e_comp_editor_get_property_part (comp_editor, I_CAL_LOCATION_PROPERTY);
+	if (part) {
+		GtkWidget *edit_widget;
+
+		edit_widget = e_comp_editor_property_part_get_edit_widget (part);
+		if (GTK_IS_ENTRY (edit_widget))
+			gtk_entry_set_max_length (GTK_ENTRY (edit_widget), can_use ? 255 : 0);
+	}
+}
+
+static void
 e_ews_comp_editor_extension_update_actions (ECompEditor *comp_editor)
 {
 	GtkAction *action;
@@ -241,6 +288,9 @@ e_ews_comp_editor_extension_constructed (GObject *object)
 		g_signal_connect (comp_editor, "fill-component",
 			G_CALLBACK (e_ews_comp_editor_extension_fill_component_cb), NULL);
 	}
+
+	g_signal_connect (extensible, "notify::target-client",
+		G_CALLBACK (e_ews_comp_editor_extension_target_client_changed_cb), NULL);
 }
 
 static void
