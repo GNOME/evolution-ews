@@ -4546,7 +4546,7 @@ ebb_ews_get_destination_address (EBackend *backend,
 	uri = g_uri_parse (host_url, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
 	if (uri) {
 		*host = g_strdup (g_uri_get_host (uri));
-		*port = g_uri_get_port (uri);
+		*port = g_uri_get_port (uri) > 0 ? g_uri_get_port (uri) : 0;
 
 		result = *host && **host;
 		if (!result) {

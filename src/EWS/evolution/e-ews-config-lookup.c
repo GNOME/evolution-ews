@@ -253,7 +253,7 @@ ews_config_lookup_worker_result_from_data (EConfigLookup *config_lookup,
 				"host", g_uri_get_host (uri));
 		}
 
-		if (uri && g_uri_get_port (uri)) {
+		if (uri && g_uri_get_port (uri) > 0) {
 			e_config_lookup_result_simple_add_uint (lookup_result,
 				E_SOURCE_EXTENSION_AUTHENTICATION,
 				"port", g_uri_get_port (uri));
