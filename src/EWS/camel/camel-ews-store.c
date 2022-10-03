@@ -3688,13 +3688,24 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 	}
 
 	fid = e_ews_folder_get_id (folder);
-
-	g_return_val_if_fail (fid != NULL, FALSE);
+	if (!fid) {
+		g_mutex_unlock (&ews_store->priv->get_finfo_lock);
+		g_set_error (
+			error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+			_("Cannot subscribe folder “%s”, folder ID not found"), folder_name);
+		return FALSE;
+	}
 
 	if (camel_ews_store_summary_has_folder (ews_store->summary, EWS_PUBLIC_FOLDER_ROOT_ID)) {
 		gchar *parent_name = camel_ews_store_summary_get_folder_name (ews_store->summary, EWS_PUBLIC_FOLDER_ROOT_ID, NULL);
 
-		g_return_val_if_fail (parent_name != NULL, FALSE);
+		if (!parent_name) {
+			g_mutex_unlock (&ews_store->priv->get_finfo_lock);
+			g_set_error (
+				error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+				_("Cannot subscribe folder “%s”, public folder root not found"), folder_name);
+			return FALSE;
+		}
 
 		tmp = g_strconcat (parent_name, "/", e_ews_folder_get_escaped_name (folder), NULL);
 		g_free (parent_name);
