@@ -507,7 +507,7 @@ ecb_m365_get_subject (EM365Connection *cnc,
 		subject = e_m365_event_get_subject (m365_object);
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		subject = e_m365_task_get_subject (m365_object);
+		subject = e_m365_task_get_title (m365_object);
 		break;
 	default:
 		g_warn_if_reached ();
@@ -539,7 +539,7 @@ ecb_m365_add_subject (EM365Connection *cnc,
 			e_m365_event_add_subject (builder, new_value ? new_value : "");
 			break;
 		case I_CAL_VTODO_COMPONENT:
-			e_m365_task_add_subject (builder, new_value ? new_value : "");
+			e_m365_task_add_title (builder, new_value ? new_value : "");
 			break;
 		default:
 			g_warn_if_reached ();
@@ -627,8 +627,7 @@ ecb_m365_get_sensitivity (EM365Connection *cnc,
 		value = e_m365_event_get_sensitivity (m365_object);
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		value = e_m365_task_get_sensitivity (m365_object);
-		break;
+		return;
 	default:
 		g_warn_if_reached ();
 		return;
@@ -657,6 +656,9 @@ ecb_m365_add_sensitivity (EM365Connection *cnc,
 {
 	ICalProperty_Class new_value = I_CAL_CLASS_NONE, old_value = I_CAL_CLASS_NONE;
 	ICalProperty *prop;
+
+	if (i_cal_component_isa (new_comp) == I_CAL_VTODO_COMPONENT)
+		return;
 
 	prop = i_cal_component_get_first_property (new_comp, prop_kind);
 
@@ -687,7 +689,6 @@ ecb_m365_add_sensitivity (EM365Connection *cnc,
 			e_m365_event_add_sensitivity (builder, value);
 			break;
 		case I_CAL_VTODO_COMPONENT:
-			e_m365_task_add_sensitivity (builder, value);
 			break;
 		default:
 			g_warn_if_reached ();
@@ -1862,8 +1863,8 @@ ecb_m365_get_reminder (EM365Connection *cnc,
 
 				alarm = e_cal_component_alarm_new ();
 				e_cal_component_alarm_set_action (alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
-				e_cal_component_alarm_take_summary (alarm, e_cal_component_text_new (e_m365_task_get_subject (m365_object), NULL));
-				e_cal_component_alarm_take_description (alarm, e_cal_component_text_new (e_m365_task_get_subject (m365_object), NULL));
+				e_cal_component_alarm_take_summary (alarm, e_cal_component_text_new (e_m365_task_get_title (m365_object), NULL));
+				e_cal_component_alarm_take_description (alarm, e_cal_component_text_new (e_m365_task_get_title (m365_object), NULL));
 				e_cal_component_alarm_take_trigger (alarm, trigger);
 
 				i_cal_component_take_component (inout_comp, e_cal_component_alarm_get_as_component (alarm));
@@ -2091,17 +2092,7 @@ ecb_m365_get_attachments (EM365Connection *cnc,
 		}
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		if (!e_m365_task_get_has_attachments (m365_object))
-			return TRUE;
-
-		id = e_m365_task_get_id (m365_object);
-
-		if (!e_m365_connection_list_task_attachments_sync (cnc, NULL,
-			group_id, folder_id, id, "id,name,contentType,contentBytes",
-			&attachments, cancellable, error)) {
-			return FALSE;
-		}
-		break;
+		return TRUE;
 	default:
 		g_warn_if_reached ();
 		return FALSE;
@@ -2276,9 +2267,11 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 		delete_attachment_func = e_m365_connection_delete_event_attachment_sync;
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		add_attachment_func = e_m365_connection_add_task_attachment_sync;
-		delete_attachment_func = e_m365_connection_delete_task_attachment_sync;
-		break;
+		if (!e_cal_util_component_has_property (new_comp, I_CAL_ATTACH_PROPERTY))
+			return TRUE;
+		g_set_error (error, E_CLIENT_ERROR, E_CLIENT_ERROR_NOT_SUPPORTED,
+			_("Microsoft 365 task cannot have attachments."));
+		return FALSE;
 	default:
 		g_warn_if_reached ();
 		return FALSE;

@@ -253,6 +253,13 @@ static MapData week_index_map[] = {
 	{ "last",	E_M365_WEEK_INDEX_LAST }
 };
 
+static MapData task_list_kind_map[] = {
+	{ "none",		E_M365_TASK_LIST_KIND_NONE },
+	{ "defaultList",	E_M365_TASK_LIST_KIND_DEFAULT_LIST },
+	{ "flaggedEmails",	E_M365_TASK_LIST_KIND_FLAGGED_EMAILS },
+	{ "unknownFutureValue",	E_M365_TASK_LIST_KIND_UNKNOWN_FUTURE_VALUE }
+};
+
 const gchar *
 e_m365_calendar_color_to_rgb (EM365CalendarColorType color)
 {
@@ -3570,71 +3577,49 @@ e_m365_schedule_information_get_working_hours (EM365ScheduleInformation *schinfo
 	return e_m365_json_get_object_member (schinfo, "workingHours");
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/resources/outlooktaskfolder?view=graph-rest-beta */
+/* https://learn.microsoft.com/en-us/graph/api/resources/todotasklist?view=graph-rest-1.0 */
 
 const gchar *
-e_m365_task_folder_get_id (EM365TaskFolder *folder)
+e_m365_task_list_get_id (EM365TaskList *list)
 {
-	return e_m365_json_get_string_member (folder, "id", NULL);
+	return e_m365_json_get_string_member (list, "id", NULL);
 }
 
 const gchar *
-e_m365_task_folder_get_change_key (EM365TaskFolder *folder)
+e_m365_task_list_get_display_name (EM365TaskList *list)
 {
-	return e_m365_json_get_string_member (folder, "changeKey", NULL);
+	return e_m365_json_get_string_member (list, "displayName", NULL);
 }
 
-const gchar *
-e_m365_task_folder_get_parent_group_key (EM365TaskFolder *folder)
+void
+e_m365_task_list_add_display_name (JsonBuilder *builder,
+				   const gchar *display_name)
 {
-	return e_m365_json_get_string_member (folder, "parentGroupKey", NULL);
-}
-
-const gchar *
-e_m365_task_folder_get_name (EM365TaskFolder *folder)
-{
-	return e_m365_json_get_string_member (folder, "name", NULL);
+	e_m365_json_add_string_member (builder, "displayName", display_name);
 }
 
 gboolean
-e_m365_task_folder_get_is_default_folder (EM365TaskFolder *folder)
+e_m365_task_list_get_is_owner (EM365TaskList *list)
 {
-	return e_m365_json_get_boolean_member (folder, "isDefaultFolder", FALSE);
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/resources/outlooktaskgroup?view=graph-rest-beta */
-
-const gchar *
-e_m365_task_group_get_id (EM365TaskGroup *group)
-{
-	return e_m365_json_get_string_member (group, "id", NULL);
-}
-
-const gchar *
-e_m365_task_group_get_change_key (EM365TaskGroup *group)
-{
-	return e_m365_json_get_string_member (group, "changeKey", NULL);
-}
-
-const gchar *
-e_m365_task_group_get_group_key (EM365TaskGroup *group)
-{
-	return e_m365_json_get_string_member (group, "groupKey", NULL);
-}
-
-const gchar *
-e_m365_task_group_get_name (EM365TaskGroup *group)
-{
-	return e_m365_json_get_string_member (group, "name", NULL);
+	return e_m365_json_get_boolean_member (list, "isOwner", FALSE);
 }
 
 gboolean
-e_m365_task_group_get_is_default_group (EM365TaskGroup *group)
+e_m365_task_list_get_is_shared (EM365TaskList *list)
 {
-	return e_m365_json_get_boolean_member (group, "isDefaultGroup", FALSE);
+	return e_m365_json_get_boolean_member (list, "isShared", FALSE);
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/resources/outlooktask?view=graph-rest-beta */
+EM365TaskListKind
+e_m365_task_list_get_kind (EM365TaskList *list)
+{
+	return m365_json_utils_get_json_as_enum (list, "wellknownListName",
+		task_list_kind_map, G_N_ELEMENTS (task_list_kind_map),
+		E_M365_TASK_LIST_KIND_NOT_SET,
+		E_M365_TASK_LIST_KIND_UNKNOWN);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/todotask?view=graph-rest-1.0 */
 
 const gchar *
 e_m365_task_get_id (EM365Task *task)
@@ -3642,22 +3627,11 @@ e_m365_task_get_id (EM365Task *task)
 	return e_m365_json_get_string_member (task, "id", NULL);
 }
 
-const gchar *
-e_m365_task_get_change_key (EM365Task *task)
+void
+e_m365_task_add_id (JsonBuilder *builder,
+		    const gchar *value)
 {
-	return e_m365_json_get_string_member (task, "changeKey", NULL);
-}
-
-const gchar *
-e_m365_task_get_parent_folder_id (EM365Task *task)
-{
-	return e_m365_json_get_string_member (task, "parentFolderId", NULL);
-}
-
-const gchar *
-e_m365_task_get_assigned_to (EM365Task *task)
-{
-	return e_m365_json_get_string_member (task, "assignedTo", NULL);
+	e_m365_json_add_string_member (builder, "id", value);
 }
 
 EM365ItemBody *
@@ -3672,6 +3646,19 @@ e_m365_task_add_body (JsonBuilder *builder,
 		      const gchar *content)
 {
 	e_m365_add_item_body (builder, "body", content_type, content);
+}
+
+time_t
+e_m365_task_get_body_last_modified_date_time (EM365Task *task)
+{
+	return e_m365_get_date_time_offset_member (task, "bodyLastModifiedDateTime", NULL);
+}
+
+void
+e_m365_task_add_boady_last_modified_date_time (JsonBuilder *builder,
+					       time_t value)
+{
+	return e_m365_add_date_time_offset_member (builder, "bodyLastModifiedDateTime", value);
 }
 
 JsonArray * /* const gchar * */
@@ -3721,6 +3708,13 @@ e_m365_task_get_created_date_time (EM365Task *task)
 	return e_m365_get_date_time_offset_member (task, "createdDateTime", NULL);
 }
 
+void
+e_m365_task_add_created_date_time (JsonBuilder *builder,
+				   time_t value)
+{
+	return e_m365_add_date_time_offset_member (builder, "createdDateTime", value);
+}
+
 EM365DateTimeWithZone *
 e_m365_task_get_due_date_time (EM365Task *task)
 {
@@ -3733,12 +3727,6 @@ e_m365_task_add_due_date_time (JsonBuilder *builder,
 			       const gchar *zone)
 {
 	e_m365_add_date_time (builder, "dueDateTime", date_time, zone);
-}
-
-gboolean
-e_m365_task_get_has_attachments (EM365Task *task)
-{
-	return e_m365_json_get_boolean_member (task, "hasAttachments", FALSE);
 }
 
 EM365ImportanceType
@@ -3780,16 +3768,16 @@ e_m365_task_get_last_modified_date_time (EM365Task *task)
 }
 
 const gchar *
-e_m365_task_get_owner (EM365Task *task)
+e_m365_task_get_last_modified_as_string (EM365Task *task)
 {
-	return e_m365_json_get_string_member (task, "owner", NULL);
+	return e_m365_json_get_string_member (task, "lastModifiedDateTime", NULL);
 }
 
 void
-e_m365_task_add_owner (JsonBuilder *builder,
-		       const gchar *value)
+e_m365_task_add_last_modified_date_time (JsonBuilder *builder,
+					 time_t value)
 {
-	e_m365_json_add_string_member (builder, "owner", value);
+	return e_m365_add_date_time_offset_member (builder, "lastModifiedDateTime", value);
 }
 
 EM365PatternedRecurrence *
@@ -3830,23 +3818,13 @@ e_m365_task_add_reminder_date_time (JsonBuilder *builder,
 	e_m365_add_date_time (builder, "reminderDateTime", date_time, zone);
 }
 
-EM365SensitivityType
-e_m365_task_get_sensitivity (EM365Task *task)
+EM365StatusType
+e_m365_task_get_status (EM365Task *task)
 {
-	return m365_json_utils_get_json_as_enum (task, "sensitivity",
-		sensitivity_map, G_N_ELEMENTS (sensitivity_map),
-		E_M365_SENSITIVITY_NOT_SET,
-		E_M365_SENSITIVITY_UNKNOWN);
-}
-
-void
-e_m365_task_add_sensitivity (JsonBuilder *builder,
-			     EM365SensitivityType value)
-{
-	m365_json_utils_add_enum_as_json (builder, "sensitivity", value,
-		sensitivity_map, G_N_ELEMENTS (sensitivity_map),
-		E_M365_SENSITIVITY_NOT_SET,
-		E_M365_SENSITIVITY_UNKNOWN);
+	return m365_json_utils_get_json_as_enum (task, "status",
+		status_map, G_N_ELEMENTS (status_map),
+		E_M365_STATUS_NOT_SET,
+		E_M365_STATUS_UNKNOWN);
 }
 
 EM365DateTimeWithZone *
@@ -3863,15 +3841,6 @@ e_m365_task_add_start_date_time (JsonBuilder *builder,
 	e_m365_add_date_time (builder, "startDateTime", date_time, zone);
 }
 
-EM365StatusType
-e_m365_task_get_status (EM365Task *task)
-{
-	return m365_json_utils_get_json_as_enum (task, "status",
-		status_map, G_N_ELEMENTS (status_map),
-		E_M365_STATUS_NOT_SET,
-		E_M365_STATUS_UNKNOWN);
-}
-
 void
 e_m365_task_add_status (JsonBuilder *builder,
 			EM365StatusType value)
@@ -3883,14 +3852,134 @@ e_m365_task_add_status (JsonBuilder *builder,
 }
 
 const gchar *
-e_m365_task_get_subject (EM365Task *task)
+e_m365_task_get_title (EM365Task *task)
 {
-	return e_m365_json_get_string_member (task, "subject", NULL);
+	return e_m365_json_get_string_member (task, "title", NULL);
 }
 
 void
-e_m365_task_add_subject (JsonBuilder *builder,
-			 const gchar *value)
+e_m365_task_add_title (JsonBuilder *builder,
+		       const gchar *value)
 {
-	e_m365_json_add_string_member (builder, "subject", value);
+	e_m365_json_add_string_member (builder, "title", value);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/checklistitem?view=graph-rest-1.0 */
+
+const gchar *
+e_m365_checklist_item_get_id (EM365ChecklistItem *item)
+{
+	return e_m365_json_get_string_member (item, "id", NULL);
+}
+
+time_t
+e_m365_checklist_item_get_checked_date_time (EM365ChecklistItem *item)
+{
+	return e_m365_get_date_time_offset_member (item, "checkedDateTime", NULL);
+}
+
+void
+e_m365_checklist_item_add_checked_date_time (JsonBuilder *builder,
+					     time_t value)
+{
+	e_m365_add_date_time_offset_member (builder, "checkedDateTime", value);
+}
+
+time_t
+e_m365_checklist_item_get_created_date_time (EM365ChecklistItem *item)
+{
+	return e_m365_get_date_time_offset_member (item, "createdDateTime", NULL);
+}
+
+void
+e_m365_checklist_item_add_created_date_time (JsonBuilder *builder,
+					     time_t value)
+{
+	e_m365_add_date_time_offset_member (builder, "createdDateTime", value);
+}
+
+const gchar *
+e_m365_checklist_item_get_display_name (EM365ChecklistItem *item)
+{
+	return e_m365_json_get_string_member (item, "displayName", NULL);
+}
+
+void
+e_m365_checklist_item_add_display_name (JsonBuilder *builder,
+					const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "displayName", value);
+}
+
+gboolean
+e_m365_checklist_item_get_is_checked (EM365ChecklistItem *item)
+{
+	return e_m365_json_get_boolean_member (item, "isChecked", FALSE);
+}
+
+void
+e_m365_checklist_item_add_is_checked (JsonBuilder *builder,
+				      gboolean value)
+{
+	e_m365_json_add_boolean_member (builder, "isChecked", value);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/linkedresource?view=graph-rest-1.0 */
+
+const gchar *
+e_m365_linked_resource_get_id (EM365LinkedResource *resource)
+{
+	return e_m365_json_get_string_member (resource, "id", NULL);
+}
+
+const gchar *
+e_m365_linked_resource_get_application_name (EM365LinkedResource *resource)
+{
+	return e_m365_json_get_string_member (resource, "applicationName", NULL);
+}
+
+void
+e_m365_linked_resource_add_application_name (JsonBuilder *builder,
+					     const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "applicationName", value);
+}
+
+const gchar *
+e_m365_linked_resource_get_display_name (EM365LinkedResource *resource)
+{
+	return e_m365_json_get_string_member (resource, "displayName", NULL);
+}
+
+void
+e_m365_linked_resource_add_display_name (JsonBuilder *builder,
+					 const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "displayName", value);
+}
+
+const gchar *
+e_m365_linked_resource_get_external_id (EM365LinkedResource *resource)
+{
+	return e_m365_json_get_string_member (resource, "externalId", NULL);
+}
+
+void
+e_m365_linked_resource_add_external_id (JsonBuilder *builder,
+					const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "externalId", value);
+}
+
+const gchar *
+e_m365_linked_resource_get_web_url (EM365LinkedResource *resource)
+{
+	return e_m365_json_get_string_member (resource, "webUrl", NULL);
+}
+
+void
+e_m365_linked_resource_add_web_url (JsonBuilder *builder,
+				    const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "webUrl", value);
 }

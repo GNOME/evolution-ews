@@ -18,6 +18,7 @@ G_BEGIN_DECLS
 #define EM365Calendar			JsonObject
 #define EM365CalendarGroup		JsonObject
 #define EM365Category			JsonObject
+#define EM365ChecklistItem		JsonObject
 #define EM365Contact			JsonObject
 #define EM365Date			gint
 #define EM365DateTimeWithZone		JsonObject
@@ -28,6 +29,7 @@ G_BEGIN_DECLS
 #define EM365FreeBusyError		JsonObject
 #define EM365InternetMessageHeader	JsonObject
 #define EM365ItemBody			JsonObject
+#define EM365LinkedResource		JsonObject
 #define EM365Location			JsonObject
 #define EM365MailFolder			JsonObject
 #define EM365MailMessage		JsonObject
@@ -43,8 +45,7 @@ G_BEGIN_DECLS
 #define EM365ScheduleInformation	JsonObject
 #define EM365ScheduleItem		JsonObject
 #define EM365Task			JsonObject
-#define EM365TaskFolder			JsonObject
-#define EM365TaskGroup			JsonObject
+#define EM365TaskList			JsonObject
 #define EM365TimeOfDay			gint64
 #define EM365WorkingHours		JsonObject
 
@@ -237,6 +238,15 @@ typedef enum _EM365WeekIndexType {
 	E_M365_WEEK_INDEX_FOURTH,
 	E_M365_WEEK_INDEX_LAST
 } EM365WeekIndexType;
+
+typedef enum _EM365TaskListKind {
+	E_M365_TASK_LIST_KIND_NOT_SET,
+	E_M365_TASK_LIST_KIND_UNKNOWN,
+	E_M365_TASK_LIST_KIND_NONE,
+	E_M365_TASK_LIST_KIND_DEFAULT_LIST,
+	E_M365_TASK_LIST_KIND_FLAGGED_EMAILS,
+	E_M365_TASK_LIST_KIND_UNKNOWN_FUTURE_VALUE
+} EM365TaskListKind;
 
 const gchar *	e_m365_calendar_color_to_rgb		(EM365CalendarColorType color);
 EM365CalendarColorType
@@ -979,26 +989,27 @@ EM365WorkingHours *
 		e_m365_schedule_information_get_working_hours
 							(EM365ScheduleInformation *schinfo);
 
-const gchar *	e_m365_task_folder_get_id		(EM365TaskFolder *folder);
-const gchar *	e_m365_task_folder_get_change_key	(EM365TaskFolder *folder);
-const gchar *	e_m365_task_folder_get_parent_group_key	(EM365TaskFolder *folder);
-const gchar *	e_m365_task_folder_get_name		(EM365TaskFolder *folder);
-gboolean	e_m365_task_folder_get_is_default_folder(EM365TaskFolder *folder);
-
-const gchar *	e_m365_task_group_get_id		(EM365TaskGroup *group);
-const gchar *	e_m365_task_group_get_change_key	(EM365TaskGroup *group);
-const gchar *	e_m365_task_group_get_group_key		(EM365TaskGroup *group);
-const gchar *	e_m365_task_group_get_name		(EM365TaskGroup *group);
-gboolean	e_m365_task_group_get_is_default_group	(EM365TaskGroup *group);
+const gchar *	e_m365_task_list_get_id			(EM365TaskList *list);
+const gchar *	e_m365_task_list_get_display_name	(EM365TaskList *list);
+void		e_m365_task_list_add_display_name	(JsonBuilder *builder,
+							 const gchar *display_name);
+gboolean	e_m365_task_list_get_is_owner		(EM365TaskList *list);
+gboolean	e_m365_task_list_get_is_shared		(EM365TaskList *list);
+EM365TaskListKind
+		e_m365_task_list_get_kind		(EM365TaskList *list);
 
 const gchar *	e_m365_task_get_id			(EM365Task *task);
-const gchar *	e_m365_task_get_change_key		(EM365Task *task);
-const gchar *	e_m365_task_get_parent_folder_id	(EM365Task *task);
-const gchar *	e_m365_task_get_assigned_to		(EM365Task *task);
+void		e_m365_task_add_id			(JsonBuilder *builder,
+							 const gchar *value);
 EM365ItemBody *	e_m365_task_get_body			(EM365Task *task);
 void		e_m365_task_add_body			(JsonBuilder *builder,
 							 EM365ItemBodyContentTypeType content_type,
 							 const gchar *content);
+time_t		e_m365_task_get_body_last_modified_date_time
+							(EM365Task *task);
+void		e_m365_task_add_boady_last_modified_date_time
+							(JsonBuilder *builder,
+							 time_t value);
 JsonArray *	e_m365_task_get_categories		(EM365Task *task); /* const gchar * */
 void		e_m365_task_begin_categories		(JsonBuilder *builder);
 void		e_m365_task_end_categories		(JsonBuilder *builder);
@@ -1010,12 +1021,13 @@ void		e_m365_task_add_completed_date_time	(JsonBuilder *builder,
 							 time_t date_time,
 							 const gchar *zone);
 time_t		e_m365_task_get_created_date_time	(EM365Task *task);
+void		e_m365_task_add_created_date_time	(JsonBuilder *builder,
+							 time_t value);
 EM365DateTimeWithZone *
 		e_m365_task_get_due_date_time		(EM365Task *task);
 void		e_m365_task_add_due_date_time		(JsonBuilder *builder,
 							 time_t date_time,
 							 const gchar *zone);
-gboolean	e_m365_task_get_has_attachments		(EM365Task *task);
 EM365ImportanceType
 		e_m365_task_get_importance		(EM365Task *task);
 void		e_m365_task_add_importance		(JsonBuilder *builder,
@@ -1024,9 +1036,9 @@ gboolean	e_m365_task_get_is_reminder_on		(EM365Task *task);
 void		e_m365_task_add_is_reminder_on		(JsonBuilder *builder,
 							 gboolean value);
 time_t		e_m365_task_get_last_modified_date_time	(EM365Task *task);
-const gchar *	e_m365_task_get_owner			(EM365Task *task);
-void		e_m365_task_add_owner			(JsonBuilder *builder,
-							 const gchar *value);
+const gchar *	e_m365_task_get_last_modified_as_string	(EM365Task *task);
+void		e_m365_task_add_last_modified_date_time	(JsonBuilder *builder,
+							 time_t value);
 EM365PatternedRecurrence *
 		e_m365_task_get_recurrence		(EM365Task *task);
 void		e_m365_task_begin_recurrence		(JsonBuilder *builder);
@@ -1037,10 +1049,6 @@ EM365DateTimeWithZone *
 void		e_m365_task_add_reminder_date_time	(JsonBuilder *builder,
 							 time_t date_time,
 							 const gchar *zone);
-EM365SensitivityType
-		e_m365_task_get_sensitivity		(EM365Task *task);
-void		e_m365_task_add_sensitivity		(JsonBuilder *builder,
-							 EM365SensitivityType value);
 EM365DateTimeWithZone *
 		e_m365_task_get_start_date_time		(EM365Task *task);
 void		e_m365_task_add_start_date_time		(JsonBuilder *builder,
@@ -1049,8 +1057,42 @@ void		e_m365_task_add_start_date_time		(JsonBuilder *builder,
 EM365StatusType	e_m365_task_get_status			(EM365Task *task);
 void		e_m365_task_add_status			(JsonBuilder *builder,
 							 EM365StatusType value);
-const gchar *	e_m365_task_get_subject			(EM365Task *task);
-void		e_m365_task_add_subject			(JsonBuilder *builder,
+const gchar *	e_m365_task_get_title			(EM365Task *task);
+void		e_m365_task_add_title			(JsonBuilder *builder,
+							 const gchar *value);
+
+const gchar *	e_m365_checklist_item_get_id		(EM365ChecklistItem *item);
+time_t		e_m365_checklist_item_get_checked_date_time
+							(EM365ChecklistItem *item);
+void		e_m365_checklist_item_add_checked_date_time
+							(JsonBuilder *builder,
+							 time_t value);
+time_t		e_m365_checklist_item_get_created_date_time
+							(EM365ChecklistItem *item);
+void		e_m365_checklist_item_add_created_date_time
+							(JsonBuilder *builder,
+							 time_t value);
+const gchar *	e_m365_checklist_item_get_display_name	(EM365ChecklistItem *item);
+void		e_m365_checklist_item_add_display_name	(JsonBuilder *builder,
+							 const gchar *value);
+gboolean	e_m365_checklist_item_get_is_checked	(EM365ChecklistItem *item);
+void		e_m365_checklist_item_add_is_checked	(JsonBuilder *builder,
+							 gboolean value);
+
+const gchar *	e_m365_linked_resource_get_id		(EM365LinkedResource *resource);
+const gchar *	e_m365_linked_resource_get_application_name
+							(EM365LinkedResource *resource);
+void		e_m365_linked_resource_add_application_name
+							(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_m365_linked_resource_get_display_name	(EM365LinkedResource *resource);
+void		e_m365_linked_resource_add_display_name	(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_m365_linked_resource_get_external_id	(EM365LinkedResource *resource);
+void		e_m365_linked_resource_add_external_id	(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_m365_linked_resource_get_web_url	(EM365LinkedResource *resource);
+void		e_m365_linked_resource_add_web_url	(JsonBuilder *builder,
 							 const gchar *value);
 
 G_END_DECLS

@@ -433,11 +433,6 @@ m365_backend_sync_calendar_folders_sync (EM365Backend *m365_backend,
 	g_clear_error (&error);
 }
 
-/* Tasks are in the beta stage (as of 2020-07-31) and even one can get groups of tasks, getting
-   information about a task folder in the group fails with an error NavigationNotSupported:
-   "Recursive navigation is not allowed after property 'TaskFolders' according to the entity schema."
-   The server returns similar error when trying to get a single task, which makes it unusable. */
-#if 0
 static void
 m365_backend_sync_task_folders_sync (EM365Backend *m365_backend,
 				     EM365Connection *cnc,
@@ -446,47 +441,29 @@ m365_backend_sync_task_folders_sync (EM365Backend *m365_backend,
 	const gchar *extension_name = E_SOURCE_EXTENSION_TASK_LIST;
 	GHashTable *known_ids; /* gchar *id ~> NULL */
 	gboolean success = FALSE;
-	GSList *groups = NULL, *link;
+	GSList *task_lists = NULL, *link;
 	GError *error = NULL;
 
 	known_ids = m365_backend_get_known_folder_ids (m365_backend, extension_name, FALSE);
 
-	if (e_m365_connection_list_task_groups_sync (cnc, NULL, &groups, cancellable, &error) && groups) {
-		success = TRUE;
+	if (e_m365_connection_list_task_lists_sync (cnc, NULL, &task_lists, cancellable, &error)) {
+		for (link = task_lists; link; link = g_slist_next (link)) {
+			EM365TaskList *task_list = link->data;
 
-		for (link = groups; link && success; link = g_slist_next (link)) {
-			EM365TaskGroup *group = link->data;
-			GSList *task_folders = NULL;
-
-			if (!group)
+			if (!task_list || !e_m365_task_list_get_id (task_list))
 				continue;
 
-			if (e_m365_connection_list_task_folders_sync (cnc, NULL, e_m365_task_group_get_id (group), NULL, &task_folders, cancellable, &error)) {
-				GSList *tlink;
+			m365_backend_update_resource (m365_backend, extension_name,
+				e_m365_task_list_get_id (task_list),
+				NULL,
+				e_m365_task_list_get_display_name (task_list),
+				e_m365_task_list_get_kind (task_list) == E_M365_TASK_LIST_KIND_DEFAULT_LIST,
+				NULL);
 
-				for (tlink = task_folders; tlink; tlink = g_slist_next (tlink)) {
-					EM365TaskFolder *task_folder = tlink->data;
-
-					if (!task_folder || !e_m365_task_folder_get_id (task_folder))
-						continue;
-
-					m365_backend_update_resource (m365_backend, extension_name,
-						e_m365_task_folder_get_id (task_folder),
-						e_m365_task_group_get_id (group),
-						e_m365_task_folder_get_name (task_folder),
-						e_m365_task_folder_get_is_default_folder (task_folder),
-						NULL);
-
-					g_hash_table_remove (known_ids, e_m365_task_folder_get_id (task_folder));
-				}
-
-				g_slist_free_full (task_folders, (GDestroyNotify) json_object_unref);
-			} else {
-				success = FALSE;
-			}
+			g_hash_table_remove (known_ids, e_m365_task_list_get_id (task_list));
 		}
 
-		g_slist_free_full (groups, (GDestroyNotify) json_object_unref);
+		g_slist_free_full (task_lists, (GDestroyNotify) json_object_unref);
 	}
 
 	if (success)
@@ -495,7 +472,6 @@ m365_backend_sync_task_folders_sync (EM365Backend *m365_backend,
 	g_hash_table_destroy (known_ids);
 	g_clear_error (&error);
 }
-#endif
 
 static void
 m365_backend_sync_folders_thread (GTask *task,
@@ -520,9 +496,7 @@ m365_backend_sync_folders_thread (GTask *task,
 
 	if (e_source_collection_get_calendar_enabled (collection_extension)) {
 		m365_backend_sync_calendar_folders_sync (m365_backend, cnc, cancellable);
-#if 0
 		m365_backend_sync_task_folders_sync (m365_backend, cnc, cancellable);
-#endif
 	}
 
 	e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (m365_backend));

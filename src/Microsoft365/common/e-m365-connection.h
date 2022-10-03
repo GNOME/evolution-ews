@@ -561,84 +561,54 @@ gboolean	e_m365_connection_get_schedule_sync
 						 GSList **out_infos, /* EM365ScheduleInformation * */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_list_task_groups_sync
+gboolean	e_m365_connection_list_task_lists_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 GSList **out_groups, /* EM365TaskGroup * - the returned outlookTaskGroup objects */
+						 GSList **out_task_lists, /* EM365TaskList * - the returned todoTaskList objects */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_create_task_group_sync
+gboolean	e_m365_connection_get_task_list_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *name,
-						 EM365TaskGroup **out_created_group,
+						 const gchar *task_list_id,
+						 EM365TaskList **out_task_list,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_get_task_group_sync
+gboolean	e_m365_connection_create_task_list_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id,
-						 EM365TaskGroup **out_group,
+						 JsonBuilder *task_list,
+						 EM365TaskList **out_created_task_list,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_update_task_group_sync
+gboolean	e_m365_connection_update_task_list_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id,
-						 const gchar *name,
+						 const gchar *task_list_id,
+						 const gchar *display_name,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_delete_task_group_sync
+gboolean	e_m365_connection_delete_task_list_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id,
+						 const gchar *task_list_id,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_list_task_folders_sync
+gboolean	e_m365_connection_get_task_lists_delta_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, task group id for group task folders */
-						 const gchar *select, /* properties to select, nullable */
-						 GSList **out_folders, /* EM365TaskFolder * - the returned outlookTaskFolder objects */
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_m365_connection_get_task_folder_sync
-						(EM365Connection *cnc,
-						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable - then the default group is used */
-						 const gchar *task_folder_id,
-						 const gchar *select, /* nullable - properties to select */
-						 EM365TaskFolder **out_task_folder,
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_m365_connection_create_task_folder_sync
-						(EM365Connection *cnc,
-						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 JsonBuilder *task_folder,
-						 EM365TaskFolder **out_created_folder,
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_m365_connection_update_task_folder_sync
-						(EM365Connection *cnc,
-						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable - then the default group is used */
-						 const gchar *task_folder_id,
-						 const gchar *name,
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_m365_connection_delete_task_folder_sync
-						(EM365Connection *cnc,
-						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable - then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *delta_link, /* previous delta link */
+						 guint max_page_size, /* 0 for default by the server */
+						 EM365ConnectionJsonFunc func, /* function to call with each result set */
+						 gpointer func_user_data, /* user data passed into the 'func' */
+						 gchar **out_delta_link,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_list_tasks_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, task group id for group task folders */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
 						 GSList **out_tasks, /* EM365Task * - the returned task objects */
@@ -647,8 +617,8 @@ gboolean	e_m365_connection_list_tasks_sync
 gboolean	e_m365_connection_create_task_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 JsonBuilder *task,
 						 EM365Task **out_created_task,
 						 GCancellable *cancellable,
@@ -656,16 +626,16 @@ gboolean	e_m365_connection_create_task_sync
 SoupMessage *	e_m365_connection_prepare_get_task
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
 						 GError **error);
 gboolean	e_m365_connection_get_task_sync	(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
@@ -674,8 +644,8 @@ gboolean	e_m365_connection_get_task_sync	(EM365Connection *cnc,
 						 GError **error);
 gboolean	e_m365_connection_get_tasks_sync(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 const GSList *task_ids, /* const gchar * */
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
@@ -685,8 +655,8 @@ gboolean	e_m365_connection_get_tasks_sync(EM365Connection *cnc,
 gboolean	e_m365_connection_update_task_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable - then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 JsonBuilder *task,
 						 GCancellable *cancellable,
@@ -694,57 +664,108 @@ gboolean	e_m365_connection_update_task_sync
 gboolean	e_m365_connection_delete_task_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable - then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *group_id, /* unused, always NULL */
+						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_complete_task_sync
+gboolean	e_m365_connection_get_tasks_delta_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable - then the default group is used */
-						 const gchar *task_folder_id,
-						 const gchar *task_id,
+						 const gchar *task_list_id,
+						 const gchar *delta_link, /* previous delta link */
+						 guint max_page_size, /* 0 for default by the server */
+						 EM365ConnectionJsonFunc func, /* function to call with each result set */
+						 gpointer func_user_data, /* user data passed into the 'func' */
+						 gchar **out_delta_link,
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_list_task_attachments_sync
+gboolean	e_m365_connection_list_checklist_items_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 const gchar *select, /* nullable - properties to select */
-						 GSList **out_attachments, /* EM365Attachment * */
+						 GSList **out_items, /* EM365ChecklistItem * */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_get_task_attachment_sync
+gboolean	e_m365_connection_get_checklist_item_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *task_list_id,
 						 const gchar *task_id,
-						 const gchar *attachment_id,
-						 EM365ConnectionRawDataFunc func,
-						 gpointer func_user_data,
+						 const gchar *item_id,
+						 EM365ChecklistItem **out_item, /* nullable */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_add_task_attachment_sync
+gboolean	e_m365_connection_create_checklist_item_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *task_list_id,
 						 const gchar *task_id,
-						 JsonBuilder *in_attachment,
-						 EM365Attachment **out_attachment, /* nullable */
+						 JsonBuilder *in_item,
+						 EM365ChecklistItem **out_item, /* nullable */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_m365_connection_delete_task_attachment_sync
+gboolean	e_m365_connection_update_checklist_item_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *group_id, /* nullable, then the default group is used */
-						 const gchar *task_folder_id,
+						 const gchar *task_list_id,
 						 const gchar *task_id,
-						 const gchar *attachment_id,
+						 const gchar *item_id,
+						 JsonBuilder *in_item,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_delete_checklist_item_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *task_list_id,
+						 const gchar *task_id,
+						 const gchar *item_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_list_linked_resources_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *task_list_id,
+						 const gchar *task_id,
+						 const gchar *select, /* nullable - properties to select */
+						 GSList **out_resources, /* EM365LinkedResource * */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_linked_resource_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *task_list_id,
+						 const gchar *task_id,
+						 const gchar *resource_id,
+						 EM365LinkedResource **out_resource, /* nullable */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_create_linked_resource_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *task_list_id,
+						 const gchar *task_id,
+						 JsonBuilder *in_resource,
+						 EM365LinkedResource **out_resource, /* nullable */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_update_linked_resource_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *task_list_id,
+						 const gchar *task_id,
+						 const gchar *resource_id,
+						 JsonBuilder *in_resource,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_delete_linked_resource_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *task_list_id,
+						 const gchar *task_id,
+						 const gchar *resource_id,
 						 GCancellable *cancellable,
 						 GError **error);
 

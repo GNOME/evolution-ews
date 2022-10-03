@@ -439,6 +439,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 				      GError **error);
 	const gchar *(* get_id_func) (JsonObject *item);
 	const gchar *(* get_change_key_func) (JsonObject *item);
+	const gchar *select_props = "id,changeKey";
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (out_new_sync_tag != NULL, FALSE);
@@ -456,7 +457,8 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	case I_CAL_VTODO_COMPONENT:
 		list_items_func = e_m365_connection_list_tasks_sync;
 		get_id_func = e_m365_task_get_id;
-		get_change_key_func = e_m365_task_get_change_key;
+		get_change_key_func = e_m365_task_get_last_modified_as_string;
+		select_props = NULL;
 		break;
 	default:
 		g_warn_if_reached ();
@@ -474,10 +476,10 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 	LOCK (cbm365);
 
-	full_read = !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
+	full_read = !select_props || !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
 
 	success = list_items_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, NULL,
-		full_read ? NULL : "id,changeKey", &items, cancellable, error);
+		full_read ? NULL : select_props, &items, cancellable, error);
 
 	if (success) {
 		GSList *new_ids = NULL; /* const gchar *, borrowed from 'items' objects */
@@ -584,7 +586,7 @@ ecb_m365_load_component_sync (ECalMetaBackend *meta_backend,
 	case I_CAL_VTODO_COMPONENT:
 		success = e_m365_connection_get_task_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
 			cbm365->priv->folder_id, uid, NULL, NULL, &item, cancellable, error);
-		get_change_key_func = e_m365_task_get_change_key;
+		get_change_key_func = e_m365_task_get_last_modified_as_string;
 		break;
 	default:
 		success = FALSE;
@@ -679,7 +681,7 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 		create_item_func = e_m365_connection_create_task_sync;
 		update_item_func = e_m365_connection_update_task_sync;
 		get_id_func = e_m365_task_get_id;
-		get_change_key_func = e_m365_task_get_change_key;
+		get_change_key_func = e_m365_task_get_last_modified_as_string;
 		break;
 	default:
 		g_warn_if_reached ();

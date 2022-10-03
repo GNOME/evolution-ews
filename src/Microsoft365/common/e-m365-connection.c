@@ -19,6 +19,7 @@
 #define LOCK(x) g_rec_mutex_lock (&(x->priv->property_lock))
 #define UNLOCK(x) g_rec_mutex_unlock (&(x->priv->property_lock))
 
+#define M365_HOSTNAME "graph.microsoft.com"
 #define M365_RETRY_IO_ERROR_SECONDS 3
 #define X_EVO_M365_DATA "X-EVO-M365-DATA"
 
@@ -1289,7 +1290,7 @@ e_m365_connection_authenticate_sync (EM365Connection *cnc,
 		if (!folder_id || !*folder_id)
 			folder_id = "tasks";
 
-		success = e_m365_connection_get_task_folder_sync (cnc, user_override, group_id, folder_id, "name", &object, cancellable, error);
+		success = e_m365_connection_get_task_list_sync (cnc, user_override, folder_id, &object, cancellable, error);
 		break;
 	}
 
@@ -1372,7 +1373,7 @@ e_m365_connection_construct_uri (EM365Connection *cnc,
 
 	/* https://graph.microsoft.com/v1.0/users/XUSERX/mailFolders */
 
-	g_string_append (uri, "https://graph.microsoft.com");
+	g_string_append (uri, "https://" M365_HOSTNAME);
 
 	switch (api_version) {
 	case E_M365_API_V1_0:
@@ -1663,7 +1664,12 @@ e_m365_connection_batch_request_internal_sync (EM365Connection *cnc,
 			continue;
 		}
 
-		use_uri = uri;
+		/* Only the path with the query can be used in the batch request */
+		use_uri = strstr (uri, M365_HOSTNAME);
+		if (use_uri)
+			use_uri = strchr (use_uri, '/');
+		if (!use_uri)
+			use_uri = uri;
 
 		/* The 'url' is without the API part, it is derived from the main request */
 		if (g_str_has_prefix (use_uri, "/v1.0/") ||
@@ -4607,356 +4613,28 @@ e_m365_connection_get_schedule_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlookuser-list-taskgroups?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todo-list-lists?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_list_task_groups_sync (EM365Connection *cnc,
-						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 GSList **out_groups, /* EM365TaskGroup * - the returned outlookTaskGroup objects */
-						 GCancellable *cancellable,
-						 GError **error)
-{
-	EM365ResponseData rd;
-	SoupMessage *message;
-	gchar *uri;
-	gboolean success;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (out_groups != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook", "taskGroups", NULL, NULL);
-
-	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	memset (&rd, 0, sizeof (EM365ResponseData));
-
-	rd.out_items = out_groups;
-
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlookuser-post-taskgroups?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_create_task_group_sync (EM365Connection *cnc,
-					  const gchar *user_override, /* for which user, NULL to use the account user */
-					  const gchar *name,
-					  EM365TaskGroup **out_created_group,
-					  GCancellable *cancellable,
-					  GError **error)
-{
-	SoupMessage *message;
-	JsonBuilder *builder;
-	gboolean success;
-	gchar *uri;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (name != NULL, FALSE);
-	g_return_val_if_fail (out_created_group != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook", "taskGroups", NULL, NULL);
-
-	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	builder = json_builder_new_immutable ();
-
-	e_m365_json_begin_object_member (builder, NULL);
-	e_m365_json_add_string_member (builder, "name", name);
-	e_m365_json_end_object_member (builder);
-
-	e_m365_connection_set_json_body (message, builder);
-
-	g_object_unref (builder);
-
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_group, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskgroup-get?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_get_task_group_sync (EM365Connection *cnc,
-				       const gchar *user_override, /* for which user, NULL to use the account user */
-				       const gchar *group_id,
-				       EM365TaskGroup **out_group,
-				       GCancellable *cancellable,
-				       GError **error)
-{
-	SoupMessage *message;
-	gboolean success;
-	gchar *uri;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (group_id != NULL, FALSE);
-	g_return_val_if_fail (out_group != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		"taskGroups",
-		group_id,
-		NULL);
-
-	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_group, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskgroup-update?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_update_task_group_sync (EM365Connection *cnc,
-					  const gchar *user_override, /* for which user, NULL to use the account user */
-					  const gchar *group_id,
-					  const gchar *name,
-					  GCancellable *cancellable,
-					  GError **error)
-{
-	SoupMessage *message;
-	JsonBuilder *builder;
-	gboolean success;
-	gchar *uri;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (group_id != NULL, FALSE);
-	g_return_val_if_fail (name != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		"taskGroups",
-		group_id,
-		NULL,
-		NULL);
-
-	message = m365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	builder = json_builder_new_immutable ();
-
-	e_m365_json_begin_object_member (builder, NULL);
-	e_m365_json_add_string_member (builder, "name", name);
-	e_m365_json_end_object_member (builder);
-
-	e_m365_connection_set_json_body (message, builder);
-
-	g_object_unref (builder);
-
-	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskfolder-delete?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_delete_task_group_sync (EM365Connection *cnc,
-					  const gchar *user_override, /* for which user, NULL to use the account user */
-					  const gchar *group_id,
-					  GCancellable *cancellable,
-					  GError **error)
-{
-	SoupMessage *message;
-	gboolean success;
-	gchar *uri;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (group_id != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook", "taskGroups", group_id, NULL);
-
-	message = m365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlookuser-list-taskfolders?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_list_task_folders_sync (EM365Connection *cnc,
-					  const gchar *user_override, /* for which user, NULL to use the account user */
-					  const gchar *group_id, /* nullable, task group id for group task folders */
-					  const gchar *select, /* properties to select, nullable */
-					  GSList **out_folders, /* EM365TaskFolder * - the returned outlookTaskFolder objects */
-					  GCancellable *cancellable,
-					  GError **error)
-{
-	EM365ResponseData rd;
-	SoupMessage *message;
-	gchar *uri;
-	gboolean success;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (out_folders != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"$select", select,
-		NULL);
-
-	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	memset (&rd, 0, sizeof (EM365ResponseData));
-
-	rd.out_items = out_folders;
-
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlookuser-post-taskfolders?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_create_task_folder_sync (EM365Connection *cnc,
-					   const gchar *user_override, /* for which user, NULL to use the account user */
-					   const gchar *group_id, /* nullable, then the default group is used */
-					   JsonBuilder *task_folder,
-					   EM365TaskFolder **out_created_folder,
-					   GCancellable *cancellable,
-					   GError **error)
-{
-	SoupMessage *message;
-	gboolean success;
-	gchar *uri;
-
-	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder != NULL, FALSE);
-	g_return_val_if_fail (out_created_folder != NULL, FALSE);
-
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", "taskFolders",
-		NULL);
-
-	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
-		return FALSE;
-	}
-
-	g_free (uri);
-
-	e_m365_connection_set_json_body (message, task_folder);
-
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_folder, cancellable, error);
-
-	g_clear_object (&message);
-
-	return success;
-}
-
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskfolder-get?view=graph-rest-beta&tabs=http */
-
-gboolean
-e_m365_connection_get_task_folder_sync (EM365Connection *cnc,
+e_m365_connection_list_task_lists_sync (EM365Connection *cnc,
 					const gchar *user_override, /* for which user, NULL to use the account user */
-					const gchar *group_id, /* nullable - then the default group is used */
-					const gchar *task_folder_id,
-					const gchar *select, /* nullable - properties to select */
-					EM365TaskFolder **out_task_folder,
+					GSList **out_task_lists, /* EM365TaskList * - the returned todoTaskList objects */
 					GCancellable *cancellable,
 					GError **error)
 {
+	EM365ResponseData rd;
 	SoupMessage *message;
 	gchar *uri;
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
-	g_return_val_if_fail (out_task_folder != NULL, FALSE);
+	g_return_val_if_fail (out_task_lists != NULL, FALSE);
 
-	if (group_id) {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-			"outlook",
-			"taskGroups",
-			group_id,
-			"", "taskFolders",
-			"", task_folder_id,
-			"$select", select,
-			NULL);
-	} else {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-			"outlook",
-			"taskFolders",
-			task_folder_id,
-			"$select", select,
-			NULL);
-	}
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		NULL,
+		NULL);
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
@@ -4968,23 +4646,110 @@ e_m365_connection_get_task_folder_sync (EM365Connection *cnc,
 
 	g_free (uri);
 
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_task_folder, cancellable, error);
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = out_task_lists;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
 
 	g_clear_object (&message);
 
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskfolder-update?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todo-post-lists?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_update_task_folder_sync (EM365Connection *cnc,
-					   const gchar *user_override, /* for which user, NULL to use the account user */
-					   const gchar *group_id, /* nullable - then the default group is used */
-					   const gchar *task_folder_id,
-					   const gchar *name,
-					   GCancellable *cancellable,
-					   GError **error)
+e_m365_connection_create_task_list_sync (EM365Connection *cnc,
+					 const gchar *user_override, /* for which user, NULL to use the account user */
+					 JsonBuilder *task_list,
+					 EM365TaskList **out_created_task_list,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list != NULL, FALSE);
+	g_return_val_if_fail (out_created_task_list != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		NULL,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, task_list);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_task_list, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/todotasklist-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_task_list_sync (EM365Connection *cnc,
+				      const gchar *user_override, /* for which user, NULL to use the account user */
+				      const gchar *task_list_id,
+				      EM365TaskList **out_task_list,
+				      GCancellable *cancellable,
+				      GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (out_task_list != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_task_list, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/todotasklist-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_update_task_list_sync (EM365Connection *cnc,
+					 const gchar *user_override, /* for which user, NULL to use the account user */
+					 const gchar *task_list_id,
+					 const gchar *display_name,
+					 GCancellable *cancellable,
+					 GError **error)
 {
 	SoupMessage *message;
 	JsonBuilder *builder;
@@ -4992,24 +4757,14 @@ e_m365_connection_update_task_folder_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
-	g_return_val_if_fail (name != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (display_name != NULL, FALSE);
 
-	if (group_id) {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-			"outlook",
-			"taskGroups",
-			group_id,
-			"", "taskFolders",
-			"", task_folder_id,
-			NULL);
-	} else {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-			"outlook",
-			"taskFolders",
-			task_folder_id,
-			NULL);
-	}
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		NULL);
 
 	message = m365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
 
@@ -5024,7 +4779,7 @@ e_m365_connection_update_task_folder_sync (EM365Connection *cnc,
 	builder = json_builder_new_immutable ();
 
 	e_m365_json_begin_object_member (builder, NULL);
-	e_m365_json_add_string_member (builder, "name", name);
+	e_m365_json_add_string_member (builder, "displayName", display_name);
 	e_m365_json_end_object_member (builder);
 
 	e_m365_connection_set_json_body (message, builder);
@@ -5038,38 +4793,27 @@ e_m365_connection_update_task_folder_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskfolder-delete?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotasklist-delete?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_delete_task_folder_sync (EM365Connection *cnc,
-					   const gchar *user_override, /* for which user, NULL to use the account user */
-					   const gchar *group_id, /* nullable - then the default group is used */
-					   const gchar *task_folder_id,
-					   GCancellable *cancellable,
-					   GError **error)
+e_m365_connection_delete_task_list_sync (EM365Connection *cnc,
+					 const gchar *user_override, /* for which user, NULL to use the account user */
+					 const gchar *task_list_id,
+					 GCancellable *cancellable,
+					 GError **error)
 {
 	SoupMessage *message;
 	gboolean success;
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 
-	if (group_id) {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-			"outlook",
-			"taskGroups",
-			group_id,
-			"", "taskFolders",
-			"", task_folder_id,
-			NULL);
-	} else {
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-			"outlook",
-			"taskFolders",
-			task_folder_id,
-			NULL);
-	}
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		NULL);
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
 
@@ -5088,13 +4832,79 @@ e_m365_connection_delete_task_folder_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktaskfolder-list-tasks?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotasklist-delta?view=graph-rest-1.0 */
+
+gboolean
+e_m365_connection_get_task_lists_delta_sync (EM365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     const gchar *delta_link, /* previous delta link */
+					     guint max_page_size, /* 0 for default by the server */
+					     EM365ConnectionJsonFunc func, /* function to call with each result set */
+					     gpointer func_user_data, /* user data passed into the 'func' */
+					     gchar **out_delta_link,
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_delta_link != NULL, FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
+
+	if (delta_link) {
+		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
+	} else {
+		gchar *uri;
+
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+			"todo",
+			"lists",
+			"delta",
+			NULL);
+
+		message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+		if (!message) {
+			g_free (uri);
+
+			return FALSE;
+		}
+
+		g_free (uri);
+	}
+
+	if (max_page_size > 0) {
+		gchar *prefer_value;
+
+		prefer_value = g_strdup_printf ("odata.maxpagesize=%u", max_page_size);
+
+		soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", prefer_value);
+
+		g_free (prefer_value);
+	}
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.json_func = func;
+	rd.func_user_data = func_user_data;
+	rd.out_delta_link = out_delta_link;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/todotasklist-list-tasks?view=graph-rest-1.0&tabs=http */
 
 gboolean
 e_m365_connection_list_tasks_sync (EM365Connection *cnc,
 				   const gchar *user_override, /* for which user, NULL to use the account user */
-				   const gchar *group_id, /* nullable, task group id for group task folders */
-				   const gchar *task_folder_id,
+				   const gchar *group_id, /* unused, always NULL */
+				   const gchar *task_list_id,
 				   const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 				   const gchar *select, /* nullable - properties to select */
 				   GSList **out_tasks, /* EM365Task * - the returned task objects */
@@ -5107,15 +4917,13 @@ e_m365_connection_list_tasks_sync (EM365Connection *cnc,
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (out_tasks != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"$select", select,
 		NULL);
@@ -5144,13 +4952,13 @@ e_m365_connection_list_tasks_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlookuser-post-tasks?view=graph-rest-beta&tabs=csharp */
+/* https://learn.microsoft.com/en-us/graph/api/todotasklist-post-tasks?view=graph-rest-1.0&tabs=http */
 
 gboolean
 e_m365_connection_create_task_sync (EM365Connection *cnc,
 				    const gchar *user_override, /* for which user, NULL to use the account user */
-				    const gchar *group_id, /* nullable, then the default group is used */
-				    const gchar *task_folder_id,
+				    const gchar *group_id, /* unused, always NULL */
+				    const gchar *task_list_id,
 				    JsonBuilder *task,
 				    EM365Task **out_created_task,
 				    GCancellable *cancellable,
@@ -5161,16 +4969,14 @@ e_m365_connection_create_task_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task != NULL, FALSE);
 	g_return_val_if_fail (out_created_task != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		NULL);
 
@@ -5193,13 +4999,13 @@ e_m365_connection_create_task_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktask-get?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotask-get?view=graph-rest-1.0&tabs=http */
 
 SoupMessage *
 e_m365_connection_prepare_get_task (EM365Connection *cnc,
 				    const gchar *user_override, /* for which user, NULL to use the account user */
-				    const gchar *group_id, /* nullable, then the default group is used */
-				    const gchar *task_folder_id,
+				    const gchar *group_id, /* unused, always NULL */
+				    const gchar *task_list_id,
 				    const gchar *task_id,
 				    const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 				    const gchar *select, /* nullable - properties to select */
@@ -5209,15 +5015,13 @@ e_m365_connection_prepare_get_task (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), NULL);
-	g_return_val_if_fail (task_folder_id != NULL, NULL);
+	g_return_val_if_fail (task_list_id != NULL, NULL);
 	g_return_val_if_fail (task_id != NULL, NULL);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
 		"$select", select,
@@ -5242,8 +5046,8 @@ e_m365_connection_prepare_get_task (EM365Connection *cnc,
 gboolean
 e_m365_connection_get_task_sync (EM365Connection *cnc,
 				 const gchar *user_override, /* for which user, NULL to use the account user */
-				 const gchar *group_id, /* nullable, then the default group is used */
-				 const gchar *task_folder_id,
+				 const gchar *group_id, /* unused, always NULL */
+				 const gchar *task_list_id,
 				 const gchar *task_id,
 				 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 				 const gchar *select, /* nullable - properties to select */
@@ -5255,11 +5059,11 @@ e_m365_connection_get_task_sync (EM365Connection *cnc,
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
 	g_return_val_if_fail (out_task != NULL, FALSE);
 
-	message = e_m365_connection_prepare_get_task (cnc, user_override, group_id, task_folder_id, task_id, prefer_outlook_timezone, select, error);
+	message = e_m365_connection_prepare_get_task (cnc, user_override, group_id, task_list_id, task_id, prefer_outlook_timezone, select, error);
 
 	if (!message)
 		return FALSE;
@@ -5274,8 +5078,8 @@ e_m365_connection_get_task_sync (EM365Connection *cnc,
 gboolean
 e_m365_connection_get_tasks_sync (EM365Connection *cnc,
 				  const gchar *user_override, /* for which user, NULL to use the account user */
-				  const gchar *group_id, /* nullable, then the default group is used */
-				  const gchar *task_folder_id,
+				  const gchar *group_id, /* unused, always NULL */
+				  const gchar *task_list_id,
 				  const GSList *task_ids, /* const gchar * */
 				  const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 				  const gchar *select, /* nullable - properties to select */
@@ -5286,7 +5090,7 @@ e_m365_connection_get_tasks_sync (EM365Connection *cnc,
 	gboolean success = TRUE;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_ids != NULL, FALSE);
 	g_return_val_if_fail (out_tasks != NULL, FALSE);
 
@@ -5302,7 +5106,7 @@ e_m365_connection_get_tasks_sync (EM365Connection *cnc,
 			const gchar *id = link->data;
 			SoupMessage *message;
 
-			message = e_m365_connection_prepare_get_task (cnc, user_override, group_id, task_folder_id, id, prefer_outlook_timezone, select, error);
+			message = e_m365_connection_prepare_get_task (cnc, user_override, group_id, task_list_id, id, prefer_outlook_timezone, select, error);
 
 			if (!message) {
 				success = FALSE;
@@ -5320,7 +5124,7 @@ e_m365_connection_get_tasks_sync (EM365Connection *cnc,
 					if (success)
 						*out_tasks = g_slist_prepend (*out_tasks, task);
 				} else {
-					success = e_m365_connection_batch_request_sync (cnc, E_M365_API_BETA, requests, cancellable, error);
+					success = e_m365_connection_batch_request_sync (cnc, E_M365_API_V1_0, requests, cancellable, error);
 
 					if (success) {
 						guint ii;
@@ -5363,7 +5167,7 @@ e_m365_connection_get_tasks_sync (EM365Connection *cnc,
 	} else {
 		SoupMessage *message;
 
-		message = e_m365_connection_prepare_get_task (cnc, user_override, group_id, task_folder_id, task_ids->data, prefer_outlook_timezone, select, error);
+		message = e_m365_connection_prepare_get_task (cnc, user_override, group_id, task_list_id, task_ids->data, prefer_outlook_timezone, select, error);
 
 		if (message) {
 			EM365Task *task = NULL;
@@ -5384,13 +5188,13 @@ e_m365_connection_get_tasks_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktask-update?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotask-update?view=graph-rest-1.0&tabs=http */
 
 gboolean
 e_m365_connection_update_task_sync (EM365Connection *cnc,
 				    const gchar *user_override, /* for which user, NULL to use the account user */
-				    const gchar *group_id, /* nullable - then the default group is used */
-				    const gchar *task_folder_id,
+				    const gchar *group_id, /* unused, always NULL */
+				    const gchar *task_list_id,
 				    const gchar *task_id,
 				    JsonBuilder *task,
 				    GCancellable *cancellable,
@@ -5401,16 +5205,14 @@ e_m365_connection_update_task_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
 	g_return_val_if_fail (task != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
 		NULL);
@@ -5434,13 +5236,13 @@ e_m365_connection_update_task_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktask-delete?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotask-delete?view=graph-rest-1.0&tabs=http */
 
 gboolean
 e_m365_connection_delete_task_sync (EM365Connection *cnc,
 				    const gchar *user_override, /* for which user, NULL to use the account user */
-				    const gchar *group_id, /* nullable - then the default group is used */
-				    const gchar *task_folder_id,
+				    const gchar *group_id, /* unused, always NULL */
+				    const gchar *task_list_id,
 				    const gchar *task_id,
 				    GCancellable *cancellable,
 				    GError **error)
@@ -5450,15 +5252,13 @@ e_m365_connection_delete_task_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
 		NULL);
@@ -5480,37 +5280,310 @@ e_m365_connection_delete_task_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktask-complete?view=graph-rest-beta */
+/* https://learn.microsoft.com/en-us/graph/api/todotask-delta?view=graph-rest-1.0 */
 
 gboolean
-e_m365_connection_complete_task_sync (EM365Connection *cnc,
-				      const gchar *user_override, /* for which user, NULL to use the account user */
-				      const gchar *group_id, /* nullable - then the default group is used */
-				      const gchar *task_folder_id,
-				      const gchar *task_id,
-				      GCancellable *cancellable,
-				      GError **error)
+e_m365_connection_get_tasks_delta_sync (EM365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					const gchar *task_list_id,
+					const gchar *delta_link, /* previous delta link */
+					guint max_page_size, /* 0 for default by the server */
+					EM365ConnectionJsonFunc func, /* function to call with each result set */
+					gpointer func_user_data, /* user data passed into the 'func' */
+					gchar **out_delta_link,
+					GCancellable *cancellable,
+					GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (out_delta_link != NULL, FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
+
+	if (delta_link) {
+		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
+	} else {
+		gchar *uri;
+
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+			"todo",
+			"lists",
+			"task_list_id",
+			"", "tasks",
+			"", "delta",
+			NULL);
+
+		message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+		if (!message) {
+			g_free (uri);
+
+			return FALSE;
+		}
+
+		g_free (uri);
+	}
+
+	if (max_page_size > 0) {
+		gchar *prefer_value;
+
+		prefer_value = g_strdup_printf ("odata.maxpagesize=%u", max_page_size);
+
+		soup_message_headers_append (soup_message_get_request_headers (message), "Prefer", prefer_value);
+
+		g_free (prefer_value);
+	}
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.json_func = func;
+	rd.func_user_data = func_user_data;
+	rd.out_delta_link = out_delta_link;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/todotask-list-checklistitems?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_list_checklist_items_sync (EM365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     const gchar *task_list_id,
+					     const gchar *task_id,
+					     const gchar *select, /* nullable - properties to select */
+					     GSList **out_items, /* EM365ChecklistItem * */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (task_id != NULL, FALSE);
+	g_return_val_if_fail (out_items != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		"", "tasks",
+		"", task_id,
+		"", "checklistItems",
+		"$select", select,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = out_items;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/checklistitem-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_checklist_item_sync (EM365Connection *cnc,
+					   const gchar *user_override, /* for which user, NULL to use the account user */
+					   const gchar *task_list_id,
+					   const gchar *task_id,
+					   const gchar *item_id,
+					   EM365ChecklistItem **out_item, /* nullable */
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (task_id != NULL, FALSE);
+	g_return_val_if_fail (item_id != NULL, FALSE);
+	g_return_val_if_fail (out_item != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		"", "tasks",
+		"", task_id,
+		"", "checklistItems",
+		"", item_id,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_item, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/todotask-post-checklistitems?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_create_checklist_item_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *task_list_id,
+					      const gchar *task_id,
+					      JsonBuilder *in_item,
+					      EM365ChecklistItem **out_item, /* nullable */
+					      GCancellable *cancellable,
+					      GError **error)
 {
 	SoupMessage *message;
 	gboolean success;
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
+	g_return_val_if_fail (in_item != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
-		"", "complete",
+		"", "checklistItems",
 		NULL);
 
-	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DISABLE_RESPONSE, error);
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, out_item ? CSM_DEFAULT : CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, in_item);
+
+	success = m365_connection_send_request_sync (cnc, message, out_item ? e_m365_read_json_object_response_cb : NULL,
+		out_item ? NULL : e_m365_read_no_response_cb, out_item, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/checklistitem-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_update_checklist_item_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *task_list_id,
+					      const gchar *task_id,
+					      const gchar *item_id,
+					      JsonBuilder *in_item,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (task_id != NULL, FALSE);
+	g_return_val_if_fail (item_id != NULL, FALSE);
+	g_return_val_if_fail (in_item != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		"", "tasks",
+		"", task_id,
+		"", "checklistItems",
+		"", item_id,
+		NULL);
+
+	message = m365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, in_item);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/checklistitem-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_delete_checklist_item_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *task_list_id,
+					      const gchar *task_id,
+					      const gchar *item_id,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (task_id != NULL, FALSE);
+	g_return_val_if_fail (item_id != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		"", "tasks",
+		"", task_id,
+		"", "checklistItems",
+		"", item_id,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
 
 	if (!message) {
 		g_free (uri);
@@ -5527,16 +5600,15 @@ e_m365_connection_complete_task_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktask-list-attachments?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotask-list-linkedresources?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_list_task_attachments_sync (EM365Connection *cnc,
+e_m365_connection_list_linked_resources_sync (EM365Connection *cnc,
 					      const gchar *user_override, /* for which user, NULL to use the account user */
-					      const gchar *group_id, /* nullable, then the default group is used */
-					      const gchar *task_folder_id,
+					      const gchar *task_list_id,
 					      const gchar *task_id,
 					      const gchar *select, /* nullable - properties to select */
-					      GSList **out_attachments, /* EM365Attachment * */
+					      GSList **out_resources, /* EM365LinkedResource * */
 					      GCancellable *cancellable,
 					      GError **error)
 {
@@ -5546,19 +5618,17 @@ e_m365_connection_list_task_attachments_sync (EM365Connection *cnc,
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
-	g_return_val_if_fail (out_attachments != NULL, FALSE);
+	g_return_val_if_fail (out_resources != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
-		"", "attachments",
+		"", "linkedResources",
 		"$select", select,
 		NULL);
 
@@ -5574,7 +5644,7 @@ e_m365_connection_list_task_attachments_sync (EM365Connection *cnc,
 
 	memset (&rd, 0, sizeof (EM365ResponseData));
 
-	rd.out_items = out_attachments;
+	rd.out_items = out_resources;
 
 	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
 
@@ -5583,41 +5653,36 @@ e_m365_connection_list_task_attachments_sync (EM365Connection *cnc,
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/attachment-get?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/linkedresource-get?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_get_task_attachment_sync (EM365Connection *cnc,
+e_m365_connection_get_linked_resource_sync (EM365Connection *cnc,
 					    const gchar *user_override, /* for which user, NULL to use the account user */
-					    const gchar *group_id, /* nullable, then the default group is used */
-					    const gchar *task_folder_id,
+					    const gchar *task_list_id,
 					    const gchar *task_id,
-					    const gchar *attachment_id,
-					    EM365ConnectionRawDataFunc func,
-					    gpointer func_user_data,
+					    const gchar *resource_id,
+					    EM365LinkedResource **out_resource, /* nullable */
 					    GCancellable *cancellable,
 					    GError **error)
 {
 	SoupMessage *message;
-	gboolean success;
 	gchar *uri;
+	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
-	g_return_val_if_fail (attachment_id != NULL, FALSE);
-	g_return_val_if_fail (func != NULL, FALSE);
+	g_return_val_if_fail (resource_id != NULL, FALSE);
+	g_return_val_if_fail (out_resource != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
-		"", "attachments",
-		"", attachment_id,
-		"", "$value",
+		"", "linkedResources",
+		"", resource_id,
 		NULL);
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
@@ -5630,47 +5695,44 @@ e_m365_connection_get_task_attachment_sync (EM365Connection *cnc,
 
 	g_free (uri);
 
-	success = m365_connection_send_request_sync (cnc, message, NULL, func, func_user_data, cancellable, error);
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_resource, cancellable, error);
 
 	g_clear_object (&message);
 
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/outlooktask-post-attachments?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/todotask-post-linkedresources?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_add_task_attachment_sync (EM365Connection *cnc,
-					    const gchar *user_override, /* for which user, NULL to use the account user */
-					    const gchar *group_id, /* nullable, then the default group is used */
-					    const gchar *task_folder_id,
-					    const gchar *task_id,
-					    JsonBuilder *in_attachment,
-					    EM365Attachment **out_attachment, /* nullable */
-					    GCancellable *cancellable,
-					    GError **error)
+e_m365_connection_create_linked_resource_sync (EM365Connection *cnc,
+					       const gchar *user_override, /* for which user, NULL to use the account user */
+					       const gchar *task_list_id,
+					       const gchar *task_id,
+					       JsonBuilder *in_resource,
+					       EM365LinkedResource **out_resource, /* nullable */
+					       GCancellable *cancellable,
+					       GError **error)
 {
 	SoupMessage *message;
 	gboolean success;
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
-	g_return_val_if_fail (in_attachment != NULL, FALSE);
+	g_return_val_if_fail (in_resource != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
-		"", "attachments",
+		"", "linkedResources",
 		NULL);
 
-	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, out_attachment ? CSM_DEFAULT : CSM_DISABLE_RESPONSE, error);
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, out_resource ? CSM_DEFAULT : CSM_DISABLE_RESPONSE, error);
 
 	if (!message) {
 		g_free (uri);
@@ -5680,25 +5742,75 @@ e_m365_connection_add_task_attachment_sync (EM365Connection *cnc,
 
 	g_free (uri);
 
-	e_m365_connection_set_json_body (message, in_attachment);
+	e_m365_connection_set_json_body (message, in_resource);
 
-	success = m365_connection_send_request_sync (cnc, message, out_attachment ? e_m365_read_json_object_response_cb : NULL,
-		out_attachment ? NULL : e_m365_read_no_response_cb, out_attachment, cancellable, error);
+	success = m365_connection_send_request_sync (cnc, message, out_resource ? e_m365_read_json_object_response_cb : NULL,
+		out_resource ? NULL : e_m365_read_no_response_cb, out_resource, cancellable, error);
 
 	g_clear_object (&message);
 
 	return success;
 }
 
-/* https://docs.microsoft.com/en-us/graph/api/attachment-delete?view=graph-rest-beta&tabs=http */
+/* https://learn.microsoft.com/en-us/graph/api/linkedresource-update?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_m365_connection_delete_task_attachment_sync (EM365Connection *cnc,
+e_m365_connection_update_linked_resource_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *task_list_id,
+					      const gchar *task_id,
+					      const gchar *resource_id,
+					      JsonBuilder *in_resource,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
+	g_return_val_if_fail (task_id != NULL, FALSE);
+	g_return_val_if_fail (resource_id != NULL, FALSE);
+	g_return_val_if_fail (in_resource != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
+		"", "tasks",
+		"", task_id,
+		"", "linkedResources",
+		"", resource_id,
+		NULL);
+
+	message = m365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, in_resource);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/linkedresource-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_delete_linked_resource_sync (EM365Connection *cnc,
 					       const gchar *user_override, /* for which user, NULL to use the account user */
-					       const gchar *group_id, /* nullable, then the default group is used */
-					       const gchar *task_folder_id,
+					       const gchar *task_list_id,
 					       const gchar *task_id,
-					       const gchar *attachment_id,
+					       const gchar *resource_id,
 					       GCancellable *cancellable,
 					       GError **error)
 {
@@ -5707,20 +5819,18 @@ e_m365_connection_delete_task_attachment_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (task_folder_id != NULL, FALSE);
+	g_return_val_if_fail (task_list_id != NULL, FALSE);
 	g_return_val_if_fail (task_id != NULL, FALSE);
-	g_return_val_if_fail (attachment_id != NULL, FALSE);
+	g_return_val_if_fail (resource_id != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_BETA, NULL,
-		"outlook",
-		group_id ? "taskGroups" : "taskFolders",
-		group_id,
-		"", group_id ? "taskFolders" : NULL,
-		"", task_folder_id,
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"todo",
+		"lists",
+		task_list_id,
 		"", "tasks",
 		"", task_id,
-		"", "attachments",
-		"", attachment_id,
+		"", "linkedResources",
+		"", resource_id,
 		NULL);
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
