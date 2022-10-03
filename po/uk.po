@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-10-03 09:08+0000\n"
-"PO-Revision-Date: 2022-10-03 13:36+0300\n"
+"POT-Creation-Date: 2022-10-03 15:50+0000\n"
+"PO-Revision-Date: 2022-10-03 20:29+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -461,17 +461,15 @@ msgstr "Неможливо підписатися на теку «%s» — те�
 
 #: ../src/EWS/camel/camel-ews-store.c:3695
 #, c-format
-#| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Неможливо підписатися на теку «%s» — ідентифікатор теки не знайдено"
 
 #: ../src/EWS/camel/camel-ews-store.c:3706
 #, c-format
-#| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
-"Неможливо підписатися на теку «%s» — загальнодоступної кореневої теки не"
-" знайдено"
+"Неможливо підписатися на теку «%s» — загальнодоступної кореневої теки не "
+"знайдено"
 
 #: ../src/EWS/camel/camel-ews-store.c:3782
 msgid "Cannot unsubscribe EWS folders in offline mode"
@@ -1625,7 +1623,7 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Успішно оформлено підписку на теку користувача «{0}»."
 
 #: ../src/EWS/registry/e-ews-backend.c:1094
-#: ../src/Microsoft365/registry/e-m365-backend.c:696
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid ""
 "Could not determine a suitable folder class for a new folder named “%s”"
@@ -1645,20 +1643,20 @@ msgstr "Не встановлено ідентифікатор теки"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Не вдалося зберегти список контактів до адресної книги Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "У календарі Microsoft 365 можна зберігати лише прості події"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "У теці завдань Microsoft 365 можна зберігати лише прості завдання"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1630
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr ""
 "У календарі Microsoft 365 не може бути збережено більше одного повторення"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1639
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1666,36 +1664,42 @@ msgstr ""
 "У календарі Microsoft 365 не може бути збережено компоненти із властивостями "
 "RDATE, EXDATE або RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1749
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Невідома частота повторення (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1901
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "У календарі Microsoft 365 не може бути збережено більше одного нагадування "
 "про подію"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1934
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr "Подія Microsoft 365 може мати лише одне нагадування перед початком"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1947
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Завдання Microsoft 365 може мати лише одне нагадування в абсолютному часі"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2273
+#, c-format
+#| msgid "Microsoft 365 task can have only a reminder with absolute time"
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Завдання Microsoft 365 не може мати долучень."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2376
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Неможливо зберегти долучення із адресою «%s»"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2378
 msgid "Failed to read attachment URI"
 msgstr "Не вдалося прочитати адресу долучення"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2392
 msgid "Failed to get inline attachment data"
 msgstr "Не вдалося отримати дані вбудованого долучення"
 
@@ -1745,7 +1749,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Отримання пошти за допомогою Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1241
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Помилкове форматування адреси: «%s»"
@@ -1802,7 +1806,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:885
+#: ../src/Microsoft365/common/e-m365-connection.c:886
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural ""
@@ -1816,7 +1820,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:891
+#: ../src/Microsoft365/common/e-m365-connection.c:892
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1829,16 +1833,16 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1016
-#: ../src/Microsoft365/common/e-m365-connection.c:1043
+#: ../src/Microsoft365/common/e-m365-connection.c:1017
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Invalid data"
 msgstr "Некоректні дані"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1041
+#: ../src/Microsoft365/common/e-m365-connection.c:1042
 msgid "Operation was cancelled"
 msgstr "Дію скасовано"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1719
+#: ../src/Microsoft365/common/e-m365-connection.c:1725
 msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
@@ -1863,7 +1867,7 @@ msgstr "Типовим тенантом є «%s»"
 msgid "_Redirect URI:"
 msgstr "Адреса переспр_ямовування:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:787
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Джерело даних «%s» не є відповідником теки Microsoft 365"
