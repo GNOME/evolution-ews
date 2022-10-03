@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-07-15 08:46+0000\n"
-"PO-Revision-Date: 2022-08-13 18:48+0200\n"
+"POT-Creation-Date: 2022-10-03 09:08+0000\n"
+"PO-Revision-Date: 2022-10-03 14:42+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
@@ -106,7 +106,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Nemoguć pronalazak izvora Microsoft365 pomoćnika za kalendar “%s”"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2089
 msgid "Invalid occurrence ID"
 msgstr "Nevaljani ID pojave"
 
@@ -444,19 +444,29 @@ msgstr "Nemoguća pretplata na mapu “%s”, nema dostupne javne mape"
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nemoguća pretplata na mapu “%s”, mape nije pronađena"
 
-#: ../src/EWS/camel/camel-ews-store.c:3771
+#: ../src/EWS/camel/camel-ews-store.c:3695
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Nemoguća pretplata na mapu “%s”, ID mape nije pronađen"
+
+#: ../src/EWS/camel/camel-ews-store.c:3706
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "Nemoguća pretplata na mapu “%s”, korijen javne mape nije pronađen"
+
+#: ../src/EWS/camel/camel-ews-store.c:3782
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nemoguć je prekinuti pretplatu na EWU mape u izvanmrežnom načinu rada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3893
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Morate biti u mrežnom načinu rada za završetak ove radnje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3954
-#: ../src/EWS/camel/camel-ews-store.c:3991
+#: ../src/EWS/camel/camel-ews-store.c:3965
+#: ../src/EWS/camel/camel-ews-store.c:4002
 msgid "Unsetting the “Out of Office” status"
 msgstr "Uklanjanje “Izvan ureda” stanja"
 
@@ -528,12 +538,12 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Stvaranje stavke poziva nije neuspjelo vratiti ID za novu poruku"
 
-#: ../src/EWS/common/e-ews-connection.c:324
+#: ../src/EWS/common/e-ews-connection.c:344
 #, c-format
 msgid "No response: %s"
 msgstr "Nema odgovora: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:487
+#: ../src/EWS/common/e-ews-connection.c:509
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -544,7 +554,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d:%02d minuta)"
 
-#: ../src/EWS/common/e-ews-connection.c:493
+#: ../src/EWS/common/e-ews-connection.c:515
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -555,59 +565,59 @@ msgstr[1] ""
 msgstr[2] ""
 "Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d sekundi)"
 
-#: ../src/EWS/common/e-ews-connection.c:622
+#: ../src/EWS/common/e-ews-connection.c:644
 msgid "Authentication failed"
 msgstr "Neuspjela ovjera"
 
-#: ../src/EWS/common/e-ews-connection.c:2350
+#: ../src/EWS/common/e-ews-connection.c:2389
 msgid "Failed to parse autodiscover response XML"
 msgstr "Nemoguća obrada automatskog otkrivanja odgovora XML-a"
 
-#: ../src/EWS/common/e-ews-connection.c:2356
+#: ../src/EWS/common/e-ews-connection.c:2395
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nemoguće je pronaći element <Automatskog otkrivanja>"
 
-#: ../src/EWS/common/e-ews-connection.c:2366
+#: ../src/EWS/common/e-ews-connection.c:2405
 msgid "Failed to find <Response> element"
 msgstr "Nemoguće je pronaći element <Odgovora>"
 
-#: ../src/EWS/common/e-ews-connection.c:2376
+#: ../src/EWS/common/e-ews-connection.c:2415
 msgid "Failed to find <Account> element"
 msgstr "Nemoguće je pronaći <element> računa"
 
-#: ../src/EWS/common/e-ews-connection.c:2421
+#: ../src/EWS/common/e-ews-connection.c:2460
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Nemoguće je pronaći <ASUrl> u odgovoru automatskog otkrivanja"
 
-#: ../src/EWS/common/e-ews-connection.c:2497
+#: ../src/EWS/common/e-ews-connection.c:2536
 msgid "URL cannot be NULL"
 msgstr "URL ne može biti NIŠTA"
 
-#: ../src/EWS/common/e-ews-connection.c:2915
+#: ../src/EWS/common/e-ews-connection.c:2954
 msgid "Email address is missing a domain part"
 msgstr "Adresi e-pošte nedostaje domena"
 
-#: ../src/EWS/common/e-ews-connection.c:3124
+#: ../src/EWS/common/e-ews-connection.c:3163
 msgid "Failed to parse oab XML"
 msgstr "Neuspjela obrada oab XML-a"
 
-#: ../src/EWS/common/e-ews-connection.c:3162
+#: ../src/EWS/common/e-ews-connection.c:3201
 msgid "Failed to find <OAB> element\n"
 msgstr "Nemoguće pronalazak <OAB> elementa\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8685
+#: ../src/EWS/common/e-ews-connection.c:8726
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2010 SP1 server"
 
-#: ../src/EWS/common/e-ews-connection.c:8786
+#: ../src/EWS/common/e-ews-connection.c:8827
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2013 server"
 
-#: ../src/EWS/common/e-ews-connection.c:8939
+#: ../src/EWS/common/e-ews-connection.c:8980
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2010 server"
 
-#: ../src/EWS/common/e-ews-connection.c:9079
+#: ../src/EWS/common/e-ews-connection.c:9120
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2007 SP1 server"
 
@@ -660,11 +670,11 @@ msgstr "_Preuzmi fotografije kontakta"
 msgid "Tries to look up for user photo"
 msgstr "Pokušava pretražiti fotografije korisnika"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
 msgid "Online Meeting"
 msgstr "Mrežni sastanak"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr "Stvori sastanak kao mrežni sastanak u glavnom kalendaru korisnika."
 
