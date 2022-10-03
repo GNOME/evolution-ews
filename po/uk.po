@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-07-15 08:46+0000\n"
-"PO-Revision-Date: 2022-07-16 08:58+0300\n"
+"POT-Creation-Date: 2022-10-03 09:08+0000\n"
+"PO-Revision-Date: 2022-10-03 13:36+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -97,8 +97,8 @@ msgstr "Не вдалося знайти користувача «%s» сере�
 msgid ""
 "Cannot connect to the server, repeat the action once you login to the server."
 msgstr ""
-"Не вдалося встановити з'єднання з сервером. Дію буде повторено, щойно ви"
-" увійдете до сервера."
+"Не вдалося встановити з'єднання з сервером. Дію буде повторено, щойно ви "
+"увійдете до сервера."
 
 #. Translators: The '%s' is replaced with a UID of the collection source
 #: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
@@ -106,7 +106,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Не вдалося знайти допоміжне джерело Microsoft365 для календаря «%s»"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2089
 msgid "Invalid occurrence ID"
 msgstr "Некоректний ідентифікатор повторення"
 
@@ -459,19 +459,33 @@ msgstr "Неможливо підписатися на теку «%s» — не�
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Неможливо підписатися на теку «%s» — теку не знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3771
+#: ../src/EWS/camel/camel-ews-store.c:3695
+#, c-format
+#| msgid "Cannot subscribe folder “%s”, folder not found"
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Неможливо підписатися на теку «%s» — ідентифікатор теки не знайдено"
+
+#: ../src/EWS/camel/camel-ews-store.c:3706
+#, c-format
+#| msgid "Cannot subscribe folder “%s”, folder not found"
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr ""
+"Неможливо підписатися на теку «%s» — загальнодоступної кореневої теки не"
+" знайдено"
+
+#: ../src/EWS/camel/camel-ews-store.c:3782
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не можна скасовувати підписку на теки EWS в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3893
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Потрібно бути в мережі, щоб завершити цю операцію"
 
-#: ../src/EWS/camel/camel-ews-store.c:3954
-#: ../src/EWS/camel/camel-ews-store.c:3991
+#: ../src/EWS/camel/camel-ews-store.c:3965
+#: ../src/EWS/camel/camel-ews-store.c:4002
 msgid "Unsetting the “Out of Office” status"
 msgstr "Скасовуємо стан «За межами офісу»"
 
@@ -541,12 +555,12 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Виклик CreateItem не повернув ідентифікатора нового повідомлення"
 
-#: ../src/EWS/common/e-ews-connection.c:324
+#: ../src/EWS/common/e-ews-connection.c:344
 #, c-format
 msgid "No response: %s"
 msgstr "Немає відповіді: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:487
+#: ../src/EWS/common/e-ews-connection.c:509
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -559,7 +573,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Exchange зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/EWS/common/e-ews-connection.c:493
+#: ../src/EWS/common/e-ews-connection.c:515
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -568,59 +582,59 @@ msgstr[1] "Сервер Exchange зайнято, очікуємо на повт�
 msgstr[2] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунд)"
 msgstr[3] "Сервер Exchange зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/EWS/common/e-ews-connection.c:622
+#: ../src/EWS/common/e-ews-connection.c:644
 msgid "Authentication failed"
 msgstr "Не вдалось пройти розпізнавання"
 
-#: ../src/EWS/common/e-ews-connection.c:2350
+#: ../src/EWS/common/e-ews-connection.c:2389
 msgid "Failed to parse autodiscover response XML"
 msgstr "Не вдалося обробити відповідь XML autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2356
+#: ../src/EWS/common/e-ews-connection.c:2395
 msgid "Failed to find <Autodiscover> element"
 msgstr "Не вдалося знайти елемент <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2366
+#: ../src/EWS/common/e-ews-connection.c:2405
 msgid "Failed to find <Response> element"
 msgstr "Не вдалося знайти елемент <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2376
+#: ../src/EWS/common/e-ews-connection.c:2415
 msgid "Failed to find <Account> element"
 msgstr "Не вдалося знайти елемент <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2421
+#: ../src/EWS/common/e-ews-connection.c:2460
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Не вдалося знайти <ASUrl> у відповіді на автовиявлення"
 
-#: ../src/EWS/common/e-ews-connection.c:2497
+#: ../src/EWS/common/e-ews-connection.c:2536
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бути порожньою"
 
-#: ../src/EWS/common/e-ews-connection.c:2915
+#: ../src/EWS/common/e-ews-connection.c:2954
 msgid "Email address is missing a domain part"
 msgstr "У адресі електронної пошти пропущено частину домену"
 
-#: ../src/EWS/common/e-ews-connection.c:3124
+#: ../src/EWS/common/e-ews-connection.c:3163
 msgid "Failed to parse oab XML"
 msgstr "Не вдалося обробити XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:3162
+#: ../src/EWS/common/e-ews-connection.c:3201
 msgid "Failed to find <OAB> element\n"
 msgstr "Не вдалося знайти елемент <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8685
+#: ../src/EWS/common/e-ews-connection.c:8726
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8786
+#: ../src/EWS/common/e-ews-connection.c:8827
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:8939
+#: ../src/EWS/common/e-ews-connection.c:8980
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9079
+#: ../src/EWS/common/e-ews-connection.c:9120
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2007 SP1"
 
@@ -673,11 +687,11 @@ msgstr "О_тримувати фотографії контактів"
 msgid "Tries to look up for user photo"
 msgstr "Намагатися отримати фотографії користувачів"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
 msgid "Online Meeting"
 msgstr "Інтернет-нарада"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr "Створити зустріч як інтернет-нараду у календарі основного користувача"
 
