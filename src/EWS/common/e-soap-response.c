@@ -681,7 +681,7 @@ e_soap_parameter_get_string_value (ESoapParameter *param)
 
 /**
  * e_soap_parameter_get_first_child:
- * @param: An #ESoapParameter.
+ * @param: (nullable): An #ESoapParameter.
  *
  * Gets the first child of the given #ESoapParameter. This is used
  * for compound data types, which can contain several parameters
@@ -692,14 +692,15 @@ e_soap_parameter_get_string_value (ESoapParameter *param)
 ESoapParameter *
 e_soap_parameter_get_first_child (ESoapParameter *param)
 {
-	g_return_val_if_fail (param != NULL, NULL);
+	if (!param)
+		return NULL;
 
 	return soup_xml_real_node (param->children);
 }
 
 /**
  * e_soap_parameter_get_first_child_by_name:
- * @param: An #ESoapParameter.
+ * @param: (nullable): An #ESoapParameter.
  * @name: The name of the child parameter to look for.
  *
  * Gets the first child of the given #ESoapParameter whose name is
@@ -714,7 +715,6 @@ e_soap_parameter_get_first_child_by_name (ESoapParameter *param,
 {
 	ESoapParameter *tmp;
 
-	g_return_val_if_fail (param != NULL, NULL);
 	g_return_val_if_fail (name != NULL, NULL);
 
 	for (tmp = e_soap_parameter_get_first_child (param);
@@ -729,7 +729,7 @@ e_soap_parameter_get_first_child_by_name (ESoapParameter *param,
 
 /**
  * e_soap_parameter_get_next_child:
- * @param: An #ESoapParameter.
+ * @param: (nullable): An #ESoapParameter, or %NULL.
  *
  * Gets the next sibling of the given #ESoapParameter. This is used
  * for compound data types, which can contain several parameters
@@ -743,14 +743,15 @@ e_soap_parameter_get_first_child_by_name (ESoapParameter *param,
 ESoapParameter *
 e_soap_parameter_get_next_child (ESoapParameter *param)
 {
-	g_return_val_if_fail (param != NULL, NULL);
+	if (!param)
+		return NULL;
 
 	return soup_xml_real_node (param->next);
 }
 
 /**
  * e_soap_parameter_get_next_child_by_name:
- * @param: An #ESoapParameter.
+ * @param: (nullable): An #ESoapParameter.
  * @name: The name of the sibling parameter to look for.
  *
  * Gets the next sibling of the given #ESoapParameter whose name is
@@ -766,7 +767,6 @@ e_soap_parameter_get_next_child_by_name (ESoapParameter *param,
 {
 	ESoapParameter *tmp;
 
-	g_return_val_if_fail (param != NULL, NULL);
 	g_return_val_if_fail (name != NULL, NULL);
 
 	for (tmp = e_soap_parameter_get_next_child (param);
