@@ -2256,12 +2256,13 @@ ebb_ews_mailbox_to_contact (EBookBackendEws *bbews,
 		e_vcard_attribute_add_value (attr, value);
 		e_vcard_append_attribute (E_VCARD (*contact), attr);
 
-		if (values)
-			g_hash_table_insert (values, g_strdup (value), GINT_TO_POINTER (1));
-	} else {
-		g_free (value);
+		if (values) {
+			g_hash_table_insert (values, value, GINT_TO_POINTER (1));
+			value = NULL;
+		}
 	}
 
+	g_free (value);
 	g_object_unref (addr);
 }
 
