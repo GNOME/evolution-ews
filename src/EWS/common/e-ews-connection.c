@@ -4814,6 +4814,8 @@ e_ews_process_resolve_names_response (EEwsConnection *cnc,
 					}
 				}
 			}
+
+			break;
 		}
 
 		subparam = e_soap_parameter_get_next_child (subparam);
@@ -5119,14 +5121,16 @@ e_ews_process_expand_dl_response (EEwsConnection *cnc,
 			g_free (prop);
 
 			for (subparam = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
-				subparam != NULL;
-				subparam = e_soap_parameter_get_next_child_by_name (subparam, "Mailbox")) {
+			     subparam != NULL;
+			     subparam = e_soap_parameter_get_next_child_by_name (subparam, "Mailbox")) {
 				EwsMailbox *mb;
 
 				mb = e_ews_item_mailbox_from_soap_param (subparam);
 				if (mb)
 					*out_mailboxes = g_slist_prepend (*out_mailboxes, mb);
 			}
+
+			break;
 		}
 
 		subparam = e_soap_parameter_get_next_child (subparam);
