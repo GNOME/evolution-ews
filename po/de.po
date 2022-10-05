@@ -12,9 +12,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-09-16 07:23+0000\n"
-"PO-Revision-Date: 2022-09-17 12:38+0200\n"
-"Last-Translator: Tim Sabsch <tim@sabsch.com>\n"
+"POT-Creation-Date: 2022-10-04 09:03+0000\n"
+"PO-Revision-Date: 2022-10-04 23:08+0200\n"
+"Last-Translator: Jürgen Benvenuti <gastornis@posteo.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -35,22 +35,22 @@ msgstr "Exchange-Webdienste"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Für den Zugriff auf Exchange-Server über Webdienste"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
 msgid "Fetching contact photos…"
 msgstr "Kontakt_fotos holen …"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
 msgid "Failed to update GAL:"
 msgstr "GAL konnte nicht aktualisiert werden:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kontaktliste kann nicht gespeichert werden. Das wird nur für Exchange-"
 "Webdienste-Server 2010 oder neuer unterstützt"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
 msgid "Failed to set contact photo:"
 msgstr "Kontaktfoto konnte nicht festgelegt werden:"
 
@@ -459,19 +459,32 @@ msgstr ""
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Ordner »%s« kann nicht abonniert werden, Ordner wurde nicht gefunden"
 
-#: ../src/EWS/camel/camel-ews-store.c:3771
+#: ../src/EWS/camel/camel-ews-store.c:3695
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr ""
+"Ordner »%s« kann nicht abonniert werden, Ordner-Kennung wurde nicht gefunden"
+
+#: ../src/EWS/camel/camel-ews-store.c:3706
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr ""
+"Ordner »%s« kann nicht abonniert werden, öffentlicher Hauptordner wurde "
+"nicht gefunden"
+
+#: ../src/EWS/camel/camel-ews-store.c:3782
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "OEWS-Ordner können im Offline-Modus nicht abbestellt werden"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3893
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Sie müssen online arbeiten, um diesen Vorgang abzuschließen"
 
-#: ../src/EWS/camel/camel-ews-store.c:3954
-#: ../src/EWS/camel/camel-ews-store.c:3991
+#: ../src/EWS/camel/camel-ews-store.c:3965
+#: ../src/EWS/camel/camel-ews-store.c:4002
 msgid "Unsetting the “Out of Office” status"
 msgstr "Abwesenheitseinstellungen werden deaktiviert"
 
@@ -609,19 +622,19 @@ msgstr "OAB-XML konnte nicht verarbeitet werden"
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB>-Element konnte nicht gefunden werden\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8726
+#: ../src/EWS/common/e-ews-connection.c:8730
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Es ist mindestens Microsoft Exchange 2010 SP1 Server erforderlich"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:8831
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Es ist mindestens Microsoft Exchange 2013 Server erforderlich"
 
-#: ../src/EWS/common/e-ews-connection.c:8980
+#: ../src/EWS/common/e-ews-connection.c:8984
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Es ist mindestens Microsoft Exchange 2010 Server erforderlich"
 
-#: ../src/EWS/common/e-ews-connection.c:9120
+#: ../src/EWS/common/e-ews-connection.c:9124
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Es ist mindestens Microsoft Exchange 2007 SP1 Server erforderlich"
 
@@ -1625,7 +1638,7 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Ordner des Benutzers »{0}« wurde erfolgreich abonniert."
 
 #: ../src/EWS/registry/e-ews-backend.c:1094
-#: ../src/Microsoft365/registry/e-m365-backend.c:696
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
@@ -1647,22 +1660,22 @@ msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr ""
 "Kontaktliste kann nicht in einem Microsoft 365-Adressbuch gespeichert werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr ""
 "Nur einfache Ereignisse können im Microsoft 365-Kalender gespeichert werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Nur einfache Aufgaben können im Microsoft 365-Aufgabenordner gespeichert "
 "werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1630
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365-Kalender kann nicht mehr als eine Wiederholung speichern"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1639
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1670,35 +1683,40 @@ msgstr ""
 "Microsoft 365-Kalender kann keine Komponente mit RDATE-, EXDATE- oder RRULE-"
 "Eigenschaften speichern"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1749
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Unbekannte Wiederholungshäufigkeit (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1901
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Microsoft 365-Kalender kann nicht mehr als eine Ereigniserinnerung speichern"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1934
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365-Ereignis darf nur eine Erinnerung vor dem Ereignisstart haben"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1947
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365-Task darf nur eine Erinnerung mit absoluter Zeit haben"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2273
+#, c-format
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Microsoft 365-Task darf keine Anlagen haben."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2376
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Anlage mit Adresse »%s« kann nicht gespeichert werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2378
 msgid "Failed to read attachment URI"
 msgstr "Fehler beim Lesen der Anlagen-Adresse"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2392
 msgid "Failed to get inline attachment data"
 msgstr "Fehler beim Abrufen von Inline-Anlagendaten"
 
@@ -1748,7 +1766,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "E-Mail-Empfang über Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1241
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Fehlerhafte Adresse: »%s«"
@@ -1806,7 +1824,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:885
+#: ../src/Microsoft365/common/e-m365-connection.c:886
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1817,7 +1835,7 @@ msgstr[1] ""
 "Der Exchange-Server ist ausgelastet. Warten auf einen erneuten Versuch (%d:"
 "%02d Minuten)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:891
+#: ../src/Microsoft365/common/e-m365-connection.c:892
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1828,16 +1846,16 @@ msgstr[1] ""
 "Microsoft 365-Server ist ausgelastet und wartet auf einen erneuten Versuch "
 "(%d Sekunden)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1016
-#: ../src/Microsoft365/common/e-m365-connection.c:1043
+#: ../src/Microsoft365/common/e-m365-connection.c:1017
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Invalid data"
 msgstr "Ungültige Daten"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1041
+#: ../src/Microsoft365/common/e-m365-connection.c:1042
 msgid "Operation was cancelled"
 msgstr "Die Operation wurde abgebrochen"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1719
+#: ../src/Microsoft365/common/e-m365-connection.c:1725
 msgid "Failed to parse own Json data"
 msgstr "Fehler beim Verarbeiten eigener JSON-Daten"
 
@@ -1862,7 +1880,7 @@ msgstr "Standard-Tenant ist »%s«"
 msgid "_Redirect URI:"
 msgstr "Weite_rleitungsadresse:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:787
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Datenquelle »%s« stellt keinen Microsoft 365-Ordner dar"
