@@ -574,29 +574,6 @@ m365_folder_append_message_sync (CamelFolder *folder,
 				 GCancellable *cancellable,
 				 GError **error)
 {
-	/* Cannot put existing messages from other providers, because:
-	   1) those are always set as drafts
-	   2) the set sentDateTime property is not respected
-	   3) internetMessageHeaders is limited to 5! headers only:
-	      {
-		"error": {
-			"code": "InvalidInternetMessageHeaderCollection",
-			"message": "Maximum number of headers in one message should be less than or equal to 5.",
-			"innerError": {
-				"date": "2020-07-01T10:03:34",
-				"request-id": "a46da0ea-8933-43c6-932d-7c751f226516"
-			}
-		}
-	      }
-	   4) there are likely to be more limitations on the graph API, not spotted yet.
-
-	   There is opened a feture request, which may eventually fix this, but it's currently not done yet (as of 2020-07-01):
-	   https://microsoftgraph.uservoice.com/forums/920506-microsoft-graph-feature-requests/suggestions/35049175-put-edit-mime-email-content-with-microsoft-graph
-
-	   Thus just error out for now.
-	*/
-
-#ifdef ENABLE_MAINTAINER_MODE /* Only for easier testing */
 	CamelStore *parent_store;
 	CamelM365Store *m365_store;
 	EM365Connection *cnc = NULL;
@@ -628,11 +605,6 @@ m365_folder_append_message_sync (CamelFolder *folder,
 		g_propagate_error (error, local_error);
 
 	return success;
-#else
-	g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
-		_("Cannot add messages into a Microsoft 365 account from another account. Only messages from the same account can be moved/copied between the Microsoft 365 folders."));
-	return FALSE;
-#endif
 }
 
 static gboolean

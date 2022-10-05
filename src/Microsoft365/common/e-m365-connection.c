@@ -2511,6 +2511,73 @@ e_m365_connection_create_mail_message_sync (EM365Connection *cnc,
 	return success;
 }
 
+gboolean
+e_m365_connection_upload_mail_message_sync (EM365Connection *cnc,
+					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
+					    CamelMimeMessage *mime_message,
+					    EM365MailMessage **out_created_message, /* free with json_object_unref() */
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	SoupMessage *message;
+	GInputStream *input_stream;
+	CamelStream *mem_stream, *filter_stream;
+	CamelMimeFilter *base64_filter;
+	GByteArray *byte_array;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (CAMEL_IS_MIME_MESSAGE (mime_message), FALSE);
+	g_return_val_if_fail (out_created_message != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		folder_id ? "mailFolders" : "messages",
+		folder_id,
+		folder_id ? "messages" : NULL,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	mem_stream = camel_stream_mem_new ();
+	filter_stream = camel_stream_filter_new (mem_stream);
+	base64_filter = camel_mime_filter_basic_new (CAMEL_MIME_FILTER_BASIC_BASE64_ENC);
+	camel_stream_filter_add (CAMEL_STREAM_FILTER (filter_stream), base64_filter);
+	g_clear_object (&base64_filter);
+
+	if (camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (mime_message), filter_stream, cancellable, error) == -1) {
+		g_clear_object (&filter_stream);
+		g_clear_object (&mem_stream);
+		g_clear_object (&message);
+
+		return FALSE;
+	}
+
+	byte_array = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem_stream));
+
+	input_stream = g_memory_input_stream_new_from_data (byte_array->data, byte_array->len, NULL);
+
+	e_soup_session_util_set_message_request_body (message, "text/plain", input_stream, byte_array->len);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_message, cancellable, error);
+
+	g_clear_object (&input_stream);
+	g_clear_object (&filter_stream);
+	g_clear_object (&mem_stream);
+	g_clear_object (&message);
+
+	return success;
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/message-post-attachments?view=graph-rest-1.0&tabs=http */
 
 gboolean

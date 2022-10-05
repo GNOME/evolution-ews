@@ -934,55 +934,41 @@ camel_m365_utils_create_message_sync (EM365Connection *cnc,
 				      GError **error)
 {
 	EM365MailMessage *appended_message = NULL;
-	GSList *attachments = NULL;
-	JsonBuilder *builder;
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (CAMEL_IS_MIME_MESSAGE (message), FALSE);
 
-	builder = json_builder_new_immutable ();
-
-	e_m365_json_begin_object_member (builder, NULL);
-
-	if (!camel_m365_utils_fill_message_object_sync (builder, message, info, NULL, NULL, FALSE, &attachments, cancellable, error)) {
-		g_slist_free_full (attachments, g_object_unref);
-		g_object_unref (builder);
-
-		return FALSE;
-	}
-
-	e_m365_json_end_object_member (builder);
-
-	success = e_m365_connection_create_mail_message_sync (cnc, NULL, folder_id, builder, &appended_message, cancellable, error);
+	/* Cannot upload message directly to the folder_id, because the server returns:
+	   {"error":{"code":"UnableToDeserializePostBody","message":"were unable to deserialize "}}
+	   thus upload to the Drafts folder and then move the message to the right place. */
+	success = e_m365_connection_upload_mail_message_sync (cnc, NULL, NULL, message, &appended_message, cancellable, error);
 
 	g_warn_if_fail ((success && appended_message) || (!success && !appended_message));
 
-	g_object_unref (builder);
-
 	if (success && appended_message) {
-		GSList *link;
-		const gchar *message_id;
+		GSList src_ids = { 0, }, *des_ids = NULL;
+		const gchar *id;
 
-		message_id = e_m365_mail_message_get_id (appended_message);
+		id = e_m365_mail_message_get_id (appended_message);
+		g_warn_if_fail (id != NULL);
 
-		if (out_appended_id)
-			*out_appended_id = g_strdup (message_id);
+		src_ids.next = NULL;
+		src_ids.data = (gpointer) id;
 
-		for (link = attachments; link && success; link = g_slist_next (link)) {
-			CamelDataWrapper *dw = link->data;
+		/* Sadly, the isDraft flag cannot be unset, thus every uploaded message
+		   is a draft for the server, which is quite bad */
+		if (e_m365_connection_copy_move_mail_messages_sync (cnc, NULL, &src_ids, folder_id, FALSE, &des_ids, cancellable, error)) {
+			if (des_ids) {
+				if (out_appended_id)
+					*out_appended_id = g_strdup ((const gchar *) des_ids->data);
 
-			builder = json_builder_new_immutable ();
-
-			m365_utils_add_attachment_object (builder, dw, cancellable);
-
-			success = e_m365_connection_add_mail_message_attachment_sync (cnc, NULL, message_id, builder, NULL, cancellable, error);
-
-			g_object_unref (builder);
+				g_slist_free_full (des_ids, (GDestroyNotify) camel_pstring_free);
+			} else {
+				g_warning ("Moved message to '%s', but did not return new message id", folder_id);
+			}
 		}
 	}
-
-	g_slist_free_full (attachments, g_object_unref);
 
 	if (appended_message)
 		json_object_unref (appended_message);

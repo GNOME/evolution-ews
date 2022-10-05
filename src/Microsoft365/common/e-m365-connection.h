@@ -247,6 +247,14 @@ gboolean	e_m365_connection_create_mail_message_sync
 						 EM365MailMessage **out_created_message, /* free with json_object_unref() */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_upload_mail_message_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
+						 CamelMimeMessage *mime_message,
+						 EM365MailMessage **out_created_message, /* free with json_object_unref() */
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_m365_connection_add_mail_message_attachment_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
