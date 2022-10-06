@@ -116,6 +116,7 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 	ICalTime *itt;
 	time_t tt;
 	const gchar *tzid, *zone;
+	gboolean use_user_timezone = FALSE;
 	gboolean is_date;
 
 	if (prop_kind == I_CAL_DTSTART_PROPERTY) {
@@ -129,6 +130,7 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 			value = e_m365_task_get_start_date_time (m365_object);
 			tzid = "UTC";
 			is_date = TRUE;
+			use_user_timezone = TRUE;
 			break;
 		default:
 			g_warn_if_reached ();
@@ -142,10 +144,12 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 		value = e_m365_task_get_completed_date_time (m365_object);
 		tzid = "UTC";
 		is_date = TRUE;
+		use_user_timezone = TRUE;
 	} else if (prop_kind == I_CAL_DUE_PROPERTY) {
 		value = e_m365_task_get_due_date_time (m365_object);
 		tzid = "UTC";
 		is_date = TRUE;
+		use_user_timezone = TRUE;
 	} else {
 		g_warn_if_reached ();
 		return;
@@ -155,27 +159,38 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 		return;
 
 	tt = e_m365_date_time_get_date_time (value);
-	zone = e_m365_date_time_get_time_zone (value);
+	if (use_user_timezone) {
+		tz = e_m365_tz_utils_get_user_timezone ();
+	} else {
+		zone = e_m365_date_time_get_time_zone (value);
 
-	if (zone && *zone)
-		zone = e_m365_tz_utils_get_ical_equivalent (zone);
+		if (zone && *zone)
+			zone = e_m365_tz_utils_get_ical_equivalent (zone);
 
-	tz = zone && *zone ? e_timezone_cache_get_timezone (timezone_cache, zone) : NULL;
+		tz = zone && *zone ? e_timezone_cache_get_timezone (timezone_cache, zone) : NULL;
+	}
 
 	if (!tz)
 		tz = i_cal_timezone_get_utc_timezone ();
 
-	itt = i_cal_time_new_from_timet_with_zone (tt, is_date, tz);
+	itt = i_cal_time_new_from_timet_with_zone (tt, is_date && !use_user_timezone, tz);
 
-	tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
+	if (is_date && use_user_timezone)
+		i_cal_time_set_is_date (itt, TRUE);
 
-	if (!tzid)
-		tzid = "UTC";
+	i_cal_time_set_timezone (itt, tz);
 
-	tz = e_timezone_cache_get_timezone (timezone_cache, tzid);
+	if (!is_date) {
+		tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
 
-	if (tz && !is_date)
-		i_cal_time_convert_to_zone_inplace (itt, tz);
+		if (!tzid)
+			tzid = "UTC";
+
+		tz = e_timezone_cache_get_timezone (timezone_cache, tzid);
+
+		if (tz && !is_date)
+			i_cal_time_convert_to_zone_inplace (itt, tz);
+	}
 
 	if (prop_kind == I_CAL_DTSTART_PROPERTY)
 		i_cal_component_set_dtstart (inout_comp, itt);

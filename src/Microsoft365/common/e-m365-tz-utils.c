@@ -11,6 +11,8 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include <gio/gio.h>
+
 #include "e-m365-tz-utils.h"
 
 /*
@@ -181,4 +183,28 @@ e_m365_tz_utils_get_ical_equivalent (const gchar *msdn_tz_location)
 	g_rec_mutex_unlock (&tz_mutex);
 
 	return ical_tz_location;
+}
+
+ICalTimezone *
+e_m365_tz_utils_get_user_timezone (void)
+{
+	GSettings *settings;
+	gchar *location;
+	ICalTimezone *zone = NULL;
+
+	settings = g_settings_new ("org.gnome.evolution.calendar");
+
+	if (g_settings_get_boolean (settings, "use-system-timezone"))
+		location = e_cal_util_get_system_timezone_location ();
+	else
+		location = g_settings_get_string (settings, "timezone");
+
+	g_object_unref (settings);
+
+	if (location)
+		zone = i_cal_timezone_get_builtin_timezone (location);
+
+	g_free (location);
+
+	return zone;
 }
