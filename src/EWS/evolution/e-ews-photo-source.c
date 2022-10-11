@@ -37,6 +37,7 @@ typedef struct _EEwsPhotoSourceClass EEwsPhotoSourceClass;
 
 struct _EEwsPhotoSource {
 	EExtension parent;
+	GThreadPool *pool;
 };
 
 struct _EEwsPhotoSourceClass {
@@ -51,12 +52,12 @@ G_DEFINE_DYNAMIC_TYPE_EXTENDED (EEwsPhotoSource, e_ews_photo_source, E_TYPE_EXTE
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_PHOTO_SOURCE, ews_photo_source_iface_init))
 
 static void
-ews_photo_source_thread (GTask *task,
-			 gpointer source_object,
-			 gpointer task_data,
-			 GCancellable *cancellable)
+e_ews_photo_source_pool_thread_func_cb (gpointer data,
+					gpointer user_data)
 {
-	const gchar *email_address = task_data;
+	GTask *task = data;
+	GCancellable *cancellable = g_task_get_cancellable (task);
+	const gchar *email_address = g_task_get_task_data (task);
 	GSList *connections, *link;
 	GHashTable *covered_uris;
 	GError *local_error = NULL;
@@ -66,7 +67,7 @@ ews_photo_source_thread (GTask *task,
 	covered_uris = g_hash_table_new_full (camel_strcase_hash, camel_strcase_equal, g_free, NULL);
 	connections = e_ews_connection_list_existing ();
 
-	for (link = connections; link; link = g_slist_next (link)) {
+	for (link = connections; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
 		EEwsConnection *cnc = link->data;
 		gchar *picture_data = NULL;
 		const gchar *uri;
@@ -94,7 +95,7 @@ ews_photo_source_thread (GTask *task,
 				decoded = NULL;
 
 				g_task_return_pointer (task, stream, g_object_unref);
-				task = NULL;
+				g_clear_object (&task);
 				g_free (decoded);
 				break;
 			}
@@ -113,6 +114,7 @@ ews_photo_source_thread (GTask *task,
 		}
 
 		g_task_return_error (task, local_error);
+		g_clear_object (&task);
 	} else {
 		g_clear_error (&local_error);
 	}
@@ -125,16 +127,20 @@ ews_photo_source_get_photo (EPhotoSource *photo_source,
 			    GAsyncReadyCallback callback,
 			    gpointer user_data)
 {
+	EEwsPhotoSource *ews_photo_source;
 	GTask *task;
 
 	g_return_if_fail (E_IS_EWS_PHOTO_SOURCE (photo_source));
 	g_return_if_fail (email_address != NULL);
 
+	ews_photo_source = E_EWS_PHOTO_SOURCE (photo_source);
+
 	task = g_task_new (photo_source, cancellable, callback, user_data);
 	g_task_set_source_tag (task, ews_photo_source_get_photo);
 	g_task_set_task_data (task, g_strdup (email_address), g_free);
-	g_task_run_in_thread (task, ews_photo_source_thread);
-	g_object_unref (task);
+	/* process only one request at a time, without using GTask threads, because
+	   those are important to not be used for a long time */
+	g_thread_pool_push (ews_photo_source->pool, task, NULL);
 }
 
 static gboolean
@@ -179,6 +185,17 @@ ews_photo_source_constructed (GObject *object)
 }
 
 static void
+ews_photo_source_finalize (GObject *object)
+{
+	EEwsPhotoSource *ews_photo_source = E_EWS_PHOTO_SOURCE (object);
+
+	g_thread_pool_free (ews_photo_source->pool, FALSE, TRUE);
+
+	/* Chain up to parent's method. */
+	G_OBJECT_CLASS (e_ews_photo_source_parent_class)->finalize (object);
+}
+
+static void
 e_ews_photo_source_class_init (EEwsPhotoSourceClass *class)
 {
 	GObjectClass *object_class;
@@ -186,6 +203,7 @@ e_ews_photo_source_class_init (EEwsPhotoSourceClass *class)
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->constructed = ews_photo_source_constructed;
+	object_class->finalize = ews_photo_source_finalize;
 
 	extension_class = E_EXTENSION_CLASS (class);
 	extension_class->extensible_type = E_TYPE_PHOTO_CACHE;
@@ -206,6 +224,7 @@ ews_photo_source_iface_init (EPhotoSourceInterface *iface)
 static void
 e_ews_photo_source_init (EEwsPhotoSource *extension)
 {
+	extension->pool = g_thread_pool_new (e_ews_photo_source_pool_thread_func_cb, NULL, 1, FALSE, NULL);
 }
 
 void
