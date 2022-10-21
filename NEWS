@@ -1,3 +1,16 @@
+Evolution-EWS 3.46.1 2022-10-21
+-------------------------------
+
+Miscellaneous:
+	Handle negative value for GUri's port
+	EwsConnect: Early stop a response traversal
+	ESoapResponse: Allow NULL for some traversal functions
+	ebb_ews_mailbox_to_contact: Fix a memory leak
+
+Translations:
+	Jürgen Benvenuti (de)
+	Мирослав Николић (sr)
+
 Evolution-EWS 3.46.0 2022-09-16
 -------------------------------
 
