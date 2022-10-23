@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-09-16 14:56+0000\n"
-"PO-Revision-Date: 2022-09-20 03:53+0200\n"
+"POT-Creation-Date: 2022-10-05 07:55+0000\n"
+"PO-Revision-Date: 2022-10-12 11:20+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <српски <gnome-sr@googlegroups.org>>\n"
 "Language: sr\n"
@@ -33,22 +33,22 @@ msgstr "Веб услуге размене"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "За приступ серверима размене помоћу веб услуга"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
 msgid "Fetching contact photos…"
 msgstr "Добављам фотографије контакта…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
 msgid "Failed to update GAL:"
 msgstr "Нисам успео да освежим ГАЛ:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Не могу да сачувам списак контакта, подржано је само на EWS серверима 2010 "
 "или новијим"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
 msgid "Failed to set contact photo:"
 msgstr "Нисам успео да подесим фотографију контакта:"
 
@@ -449,19 +449,31 @@ msgstr "Не могу да претплатим фасциклу „%s“, не�
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Не могу да претплатим фасциклу „%s“, нисам нашао фасциклу"
 
-#: ../src/EWS/camel/camel-ews-store.c:3771
+#: ../src/EWS/camel/camel-ews-store.c:3695
+#, c-format
+#| msgid "Cannot subscribe folder “%s”, folder not found"
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Не могу да претплатим фасциклу „%s“, нисам нашао ИД фасцикле"
+
+#: ../src/EWS/camel/camel-ews-store.c:3706
+#, c-format
+#| msgid "Cannot subscribe folder “%s”, folder not found"
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "Не могу да претплатим фасциклу „%s“, нисам нашао корен јавне фасцикле"
+
+#: ../src/EWS/camel/camel-ews-store.c:3782
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не могу да поништим претплату EWS фасцикли у режиму ван мреже"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3893
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Морате да будете на мрежи да бисте завршили ову радњу"
 
-#: ../src/EWS/camel/camel-ews-store.c:3954
-#: ../src/EWS/camel/camel-ews-store.c:3991
+#: ../src/EWS/camel/camel-ews-store.c:3965
+#: ../src/EWS/camel/camel-ews-store.c:4002
 msgid "Unsetting the “Out of Office” status"
 msgstr "Поништавам стање за „ван канцеларије“"
 
@@ -594,22 +606,19 @@ msgstr "Нисам успео да обрадим оаб ИксМЛ"
 msgid "Failed to find <OAB> element\n"
 msgstr "Нисам успео да пронађем елемент <ОАБ>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8726
-#| msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+#: ../src/EWS/common/e-ews-connection.c:8730
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Захтева барем сервер Мајкрософт размене 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
-#| msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+#: ../src/EWS/common/e-ews-connection.c:8831
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Захтева барем сервер Мајкрософт размене 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:8980
-#| msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+#: ../src/EWS/common/e-ews-connection.c:8984
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Захтева барем сервер Мајкрософт размене 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9120
+#: ../src/EWS/common/e-ews-connection.c:9124
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Захтева барем сервер Мајкрософт размене 2007 SP1"
 
@@ -662,11 +671,11 @@ msgstr "До_бави слике контаката"
 msgid "Tries to look up for user photo"
 msgstr "Покушава да потражи слику корисника"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
 msgid "Online Meeting"
 msgstr "Састанак на мрежи"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr "Направите састанак као састанак на мрежи у главном календару корисника"
 
@@ -1589,7 +1598,7 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Фасцикла корисника „{0}“ је успешно претплаћена."
 
 #: ../src/EWS/registry/e-ews-backend.c:1094
-#: ../src/Microsoft365/registry/e-m365-backend.c:696
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
@@ -1610,20 +1619,20 @@ msgstr "ИБ фасцикле није постављен"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Не могу да сачувам списак контаката у адресар Мајкрософта 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Могу да сачувам само једноставне догађаје у календар Мајкрософта 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Могу да сачувам само једноставне задатке у фасциклу задатака Мајкрософта 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1630
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Календар Мајкрософта 365 не може да сачува више од једног понављања"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1639
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1631,63 +1640,59 @@ msgstr ""
 "Календар Мајкрософта 365 не може да сачува састојак са „RDATE“, „EXDATE“ или "
 "„RRULE“ својствима"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1749
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Непозната учесталост понављања (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1901
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Календар Мајкрософта 365 не може да сачува више од једног подсетника догађаја"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1934
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Догађај Мајкрософта 365 може да има само подсетник пре почетка догађаја "
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1947
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Задатак Мајкрософта 365 може да има само подсетник са апсолутним временом"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2273
+#, c-format
+#| msgid "Microsoft 365 task can have only a reminder with absolute time"
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Задатак Мајкрософта 365 не може да има прилоге."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2376
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Не могу да сачувам прилог са путањом „%s“"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2378
 msgid "Failed to read attachment URI"
 msgstr "Нисам успео да прочитам путању прилога"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2392
 msgid "Failed to get inline attachment data"
 msgstr "Нисам успео да добавим пподатке унутарњег прилога"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:610
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+#: ../src/Microsoft365/camel/camel-m365-folder.c:587
+#: ../src/Microsoft365/camel/camel-m365-folder.c:989
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
 msgid "Invalid folder state (missing parent store)"
 msgstr "Неисправно стање фасцикле (недостаје главни смештај)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:633
-msgid ""
-"Cannot add messages into a Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-msgstr ""
-"Не могу да додајем поруке у налог Мајкрософта 365 из другог налога. Само "
-"поруке из истог налога могу бити премештене/умножене између фасцикли "
-"Мајкрософта 365."
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Фасцикла „%s“ не одговара ниједној познатој фасцикли"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Не могу да учитам сажетак за „%s“"
@@ -1710,7 +1715,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Пријем поште путем Мајкрософта 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1241
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Лоша путања: „%s“"
@@ -1766,7 +1771,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Микрософт365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:885
+#: ../src/Microsoft365/common/e-m365-connection.c:886
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1779,7 +1784,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Мајкрософта 365 је заузет, чекам да покушам поново (један минут)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:891
+#: ../src/Microsoft365/common/e-m365-connection.c:892
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1792,17 +1797,16 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Мајкрософта 365 је заузет, чекам да покушам поново (једна секунда)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1016
-#: ../src/Microsoft365/common/e-m365-connection.c:1043
+#: ../src/Microsoft365/common/e-m365-connection.c:1017
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Invalid data"
 msgstr "Неисправни подаци"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1041
-#| msgid "Operation Cancelled"
+#: ../src/Microsoft365/common/e-m365-connection.c:1042
 msgid "Operation was cancelled"
 msgstr "Радња је отказана"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1719
+#: ../src/Microsoft365/common/e-m365-connection.c:1725
 msgid "Failed to parse own Json data"
 msgstr "Нисам успео да обрадим сопствене Јсон податке"
 
@@ -1827,10 +1831,19 @@ msgstr "Основни поручник је „%s“"
 msgid "_Redirect URI:"
 msgstr "_Адреса преусмерења:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:787
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Извор података „%s“ не представља фасциклу Мајкрософта 365"
+
+#~ msgid ""
+#~ "Cannot add messages into a Microsoft 365 account from another account. "
+#~ "Only messages from the same account can be moved/copied between the "
+#~ "Microsoft 365 folders."
+#~ msgstr ""
+#~ "Не могу да додајем поруке у налог Мајкрософта 365 из другог налога. Само "
+#~ "поруке из истог налога могу бити премештене/умножене између фасцикли "
+#~ "Мајкрософта 365."
 
 #~ msgid "URL “%s” is not valid"
 #~ msgstr "Адреса „%s“ није исправна"
