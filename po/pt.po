@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2022-10-25 13:37+0000\n"
-"PO-Revision-Date: 2022-10-26 13:45+0100\n"
+"PO-Revision-Date: 2022-10-26 13:53+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Português <hugokarvalho@hotmail.com>\n"
 "Language: pt\n"
@@ -334,7 +334,7 @@ msgstr "Não é possível listar as pastas EWS públicas no modo Offline"
 
 #: ../src/EWS/camel/camel-ews-store.c:2765
 msgid "Cannot find any EWS public folders"
-msgstr "Não épossível encontrar uma pasta EWS pública"
+msgstr "Não é possível encontrar uma pasta EWS pública"
 
 #: ../src/EWS/camel/camel-ews-store.c:2878
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
@@ -467,7 +467,7 @@ msgstr "Tem de trabalhar online para completar esta operação"
 #: ../src/EWS/camel/camel-ews-store.c:3954
 #: ../src/EWS/camel/camel-ews-store.c:3991
 msgid "Unsetting the “Out of Office” status"
-msgstr "Desmarcando o estado de “Fora do escritório”"
+msgstr "A anular o estado de “Fora do escritório”"
 
 #: ../src/EWS/camel/camel-ews-store.h:40
 msgid "Foreign Folders"
@@ -836,7 +836,7 @@ msgstr "Personalizada"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:248
 msgid "Writing folder permissions, please wait…"
-msgstr "Gravando permissões da pasta, por favor aguarde…"
+msgstr "A gravar permissões da pasta, aguarde…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:762
 msgctxt "User"
@@ -1677,7 +1677,7 @@ msgstr "Falha ao obter informação do anexo na linha"
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1378
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1516
 msgid "Invalid folder state (missing parent store)"
-msgstr "Estado de pasta inválido (faltando armazenamento pai)"
+msgstr "Estado de pasta inválido (armazenamento principal em falta)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:633
 msgid ""
