@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2022-10-25 13:37+0000\n"
-"PO-Revision-Date: 2022-10-26 13:32+0100\n"
+"PO-Revision-Date: 2022-10-26 13:53+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Português <hugokarvalho@hotmail.com>\n"
 "Language: pt\n"
@@ -293,7 +293,7 @@ msgstr "%s_%d"
 #: ../src/EWS/camel/camel-ews-store.c:652
 #: ../src/EWS/camel/camel-ews-store.c:1479
 msgid "Checking “Out of Office” settings"
-msgstr "Verificando configurações de “Fora do escritório”"
+msgstr "A verificar definições de “Fora do escritório”"
 
 #: ../src/EWS/camel/camel-ews-store.c:1485
 msgid "Look up Exchange server categories"
@@ -334,7 +334,7 @@ msgstr "Não é possível listar as pastas EWS públicas no modo Offline"
 
 #: ../src/EWS/camel/camel-ews-store.c:2765
 msgid "Cannot find any EWS public folders"
-msgstr "Não épossível encontrar uma pasta EWS pública"
+msgstr "Não é possível encontrar uma pasta EWS pública"
 
 #: ../src/EWS/camel/camel-ews-store.c:2878
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
@@ -479,7 +479,7 @@ msgstr "Tem de trabalhar online para completar esta operação"
 #: ../src/EWS/camel/camel-ews-store.c:3965
 #: ../src/EWS/camel/camel-ews-store.c:4002
 msgid "Unsetting the “Out of Office” status"
-msgstr "Desmarcando o estado de “Fora do escritório”"
+msgstr "A anular o estado de “Fora do escritório”"
 
 #: ../src/EWS/camel/camel-ews-store.h:40
 msgid "Foreign Folders"
@@ -848,7 +848,7 @@ msgstr "Personalizado"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:248
 msgid "Writing folder permissions, please wait…"
-msgstr "Gravando permissões da pasta, por favor aguarde…"
+msgstr "A gravar permissões da pasta, aguarde…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:762
 msgctxt "User"
@@ -1194,7 +1194,7 @@ msgstr "Autenticação"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
 msgid "_Override Office365 OAuth2 settings"
-msgstr "_Sobrescrever configurações de OAuth2 do Office365"
+msgstr "_Sobrescrever definições de OAuth2 do Office365"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:320
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:398
@@ -1528,7 +1528,7 @@ msgstr "Responder a qualquer remetente fora da organização"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:976
 msgid "Retrieving “Out of Office” settings"
-msgstr "Obtendo configurações de “Fora do escritório”"
+msgstr "A obter definições de “Fora do escritório”"
 
 #. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
@@ -1580,11 +1580,11 @@ msgstr "Falha ao localizar livros de endereços offline."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
 msgid "Failed to retrieve “Out of Office” settings."
-msgstr "Falha ao obter configurações de “Fora do escritório”."
+msgstr "Falha ao obter definições de “Fora do escritório”."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:5
 msgid "Failed to retrieve “Delegates” settings."
-msgstr "Falha ao obter configurações de “Representantes”."
+msgstr "Falha ao obter definições de “Representantes”."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
@@ -1694,7 +1694,7 @@ msgstr "Falha ao obter informação do anexo na linha"
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1350
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1488
 msgid "Invalid folder state (missing parent store)"
-msgstr "Estado de pasta inválido (faltando armazenamento pai)"
+msgstr "Estado de pasta inválido (armazenamento principal em falta)"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1718
 #, c-format
@@ -1736,7 +1736,7 @@ msgstr "Procurar categorias do Microsoft 365"
 #: ../src/Microsoft365/camel/camel-m365-store.c:541
 #: ../src/Microsoft365/camel/camel-m365-transport.c:330
 msgid "Failed to create connection"
-msgstr "Falha ao criar conexão"
+msgstr "Falha ao criar ligação"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
