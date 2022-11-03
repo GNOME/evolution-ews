@@ -2793,7 +2793,6 @@ ews_get_folder_info_sync (CamelStore *store,
 		g_free (old_sync_state);
 		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL && ews_refresh_finfo (ews_store))
 			ews_store->priv->last_refresh_time = time (NULL);
-		else
 
 		g_mutex_unlock (&priv->get_finfo_lock);
 		goto offline;
