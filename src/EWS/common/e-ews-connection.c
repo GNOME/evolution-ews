@@ -7200,7 +7200,7 @@ e_ews_process_get_folder_permissions_response (EEwsConnection *cnc,
 	while (subparam != NULL) {
 		const gchar *name = (const gchar *) subparam->name;
 
-		if (ews_get_response_status (subparam, error))
+		if (!ews_get_response_status (subparam, error))
 			return FALSE;
 
 		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "GetFolderResponseMessage")) {
