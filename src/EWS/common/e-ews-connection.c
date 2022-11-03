@@ -7697,8 +7697,7 @@ e_ews_process_find_folder_response (EEwsConnection *cnc,
 			     subparam1 = e_soap_parameter_get_next_child (subparam1)) {
 				folder = e_ews_folder_new_from_soap_parameter (subparam1);
 				if (folder)
-					continue;
-				*out_folders = g_slist_prepend (*out_folders, folder);
+					*out_folders = g_slist_prepend (*out_folders, folder);
 			}
 
 			if (out_includes_last_item)
