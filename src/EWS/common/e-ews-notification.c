@@ -344,7 +344,8 @@ ews_notification_handle_events_param (ESoapParameter *node,
 
 static gboolean
 ews_notification_fire_events_from_response (EEwsNotification *notification,
-					    ESoapResponse *response)
+					    ESoapResponse *response,
+					    gboolean *out_success)
 {
 	ESoapParameter *param, *subparam;
 	GSList *events = NULL;
@@ -358,6 +359,7 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	if (error != NULL) {
 		e_ews_debug_print (G_STRLOC ": %s\n", error->message);
 		g_error_free (error);
+		*out_success = FALSE;
 		return FALSE;
 	}
 
@@ -368,6 +370,13 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 
 		if (!ews_get_response_status (subparam, &error)) {
 			e_ews_debug_print (G_STRLOC ": %s\n", error->message);
+			*out_success =
+				!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_EXPIREDSUBSCRIPTION) &&
+				!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDPULLSUBSCRIPTIONID) &&
+				!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSUBSCRIPTION) &&
+				!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SUBSCRIPTIONACCESSDENIED) &&
+				!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SUBSCRIPTIONDELEGATEACCESSNOTSUPPORTED) &&
+				!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SUBSCRIPTIONNOTFOUND);
 			g_error_free (error);
 			g_slist_free_full (events, (GDestroyNotify) e_ews_notification_event_free);
 			return FALSE;
@@ -403,13 +412,14 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	return TRUE;
 }
 
-static void
+static gboolean
 ews_notification_process_chunk (EEwsNotification *notification,
 				GByteArray *chunk_data,
 				GCancellable *cancellable)
 {
 	const gchar *chunk_str;
 	gsize chunk_len;
+	gboolean success = TRUE;
 
 	/*
 	 * Here we receive, in chunks, "well-formed" messages that contain:
@@ -446,7 +456,7 @@ ews_notification_process_chunk (EEwsNotification *notification,
 		if (response == NULL)
 			break;
 
-		if (!ews_notification_fire_events_from_response (notification, response)) {
+		if (!ews_notification_fire_events_from_response (notification, response, &success)) {
 			g_object_unref (response);
 			break;
 		}
@@ -457,6 +467,8 @@ ews_notification_process_chunk (EEwsNotification *notification,
 		chunk_str = (gchar *) chunk_data->data;
 		chunk_len = chunk_data->len;
 	} while (chunk_len > 0 && !g_cancellable_is_cancelled (cancellable));
+
+	return success;
 }
 
 static gboolean
@@ -493,6 +505,7 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		GByteArray *chunk_data;
 		gpointer buffer;
 		gssize nread;
+		gboolean subscription_failed = FALSE;
 
 		buffer = g_malloc (EWS_BUFFER_SIZE);
 		chunk_data = g_byte_array_new ();
@@ -503,20 +516,21 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		g_clear_object (&cnc);
 
 		while (nread = g_input_stream_read (input_stream, buffer, EWS_BUFFER_SIZE, cancellable, &local_error),
-		       nread > 0) {
+		       nread > 0 && !subscription_failed) {
 			g_byte_array_append (chunk_data, buffer, nread);
-			ews_notification_process_chunk (notification, chunk_data, cancellable);
+			subscription_failed = !ews_notification_process_chunk (notification, chunk_data, cancellable);
 		}
 
-		e_ews_debug_print ("%s: %p: finished reading events; cancelled:%d err:%s is-partial-input:%d\n", G_STRFUNC, notification,
+		e_ews_debug_print ("%s: %p: finished reading events; cancelled:%d err:%s is-partial-input:%d subscription-failed:%d\n", G_STRFUNC, notification,
 			g_cancellable_is_cancelled (cancellable),
 			local_error ? local_error->message : "no-err",
-			g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_PARTIAL_INPUT));
+			g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_PARTIAL_INPUT),
+			subscription_failed);
 
 		/* It's okay when read failed on EOF */
 		*out_fatal_error = (local_error != NULL && !g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_PARTIAL_INPUT)) ||
 			g_cancellable_is_cancelled (cancellable);
-		success = !local_error && !*out_fatal_error;
+		success = !local_error && !*out_fatal_error && !subscription_failed;
 
 		g_byte_array_unref (chunk_data);
 		g_free (buffer);
