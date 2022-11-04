@@ -88,6 +88,7 @@ e_ews_search_user_free (gpointer ptr)
 
 struct EEwsSearchIdleData
 {
+	gint ref_count;
 	EEwsConnection *conn;
 	gchar *search_text;
 	GCancellable *cancellable;
@@ -99,18 +100,26 @@ struct EEwsSearchIdleData
 };
 
 static void
-e_ews_search_idle_data_free (gpointer ptr)
+e_ews_search_idle_data_ref (struct EEwsSearchIdleData *sid)
+{
+	g_atomic_int_inc (&sid->ref_count);
+}
+
+static void
+e_ews_search_idle_data_unref (gpointer ptr)
 {
 	struct EEwsSearchIdleData *sid = ptr;
 
 	if (!sid)
 		return;
 
-	g_object_unref (sid->conn);
-	g_object_unref (sid->cancellable);
-	g_free (sid->search_text);
-	g_slist_free_full (sid->found_users, e_ews_search_user_free);
-	g_slice_free (struct EEwsSearchIdleData, sid);
+	if (g_atomic_int_dec_and_test (&sid->ref_count)) {
+		g_clear_object (&sid->conn);
+		g_clear_object (&sid->cancellable);
+		g_free (sid->search_text);
+		g_slist_free_full (sid->found_users, e_ews_search_user_free);
+		g_slice_free (struct EEwsSearchIdleData, sid);
+	}
 }
 
 static void
@@ -208,7 +217,7 @@ search_finish_idle (gpointer user_data)
 		}
 	}
 
-	e_ews_search_idle_data_free (sid);
+	e_ews_search_idle_data_unref (sid);
 
 	return FALSE;
 }
@@ -259,7 +268,7 @@ search_thread (gpointer user_data)
 
 		g_idle_add (search_finish_idle, sid);
 	} else {
-		e_ews_search_idle_data_free (sid);
+		e_ews_search_idle_data_unref (sid);
 	}
 
 	return NULL;
@@ -286,6 +295,8 @@ schedule_search_cb (gpointer user_data)
 		sid->conn = g_object_ref (pgu->conn);
 		sid->search_text = g_strdup (pgu->search_text);
 
+		e_ews_search_idle_data_ref (sid);
+
 		thread = g_thread_try_new (NULL, search_thread, sid, &error);
 		if (thread) {
 			sid = NULL;
@@ -297,8 +308,6 @@ schedule_search_cb (gpointer user_data)
 
 		g_clear_error (&error);
 	}
-
-	e_ews_search_idle_data_free (sid);
 
 	return FALSE;
 }
@@ -340,11 +349,13 @@ search_term_changed_cb (GtkEntry *entry,
 		struct EEwsSearchIdleData *sid;
 
 		sid = g_slice_new0 (struct EEwsSearchIdleData);
+		sid->ref_count = 1;
 		sid->cancellable = g_object_ref (pgu->cancellable);
 		sid->dialog = dialog;
 
 		gtk_label_set_text (GTK_LABEL (pgu->info_label), _("Searching…"));
-		pgu->schedule_search_id = e_named_timeout_add (333, schedule_search_cb, sid);
+		pgu->schedule_search_id = e_named_timeout_add_full (G_PRIORITY_DEFAULT,
+			333, schedule_search_cb, sid, e_ews_search_idle_data_unref);
 	}
 }
 
