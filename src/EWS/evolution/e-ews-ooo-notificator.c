@@ -74,6 +74,23 @@ e_ews_ooo_notificator_dispatcher_data_free (gpointer user_data)
 }
 
 static void
+e_ews_ooo_notificator_maybe_remove_timeout (EEwsOooNotificatorDispatcherData *data)
+{
+	g_return_if_fail (data != NULL);
+
+	if (data->timeout_id) {
+		guint id;
+
+		id = data->timeout_id;
+		data->timeout_id = 0;
+
+		/* Unset the data structure before calling remove(),
+		   because the removal can free the `data`. */
+		g_source_remove (id);
+	}
+}
+
+static void
 e_ews_ooo_notificator_unset_on_server_cb (EEwsOooNotificatorDispatcherData *data,
 					  GtkAction *action)
 {
@@ -86,10 +103,7 @@ e_ews_ooo_notificator_unset_on_server_cb (EEwsOooNotificatorDispatcherData *data
 	if (alert)
 		g_hash_table_remove (data->extension->priv->alerts, data->ews_store);
 
-	if (data->timeout_id) {
-		g_source_remove (data->timeout_id);
-		data->timeout_id = 0;
-	}
+	e_ews_ooo_notificator_maybe_remove_timeout (data);
 }
 
 static void
@@ -104,10 +118,7 @@ e_ews_ooo_notificator_dismiss_cb (EEwsOooNotificatorDispatcherData *data,
 		g_hash_table_remove (data->extension->priv->alerts, data->ews_store);
 	 }
 
-	if (data->timeout_id) {
-		g_source_remove (data->timeout_id);
-		data->timeout_id = 0;
-	}
+	e_ews_ooo_notificator_maybe_remove_timeout (data);
 }
 
 static void
