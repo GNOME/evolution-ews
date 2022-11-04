@@ -818,8 +818,44 @@ action_global_subscribe_foreign_folder_cb (GtkAction *action,
 	g_object_unref (session);
 }
 
-static GtkActionEntry global_ews_entries[] = {
-	{ "ews-global-subscribe-foreign-folder",
+static GtkActionEntry global_ews_mail_entries[] = {
+	{ "ews-mail-global-subscribe-foreign-folder",
+	  NULL,
+	  N_("Subscribe to folder of other EWS user…"),
+	  NULL,
+	  NULL,  /* XXX Add a tooltip! */
+	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+};
+
+static GtkActionEntry global_ews_book_entries[] = {
+	{ "ews-contact-global-subscribe-foreign-folder",
+	  NULL,
+	  N_("Subscribe to folder of other EWS user…"),
+	  NULL,
+	  NULL,  /* XXX Add a tooltip! */
+	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+};
+
+static GtkActionEntry global_ews_cal_entries[] = {
+	{ "ews-calendar-global-subscribe-foreign-folder",
+	  NULL,
+	  N_("Subscribe to folder of other EWS user…"),
+	  NULL,
+	  NULL,  /* XXX Add a tooltip! */
+	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+};
+
+static GtkActionEntry global_ews_task_entries[] = {
+	{ "ews-task-global-subscribe-foreign-folder",
+	  NULL,
+	  N_("Subscribe to folder of other EWS user…"),
+	  NULL,
+	  NULL,  /* XXX Add a tooltip! */
+	  G_CALLBACK (action_global_subscribe_foreign_folder_cb) }
+};
+
+static GtkActionEntry global_ews_memo_entries[] = {
+	{ "ews-memo-global-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other EWS user…"),
 	  NULL,
@@ -1115,7 +1151,7 @@ static const gchar *ews_ui_mail_def =
 	"<menubar name='main-menu'>\n"
 	"  <menu action='file-menu'>\n"
 	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"ews-global-subscribe-foreign-folder\"/>\n"
+	"      <menuitem action=\"ews-mail-global-subscribe-foreign-folder\"/>\n"
 	"    </placeholder>\n"
 	"  </menu>\n"
 	"</menubar>\n"
@@ -1178,7 +1214,7 @@ ews_ui_update_actions_mail_cb (EShellView *shell_view,
 
 	ews_ui_enable_actions (action_group, mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), account_node, online);
 	ews_ui_enable_actions (action_group, mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), account_node || folder_node, online);
-	ews_ui_enable_actions (action_group, global_ews_entries, G_N_ELEMENTS (global_ews_entries), has_ews_account, online);
+	ews_ui_enable_actions (action_group, global_ews_mail_entries, G_N_ELEMENTS (global_ews_mail_entries), has_ews_account, online);
 }
 
 static void
@@ -1207,7 +1243,7 @@ ews_ui_init_mail (GtkUIManager *ui_manager,
 	/* Add global actions */
 	e_action_group_add_actions_localized (
 		action_group, GETTEXT_PACKAGE,
-		global_ews_entries, G_N_ELEMENTS (global_ews_entries), shell_view);
+		global_ews_mail_entries, G_N_ELEMENTS (global_ews_mail_entries), shell_view);
 
 	/* Decide whether we want this option to be visible or not */
 	g_signal_connect (
@@ -1280,22 +1316,33 @@ update_ews_source_entries_cb (EShellView *shell_view,
 	EShell *shell;
 	EShellWindow *shell_window;
 	ESource *source = NULL;
+	GtkActionEntry *global_entries = NULL;
+	guint n_global_entries = 0;
 	const gchar *group;
 	gboolean is_ews_source, is_online;
 
 	g_return_if_fail (E_IS_SHELL_VIEW (shell_view));
 	g_return_if_fail (entries != NULL);
 
-	if (strstr (entries->name, "calendar"))
+	if (strstr (entries->name, "calendar")) {
 		group = "calendar";
-	else if (strstr (entries->name, "tasks"))
+		global_entries = global_ews_cal_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_cal_entries);
+	} else if (strstr (entries->name, "tasks")) {
 		group = "tasks";
-	else if (strstr (entries->name, "memos"))
+		global_entries = global_ews_task_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_task_entries);
+	} else if (strstr (entries->name, "memos")) {
 		group = "memos";
-	else if (strstr (entries->name, "contacts"))
+		global_entries = global_ews_memo_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_memo_entries);
+	} else if (strstr (entries->name, "contacts")) {
 		group = "contacts";
-	else
+		global_entries = global_ews_book_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_book_entries);
+	} else {
 		g_return_if_reached ();
+	}
 
 	is_ews_source = get_selected_ews_source (shell_view, &source, NULL);
 
@@ -1337,7 +1384,7 @@ update_ews_source_entries_cb (EShellView *shell_view,
 	action_group = e_shell_window_get_action_group (shell_window, group);
 
 	ews_ui_enable_actions (action_group, entries, EWS_ESOURCE_NUM_ENTRIES, is_ews_source, is_online);
-	ews_ui_enable_actions (action_group, global_ews_entries, G_N_ELEMENTS (global_ews_entries),
+	ews_ui_enable_actions (action_group, global_entries, n_global_entries,
 		ews_ui_has_ews_account (shell_view, NULL), is_online);
 }
 
@@ -1349,6 +1396,8 @@ setup_ews_source_actions (EShellView *shell_view,
 {
 	EShellWindow *shell_window;
 	GtkActionGroup *action_group;
+	GtkActionEntry *global_entries = NULL;
+	guint n_global_entries = 0;
 	const gchar *group;
 
 	g_return_if_fail (shell_view != NULL);
@@ -1357,16 +1406,25 @@ setup_ews_source_actions (EShellView *shell_view,
 	g_return_if_fail (n_entries > 0);
 	g_return_if_fail (n_entries == EWS_ESOURCE_NUM_ENTRIES);
 
-	if (strstr (entries->name, "calendar"))
+	if (strstr (entries->name, "calendar")) {
 		group = "calendar";
-	else if (strstr (entries->name, "tasks"))
+		global_entries = global_ews_cal_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_cal_entries);
+	} else if (strstr (entries->name, "tasks")) {
 		group = "tasks";
-	else if (strstr (entries->name, "memos"))
+		global_entries = global_ews_task_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_task_entries);
+	} else if (strstr (entries->name, "memos")) {
 		group = "memos";
-	else if (strstr (entries->name, "contacts"))
+		global_entries = global_ews_memo_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_memo_entries);
+	} else if (strstr (entries->name, "contacts")) {
 		group = "contacts";
-	else
+		global_entries = global_ews_book_entries;
+		n_global_entries = G_N_ELEMENTS (global_ews_book_entries);
+	} else {
 		g_return_if_reached ();
+	}
 
 	shell_window = e_shell_view_get_shell_window (shell_view);
 	action_group = e_shell_window_get_action_group (shell_window, group);
@@ -1378,7 +1436,7 @@ setup_ews_source_actions (EShellView *shell_view,
 	/* Add global actions */
 	e_action_group_add_actions_localized (
 		action_group, GETTEXT_PACKAGE,
-		global_ews_entries, G_N_ELEMENTS (global_ews_entries), shell_view);
+		global_entries, n_global_entries, shell_view);
 
 	g_signal_connect (shell_view, "update-actions", G_CALLBACK (update_ews_source_entries_cb), entries);
 }
@@ -1451,7 +1509,7 @@ static const gchar *ews_ui_cal_def =
 	"<menubar name='main-menu'>\n"
 	"  <menu action='file-menu'>\n"
 	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"ews-global-subscribe-foreign-folder\"/>\n"
+	"      <menuitem action=\"ews-calendar-global-subscribe-foreign-folder\"/>\n"
 	"    </placeholder>\n"
 	"  </menu>\n"
 	"</menubar>\n"
@@ -1489,7 +1547,7 @@ static const gchar *ews_ui_task_def =
 	"<menubar name='main-menu'>\n"
 	"  <menu action='file-menu'>\n"
 	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"ews-global-subscribe-foreign-folder\"/>\n"
+	"      <menuitem action=\"ews-task-global-subscribe-foreign-folder\"/>\n"
 	"    </placeholder>\n"
 	"  </menu>\n"
 	"</menubar>\n"
@@ -1527,7 +1585,7 @@ static const gchar *ews_ui_memo_def =
 	"<menubar name='main-menu'>\n"
 	"  <menu action='file-menu'>\n"
 	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"ews-global-subscribe-foreign-folder\"/>\n"
+	"      <menuitem action=\"ews-memo-global-subscribe-foreign-folder\"/>\n"
 	"    </placeholder>\n"
 	"  </menu>\n"
 	"</menubar>\n"
@@ -1565,7 +1623,7 @@ static const gchar *ews_ui_book_def =
 	"<menubar name='main-menu'>\n"
 	"  <menu action='file-menu'>\n"
 	"    <placeholder name='long-running-actions'>\n"
-	"      <menuitem action=\"ews-global-subscribe-foreign-folder\"/>\n"
+	"      <menuitem action=\"ews-contact-global-subscribe-foreign-folder\"/>\n"
 	"    </placeholder>\n"
 	"  </menu>\n"
 	"</menubar>\n"
