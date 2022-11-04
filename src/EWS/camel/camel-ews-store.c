@@ -1814,6 +1814,8 @@ ews_store_update_foreign_subfolders (CamelSession *session,
 				if (e_ews_folder_get_child_count (folder) > 0 && e_ews_folder_get_id (folder))
 					tocheck = g_slist_prepend (tocheck, e_ews_folder_get_id (folder)->id);
 			}
+
+			g_slist_free (folders);
 		}
 
 		e_ews_folder_id_free (folder_id);
