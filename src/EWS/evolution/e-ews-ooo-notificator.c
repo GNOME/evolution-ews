@@ -74,51 +74,27 @@ e_ews_ooo_notificator_dispatcher_data_free (gpointer user_data)
 }
 
 static void
-e_ews_ooo_notificator_maybe_remove_timeout (EEwsOooNotificatorDispatcherData *data)
-{
-	g_return_if_fail (data != NULL);
-
-	if (data->timeout_id) {
-		guint id;
-
-		id = data->timeout_id;
-		data->timeout_id = 0;
-
-		/* Unset the data structure before calling remove(),
-		   because the removal can free the `data`. */
-		g_source_remove (id);
-	}
-}
-
-static void
-e_ews_ooo_notificator_unset_on_server_cb (EEwsOooNotificatorDispatcherData *data,
-					  GtkAction *action)
-{
-	EAlert *alert;
-	camel_ews_store_unset_oof_settings_state (data->ews_store);
-	camel_ews_store_set_ooo_alert_state (
-			data->ews_store, CAMEL_EWS_STORE_OOO_ALERT_STATE_CLOSED);
-
-	alert = g_hash_table_lookup (data->extension->priv->alerts, data->ews_store);
-	if (alert)
-		g_hash_table_remove (data->extension->priv->alerts, data->ews_store);
-
-	e_ews_ooo_notificator_maybe_remove_timeout (data);
-}
-
-static void
 e_ews_ooo_notificator_dismiss_cb (EEwsOooNotificatorDispatcherData *data,
 				  gint response_id,
 				  EAlert *alert)
 {
 
-	if (response_id == GTK_RESPONSE_CLOSE) {
-		camel_ews_store_set_ooo_alert_state (
-				data->ews_store, CAMEL_EWS_STORE_OOO_ALERT_STATE_CLOSED);
-		g_hash_table_remove (data->extension->priv->alerts, data->ews_store);
-	 }
+	if (response_id == GTK_RESPONSE_ACCEPT)
+		camel_ews_store_unset_oof_settings_state (data->ews_store);
 
-	e_ews_ooo_notificator_maybe_remove_timeout (data);
+	camel_ews_store_set_ooo_alert_state (data->ews_store, CAMEL_EWS_STORE_OOO_ALERT_STATE_CLOSED);
+	g_hash_table_remove (data->extension->priv->alerts, data->ews_store);
+
+	if (data->timeout_id) {
+		guint id;
+
+		/* Unset the data structure before calling remove(),
+		   because the removal can free the `data`. */
+		id = data->timeout_id;
+		data->timeout_id = 0;
+
+		g_source_remove (id);
+	}
 }
 
 static void
@@ -175,13 +151,9 @@ e_ews_ooo_notificator_show_notification (EEwsOooNotificator *extension,
 			_("Unset on Server"),
 			_("Unset the “Out of Office” status"),
 			GTK_STOCK_OK);
-	g_signal_connect_swapped (
-			action,
-			"activate",
-			G_CALLBACK (e_ews_ooo_notificator_unset_on_server_cb), data);
-	e_alert_add_action (alert, action, 0, FALSE);
+	e_alert_add_action (alert, action, GTK_RESPONSE_ACCEPT, FALSE);
 
-	g_hash_table_insert (extension->priv->alerts, ews_store, alert);
+	g_hash_table_insert (extension->priv->alerts, g_object_ref (ews_store), g_object_ref_sink (alert));
 	e_alert_sink_submit_alert (E_ALERT_SINK (shell_content), alert);
 
 	/* If the user doesn't cancel the notify, it will be hide automatically in 5 minutes */
