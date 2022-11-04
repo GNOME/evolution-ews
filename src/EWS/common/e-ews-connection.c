@@ -9392,6 +9392,29 @@ ews_oof_settings_date_time_to_string (const GDateTime *date_time)
 	return string;
 }
 
+static gboolean
+e_ews_process_set_user_oof_settings_response (EEwsConnection *cnc,
+					      ESoapResponse *response,
+					      GError **error)
+{
+	ESoapParameter *param;
+	GError *local_error = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessage", &local_error);
+
+	/* Sanity check */
+	g_return_val_if_fail (
+		(param != NULL && local_error == NULL) ||
+		(param == NULL && local_error != NULL), FALSE);
+
+	if (local_error) {
+		g_propagate_error (error, local_error);
+		return FALSE;
+	}
+
+	return ews_get_response_status (param, error);
+}
+
 gboolean
 e_ews_connection_set_user_oof_settings_sync (EEwsConnection *cnc,
 					     gint pri,
@@ -9497,7 +9520,7 @@ e_ews_connection_set_user_oof_settings_sync (EEwsConnection *cnc,
 		return FALSE;
 	}
 
-	success = e_ews_process_generic_response (cnc, response, error);
+	success = e_ews_process_set_user_oof_settings_response (cnc, response, error);
 
 	g_clear_object (&request);
 	g_clear_object (&response);
