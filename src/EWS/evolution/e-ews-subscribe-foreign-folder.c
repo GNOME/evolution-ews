@@ -899,14 +899,14 @@ e_ews_subscrive_foreign_folder_subscribe_sync (CamelEwsStore *ews_store,
 		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
 	success = (folder_type == E_EWS_FOLDER_TYPE_MAILBOX &&
-	     !add_foreign_folder_to_camel (ews_store,
+	     add_foreign_folder_to_camel (ews_store,
 		user_email,
 		folder,
 		include_subfolders,
 		base_username,
 		base_foldername,
 		error)) ||
-	    (folder_type != E_EWS_FOLDER_TYPE_MAILBOX && !e_ews_folder_utils_add_as_esource (registry,
+	    (folder_type != E_EWS_FOLDER_TYPE_MAILBOX && e_ews_folder_utils_add_as_esource (registry,
 		camel_ews_settings_get_hosturl (ews_settings),
 		camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
 		folder,
