@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-07-15 08:46+0000\n"
-"PO-Revision-Date: 2022-07-24 12:07+0700\n"
+"POT-Creation-Date: 2022-10-05 07:55+0000\n"
+"PO-Revision-Date: 2022-11-16 10:51+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n!=1;\n"
-"X-Generator: Poedit 3.1.1\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.2.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -30,22 +30,22 @@ msgstr "Layanan Web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses peladen Exchange memakai Layanan Web"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
 msgid "Fetching contact photos…"
 msgstr "Mengambil foto kontak…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
 msgid "Failed to update GAL:"
 msgstr "Failed to update GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Tak bisa menyimpan daftar kontak, itu hanya didukung pada Peladen EWS 2010 "
 "atau setelahnya"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
@@ -104,7 +104,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Tidak dapat menemukan sumber bantuan Microsoft 365 untuk kalender “%s”"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2089
 msgid "Invalid occurrence ID"
 msgstr "ID kejadian tidak valid"
 
@@ -301,15 +301,12 @@ msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] ""
 "Kata sandi akan kedaluwarsa dalam %d hari. Buka \"%s\" untuk menggantinya."
-msgstr[1] ""
-"Kata sandi akan kedaluwarsa dalam %d hari. Buka \"%s\" untuk menggantinya."
 
 #: ../src/EWS/camel/camel-ews-store.c:1567
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
-msgstr[0] "Kata sandi akan kedaluwarsa dalam satu hari."
-msgstr[1] "Kata sandi akan kedaluwarsa dalam %d hari."
+msgstr[0] "Kata sandi akan kedaluwarsa dalam %d hari."
 
 #: ../src/EWS/camel/camel-ews-store.c:1793
 msgid "Updating foreign folder structure"
@@ -443,19 +440,29 @@ msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersed
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3771
+#: ../src/EWS/camel/camel-ews-store.c:3695
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Tak bisa berlangganan folder “%s”, ID folder tak ditemukan"
+
+#: ../src/EWS/camel/camel-ews-store.c:3706
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "Tak bisa berlangganan folder “%s”, root folder publik tak ditemukan"
+
+#: ../src/EWS/camel/camel-ews-store.c:3782
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3893
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/EWS/camel/camel-ews-store.c:3954
-#: ../src/EWS/camel/camel-ews-store.c:3991
+#: ../src/EWS/camel/camel-ews-store.c:3965
+#: ../src/EWS/camel/camel-ews-store.c:4002
 msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
@@ -525,82 +532,78 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
 
-#: ../src/EWS/common/e-ews-connection.c:324
+#: ../src/EWS/common/e-ews-connection.c:344
 #, c-format
 msgid "No response: %s"
 msgstr "Tak ada respon: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:487
+#: ../src/EWS/common/e-ews-connection.c:509
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Peladen Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
-msgstr[1] ""
-"Peladen Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
 
-#: ../src/EWS/common/e-ews-connection.c:493
+#: ../src/EWS/common/e-ews-connection.c:515
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Peladen Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
-msgstr[1] ""
-"Peladen Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
-#: ../src/EWS/common/e-ews-connection.c:622
+#: ../src/EWS/common/e-ews-connection.c:644
 msgid "Authentication failed"
 msgstr "Autentikasi gagal"
 
-#: ../src/EWS/common/e-ews-connection.c:2350
+#: ../src/EWS/common/e-ews-connection.c:2389
 msgid "Failed to parse autodiscover response XML"
 msgstr "Gagal mengurai XML respon autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2356
+#: ../src/EWS/common/e-ews-connection.c:2395
 msgid "Failed to find <Autodiscover> element"
 msgstr "Gagal menemukan elemen <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2366
+#: ../src/EWS/common/e-ews-connection.c:2405
 msgid "Failed to find <Response> element"
 msgstr "Gagal menemukan elemen <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2376
+#: ../src/EWS/common/e-ews-connection.c:2415
 msgid "Failed to find <Account> element"
 msgstr "Gagal menemukan elemen <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2421
+#: ../src/EWS/common/e-ews-connection.c:2460
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dalam respon autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2497
+#: ../src/EWS/common/e-ews-connection.c:2536
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:2915
+#: ../src/EWS/common/e-ews-connection.c:2954
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/EWS/common/e-ews-connection.c:3124
+#: ../src/EWS/common/e-ews-connection.c:3163
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:3162
+#: ../src/EWS/common/e-ews-connection.c:3201
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8685
+#: ../src/EWS/common/e-ews-connection.c:8730
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8786
+#: ../src/EWS/common/e-ews-connection.c:8831
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:8939
+#: ../src/EWS/common/e-ews-connection.c:8984
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9079
+#: ../src/EWS/common/e-ews-connection.c:9124
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2007 SP1"
 
@@ -653,11 +656,11 @@ msgstr "Ambil _foto kontak"
 msgid "Tries to look up for user photo"
 msgstr "Mencoba mencari foto pengguna"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
 msgid "Online Meeting"
 msgstr "Rapat Daring"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr "Buat rapat sebagai rapat daring di kalender pengguna utama"
 
@@ -975,8 +978,7 @@ msgstr "Menghapus status \"Di Luar Kantor\""
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
-msgstr[0] "Tak ditemukan pengguna, hanya satu kontak"
-msgstr[1] "Tak ditemukan pengguna, hanya %d kontak"
+msgstr[0] "Tak ditemukan pengguna, hanya %d kontak"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:194
 msgid "No users found"
@@ -986,16 +988,13 @@ msgstr "Tak ditemukan pengguna"
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
-msgstr[0] "Ditemukan satu pengguna"
-msgstr[1] "Ditemukan %d pengguna"
+msgstr[0] "Ditemukan %d pengguna"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:204
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] ""
-"Ditemukan lebih dari 100 pengguna, tapi hanya menampilkan %d pertama"
-msgstr[1] ""
 "Ditemukan lebih dari 100 pengguna, tapi hanya menampilkan %d pertama"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:338
@@ -1576,7 +1575,7 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Folder pengguna \"{0}\" telah berhasil dilanggani."
 
 #: ../src/EWS/registry/e-ews-backend.c:1094
-#: ../src/Microsoft365/registry/e-m365-backend.c:696
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
@@ -1597,20 +1596,20 @@ msgstr "ID Folder belum disetel"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Tidak dapat menyimpan daftar kontak ke dalam buku alamat Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Hanya dapat menyimpan acara sederhana ke dalam kalender Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "Hanya dapat menyimpan tugas sederhana ke folder tugas Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1630
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr ""
 "Kalender Microsoft 365 tidak dapat menyimpan lebih dari satu pengulangan"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1639
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1618,62 +1617,57 @@ msgstr ""
 "Kalender Microsoft 365 tidak dapat menyimpan komponen dengan properti RDATE, "
 "EXDATE, atau RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1749
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Frekuensi pengulangan tidak diketahui (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1901
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Kalender Microsoft 365 tidak dapat menyimpan lebih dari satu pengingat acara"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1934
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Acara Microsoft 365 hanya dapat memiliki pengingat sebelum acara dimulai"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1947
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Tugas Microsoft 365 hanya bisa memiliki pengingat dengan waktu absolut"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2273
+#, c-format
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Tugas Microsoft 365 tidak dapat memiliki lampiran."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2376
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Tak bisa menyimpan lampiran dengan URI \"%s\""
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2378
 msgid "Failed to read attachment URI"
 msgstr "Gagal membaca URI lampiran"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2392
 msgid "Failed to get inline attachment data"
 msgstr "Gagal mendapat data lampiran inline"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:610
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+#: ../src/Microsoft365/camel/camel-m365-folder.c:587
+#: ../src/Microsoft365/camel/camel-m365-folder.c:989
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
 msgid "Invalid folder state (missing parent store)"
 msgstr "Keadaan folder tidak valid (penyimpanan induk hilang)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:633
-msgid ""
-"Cannot add messages into a Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-msgstr ""
-"Tidak dapat menambahkan pesan ke akun Microsoft 365 dari akun lain. Hanya "
-"pesan dari akun yang sama yang dapat dipindahkan/disalin di antara folder "
-"Microsoft 365."
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Folder \"%s\" tidak sesuai dengan folder manapun yang diketahui"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Tak bisa memuat ringkasan untuk \"%s\""
@@ -1696,7 +1690,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Surat diterima melalui Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1241
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "URI cacat: \"%s\""
@@ -1752,36 +1746,31 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:885
+#: ../src/Microsoft365/common/e-m365-connection.c:886
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Peladen Microsoft 365 sedang sibuk, menunggu untuk mencoba lagi (%d:%02d "
 "menit)"
-msgstr[1] ""
-"Peladen Microsoft 365 sedang sibuk, menunggu untuk mencoba lagi (%d:%02d "
-"menit)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:891
+#: ../src/Microsoft365/common/e-m365-connection.c:892
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Peladen Microsoft 365 sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
-msgstr[1] ""
-"Peladen Microsoft 365 sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1016
-#: ../src/Microsoft365/common/e-m365-connection.c:1043
+#: ../src/Microsoft365/common/e-m365-connection.c:1017
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Invalid data"
 msgstr "Data tidak valid"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1041
+#: ../src/Microsoft365/common/e-m365-connection.c:1042
 msgid "Operation was cancelled"
 msgstr "Operasi dibatalkan"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1719
+#: ../src/Microsoft365/common/e-m365-connection.c:1725
 msgid "Failed to parse own Json data"
 msgstr "Gagal mengurai data Json sendiri"
 
@@ -1806,10 +1795,19 @@ msgstr "Tenant baku adalah \"%s\""
 msgid "_Redirect URI:"
 msgstr "U_RI pengalihan:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:787
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Sumber data \"%s\" tak merepresentasikan suatu folder Microsoft 365"
+
+#~ msgid ""
+#~ "Cannot add messages into a Microsoft 365 account from another account. "
+#~ "Only messages from the same account can be moved/copied between the "
+#~ "Microsoft 365 folders."
+#~ msgstr ""
+#~ "Tidak dapat menambahkan pesan ke akun Microsoft 365 dari akun lain. Hanya "
+#~ "pesan dari akun yang sama yang dapat dipindahkan/disalin di antara folder "
+#~ "Microsoft 365."
 
 #~ msgid "URL “%s” is not valid"
 #~ msgstr "URL “%s” tak valid"
