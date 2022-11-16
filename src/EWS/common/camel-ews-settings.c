@@ -910,7 +910,7 @@ camel_ews_settings_get_auth_mechanism (CamelEwsSettings *settings)
 	EwsAuthType result;
 	gchar *auth_mech = NULL;
 
-	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), EWS_AUTH_TYPE_NTLM);
 
 	g_object_get (G_OBJECT (settings), "auth-mechanism", &auth_mech, NULL);
 
@@ -930,6 +930,37 @@ camel_ews_settings_get_auth_mechanism (CamelEwsSettings *settings)
 	g_free (auth_mech);
 
 	return result;
+}
+
+/**
+ * camel_ews_settings_get_auth_mechanism_string:
+ * @settings: a #CamelEwsSettings
+ *
+ * Returns an authentication method to use. It's similar to
+ * the camel_ews_settings_get_auth_mechanism(), only returning
+ * the method as a string.
+ *
+ * Returns: authentication method to use for this account
+ *
+ * Since: 3.46.2
+ **/
+const gchar *
+camel_ews_settings_get_auth_mechanism_string (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	switch (camel_ews_settings_get_auth_mechanism (settings)) {
+	case EWS_AUTH_TYPE_NTLM:
+		return "NTLM";
+	case EWS_AUTH_TYPE_BASIC:
+		return "PLAIN";
+	case EWS_AUTH_TYPE_GSSAPI:
+		return "GSSAPI";
+	case EWS_AUTH_TYPE_OAUTH2:
+		return "Office365";
+	}
+
+	return "NTLM";
 }
 
 /**

@@ -1136,6 +1136,37 @@ ews_connection_get_property (GObject *object,
 }
 
 static void
+ews_connection_constructed (GObject *object)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+
+	/* Chain up to parent's method. */
+	G_OBJECT_CLASS (e_ews_connection_parent_class)->constructed (object);
+
+	if (cnc->priv->source && cnc->priv->settings &&
+	    e_source_has_extension (cnc->priv->source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+		ESourceAuthentication *auth_extension;
+		gchar *auth_method_source;
+		const gchar *auth_method_settings;
+
+		auth_extension = e_source_get_extension (cnc->priv->source, E_SOURCE_EXTENSION_AUTHENTICATION);
+		auth_method_source = e_source_authentication_dup_method (auth_extension);
+		auth_method_settings = camel_ews_settings_get_auth_mechanism_string (cnc->priv->settings);
+
+		/* Make sure the ESource and the CamelEwsSettings authentication methods correspond
+		   to each other, because the NTLM is a default for any unknown value, which should
+		   be propagated into the ESoupSession (through the ESource) as well. */
+		if (!auth_method_source ||
+		    (g_ascii_strcasecmp (auth_method_source, "Microsoft365") != 0 &&
+		    auth_method_settings && g_ascii_strcasecmp (auth_method_source, auth_method_settings) != 0)) {
+			e_source_authentication_set_method (auth_extension, auth_method_settings);
+		}
+
+		g_free (auth_method_source);
+	}
+}
+
+static void
 ews_connection_dispose (GObject *object)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
@@ -1247,6 +1278,7 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 	object_class = G_OBJECT_CLASS (class);
 	object_class->set_property = ews_connection_set_property;
 	object_class->get_property = ews_connection_get_property;
+	object_class->constructed = ews_connection_constructed;
 	object_class->dispose = ews_connection_dispose;
 	object_class->finalize = ews_connection_finalize;
 

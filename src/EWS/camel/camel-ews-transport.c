@@ -292,7 +292,7 @@ ews_transport_connect_sync (CamelService *service,
 	EEwsConnection *connection;
 	CamelSession *session;
 	CamelSettings *settings;
-	gchar *auth_mech;
+	const gchar *auth_mech;
 	gboolean success;
 
 	/* Chain up to parent's method. */
@@ -313,12 +313,10 @@ ews_transport_connect_sync (CamelService *service,
 
 	/* Try running an operation that requires authentication
 	 * to make sure we have valid credentials available. */
-	auth_mech = camel_network_settings_dup_auth_mechanism (CAMEL_NETWORK_SETTINGS (settings));
+	auth_mech = camel_ews_settings_get_auth_mechanism_string (CAMEL_EWS_SETTINGS (settings));
 
 	success = camel_session_authenticate_sync (session, service,
 			   auth_mech ? auth_mech : "NTLM", cancellable, error);
-
-	g_free (auth_mech);
 
 	g_object_unref (session);
 	g_object_unref (settings);

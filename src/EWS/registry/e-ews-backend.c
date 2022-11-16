@@ -792,6 +792,7 @@ ews_backend_constructed (GObject *object)
 	const gchar *extension_name;
 	gchar *host = NULL;
 	guint16 port = 0;
+	gboolean changed = FALSE;
 
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->constructed (object);
@@ -822,8 +823,10 @@ ews_backend_constructed (GObject *object)
 	/* NTLM is a fallback, for any unknown value, but ESoupSession requires it
 	   explicitly set, to use it for authentication, thus make sure it is set */
 	if (camel_ews_settings_get_auth_mechanism (settings) == EWS_AUTH_TYPE_NTLM &&
-	    g_strcmp0 (e_source_authentication_get_method (auth_extension), "NTLM") != 0)
+	    g_strcmp0 (e_source_authentication_get_method (auth_extension), "NTLM") != 0) {
 		e_source_authentication_set_method (auth_extension, "NTLM");
+		changed = TRUE;
+	}
 
 	/* Reset the connectable, it steals data from Authentication extension,
 	   where is written incorrect address */
@@ -844,6 +847,10 @@ ews_backend_constructed (GObject *object)
 		collection_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_COLLECTION);
 		e_source_collection_set_allow_sources_rename (collection_extension, TRUE);
 	}
+
+	/* Make sure the auth method change is saved, maybe with temporary SSL trust unset too */
+	if (changed)
+		e_source_write (source, NULL, NULL, NULL);
 }
 
 static void

@@ -59,6 +59,8 @@ void		camel_ews_settings_lock		(CamelEwsSettings *settings);
 void		camel_ews_settings_unlock	(CamelEwsSettings *settings);
 EwsAuthType	camel_ews_settings_get_auth_mechanism
 						(CamelEwsSettings *settings);
+const gchar *	camel_ews_settings_get_auth_mechanism_string
+						(CamelEwsSettings *settings);
 gboolean	camel_ews_settings_get_check_all
 						(CamelEwsSettings *settings);
 void		camel_ews_settings_set_check_all

@@ -116,6 +116,30 @@ mail_config_ews_backend_auth_mech_is_oauth2 (GBinding *binding,
 	return TRUE;
 }
 
+static gboolean
+mail_config_ews_active_mech_to_auth_mech (GBinding *binding,
+					  const GValue *from_value,
+					  GValue *to_value,
+					  gpointer user_data)
+{
+	const gchar *active_mechanism, *use_mechanism;
+
+	active_mechanism = g_value_get_string (from_value);
+
+	if (!active_mechanism || (
+	    g_ascii_strcasecmp (active_mechanism, "NTLM") != 0 &&
+	    g_ascii_strcasecmp (active_mechanism, "PLAIN") != 0 &&
+	    g_ascii_strcasecmp (active_mechanism, "GSSAPI") != 0 &&
+	    g_ascii_strcasecmp (active_mechanism, "Office365") != 0))
+		use_mechanism = "NTLM";
+	else
+		use_mechanism = active_mechanism;
+
+	g_value_set_string (to_value, use_mechanism);
+
+	return TRUE;
+}
+
 static void
 mail_config_ews_backend_set_oauth2_tooltip (GtkWidget *widget,
 					    const gchar *value,
@@ -566,10 +590,13 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	/* Don't use G_BINDING_SYNC_CREATE here since the widget
 	 * chooses its initial mechanism more intelligently than
 	 * a simple property binding would. */
-	e_binding_bind_property (
+	e_binding_bind_property_full (
 		settings, "auth-mechanism",
 		ews_backend->priv->auth_check, "active-mechanism",
-		G_BINDING_BIDIRECTIONAL);
+		G_BINDING_BIDIRECTIONAL,
+		NULL,
+		mail_config_ews_active_mech_to_auth_mech,
+		NULL, NULL);
 
 	e_binding_bind_property (
 		settings, "override-oauth2",
