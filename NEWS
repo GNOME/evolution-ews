@@ -1,3 +1,27 @@
+Evolution-EWS 3.46.2 2022-12-02
+-------------------------------
+
+Bug Fixes:
+	I#201 - EWS: Subscription with subfolders doesn't find subfolders
+	I#206 - Can't change Authentication Method back to NTLM
+
+Miscellaneous:
+	Camel: Remove invalid 'else' in ews_get_folder_info_sync()
+	EWS: GetFolderPermissions response lost
+	EEwsNotification: Re-subscribe when current subscription fails
+	Fix visibility of "Subscribe to folder of other EWS user" menu option
+	Fix a small memory leak when updating EWS foreign subfolders
+	Correct response read of SetUserOofSettingsRequest
+	EEwsOooNotificator: Change how timeout callback is removed
+	EEwsOooNotificator: Simplify response code to the alert
+	Subscribe foreign folder dialog does not close on success
+	EEwsSearchUser: Fix a small memory leak
+
+Translations:
+	Ekaterine Papava (ka)
+	Hugo Carvalho (pt)
+	Nathan Follens (nl)
+
 Evolution-EWS 3.46.1 2022-10-21
 -------------------------------
 
