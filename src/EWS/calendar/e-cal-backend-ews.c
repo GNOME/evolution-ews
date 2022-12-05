@@ -358,9 +358,11 @@ ecb_ews_get_timezone (ETimezoneCache *timezone_cache,
 	ICalTimezone *zone = NULL;
 	const gchar *evo_ews_msdn_tzid;
 
-	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
-	if (zone == NULL)
-		zone = i_cal_timezone_get_builtin_timezone (tzid);
+	if (tzid) {
+		zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+		if (zone == NULL)
+			zone = i_cal_timezone_get_builtin_timezone (tzid);
+	}
 
 	if (g_strcmp0 (tzid, evo_ews_tzid) == 0)
 		return zone;
