@@ -1,3 +1,12 @@
+Evolution-EWS 3.46.3 2023-01-06
+-------------------------------
+
+Miscellaneous:
+	ecb_ews_get_timezone: Check for non-NULL `tzid` to avoid runtime warning
+
+Translations:
+	Asier Sarasua Garmendia (eu)
+
 Evolution-EWS 3.46.2 2022-12-02
 -------------------------------
 
