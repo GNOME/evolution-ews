@@ -1,3 +1,48 @@
+Evolution-EWS 3.47.1 2023-01-06
+-------------------------------
+
+Bug Fixes:
+	I#153 - Limit Subject/Summary/Location text length
+	I#201 - EWS: Subscription with subfolders doesn't find subfolders
+	I#206 - Can't change Authentication Method back to NTLM
+
+Miscellaneous:
+	Handle negative value for GUri's port
+	ews_store_subscribe_folder_sync: Turn two runtime warnings into regular errors
+	Microsoft365: Use 'To-Do' API for tasks
+	EwsConnect: Early stop a response traversal
+	ESoapResponse: Allow NULL for some traversal functions
+	ebb_ews_mailbox_to_contact: Fix a memory leak
+	Microsoft365: Implement raw MIME message upload
+	Microsoft365: Correct task Due and Completed date read
+	EEwsPhotoSource: Do not use GTask thread pool, but use its own serialized pool
+	Camel: Remove invalid 'else' in ews_get_folder_info_sync()
+	EWS: GetFolderPermissions response lost
+	EEwsNotification: Re-subscribe when current subscription fails
+	Fix visibility of "Subscribe to folder of other EWS user" menu option
+	Fix a small memory leak when updating EWS foreign subfolders
+	Correct response read of SetUserOofSettingsRequest
+	EEwsOooNotificator: Change how timeout callback is removed
+	EEwsOooNotificator: Simplify response code to the alert
+	Subscribe foreign folder dialog does not close on success
+	EEwsSearchUser: Fix a small memory leak
+	ecb_ews_get_timezone: Check for non-NULL `tzid` to avoid runtime warning
+
+Translations:
+	Alan Mortensen (da)
+	Anders Jonsson (sv)
+	Asier Sarasua Garmendia (eu)
+	Balázs Úr (hu)
+	Goran Vidović (hr)
+	Hugo Carvalho (pt)
+	Jürgen Benvenuti (de)
+	Kukuh Syafaat (id)
+	Мирослав Николић (sr)
+	Nathan Follens (nl)
+	Piotr Drąg (pl)
+	Rafael Fontenelle (pt_BR)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.46.0 2022-09-16
 -------------------------------
 
