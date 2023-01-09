@@ -187,8 +187,19 @@ ecb_ews_save_as_online_meeting_sync (ESourceRegistry *registry,
 					I_CAL_VEVENT_COMPONENT, new_comp, NULL, m365_id, cancellable, error);
 			}
 
-			if (success && created_item)
+			if (success && created_item) {
 				*out_new_uid = g_strdup (e_m365_event_get_id (created_item));
+
+				/* Convert from Microsoft Graph ID into EWS ID */
+				if (*out_new_uid && strchr (*out_new_uid, '-') != NULL) {
+					gchar *ptr;
+
+					for (ptr = *out_new_uid; *ptr; ptr++) {
+						if (*ptr == '-')
+							*ptr = '/';
+					}
+				}
+			}
 
 			g_clear_pointer (&created_item, json_object_unref);
 			g_clear_object (&builder);
