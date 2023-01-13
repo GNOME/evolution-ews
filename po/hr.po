@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-10-03 09:08+0000\n"
-"PO-Revision-Date: 2022-10-03 14:42+0200\n"
+"POT-Creation-Date: 2022-11-09 19:01+0000\n"
+"PO-Revision-Date: 2023-01-13 12:36+0100\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:68
@@ -32,22 +32,22 @@ msgstr "Exchange web usluge"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za pristup Exchange poslužiteljima koristeći web usluge"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
 msgid "Fetching contact photos…"
 msgstr "Preuzimanje fotografija kontakta…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
 msgid "Failed to update GAL:"
 msgstr "Neuspjela GAL nadopuna:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nemoguće spremanje popisa kontakta, podržano je samo na EWU poslužitelju "
 "2010 ili novijem"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
 msgid "Failed to set contact photo:"
 msgstr "Neuspjelo postavljanje fotografije kontakta:"
 
@@ -318,155 +318,155 @@ msgstr[2] "Lozinka istječe za %d dana."
 msgid "Updating foreign folder structure"
 msgstr "Nadopuna strukture strane mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:1929
+#: ../src/EWS/camel/camel-ews-store.c:1931
 msgid "Updating foreign folders"
 msgstr "Nadopuna strane mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:2345
+#: ../src/EWS/camel/camel-ews-store.c:2347
 #: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nema takve mape: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2692
+#: ../src/EWS/camel/camel-ews-store.c:2694
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nemoguć prikaz EWU javnih mapa u izvanmrežnom načinu rada"
 
-#: ../src/EWS/camel/camel-ews-store.c:2765
+#: ../src/EWS/camel/camel-ews-store.c:2767
 msgid "Cannot find any EWS public folders"
 msgstr "Nemoguć pronalazak bilo kakvih EWU javnih mapa"
 
-#: ../src/EWS/camel/camel-ews-store.c:2878
+#: ../src/EWS/camel/camel-ews-store.c:2879
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nemoguće stvaranje mape “%s”, mapa već postoji"
 
-#: ../src/EWS/camel/camel-ews-store.c:2893
+#: ../src/EWS/camel/camel-ews-store.c:2894
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Sadržajna mapa %s ne postoji"
 
-#: ../src/EWS/camel/camel-ews-store.c:2903
+#: ../src/EWS/camel/camel-ews-store.c:2904
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
 "Nemoguće stvaranje mape u “%s”, koristi se samo za mape drugih korisnika"
 
-#: ../src/EWS/camel/camel-ews-store.c:2913
+#: ../src/EWS/camel/camel-ews-store.c:2914
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Nemoguće stvaranje mape u “%s”, koristi se samo za javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3020
+#: ../src/EWS/camel/camel-ews-store.c:3021
 #: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne postoji"
 
-#: ../src/EWS/camel/camel-ews-store.c:3030
+#: ../src/EWS/camel/camel-ews-store.c:3031
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nemoguće uklanjanje mape u “%s”, koristi se samo za mape drugih korisnika"
 
-#: ../src/EWS/camel/camel-ews-store.c:3041
+#: ../src/EWS/camel/camel-ews-store.c:3042
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Nemoguće uklanjanje mape u “%s”, koristi se samo za javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
-#: ../src/EWS/camel/camel-ews-store.c:3296
+#: ../src/EWS/camel/camel-ews-store.c:3201
+#: ../src/EWS/camel/camel-ews-store.c:3297
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne postoji"
 
-#: ../src/EWS/camel/camel-ews-store.c:3209
+#: ../src/EWS/camel/camel-ews-store.c:3210
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nema zapisa promjene ključa za mapu %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3252
+#: ../src/EWS/camel/camel-ews-store.c:3253
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nemoguće je preimenovanje i premještanje mape u isto vrijeme"
 
-#: ../src/EWS/camel/camel-ews-store.c:3283
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3284
+#: ../src/EWS/camel/camel-ews-store.c:3307
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nemoguć pronalazak ID-a mape za sadržajnu mapu %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3296
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3307
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Pristigla pošta"
 
-#: ../src/EWS/camel/camel-ews-store.c:3355
+#: ../src/EWS/camel/camel-ews-store.c:3356
 #: ../src/EWS/camel/camel-ews-transport.c:449
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange poslužitelj %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3358
+#: ../src/EWS/camel/camel-ews-store.c:3359
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange usluga za %s na %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3402
+#: ../src/EWS/camel/camel-ews-store.c:3403
 #: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nemoguće lociranje mape smeća"
 
-#: ../src/EWS/camel/camel-ews-store.c:3462
+#: ../src/EWS/camel/camel-ews-store.c:3463
 #: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nemoguće lociranje mape neželjene pošte"
 
-#: ../src/EWS/camel/camel-ews-store.c:3653
+#: ../src/EWS/camel/camel-ews-store.c:3654
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nemoguća pretplata na EWU mape u izvanmrežnom načinu rada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3676
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Nemoguća pretplata na mapu “%s”, nema dostupne javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3686
+#: ../src/EWS/camel/camel-ews-store.c:3687
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nemoguća pretplata na mapu “%s”, mape nije pronađena"
 
-#: ../src/EWS/camel/camel-ews-store.c:3695
+#: ../src/EWS/camel/camel-ews-store.c:3696
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Nemoguća pretplata na mapu “%s”, ID mape nije pronađen"
 
-#: ../src/EWS/camel/camel-ews-store.c:3706
+#: ../src/EWS/camel/camel-ews-store.c:3707
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Nemoguća pretplata na mapu “%s”, korijen javne mape nije pronađen"
 
-#: ../src/EWS/camel/camel-ews-store.c:3782
+#: ../src/EWS/camel/camel-ews-store.c:3783
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nemoguć je prekinuti pretplatu na EWU mape u izvanmrežnom načinu rada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3893
+#: ../src/EWS/camel/camel-ews-store.c:3894
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Morate biti u mrežnom načinu rada za završetak ove radnje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3965
-#: ../src/EWS/camel/camel-ews-store.c:4002
+#: ../src/EWS/camel/camel-ews-store.c:3966
+#: ../src/EWS/camel/camel-ews-store.c:4003
 msgid "Unsetting the “Out of Office” status"
 msgstr "Uklanjanje “Izvan ureda” stanja"
 
@@ -605,19 +605,19 @@ msgstr "Neuspjela obrada oab XML-a"
 msgid "Failed to find <OAB> element\n"
 msgstr "Nemoguće pronalazak <OAB> elementa\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8726
+#: ../src/EWS/common/e-ews-connection.c:8729
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2010 SP1 server"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:8830
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2013 server"
 
-#: ../src/EWS/common/e-ews-connection.c:8980
+#: ../src/EWS/common/e-ews-connection.c:8983
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2010 server"
 
-#: ../src/EWS/common/e-ews-connection.c:9120
+#: ../src/EWS/common/e-ews-connection.c:9123
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Zahtijeva najmanje Microsoft Exchange 2007 SP1 server"
 
@@ -729,48 +729,52 @@ msgid "Fetching folder list…"
 msgstr "Dohvaćanje popisa mape…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:824
+#: ../src/EWS/evolution/e-ews-config-utils.c:833
+#: ../src/EWS/evolution/e-ews-config-utils.c:842
+#: ../src/EWS/evolution/e-ews-config-utils.c:851
+#: ../src/EWS/evolution/e-ews-config-utils.c:860
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Pretplati se na mapu drugog EWU korisnika…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1011
+#: ../src/EWS/evolution/e-ews-config-utils.c:1047
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nemoguće uređivanje dozvole za mapu “%s”, odaberite drugu mapu."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1092
+#: ../src/EWS/evolution/e-ews-config-utils.c:1128
 msgid "Folder Sizes…"
 msgstr "Veličina mape…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1099
+#: ../src/EWS/evolution/e-ews-config-utils.c:1135
 msgid "Subscribe to folder of other user…"
 msgstr "Pretplati se na mapu drugog korisnika…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1108
-#: ../src/EWS/evolution/e-ews-config-utils.c:1444
-#: ../src/EWS/evolution/e-ews-config-utils.c:1482
-#: ../src/EWS/evolution/e-ews-config-utils.c:1520
-#: ../src/EWS/evolution/e-ews-config-utils.c:1558
+#: ../src/EWS/evolution/e-ews-config-utils.c:1144
+#: ../src/EWS/evolution/e-ews-config-utils.c:1502
+#: ../src/EWS/evolution/e-ews-config-utils.c:1540
+#: ../src/EWS/evolution/e-ews-config-utils.c:1578
+#: ../src/EWS/evolution/e-ews-config-utils.c:1616
 msgid "Permissions…"
 msgstr "Dozvole…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1110
+#: ../src/EWS/evolution/e-ews-config-utils.c:1146
 msgid "Edit EWS folder permissions"
 msgstr "Uredi dozvole EWU mape"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1446
+#: ../src/EWS/evolution/e-ews-config-utils.c:1504
 msgid "Edit EWS calendar permissions"
 msgstr "Uredi dozvole EWU kalendara"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1484
+#: ../src/EWS/evolution/e-ews-config-utils.c:1542
 msgid "Edit EWS tasks permissions"
 msgstr "Uredi dozvole EWU zadataka"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1522
+#: ../src/EWS/evolution/e-ews-config-utils.c:1580
 msgid "Edit EWS memos permissions"
 msgstr "Uredi dozvole EWU dopisa"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1560
+#: ../src/EWS/evolution/e-ews-config-utils.c:1618
 msgid "Edit EWS contacts permissions"
 msgstr "Uredi dozvole EWU kontakata"
 
@@ -856,7 +860,7 @@ msgid "Unknown"
 msgstr "Nepoznato"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
-#: ../src/EWS/evolution/e-ews-search-user.c:414
+#: ../src/EWS/evolution/e-ews-search-user.c:425
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Ime"
@@ -980,15 +984,15 @@ msgstr "Mapa je vidljiva"
 msgid "Reading folder permissions, please wait…"
 msgstr "Čitanje dozvola mape, pričekajte…"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:151
 msgid "Unset on Server"
 msgstr "Ukloni na poslužitelju"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:152
 msgid "Unset the “Out of Office” status"
 msgstr "Ukloni “Izvan ureda” stanje"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:189
+#: ../src/EWS/evolution/e-ews-search-user.c:198
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
@@ -996,11 +1000,11 @@ msgstr[0] "Nema pronađenih korisnika, samo %d kontakt"
 msgstr[1] "Nema pronađenih korisnika, samo %d kontakta"
 msgstr[2] "Nema pronađenih korisnika, samo %d kontakata"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:194
+#: ../src/EWS/evolution/e-ews-search-user.c:203
 msgid "No users found"
 msgstr "Nema pronađenih korisnika"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:198
+#: ../src/EWS/evolution/e-ews-search-user.c:207
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
@@ -1008,7 +1012,7 @@ msgstr[0] "Pronađen je %d korisnik"
 msgstr[1] "Pronađena su %d korisnika"
 msgstr[2] "Pronađeno je %d korisnika"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:204
+#: ../src/EWS/evolution/e-ews-search-user.c:213
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
@@ -1016,24 +1020,24 @@ msgstr[0] "Pronađeno je više od 100 korisnika, ali se prikazuje samo prvih %d"
 msgstr[1] "Pronađeno je više od 100 korisnika, ali se prikazuje samo prvih %d"
 msgstr[2] "Pronađeno je više od 100 korisnika, ali se prikazuje samo prvih %d"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:338
-#: ../src/EWS/evolution/e-ews-search-user.c:523
+#: ../src/EWS/evolution/e-ews-search-user.c:347
+#: ../src/EWS/evolution/e-ews-search-user.c:534
 msgid "Search for a user"
 msgstr "Pretraži korisnika"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:356
 msgid "Searching…"
 msgstr "Pretraživanje…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:420
+#: ../src/EWS/evolution/e-ews-search-user.c:431
 msgid "E-mail"
 msgstr "E-pošta"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:457
+#: ../src/EWS/evolution/e-ews-search-user.c:468
 msgid "Choose EWS user…"
 msgstr "Odaberi EWU korisnika…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:480
+#: ../src/EWS/evolution/e-ews-search-user.c:491
 msgid "_Search:"
 msgstr "_Pretraži:"
 
@@ -1592,7 +1596,7 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Mapa korisnika “{0}” je uspješno pretplaćena."
 
 #: ../src/EWS/registry/e-ews-backend.c:1094
-#: ../src/Microsoft365/registry/e-m365-backend.c:696
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nemoguće otkrivanje prikladne klase mape za novu mapu naziva “%s”"
@@ -1611,19 +1615,19 @@ msgstr "ID mape nije postavljen"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Nemoguće spremanje popisa kontakata u Microsoft 365 adresar"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Može pohraniti samo jednostavne događaje u Microsoft 365 kalendar"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "Može pohraniti samo jednostavne zadatke u Microsoft 365 mapu zadataka"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 kalendar ne može spremiti više od jednog ponavljanja"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1631,62 +1635,58 @@ msgstr ""
 "Microsoft 365 kalendar ne može spremiti komponentu sa RDATE, EXDATE ili "
 "RRULE svojstvima"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Nepoznata učestalost ponavljanja (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Microsoft 365 kalendar ne može spremiti više od jednog podsjetnika događaja"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 događaj može samo sadržavati podsjetnik prije početka događaja"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Microsoft 365 zadatak može samo sadržavati podsjetnik s apsolutnim vremenom"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
+#, c-format
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Microsoft 365 zadatak ne može sadržavati privitke."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nemoguća pohrana privitka sa URI-jem “%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 msgid "Failed to read attachment URI"
 msgstr "Neuspjelo čitanje URI-ja privitka"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
 msgid "Failed to get inline attachment data"
 msgstr "Neuspjelo dobivanje podataka privitka"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:610
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+#: ../src/Microsoft365/camel/camel-m365-folder.c:587
+#: ../src/Microsoft365/camel/camel-m365-folder.c:989
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
 msgid "Invalid folder state (missing parent store)"
 msgstr "Nevaljano stanje mape (nedostaje sadržana pohrana)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:633
-msgid ""
-"Cannot add messages into a Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-msgstr ""
-"Nemoguće dodavanje poruka u Microsoft 365 račun iz drugog računa. Samo "
-"poruke s istog računa mogu se premještati/kopirati između Microsoft 365 mapa."
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mapa “%s” ne odgovara nijednoj poznatoj mapi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Neuspjelo učitavanje sažetka za “%s”"
@@ -1709,7 +1709,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Pošta primljena putem Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1241
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Oštećeni URI: “%s”"
@@ -1766,7 +1766,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:885
+#: ../src/Microsoft365/common/e-m365-connection.c:886
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1780,7 +1780,7 @@ msgstr[2] ""
 "Microsoft 365 poslužitelj je zauzet, čekanje ponovnog pokušaja (%d:%02d "
 "minuta)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:891
+#: ../src/Microsoft365/common/e-m365-connection.c:892
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1791,16 +1791,16 @@ msgstr[1] ""
 msgstr[2] ""
 "Microsoft 365 poslužitelj je zauzet, čekanje ponovnog pokušaja (%d sekundi)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1016
-#: ../src/Microsoft365/common/e-m365-connection.c:1043
+#: ../src/Microsoft365/common/e-m365-connection.c:1017
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Invalid data"
 msgstr "Nevaljani podatak"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1041
+#: ../src/Microsoft365/common/e-m365-connection.c:1042
 msgid "Operation was cancelled"
 msgstr "Radnja je prekinuta"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1719
+#: ../src/Microsoft365/common/e-m365-connection.c:1725
 msgid "Failed to parse own Json data"
 msgstr "Neuspjela obrada vlastitog Json podatka"
 
@@ -1825,10 +1825,19 @@ msgstr "Zadani tenant je “%s”"
 msgid "_Redirect URI:"
 msgstr "_Preusmjeri URI:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:787
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Izvor podataka “%s” ne predstavlja Microsoft 365 mapu"
+
+#~ msgid ""
+#~ "Cannot add messages into a Microsoft 365 account from another account. "
+#~ "Only messages from the same account can be moved/copied between the "
+#~ "Microsoft 365 folders."
+#~ msgstr ""
+#~ "Nemoguće dodavanje poruka u Microsoft 365 račun iz drugog računa. Samo "
+#~ "poruke s istog računa mogu se premještati/kopirati između Microsoft 365 "
+#~ "mapa."
 
 #, c-format
 #~ msgid "URL “%s” is not valid"
