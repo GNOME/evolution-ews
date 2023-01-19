@@ -1123,6 +1123,87 @@ check_is_all_day_event (const ICalTime *dtstart,
 	return ((secs_end - secs_start) > 0) && ((secs_end - secs_start) % (24 * 60 * 60)) == 0 && (secs_start % 24 * 60 * 60) == 0;
 }
 
+static xmlXPathObjectPtr
+ewscal_xpath_eval_simple (xmlXPathContextPtr ctx,
+			  const gchar *expr)
+{
+	xmlXPathObjectPtr result;
+
+	if (!ctx)
+		return NULL;
+
+	result = xmlXPathEvalExpression ((const xmlChar *) expr, ctx);
+
+	if (result == NULL)
+		return NULL;
+
+	if (result->type == XPATH_NODESET && xmlXPathNodeSetIsEmpty (result->nodesetval)) {
+		xmlXPathFreeObject (result);
+		return NULL;
+	}
+
+	return result;
+}
+
+static void
+ewscal_set_timezone_in_request_header (ESoapRequest *request,
+				       const gchar *msdn_tz_id,
+				       const gchar *msdn_tz_name)
+{
+	xmlDocPtr doc;
+	xmlXPathContextPtr xpctx;
+	xmlXPathObjectPtr result;
+
+	g_return_if_fail (E_IS_SOAP_REQUEST (request));
+	g_return_if_fail (msdn_tz_id != NULL);
+
+	doc = e_soap_request_get_xml_doc (request);
+	xpctx = xmlXPathNewContext (doc);
+
+	xmlXPathRegisterNs (
+			xpctx,
+			(xmlChar *) "s",
+			(xmlChar *) "http://schemas.xmlsoap.org/soap/envelope/");
+
+	xmlXPathRegisterNs (
+			xpctx,
+			(xmlChar *) "t",
+			(xmlChar *) "http://schemas.microsoft.com/exchange/services/2006/types");
+
+	result = ewscal_xpath_eval_simple (xpctx, "/s:Envelope/s:Header/t:TimeZoneContext");
+	if (result) {
+		/* already set, skip it */
+	} else {
+		result = ewscal_xpath_eval_simple (xpctx, "/s:Envelope/s:Header");
+		if (result && result->type == XPATH_NODESET && result->nodesetval && result->nodesetval->nodeNr > 0) {
+			xmlNode *header_node = result->nodesetval->nodeTab[0];
+			xmlNode *tzcontext_node, *tzdef_node;
+			xmlNs *types_ns;
+
+			tzcontext_node = xmlNewChild (header_node, NULL, (const xmlChar *) "TimeZoneContext", NULL);
+			types_ns = xmlNewNs (tzcontext_node,
+				(const xmlChar *) "http://schemas.microsoft.com/exchange/services/2006/types",
+				(const xmlChar *) "types");
+			xmlSetNs (tzcontext_node, types_ns);
+
+			tzdef_node = xmlNewChild (tzcontext_node, NULL, (const xmlChar *) "TimeZoneDefinition", NULL);
+			types_ns = xmlNewNs (tzdef_node,
+				(const xmlChar *) "http://schemas.microsoft.com/exchange/services/2006/types",
+				(const xmlChar *) "types");
+			xmlSetNs (tzdef_node, types_ns);
+
+			if (msdn_tz_id)
+				xmlNewNsProp (tzdef_node, NULL, (const xmlChar *) "Id", (const xmlChar *) msdn_tz_id);
+			if (msdn_tz_name)
+				xmlNewNsProp (tzdef_node, NULL, (const xmlChar *) "Name", (const xmlChar *) msdn_tz_name);
+		}
+	}
+
+	if (result)
+		xmlXPathFreeObject (result);
+	xmlXPathFreeContext (xpctx);
+}
+
 static gboolean
 convert_vevent_calcomp_to_xml (ESoapRequest *request,
                                gpointer user_data,
@@ -1271,8 +1352,13 @@ convert_vevent_calcomp_to_xml (ESoapRequest *request,
 				&tzds,
 				NULL,
 				NULL)) {
-			ewscal_set_timezone (request, "StartTimeZone", tzds->data);
-			ewscal_set_timezone (request, "EndTimeZone", tzds->data);
+			EEwsCalendarTimeZoneDefinition *tzdef = tzds->data;
+
+			ewscal_set_timezone (request, "StartTimeZone", tzdef);
+			ewscal_set_timezone (request, "EndTimeZone", tzdef);
+
+			if (tzdef && tzdef->id)
+				ewscal_set_timezone_in_request_header (request, tzdef->id, tzdef->name);
 		}
 
 		g_slist_free (msdn_locations);
@@ -1786,9 +1872,14 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 
 				tmp = tzds;
 				if (tzid_start != NULL) {
+					EEwsCalendarTimeZoneDefinition *tzdef = tmp->data;
+
 					e_ews_request_start_set_item_field (request, "StartTimeZone", "calendar", "CalendarItem");
-					ewscal_set_timezone (request, "StartTimeZone", tmp->data);
+					ewscal_set_timezone (request, "StartTimeZone", tzdef);
 					e_ews_request_end_set_item_field (request);
+
+					if (tzdef && tzdef->id)
+						ewscal_set_timezone_in_request_header (request, tzdef->id, tzdef->name);
 
 					/*
 					 * Exchange server is smart enough to return the list of
