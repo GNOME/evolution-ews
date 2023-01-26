@@ -13,6 +13,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <gmodule.h>
+#include <libedataserver/libedataserver.h>
 
 #include "common/camel-sasl-xoauth2-office365.h"
 
@@ -58,6 +59,8 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "override-user-agent", NULL,
 	  N_("Override _User-Agent header value"), "0" },
 	{ CAMEL_PROVIDER_CONF_ENTRY, "user-agent", "override-user-agent", "" },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "force-http1", NULL,
+	  N_("Al_ways connect with HTTP/1"), "0" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_END }
@@ -129,6 +132,19 @@ camel_provider_module_init (void)
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
 	g_type_ensure (CAMEL_TYPE_SASL_XOAUTH2_OFFICE365);
+
+	/* Hide the option when not supported */
+	if (!e_soup_session_util_get_force_http1_supported ()) {
+		gint ii;
+
+		for (ii = G_N_ELEMENTS (ews_conf_entries) - 1; ii >= 0 ; ii--) {
+			if (ews_conf_entries[ii].type == CAMEL_PROVIDER_CONF_CHECKBOX &&
+			    g_strcmp0 (ews_conf_entries[ii].name, "force-http1") == 0) {
+				ews_conf_entries[ii].type = CAMEL_PROVIDER_CONF_HIDDEN;
+				break;
+			}
+		}
+	}
 
 	camel_provider_register (&ews_provider);
 }

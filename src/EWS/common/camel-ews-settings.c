@@ -19,6 +19,7 @@ struct _CamelEwsSettingsPrivate {
 	gboolean oab_offline;
 	gboolean use_impersonation;
 	gboolean show_public_folders;
+	gboolean force_http1;
 	gchar *email;
 	gchar *gal_uid;
 	gchar *hosturl;
@@ -68,7 +69,8 @@ enum {
 	PROP_OAUTH2_ENDPOINT_HOST,
 	PROP_SHOW_PUBLIC_FOLDERS,
 	PROP_CONCURRENT_CONNECTIONS,
-	PROP_SYNC_TAG_STAMP
+	PROP_SYNC_TAG_STAMP,
+	PROP_FORCE_HTTP1
 };
 
 G_DEFINE_TYPE_WITH_CODE (CamelEwsSettings, camel_ews_settings, CAMEL_TYPE_OFFLINE_SETTINGS,
@@ -284,6 +286,12 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_uint (value));
 			return;
+
+		case PROP_FORCE_HTTP1:
+			camel_ews_settings_set_force_http1 (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -496,6 +504,13 @@ ews_settings_get_property (GObject *object,
 			g_value_set_uint (
 				value,
 				camel_ews_settings_get_sync_tag_stamp (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_FORCE_HTTP1:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_force_http1 (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 	}
@@ -859,6 +874,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_EXPLICIT_NOTIFY |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FORCE_HTTP1,
+		g_param_spec_boolean (
+			"force-http1",
+			"Force HTTP1",
+			NULL,
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
 }
 
@@ -1897,4 +1924,26 @@ camel_ews_settings_inc_sync_tag_stamp (CamelEwsSettings *settings)
 	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "sync-tag-stamp");
+}
+
+gboolean
+camel_ews_settings_get_force_http1 (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->force_http1;
+}
+
+void
+camel_ews_settings_set_force_http1 (CamelEwsSettings *settings,
+				    gboolean force_http1)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->force_http1 ? 1 : 0) == (force_http1 ? 1 : 0))
+		return;
+
+	settings->priv->force_http1 = force_http1;
+
+	g_object_notify (G_OBJECT (settings), "force-http1");
 }

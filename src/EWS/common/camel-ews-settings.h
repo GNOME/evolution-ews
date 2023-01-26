@@ -193,6 +193,11 @@ void		camel_ews_settings_set_sync_tag_stamp
 						 guint value);
 void		camel_ews_settings_inc_sync_tag_stamp
 						(CamelEwsSettings *settings);
+gboolean	camel_ews_settings_get_force_http1
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_force_http1
+						(CamelEwsSettings *settings,
+						 gboolean force_http1);
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

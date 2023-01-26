@@ -187,6 +187,11 @@ e_ews_connection_create_soup_session (EEwsConnection *cnc)
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property (
+		cnc->priv->settings, "force-http1",
+		session, "force-http1",
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
 		cnc, "proxy-resolver",
 		session, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
