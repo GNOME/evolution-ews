@@ -368,62 +368,6 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 	e_oauth2_service_util_set_to_form (uri_query, "resource", eos_office365_get_resource_uri (service, source));
 }
 
-static gboolean
-eos_office365_extract_authorization_code (EOAuth2Service *service,
-					  ESource *source,
-					  const gchar *page_title,
-					  const gchar *page_uri,
-					  const gchar *page_content,
-					  gchar **out_authorization_code)
-{
-	GUri *uri;
-	gboolean known = FALSE;
-
-	g_return_val_if_fail (out_authorization_code != NULL, FALSE);
-
-	*out_authorization_code = NULL;
-
-	if (!page_uri || !*page_uri)
-		return FALSE;
-
-	uri = g_uri_parse (page_uri, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
-	if (!uri)
-		return FALSE;
-
-	if (g_uri_get_query (uri)) {
-		GHashTable *uri_query = soup_form_decode (g_uri_get_query (uri));
-
-		if (uri_query) {
-			const gchar *code;
-
-			code = g_hash_table_lookup (uri_query, "code");
-
-			if (code && *code) {
-				*out_authorization_code = g_strdup (code);
-				known = TRUE;
-			} else if (g_hash_table_lookup (uri_query, "error")) {
-				known = TRUE;
-				if (g_strcmp0 (g_hash_table_lookup (uri_query, "error"), "access_denied") != 0) {
-					const gchar *description;
-
-					description = g_hash_table_lookup (uri_query, "error_description");
-					if (description) {
-						g_warning ("%s: error:%s description:%s", G_STRFUNC,
-							(const gchar *) g_hash_table_lookup (uri_query, "error"),
-							description);
-					}
-				}
-			}
-
-			g_hash_table_unref (uri_query);
-		}
-	}
-
-	g_uri_unref (uri);
-
-	return known;
-}
-
 static void
 eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 					  ESource *source,
@@ -462,7 +406,6 @@ e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface)
 	iface->get_refresh_uri = eos_office365_get_refresh_uri;
 	iface->get_redirect_uri = eos_office365_get_redirect_uri;
 	iface->prepare_authentication_uri_query = eos_office365_prepare_authentication_uri_query;
-	iface->extract_authorization_code = eos_office365_extract_authorization_code;
 	iface->prepare_refresh_token_form = eos_office365_prepare_refresh_token_form;
 }
 
