@@ -3031,7 +3031,7 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		convert_data.old_comp = oldcomp;
 		convert_data.item_id = itemid;
 		convert_data.change_key = changekey;
-		convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
+		convert_data.default_zone = calendar_config_get_icaltimezone ();
 
 		if (!(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) &&
 		    e_cal_component_has_attendees (comp) &&
@@ -3277,7 +3277,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		convert_data.connection = cbews->priv->cnc;
 		convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 		convert_data.icomp = icomp;
-		convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
+		convert_data.default_zone = calendar_config_get_icaltimezone ();
 
 		success = e_ews_connection_create_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, "SaveOnly", send_meeting_invitations,
 			fid, e_cal_backend_ews_convert_calcomp_to_xml, &convert_data,
@@ -3667,7 +3667,7 @@ ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 	convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 	convert_data.icomp = subcomp;
 	convert_data.vcalendar = vcalendar;
-	convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
+	convert_data.default_zone = calendar_config_get_icaltimezone ();
 
 	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
 
@@ -3981,7 +3981,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 				sub_convert_data.old_comp = comp; /* no change, just detach the instance */
 				sub_convert_data.item_id = item_id;
 				sub_convert_data.change_key = change_key;
-				sub_convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
+				sub_convert_data.default_zone = calendar_config_get_icaltimezone ();
 
 				e_ews_connection_update_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
 					"AlwaysOverwrite", "SaveOnly", "SendToNone", cbews->priv->folder_id,
