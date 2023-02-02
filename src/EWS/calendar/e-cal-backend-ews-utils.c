@@ -1255,13 +1255,13 @@ convert_vevent_calcomp_to_xml (ESoapRequest *request,
 	tzid_start = dtstart ? i_cal_time_get_timezone (dtstart) : NULL;
 	if (!tzid_start)
 		tzid_start = convert_data->default_zone;
-	ical_location_start = i_cal_timezone_get_location (tzid_start);
+	ical_location_start = tzid_start ? i_cal_timezone_get_location (tzid_start) : NULL;
 
 	dtend = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTEND_PROPERTY, i_cal_property_get_dtend);
 	tzid_end = dtend ? i_cal_time_get_timezone (dtend) : NULL;
 	if (!tzid_end)
 		tzid_end = convert_data->default_zone;
-	ical_location_end = i_cal_timezone_get_location (tzid_end);
+	ical_location_end = tzid_end ? i_cal_timezone_get_location (tzid_end) : NULL;
 
 	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
 	if (satisfies && ical_location_start != NULL && ical_location_end != NULL) {
