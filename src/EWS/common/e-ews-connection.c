@@ -6456,6 +6456,7 @@ ews_handle_free_busy_view (ESoapParameter *param,
 	     event_param != NULL;
 	     event_param = e_soap_parameter_get_next_child (event_param)) {
 		ICalPeriod *ipt;
+		gboolean is_recurring = FALSE;
 
 		ipt = i_cal_period_new_null_period ();
 
@@ -6540,12 +6541,40 @@ ews_handle_free_busy_view (ESoapParameter *param,
 					g_clear_pointer (&location, g_free);
 					location = e_soap_parameter_get_string_value (dparam);
 				}
+
+				dparam = e_soap_parameter_get_first_child_by_name (subparam, "IsRecurring");
+				if (dparam) {
+					value = e_soap_parameter_get_string_value (dparam);
+					is_recurring = g_strcmp0 (value, "true") == 0;
+					g_free (value);
+				}
 			}
 		}
 
 		if (prop) {
-			if (id)
+			if (id) {
+				/* Unique-ize the ID for the recurring events, otherwise the ID clashes when
+				   more items are from the same series/event. */
+				if (is_recurring) {
+					ICalTime *itt;
+
+					itt = i_cal_period_get_start (ipt);
+					if (itt) {
+						gchar *itt_str, *tmp;
+
+						itt_str = i_cal_time_as_ical_string (itt);
+						tmp = g_strconcat (id, "-", itt_str, NULL);
+
+						g_free (id);
+						g_free (itt_str);
+
+						id = tmp;
+					}
+					g_clear_object (&itt);
+				}
+
 				i_cal_property_set_parameter_from_string (prop, "X-EWS-ID", id);
+			}
 			if (summary)
 				i_cal_property_set_parameter_from_string (prop, "X-SUMMARY", summary);
 			if (location)
