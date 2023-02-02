@@ -200,7 +200,7 @@ e_ews_connection_create_soup_session (EEwsConnection *cnc)
 
 		if (log_level >= 4)
 			soup_logger_set_printer (logger, e_ews_soup_log_printer, NULL, NULL);
-		else if (log_level == 2)
+		else if (log_level == 1 || log_level == 2)
 			soup_logger_set_printer (logger, e_ews_debug_soup_log_printer_stdout, NULL, NULL);
 
 		soup_session_add_feature (SOUP_SESSION (session), SOUP_SESSION_FEATURE (logger));

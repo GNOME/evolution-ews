@@ -94,7 +94,7 @@ e_ews_debug_redact_headers (gchar direction,
 	const gchar *filtered_data = NULL;
 	gint log_level = e_ews_debug_get_log_level ();
 
-	if (log_level == 2 || log_level > 3) {
+	if (log_level == 1 || log_level == 2 || log_level > 3) {
 		if (direction == '>' && g_ascii_strncasecmp (data, "Host:", 5) == 0)
 			filtered_data = "Host: <redacted>";
 		else if (direction == '>' && g_ascii_strncasecmp (data, "Authorization:", 14) == 0)
