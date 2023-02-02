@@ -1,19 +1,19 @@
 # Turkish translation for evolution-ews.
-# Copyright (C) 2015-2022 evolution-ews's COPYRIGHT HOLDER
+# Copyright (C) 2015-2023 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 #
 # Kaan Özdinçer <kaanozdincer@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2015, 2016.
 # Serdar Sağlam <teknomobil@yandex.com>, 2019.
-# Sabri Ünal <libreajans@gmail.com>, 2019, 2022.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2020, 2021, 2022.
+# Sabri Ünal <libreajans@gmail.com>, 2019, 2022, 2023.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2020-2023.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-09-02 06:55+0000\n"
-"PO-Revision-Date: 2022-09-03 08:48+0300\n"
+"POT-Creation-Date: 2023-01-25 17:12+0000\n"
+"PO-Revision-Date: 2023-02-02 15:44+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-POOTLE-MTIME: 1434380104.000000\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
@@ -36,51 +36,51 @@ msgstr "Exchange Web Servisleri"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Web Servisleri kullanarak Exchange sunucularına ulaşmak için"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2880
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
 msgid "Fetching contact photos…"
 msgstr "Kişi fotoğrafları alınıyor…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4060
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
 msgid "Failed to update GAL:"
 msgstr "GAL güncellenemedi:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4225
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kişi listesi kaydedilemiyor, bu yalnızca EWS Sunucusu 2010 veya sonrasınca "
 "destekleniyor"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4323
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
 msgid "Failed to set contact photo:"
 msgstr "Kişi fotoğrafı ayarlanamadı:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Uygun"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Meşgul"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ofis Dışında"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2046
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Belirsiz"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2624
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2898
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2626
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2900
 msgid "Cannot determine EWS ItemId"
 msgstr "EWS ItemId belirlenemedi"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3197
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3199
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -88,11 +88,11 @@ msgstr ""
 "Exchange Web Servisleri takviminde diğer kullanıcılarca düzenlenen "
 "toplantılar oluşturulamaz."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3234
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3236
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Çevrim içi toplantı yalnızca ana kullanıcı Takviminde oluşturulabilir."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "“%s” kullanıcısı, katılımcılar arasında bulunamıyor"
@@ -108,7 +108,7 @@ msgstr "Sunucuya bağlanamıyor, sunucuda oturum açtığınızda eylemi yineley
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "%s takvimi için Microsoft 365 yardımcı kaynağı bulunamadı"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2089
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2180
 msgid "Invalid occurrence ID"
 msgstr "Geçersiz eşleşme kimliği"
 
@@ -290,62 +290,62 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:652
-#: ../src/EWS/camel/camel-ews-store.c:1479
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Checking “Out of Office” settings"
 msgstr "“Ofis Dışı” ayarları denetleniyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:1485
+#: ../src/EWS/camel/camel-ews-store.c:1482
 msgid "Look up Exchange server categories"
 msgstr "Exchange sunucusu kategorilerine bak"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1561
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] ""
 "Parola %d gün içinde sona erecek. Değiştirmek için “%s” konumunu açın."
 
-#: ../src/EWS/camel/camel-ews-store.c:1567
+#: ../src/EWS/camel/camel-ews-store.c:1564
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Parola %d gün içinde sona erecek."
 
-#: ../src/EWS/camel/camel-ews-store.c:1793
+#: ../src/EWS/camel/camel-ews-store.c:1790
 msgid "Updating foreign folder structure"
 msgstr "Yabancı klasör yapısını güncelle"
 
-#: ../src/EWS/camel/camel-ews-store.c:1929
+#: ../src/EWS/camel/camel-ews-store.c:1928
 msgid "Updating foreign folders"
 msgstr "Yabancı klasörleri güncelle"
 
-#: ../src/EWS/camel/camel-ews-store.c:2345
+#: ../src/EWS/camel/camel-ews-store.c:2344
 #: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Böyle bir klasör yok: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2692
+#: ../src/EWS/camel/camel-ews-store.c:2691
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Çevrim dışı kipte, EWS açık klasörleri listelenemez"
 
-#: ../src/EWS/camel/camel-ews-store.c:2765
+#: ../src/EWS/camel/camel-ews-store.c:2764
 msgid "Cannot find any EWS public folders"
 msgstr "Herhangi bir EWS açık klasörü bulunamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:2878
+#: ../src/EWS/camel/camel-ews-store.c:2876
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "“%s” klasörü oluşturulamadı, klasör zaten var"
 
-#: ../src/EWS/camel/camel-ews-store.c:2893
+#: ../src/EWS/camel/camel-ews-store.c:2891
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "%s üst klasörü yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:2903
+#: ../src/EWS/camel/camel-ews-store.c:2901
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -353,112 +353,122 @@ msgstr ""
 "“%s” altına bir klasör oluşturulamıyor, yalnızca diğer kullanıcıların "
 "klasörleri için kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:2913
+#: ../src/EWS/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "“%s” altına bir klasör oluşturulamıyor, yalnızca açık klasörler için "
 "kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3020
+#: ../src/EWS/camel/camel-ews-store.c:3018
 #: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Klasör yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3030
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "“%s” klasörü silinemiyor, yalnızca diğer kullanıcıların klasörleri için "
 "kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3041
+#: ../src/EWS/camel/camel-ews-store.c:3039
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "“%s” klasörü silinemiyor, yalnızca açık klasörler için kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
-#: ../src/EWS/camel/camel-ews-store.c:3296
+#: ../src/EWS/camel/camel-ews-store.c:3198
+#: ../src/EWS/camel/camel-ews-store.c:3294
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "%s klasörü yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3209
+#: ../src/EWS/camel/camel-ews-store.c:3207
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "%s klasörü için değişim anahtarı kaydı yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3252
+#: ../src/EWS/camel/camel-ews-store.c:3250
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Bir klasörü aynı anda hem yeniden adlandırıp hem de taşıyamazsınız"
 
-#: ../src/EWS/camel/camel-ews-store.c:3283
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3281
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "%s üst klasörü için klasörü kimliği bulunamıyor"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3296
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3294
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Gelen Kutusu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3355
-#: ../src/EWS/camel/camel-ews-transport.c:449
+#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange sunucu %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3358
+#: ../src/EWS/camel/camel-ews-store.c:3356
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%2$s üzerinde %1$s için Exchange servisi"
 
-#: ../src/EWS/camel/camel-ews-store.c:3402
+#: ../src/EWS/camel/camel-ews-store.c:3400
 #: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Çöp klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3462
+#: ../src/EWS/camel/camel-ews-store.c:3460
 #: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Önemsiz klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3653
+#: ../src/EWS/camel/camel-ews-store.c:3651
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Çevrim dışı kipte EWS klasörlerine abone olunamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3676
+#: ../src/EWS/camel/camel-ews-store.c:3674
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "“%s” klasörüne abone olunamıyor, kullanılabilir bir açık klasör yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3686
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "“%s” klasörüne abone olunamıyor, klasör bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3771
+#: ../src/EWS/camel/camel-ews-store.c:3693
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "“%s” klasörüne abone olunamıyor, klasör kimliği bulunamadı"
+
+#: ../src/EWS/camel/camel-ews-store.c:3704
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "“%s” klasörüne abone olunamıyor, genel klasör kökü bulunamadı"
+
+#: ../src/EWS/camel/camel-ews-store.c:3780
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Çevrip dışı kipte EWS klasörlerinden abonelik kaldırılamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3882
+#: ../src/EWS/camel/camel-ews-store.c:3891
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Bu işlemi tamamlayabilmek için çevirim içi çalışmanız gerekiyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3954
-#: ../src/EWS/camel/camel-ews-store.c:3991
+#: ../src/EWS/camel/camel-ews-store.c:3963
+#: ../src/EWS/camel/camel-ews-store.c:4000
 msgid "Unsetting the “Out of Office” status"
 msgstr "\"Ofis Dışında\" durumunu kaldır"
 
@@ -476,27 +486,27 @@ msgstr "Genel Klasörler"
 msgid "Invalid folder URI “%s”"
 msgstr "Bozuk klasör URI’si: “%s”"
 
-#: ../src/EWS/camel/camel-ews-transport.c:452
+#: ../src/EWS/camel/camel-ews-transport.c:450
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "%s üzerinden Exchange posta teslimatı"
 
-#: ../src/EWS/camel/camel-ews-transport.c:501
+#: ../src/EWS/camel/camel-ews-transport.c:499
 #: ../src/Microsoft365/camel/camel-m365-transport.c:438
 msgid "Cannot send message with no From address"
 msgstr "Gönderen adresi olmadan ileti gönderilemez"
 
-#: ../src/EWS/camel/camel-ews-transport.c:507
+#: ../src/EWS/camel/camel-ews-transport.c:505
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "Exchange sunucusu, birden çok Gönderen adresi olan iletiyi gönderemiyor"
 
-#: ../src/EWS/camel/camel-ews-transport.c:517
+#: ../src/EWS/camel/camel-ews-transport.c:515
 #: ../src/Microsoft365/camel/camel-m365-transport.c:453
 msgid "Failed to read From address"
 msgstr "Gönderen adresini okuma başarısız"
 
-#: ../src/EWS/camel/camel-ews-transport.c:527
+#: ../src/EWS/camel/camel-ews-transport.c:525
 #: ../src/Microsoft365/camel/camel-m365-transport.c:463
 #, c-format
 msgid "Service not connected"
@@ -550,55 +560,55 @@ msgstr[0] "Exchange sunucusu meşgul, yeniden denemeyi bekliyor (%d saniye)"
 msgid "Authentication failed"
 msgstr "Kimlik doğrulama başarısız"
 
-#: ../src/EWS/common/e-ews-connection.c:2389
+#: ../src/EWS/common/e-ews-connection.c:2421
 msgid "Failed to parse autodiscover response XML"
 msgstr "Kendiliğinden keşifin XML yanıtı ayrıştırılamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2395
+#: ../src/EWS/common/e-ews-connection.c:2427
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2405
+#: ../src/EWS/common/e-ews-connection.c:2437
 msgid "Failed to find <Response> element"
 msgstr "<Response> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2415
+#: ../src/EWS/common/e-ews-connection.c:2447
 msgid "Failed to find <Account> element"
 msgstr "<Account> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2460
+#: ../src/EWS/common/e-ews-connection.c:2492
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "<ASUrl> ögesi kendiliğinden keşif yanıtında bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2536
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "URL cannot be NULL"
 msgstr "Adres NULL olamaz"
 
-#: ../src/EWS/common/e-ews-connection.c:2954
+#: ../src/EWS/common/e-ews-connection.c:2986
 msgid "Email address is missing a domain part"
 msgstr "E-posta adresinde etki alanı bölümü eksik"
 
-#: ../src/EWS/common/e-ews-connection.c:3163
+#: ../src/EWS/common/e-ews-connection.c:3195
 msgid "Failed to parse oab XML"
 msgstr "OAB XML ayrıştırılamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3201
+#: ../src/EWS/common/e-ews-connection.c:3233
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> ögesi bulunamadı\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8726
+#: ../src/EWS/common/e-ews-connection.c:8761
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "En az Microsoft Exchange 2010 SP1 sunucusu gerektirir"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:8862
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "En az Microsoft Exchange 2013 sunucusu gerektirir"
 
-#: ../src/EWS/common/e-ews-connection.c:8980
+#: ../src/EWS/common/e-ews-connection.c:9015
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "En az Microsoft Exchange 2010 sunucusu gerektirir"
 
-#: ../src/EWS/common/e-ews-connection.c:9120
+#: ../src/EWS/common/e-ews-connection.c:9155
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "En az Microsoft Exchange 2007 SP1 sunucusu gerektirir"
 
@@ -651,14 +661,13 @@ msgstr "Kişi fotoğraflarını _al"
 msgid "Tries to look up for user photo"
 msgstr "Kullanıcı fotoğrafına bakmaya çalışır"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:195
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
 msgid "Online Meeting"
 msgstr "Çevrim İçi Toplantı"
 
-#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:197
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
 msgid "Create the meeting as an online meeting in the main user calendar"
-msgstr ""
-"Toplantıyı ana kullanıcı takviminde çevrim içi toplantı olarak oluştur"
+msgstr "Toplantıyı ana kullanıcı takviminde çevrim içi toplantı olarak oluştur"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
@@ -711,48 +720,52 @@ msgid "Fetching folder list…"
 msgstr "Klasör listesi çekiliyor…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:824
+#: ../src/EWS/evolution/e-ews-config-utils.c:833
+#: ../src/EWS/evolution/e-ews-config-utils.c:842
+#: ../src/EWS/evolution/e-ews-config-utils.c:851
+#: ../src/EWS/evolution/e-ews-config-utils.c:860
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Diğer EWS kullanıcısının klasörüne abone ol…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1011
+#: ../src/EWS/evolution/e-ews-config-utils.c:1047
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "“%s” klasörünün izinleri düzenlenemiyor, başka klasör seç."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1092
+#: ../src/EWS/evolution/e-ews-config-utils.c:1128
 msgid "Folder Sizes…"
 msgstr "Klasör Boyutları…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1099
+#: ../src/EWS/evolution/e-ews-config-utils.c:1135
 msgid "Subscribe to folder of other user…"
 msgstr "Diğer kullanıcının klasörüne abone ol…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1108
-#: ../src/EWS/evolution/e-ews-config-utils.c:1444
-#: ../src/EWS/evolution/e-ews-config-utils.c:1482
-#: ../src/EWS/evolution/e-ews-config-utils.c:1520
-#: ../src/EWS/evolution/e-ews-config-utils.c:1558
+#: ../src/EWS/evolution/e-ews-config-utils.c:1144
+#: ../src/EWS/evolution/e-ews-config-utils.c:1502
+#: ../src/EWS/evolution/e-ews-config-utils.c:1540
+#: ../src/EWS/evolution/e-ews-config-utils.c:1578
+#: ../src/EWS/evolution/e-ews-config-utils.c:1616
 msgid "Permissions…"
 msgstr "İzinler…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1110
+#: ../src/EWS/evolution/e-ews-config-utils.c:1146
 msgid "Edit EWS folder permissions"
 msgstr "EWS klasör izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1446
+#: ../src/EWS/evolution/e-ews-config-utils.c:1504
 msgid "Edit EWS calendar permissions"
 msgstr "EWS takvim izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1484
+#: ../src/EWS/evolution/e-ews-config-utils.c:1542
 msgid "Edit EWS tasks permissions"
 msgstr "EWS görevlerinin izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1522
+#: ../src/EWS/evolution/e-ews-config-utils.c:1580
 msgid "Edit EWS memos permissions"
 msgstr "EWS notlarının izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1560
+#: ../src/EWS/evolution/e-ews-config-utils.c:1618
 msgid "Edit EWS contacts permissions"
 msgstr "EWS kişilerinin izinlerini düzenle"
 
@@ -838,7 +851,7 @@ msgid "Unknown"
 msgstr "Bilinmeyen"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
-#: ../src/EWS/evolution/e-ews-search-user.c:414
+#: ../src/EWS/evolution/e-ews-search-user.c:425
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Ad"
@@ -962,55 +975,55 @@ msgstr "Klasör görünürlüğü"
 msgid "Reading folder permissions, please wait…"
 msgstr "Klasör izinleri okunuyor, lütfen bekleyiniz…"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:151
 msgid "Unset on Server"
 msgstr "Sunucuda Belirlenmedi"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:152
 msgid "Unset the “Out of Office” status"
 msgstr "\"Ofis Dışında\" durumu ayarını kaldır"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:189
+#: ../src/EWS/evolution/e-ews-search-user.c:198
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
 msgstr[0] "Hiç kullanıcı bulunamadı, yalnızca %d kişi"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:194
+#: ../src/EWS/evolution/e-ews-search-user.c:203
 msgid "No users found"
 msgstr "Hiç kullanıcı bulunamadı"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:198
+#: ../src/EWS/evolution/e-ews-search-user.c:207
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "%d kullanıcı bulundu"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:204
+#: ../src/EWS/evolution/e-ews-search-user.c:213
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] ""
 "100 kullanıcıdan fazla bulundu, ancak yalnızca ilk %d tanesi gösteriliyor"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:338
-#: ../src/EWS/evolution/e-ews-search-user.c:523
+#: ../src/EWS/evolution/e-ews-search-user.c:347
+#: ../src/EWS/evolution/e-ews-search-user.c:534
 msgid "Search for a user"
 msgstr "Kullanıcı ara"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:356
 msgid "Searching…"
 msgstr "Aranıyor…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:420
+#: ../src/EWS/evolution/e-ews-search-user.c:431
 msgid "E-mail"
 msgstr "E-posta"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:457
+#: ../src/EWS/evolution/e-ews-search-user.c:468
 msgid "Choose EWS user…"
 msgstr "EWS kullanıcısı seç…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:480
+#: ../src/EWS/evolution/e-ews-search-user.c:491
 msgid "_Search:"
 msgstr "_Ara:"
 
@@ -1126,60 +1139,60 @@ msgstr "Kendiliğinden keşif servisini sorgulama"
 msgid "Fetch _URL"
 msgstr "_URL Getir"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:169
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Yapılandırma"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:187
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:211
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "Kullanıcı _adı:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:201
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "_Host URL:"
 msgstr "_Makine Adresi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:220
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:244
 msgid "OAB U_RL:"
 msgstr "OAB _Adresi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:234
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:258
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Diğer kullanıcının _Posta Kutusunu aç"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:278
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:302
 msgid "S_earch…"
 msgstr "A_ra…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:313
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Kimlik Doğrulama"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:340
 msgid "_Override Office365 OAuth2 settings"
 msgstr "Office365 OAuth2 ayarlarını _geçersiz kıl"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:320
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:398
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:422
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Yardım…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:327
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "Uygulama _kimliği:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:374
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Öntanımlı uygulama kimliği ayarlanamadı"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1189,59 +1202,59 @@ msgstr "Öntanımlı uygulama kimliği “%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "_Kiracı kimliği:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:404
 msgid "Default tenant ID is “common“"
 msgstr "Öntanımlı kiracı kimliği: “common” (ortak)"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:407
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Öntanımlı kiracı kimliği: “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Gelişmiş Ayarlar"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:406
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "_Uç nokta ana makinesi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:429
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:432
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Öntanımlı uç nokta ana makinesi: “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
 msgid "Red_irect URI:"
 msgstr "_Yönlendirme URIʼsi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:485
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Öntanımlı yönlendirme URIsi “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:488
 msgid "Re_source URI:"
 msgstr "_Kaynak URIʼsi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:511
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1250,24 +1263,24 @@ msgstr ""
 "Öntanımlı kaynak URI’si Ana Makine URL’sinden türetilmiştir, “%s” olarak "
 "geri çekilebilir."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:761
 msgid "Host URL is not valid"
 msgstr "Ana makine URLsi geçerli değil"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:765
 msgid "Host URL cannot be empty"
 msgstr "Ana bilgisayar URLsi boş olamaz"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
 msgid "OAB URL is not valid"
 msgstr "OAB URLsi geçerli değil"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:786
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Kullanıcı adı boş olamaz"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:800
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Uygulama kimliği boş olamaz"
@@ -1568,16 +1581,17 @@ msgstr "Klasöre abone olundu."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "“{0}” kullanıcı klasörüne başarıyla abone olundu."
 
-#: ../src/EWS/registry/e-ews-backend.c:1094
-#: ../src/Microsoft365/registry/e-m365-backend.c:696
+#: ../src/EWS/registry/e-ews-backend.c:1101
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "“%s” adlı yeni klasör için uygun bir klasör sınıfına karar verilemedi"
 
-#: ../src/EWS/registry/e-ews-backend.c:1183
+#: ../src/EWS/registry/e-ews-backend.c:1190
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
-msgstr "“%s”veri kaynağı, bir Exchange Web Servisleri klasörünü temsil etmiyor"
+msgstr ""
+"“%s” veri kaynağı, bir Exchange Web Servisleri klasörünü temsil etmiyor"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
@@ -1588,19 +1602,19 @@ msgstr "Klasör kimliği belirlenmedi"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Kişi listesi Microsofft 365 adres defterine kaydedilemedi"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:661
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Microsoft 365 takviminde yalnızca basit olaylar depolanabilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:674
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "Microsoft 365 görev klasöründe yalnızca basit görevler depolanabilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1629
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 takvimi, birden çok yinelemeyi depolayamaz"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1638
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1608,61 +1622,56 @@ msgstr ""
 "Microsoft 365 takvimi; RDATE, EXDATE veya RRULE özellikli bileşeni "
 "depolayamaz"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1748
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Bilinmeyen yineleme sıklığı (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1900
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr "Microsoft 365 takvimi birden çok olay anımsatıcı depolayamaz"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1933
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 olayı, yalnızca olay başlamadan önce anımsatıcı içerebilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1946
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 görevi, yalnızca mutlak zamanlı anımsatıcı içerebilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2383
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
+#, c-format
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Microsoft 365 görevi ek içeremez."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "“%s” URIʼli ek depolanamadı"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2385
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 msgid "Failed to read attachment URI"
 msgstr "Ek URIʼsi okunamadı"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2399
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
 msgid "Failed to get inline attachment data"
 msgstr "Satır içi ek verisi alınamadı"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:610
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+#: ../src/Microsoft365/camel/camel-m365-folder.c:587
+#: ../src/Microsoft365/camel/camel-m365-folder.c:989
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
 msgid "Invalid folder state (missing parent store)"
 msgstr "Geçersiz klasör durumu (eksik üst depolama)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:633
-msgid ""
-"Cannot add messages into a Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-msgstr ""
-"Microsoft 365 hesabına bir başka hesaptan ileti eklenemez. Microsoft 365 "
-"klasörleri arasında yalnızca aynı hesaptan iletiler taşınabilir/"
-"kopyalanabilir."
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "“%s” klasörü herhangi bir bilindik klasöre denk gelmiyor"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "“%s” için özet yüklenemedi"
@@ -1685,7 +1694,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Microsoft 362 aracılığıyla posta al"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1241
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Bozuk URI: “%s”"
@@ -1741,30 +1750,30 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:885
+#: ../src/Microsoft365/common/e-m365-connection.c:886
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Microsoft 365 sunucusu meşgul, yeniden deneme bekleniyor (%d:%02d dakika)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:891
+#: ../src/Microsoft365/common/e-m365-connection.c:892
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Microsoft 365 sunucusu meşgul, yeniden deneme bekleniyor (%d saniye)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1016
-#: ../src/Microsoft365/common/e-m365-connection.c:1043
+#: ../src/Microsoft365/common/e-m365-connection.c:1017
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Invalid data"
 msgstr "Geçersiz veri"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1041
+#: ../src/Microsoft365/common/e-m365-connection.c:1042
 msgid "Operation was cancelled"
 msgstr "İşlem iptal edildi"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1719
+#: ../src/Microsoft365/common/e-m365-connection.c:1725
 msgid "Failed to parse own Json data"
 msgstr "Kendi Json verisi ayrıştırılamadı"
 
@@ -1789,7 +1798,7 @@ msgstr "Öntanımlı kiracı: “%s”"
 msgid "_Redirect URI:"
 msgstr "_Yönlendirme URIsi:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:787
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
-msgstr "“%s”veri kaynağı, bir Microsoft 365 klasörünü temsil etmiyor"
+msgstr "“%s” veri kaynağı, bir Microsoft 365 klasörünü temsil etmiyor"
