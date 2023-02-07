@@ -141,38 +141,6 @@ ews_backend_get_settings (EEwsBackend *backend)
 }
 
 static void
-ews_backend_update_enabled (ESource *data_source,
-			    ESource *collection_source)
-{
-	ESourceCollection *collection_extension = NULL;
-	gboolean part_enabled = TRUE;
-
-	g_return_if_fail (E_IS_SOURCE (data_source));
-
-	if (!collection_source || !e_source_get_enabled (collection_source)) {
-		e_source_set_enabled (data_source, FALSE);
-		return;
-	}
-
-	if (e_source_has_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION))
-		collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION);
-
-	if (e_source_has_extension (data_source, E_SOURCE_EXTENSION_CALENDAR) ||
-	    e_source_has_extension (data_source, E_SOURCE_EXTENSION_TASK_LIST) ||
-	    e_source_has_extension (data_source, E_SOURCE_EXTENSION_MEMO_LIST)) {
-		part_enabled = !collection_extension || e_source_collection_get_calendar_enabled (collection_extension);
-	} else if (e_source_has_extension (data_source, E_SOURCE_EXTENSION_ADDRESS_BOOK)) {
-		part_enabled = !collection_extension || e_source_collection_get_contacts_enabled (collection_extension);
-	} else if (e_source_has_extension (data_source, E_SOURCE_EXTENSION_MAIL_ACCOUNT) ||
-		   e_source_has_extension (data_source, E_SOURCE_EXTENSION_MAIL_IDENTITY) ||
-		   e_source_has_extension (data_source, E_SOURCE_EXTENSION_MAIL_TRANSPORT)) {
-		part_enabled = !collection_extension || e_source_collection_get_mail_enabled (collection_extension);
-	}
-
-	e_source_set_enabled (data_source, part_enabled);
-}
-
-static void
 ews_backend_sync_authentication (EEwsBackend *ews_backend,
 				 ESource *child_source)
 {
@@ -244,7 +212,6 @@ ews_backend_new_child (EEwsBackend *backend,
 	e_source_backend_set_backend_name (
 		E_SOURCE_BACKEND (extension), "ews");
 	ews_backend_sync_authentication (backend, source);
-	ews_backend_update_enabled (source, e_backend_get_source (E_BACKEND (backend)));
 
 	if (e_ews_folder_get_folder_type (folder) != E_EWS_FOLDER_TYPE_CONTACTS &&
 	    !e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER) &&
@@ -496,23 +463,10 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	const gchar *oal_id = NULL;
 	const gchar *uid;
 	gchar *oal_selected;
-	gboolean can_enable;
 
 	settings = ews_backend_get_settings (backend);
 	collection_backend = E_COLLECTION_BACKEND (backend);
 	source = e_backend_get_source (E_BACKEND (backend));
-	if (source) {
-		ESourceCollection *collection_extension = NULL;
-
-		if (e_source_has_extension (source, E_SOURCE_EXTENSION_COLLECTION))
-			collection_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_COLLECTION);
-
-		can_enable = !collection_extension || (e_source_get_enabled (source) &&
-			e_source_collection_get_contacts_enabled (collection_extension));
-	} else {
-		can_enable = FALSE;
-	}
-
 	gal_uid = camel_ews_settings_get_gal_uid (settings);
 
 	if (gal_uid != NULL) {
@@ -521,7 +475,6 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 		g_object_unref (server);
 
 		if (source != NULL) {
-			e_source_set_enabled (source, can_enable);
 			g_object_unref (source);
 			return;
 		}
@@ -558,7 +511,6 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 
 	source = e_collection_backend_new_child (
 		collection_backend, oal_id);
-	e_source_set_enabled (source, can_enable);
 	ews_backend_sync_authentication (backend, source);
 
 	e_source_set_display_name (source, display_name);
@@ -604,10 +556,8 @@ ews_backend_maybe_add_m365_source (EEwsBackend *ews_backend)
 	ESource *m365_source;
 	ESourceAuthentication *auth_extension;
 	ESourceAuthentication *collection_auth_extension;
-	ESourceCollection *collection_extension = NULL;
 	ESourceExtension *source_extension;
 	ESourceRegistryServer *server;
-	gboolean can_enable;
 	gchar *display_name;
 
 	ews_settings = ews_backend_get_settings (ews_backend);
@@ -623,15 +573,8 @@ ews_backend_maybe_add_m365_source (EEwsBackend *ews_backend)
 	/* Make sure the ESourceCamel knows about it, even when no Microsoft365 mail account is created */
 	e_source_camel_generate_subtype ("microsoft365", CAMEL_TYPE_M365_SETTINGS);
 
-	if (e_source_has_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION))
-		collection_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_COLLECTION);
-
-	can_enable = !collection_extension || (e_source_get_enabled (collection_source) &&
-		e_source_collection_get_contacts_enabled (collection_extension));
-
 	collection_backend = E_COLLECTION_BACKEND (ews_backend);
 	m365_source = e_collection_backend_new_child (collection_backend, EWS_HELPER_M365_RESOURCE_ID);
-	e_source_set_enabled (m365_source, can_enable);
 
 	display_name = g_strconcat (e_source_get_display_name (collection_source), " (Microsoft365)", NULL);
 
@@ -712,7 +655,6 @@ add_remote_sources (EEwsBackend *backend,
 				E_SERVER_SIDE_SOURCE (source), TRUE);
 			e_server_side_source_set_remote_deletable (
 				E_SERVER_SIDE_SOURCE (source), TRUE);
-			ews_backend_update_enabled (source, e_backend_get_source (E_BACKEND (backend)));
 			e_source_registry_server_add_source (registry, source);
 		} else {
 			GError *error = NULL;
@@ -867,7 +809,6 @@ ews_backend_claim_old_resources (ECollectionBackend *backend)
 	for (iter = old_resources; iter; iter = g_list_next (iter)) {
 		ESource *source = iter->data;
 
-		ews_backend_update_enabled (source, e_backend_get_source (E_BACKEND (backend)));
 		e_source_registry_server_add_source (registry, source);
 	}
 
@@ -909,18 +850,21 @@ ews_backend_populate (ECollectionBackend *collection_backend)
 			G_CALLBACK (ews_backend_source_changed_cb), ews_backend);
 	}
 
-	/* do not do anything, if account is disabled */
-	if (!e_collection_backend_get_part_enabled (collection_backend, E_COLLECTION_BACKEND_PART_ANY))
+	/* only claim old sources, when the account is disabled, thus
+	   those sources can be auto-enabled when the account is enabled */
+	if (!e_collection_backend_get_part_enabled (collection_backend, E_COLLECTION_BACKEND_PART_ANY)) {
+		ews_backend_claim_old_resources (collection_backend);
 		return;
+	}
 
 	if (!e_collection_backend_freeze_populate (collection_backend)) {
 		e_collection_backend_thaw_populate (collection_backend);
 		return;
 	}
 
+	ews_backend_claim_old_resources (collection_backend);
 	ews_backend_add_gal_source (ews_backend);
 	ews_backend_maybe_add_m365_source (ews_backend);
-	ews_backend_claim_old_resources (collection_backend);
 
 	if (e_backend_get_online (backend)) {
 		CamelEwsSettings *ews_settings;
