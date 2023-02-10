@@ -1,3 +1,27 @@
+Evolution-EWS 3.47.2 2023-02-10
+-------------------------------
+
+Bug Fixes:
+	I#210 - Add option to always use HTTP/1
+	I#211 - Calendar: Cover possible ID conversion for Online meetings
+	I#216 - Calendar: Ensure TimeZone info in SOAP-header request
+	I#219 - Disabled sources auto-re-enabled the next start
+	I#220 - Calendar: Convert floating time to user's timezone on save
+	I#221 - Subscribed free/busy calendar does not show all events
+
+Miscellaneous:
+	Enable GitLab CI for easier testing of the changes
+	Remove duplicated OAuth2 code
+	Sanitize headers in debug log also for level 1
+
+Translations:
+	Alan Mortensen (da)
+	Anders Jonsson (sv)
+	Goran Vidović (hr)
+	Piotr Drąg (pl)
+	Sabri Ünal (tr)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.47.1 2023-01-06
 -------------------------------
 
