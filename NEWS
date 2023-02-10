@@ -1,3 +1,16 @@
+Evolution-EWS 3.46.4 2023-02-10
+-------------------------------
+
+Bug Fixes:
+	I#211 - Calendar: Cover possible ID conversion for Online meetings
+	I#216 - Calendar: Ensure TimeZone info in SOAP-header request
+	I#219 - Disabled sources auto-re-enabled the next start
+	I#220 - Calendar: Convert floating time to user's timezone on save
+	I#221 - Subscribed free/busy calendar does not show all events
+
+Miscellaneous:
+	Sanitize headers in debug log also for level 1
+
 Evolution-EWS 3.46.3 2023-01-06
 -------------------------------
 
