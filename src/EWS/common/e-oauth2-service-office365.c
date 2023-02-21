@@ -200,10 +200,9 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
 	CamelEwsSettings *ews_settings;
-	gboolean use_oauth2_v2;
+	gboolean use_oauth2_v2 = FALSE;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	use_oauth2_v2 = ews_settings ? camel_ews_settings_get_use_oauth2_v2 (ews_settings) : FALSE;
 
 	if (ews_settings) {
 		const gchar *res = NULL;
@@ -215,6 +214,7 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 			const gchar *tenant = NULL;
 			const gchar *uri_path;
 
+			use_oauth2_v2 = camel_ews_settings_get_use_oauth2_v2 (ews_settings);
 			eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, &tenant);
 
 			if (use_oauth2_v2)
@@ -244,10 +244,9 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
 	CamelEwsSettings *ews_settings;
-	gboolean use_oauth2_v2;
+	gboolean use_oauth2_v2 = FALSE;
 
 	ews_settings = eos_office365_get_camel_settings (source);
-	use_oauth2_v2 = ews_settings ? camel_ews_settings_get_use_oauth2_v2 (ews_settings) : FALSE;
 
 	if (ews_settings) {
 		const gchar *res = NULL;
@@ -259,6 +258,7 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 			const gchar *tenant = NULL;
 			const gchar *uri_path;
 
+			use_oauth2_v2 = camel_ews_settings_get_use_oauth2_v2 (ews_settings);
 			eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, &tenant);
 
 			if (use_oauth2_v2)
@@ -403,7 +403,9 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 
 	ews_settings = eos_office365_get_camel_settings (source);
 
-	if (ews_settings && camel_ews_settings_get_use_oauth2_v2 (ews_settings))
+	if (ews_settings &&
+	    camel_ews_settings_get_override_oauth2 (ews_settings) &&
+	    camel_ews_settings_get_use_oauth2_v2 (ews_settings))
 		e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
 	else
 		e_oauth2_service_util_set_to_form (uri_query, "resource", eos_office365_get_resource_uri (service, source));
@@ -423,7 +425,9 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 
 	e_oauth2_service_util_set_to_form (form, "redirect_uri", e_oauth2_service_get_redirect_uri (service, source));
 
-	if (ews_settings && camel_ews_settings_get_use_oauth2_v2 (ews_settings))
+	if (ews_settings &&
+	    camel_ews_settings_get_override_oauth2 (ews_settings) &&
+	    camel_ews_settings_get_use_oauth2_v2 (ews_settings))
 		e_oauth2_service_util_set_to_form (form, "scope", OFFICE365_SCOPE);
 	else
 		e_oauth2_service_util_set_to_form (form, "resource", eos_office365_get_resource_uri (service, source));

@@ -910,7 +910,7 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"use-oauth2-v2",
 			"Use OAuth2 v2",
 			NULL,
-			TRUE,
+			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
