@@ -16,7 +16,18 @@
 /* https://portal.azure.com/
    https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-developers-guide
    https://tsmatz.wordpress.com/2016/10/07/application-permission-with-v2-endpoint-and-microsoft-graph/
+   https://learn.microsoft.com/en-us/azure/active-directory/develop/authentication-flows-app-scenarios
 */
+
+#define AUTHENTICATION_PATH_V1 "oauth2/authorize"
+#define AUTHENTICATION_PATH_V2 "oauth2/v2.0/authorize"
+
+#define REFRESH_PATH_V1 "oauth2/token"
+#define REFRESH_PATH_V2 "oauth2/v2.0/token"
+
+#define OFFICE365_SCOPE "offline_access" \
+			" openid" \
+			" https://outlook.office.com/EWS.AccessAsUser.All"
 
 struct _EOAuth2ServiceOffice365Private
 {
@@ -189,8 +200,10 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
 	CamelEwsSettings *ews_settings;
+	gboolean use_oauth2_v2;
 
 	ews_settings = eos_office365_get_camel_settings (source);
+	use_oauth2_v2 = ews_settings ? camel_ews_settings_get_use_oauth2_v2 (ews_settings) : FALSE;
 
 	if (ews_settings) {
 		const gchar *res = NULL;
@@ -200,11 +213,17 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
 			const gchar *endpoint_host = NULL;
 			const gchar *tenant = NULL;
+			const gchar *uri_path;
 
 			eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, &tenant);
 
+			if (use_oauth2_v2)
+				uri_path = AUTHENTICATION_PATH_V2;
+			else
+				uri_path = AUTHENTICATION_PATH_V1;
+
 			res = eos_office365_cache_string_take (oauth2_office365,
-				g_strdup_printf ("https://%s/%s/oauth2/authorize", endpoint_host, tenant));
+				g_strdup_printf ("https://%s/%s/%s", endpoint_host, tenant, uri_path));
 		}
 
 		camel_ews_settings_unlock (ews_settings);
@@ -213,7 +232,10 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 			return res;
 	}
 
-	return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/oauth2/authorize";
+	if (use_oauth2_v2)
+		return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/" AUTHENTICATION_PATH_V2;
+
+	return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/" AUTHENTICATION_PATH_V1;
 }
 
 static const gchar *
@@ -222,8 +244,10 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
 	CamelEwsSettings *ews_settings;
+	gboolean use_oauth2_v2;
 
 	ews_settings = eos_office365_get_camel_settings (source);
+	use_oauth2_v2 = ews_settings ? camel_ews_settings_get_use_oauth2_v2 (ews_settings) : FALSE;
 
 	if (ews_settings) {
 		const gchar *res = NULL;
@@ -233,11 +257,17 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
 			const gchar *endpoint_host = NULL;
 			const gchar *tenant = NULL;
+			const gchar *uri_path;
 
 			eos_office365_get_endpoint_host_and_tenant_locked (ews_settings, &endpoint_host, &tenant);
 
+			if (use_oauth2_v2)
+				uri_path = REFRESH_PATH_V2;
+			else
+				uri_path = REFRESH_PATH_V1;
+
 			res = eos_office365_cache_string_take (oauth2_office365,
-				g_strdup_printf ("https://%s/%s/oauth2/token", endpoint_host, tenant));
+				g_strdup_printf ("https://%s/%s/%s", endpoint_host, tenant, uri_path));
 		}
 
 		camel_ews_settings_unlock (ews_settings);
@@ -246,7 +276,10 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 			return res;
 	}
 
-	return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/oauth2/token";
+	if (use_oauth2_v2)
+		return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/" REFRESH_PATH_V2;
+
+	return "https://" OFFICE365_ENDPOINT_HOST "/" OFFICE365_TENANT "/" REFRESH_PATH_V1;
 }
 
 static const gchar *
@@ -362,10 +395,18 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 						ESource *source,
 						GHashTable *uri_query)
 {
+	CamelEwsSettings *ews_settings;
+
 	g_return_if_fail (uri_query != NULL);
 
 	e_oauth2_service_util_set_to_form (uri_query, "response_mode", "query");
-	e_oauth2_service_util_set_to_form (uri_query, "resource", eos_office365_get_resource_uri (service, source));
+
+	ews_settings = eos_office365_get_camel_settings (source);
+
+	if (ews_settings && camel_ews_settings_get_use_oauth2_v2 (ews_settings))
+		e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
+	else
+		e_oauth2_service_util_set_to_form (uri_query, "resource", eos_office365_get_resource_uri (service, source));
 }
 
 static void
@@ -374,10 +415,18 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 					  const gchar *refresh_token,
 					  GHashTable *form)
 {
+	CamelEwsSettings *ews_settings;
+
 	g_return_if_fail (form != NULL);
 
-	e_oauth2_service_util_set_to_form (form, "resource", eos_office365_get_resource_uri (service, source));
+	ews_settings = eos_office365_get_camel_settings (source);
+
 	e_oauth2_service_util_set_to_form (form, "redirect_uri", e_oauth2_service_get_redirect_uri (service, source));
+
+	if (ews_settings && camel_ews_settings_get_use_oauth2_v2 (ews_settings))
+		e_oauth2_service_util_set_to_form (form, "scope", OFFICE365_SCOPE);
+	else
+		e_oauth2_service_util_set_to_form (form, "resource", eos_office365_get_resource_uri (service, source));
 }
 
 static void

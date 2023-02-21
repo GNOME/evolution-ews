@@ -18,6 +18,8 @@
 
    https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-developers-guide
    https://tsmatz.wordpress.com/2016/10/07/application-permission-with-v2-endpoint-and-microsoft-graph/
+   https://learn.microsoft.com/en-us/azure/active-directory/develop/permissions-consent-overview
+   https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 */
 
 #define MICROSOFT365_SCOPE	"Calendars.ReadWrite " \

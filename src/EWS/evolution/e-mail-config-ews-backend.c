@@ -32,6 +32,7 @@ struct _EMailConfigEwsBackendPrivate {
 	GtkWidget *impersonate_user_entry;
 	GtkGrid *oauth2_settings_grid;
 	GtkWidget *oauth2_override_check;
+	GtkWidget *oauth2_v2_check;
 	GtkWidget *oauth2_tenant_entry;
 	GtkWidget *oauth2_client_id_entry;
 	GtkWidget *oauth2_redirect_uri_entry;
@@ -514,11 +515,21 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		NULL);
 	g_free (markup);
 
+	widget = gtk_check_button_new_with_mnemonic (_("Use _protocol version 2.0 (for school and organization accounts)"));
+	ews_backend->priv->oauth2_v2_check = widget;
+	gtk_grid_attach (ews_backend->priv->oauth2_settings_grid, widget, 1, 7, 1, 1);
+
+	e_binding_bind_property (
+		ews_backend->priv->oauth2_override_check, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
 	gtk_widget_show_all (GTK_WIDGET (ews_backend->priv->oauth2_settings_grid));
 
 	camel_ews_settings_lock (ews_settings);
 
 	gtk_expander_set_expanded (GTK_EXPANDER (expander),
+		camel_ews_settings_get_use_oauth2_v2 (ews_settings) ||
 		(e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), NULL) != 0 &&
 		 e_util_strcmp0 (camel_ews_settings_get_oauth2_endpoint_host (ews_settings), OFFICE365_ENDPOINT_HOST) != 0) ||
 		(e_util_strcmp0 (camel_ews_settings_get_oauth2_redirect_uri (ews_settings), NULL) != 0 &&
@@ -562,6 +573,11 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		ews_backend->priv->oauth2_resource_uri_entry, "visible",
 		G_BINDING_SYNC_CREATE);
 
+	e_binding_bind_property (
+		expander, "expanded",
+		ews_backend->priv->oauth2_v2_check, "visible",
+		G_BINDING_SYNC_CREATE);
+
 	e_binding_bind_property_full (
 		ews_backend->priv->auth_check, "active-mechanism",
 		ews_backend->priv->oauth2_settings_grid, "visible",
@@ -597,6 +613,12 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		NULL,
 		mail_config_ews_active_mech_to_auth_mech,
 		NULL, NULL);
+
+	e_binding_bind_property (
+		settings, "use-oauth2-v2",
+		ews_backend->priv->oauth2_v2_check, "active",
+		G_BINDING_BIDIRECTIONAL |
+		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property (
 		settings, "override-oauth2",

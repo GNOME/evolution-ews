@@ -198,6 +198,11 @@ gboolean	camel_ews_settings_get_force_http1
 void		camel_ews_settings_set_force_http1
 						(CamelEwsSettings *settings,
 						 gboolean force_http1);
+gboolean	camel_ews_settings_get_use_oauth2_v2
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_use_oauth2_v2
+						(CamelEwsSettings *settings,
+						 gboolean use_oauth2_v2);
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

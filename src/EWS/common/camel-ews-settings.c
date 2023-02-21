@@ -32,6 +32,7 @@ struct _CamelEwsSettingsPrivate {
 	gboolean override_user_agent;
 	gchar *user_agent;
 	gboolean override_oauth2;
+	gboolean use_oauth2_v2;
 	gchar *oauth2_tenant;
 	gchar *oauth2_client_id;
 	gchar *oauth2_redirect_uri;
@@ -70,7 +71,8 @@ enum {
 	PROP_SHOW_PUBLIC_FOLDERS,
 	PROP_CONCURRENT_CONNECTIONS,
 	PROP_SYNC_TAG_STAMP,
-	PROP_FORCE_HTTP1
+	PROP_FORCE_HTTP1,
+	PROP_USE_OAUTH2_V2
 };
 
 G_DEFINE_TYPE_WITH_CODE (CamelEwsSettings, camel_ews_settings, CAMEL_TYPE_OFFLINE_SETTINGS,
@@ -289,6 +291,12 @@ ews_settings_set_property (GObject *object,
 
 		case PROP_FORCE_HTTP1:
 			camel_ews_settings_set_force_http1 (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_USE_OAUTH2_V2:
+			camel_ews_settings_set_use_oauth2_v2 (
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
 			return;
@@ -511,6 +519,13 @@ ews_settings_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				camel_ews_settings_get_force_http1 (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_USE_OAUTH2_V2:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_use_oauth2_v2 (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 	}
@@ -884,6 +899,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"Force HTTP1",
 			NULL,
 			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USE_OAUTH2_V2,
+		g_param_spec_boolean (
+			"use-oauth2-v2",
+			"Use OAuth2 v2",
+			NULL,
+			TRUE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -1946,4 +1973,26 @@ camel_ews_settings_set_force_http1 (CamelEwsSettings *settings,
 	settings->priv->force_http1 = force_http1;
 
 	g_object_notify (G_OBJECT (settings), "force-http1");
+}
+
+gboolean
+camel_ews_settings_get_use_oauth2_v2 (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->use_oauth2_v2;
+}
+
+void
+camel_ews_settings_set_use_oauth2_v2 (CamelEwsSettings *settings,
+				      gboolean use_oauth2_v2)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->use_oauth2_v2 ? 1 : 0) == (use_oauth2_v2 ? 1 : 0))
+		return;
+
+	settings->priv->use_oauth2_v2 = use_oauth2_v2;
+
+	g_object_notify (G_OBJECT (settings), "use-oauth2-v2");
 }
