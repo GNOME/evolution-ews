@@ -1,16 +1,16 @@
 # Hungarian translation for evolution-ews.
-# Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022 Free Software Foundation, Inc.
+# Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022, 2023 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-ews package.
 #
 # Mézi Zoltán <mezi dot zoltan at gmail dot com>, 2011.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2011, 2012, 2013, 2018.
-# Balázs Úr <ur.balazs at fsf dot hu>, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022.
+# Balázs Úr <ur.balazs at fsf dot hu>, 2012, 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-10-05 07:55+0000\n"
-"PO-Revision-Date: 2022-10-22 00:33+0200\n"
+"POT-Creation-Date: 2023-02-17 21:56+0000\n"
+"PO-Revision-Date: 2023-02-21 01:06+0100\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -18,17 +18,17 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 19.12.3\n"
+"X-Generator: Lokalize 22.08.2\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:68
+#: ../src/EWS/camel/camel-ews-provider.c:71
 #: ../src/EWS/evolution/e-ews-config-lookup.c:222
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Exchange webszolgáltatások"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:73
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange kiszolgálók eléréséhez webszolgáltatások használatával"
 
@@ -50,32 +50,32 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Nem sikerült a kapcsolati fénykép beállítása:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Szabad"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Elfoglalt"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Házon kívül"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2046
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Feltételes"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2624
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2898
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2626
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2900
 msgid "Cannot determine EWS ItemId"
 msgstr "Nem lehet meghatározni az EWS elemazonosítót"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3197
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3199
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -83,13 +83,13 @@ msgstr ""
 "Nem lehet létrehozni más felhasználók által szervezett találkozókat egy "
 "Exchange Web Services naptárban."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3234
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3236
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "A hálózaton keresztüli találkozót csak a fő felhasználó naptárában lehet "
 "létrehozni."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nem található a(z) „%s” felhasználó a jelenlévők között"
@@ -107,7 +107,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Nem található Microsoft365 segítségforrás a(z) „%s” naptárhoz"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2089
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2180
 msgid "Invalid occurrence ID"
 msgstr "Érvénytelen előfordulási azonosító"
 
@@ -162,76 +162,80 @@ msgstr "A(z) „%s” mappa frissítése"
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kapcsolat nélküli módban nem lehet végrehajtani a műveleteket a mappán"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
+#: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Checking for new mail"
 msgstr "Új levelek keresése"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
+#: ../src/EWS/camel/camel-ews-provider.c:33
 #: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "C_heck for new messages in all folders"
 msgstr "_Új levelek keresése minden mappában"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:35
 msgid "_Listen for server change notifications"
 msgstr "_Kiszolgáló változásértesítéseinek figyelése"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:38
 #: ../src/Microsoft365/camel/camel-m365-provider.c:30
 msgid "Options"
 msgstr "Beállítások"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/EWS/camel/camel-ews-provider.c:40
 #: ../src/Microsoft365/camel/camel-m365-provider.c:32
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "S_zűrők alkalmazása az új üzenetekre ezen kiszolgáló bejövő mappájában"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:42
 #: ../src/Microsoft365/camel/camel-m365-provider.c:34
 msgid "Check new messages for _Junk contents"
 msgstr "_Levélszemét keresése az új levelek között"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
+#: ../src/EWS/camel/camel-ews-provider.c:44
 #: ../src/Microsoft365/camel/camel-m365-provider.c:36
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Csak a BEÉ_RKEZETT ÜZENETEK mappában keressen levélszemetet"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:46
 #: ../src/Microsoft365/camel/camel-m365-provider.c:38
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Távoli levelek helyi s_zinkronizációja minden mappában"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:49
 msgid "Show _Public Folders beside user folders"
 msgstr "_Nyilvános mappák megjelenítése a felhasználó mappák mellett"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/EWS/camel/camel-ews-provider.c:52
 #: ../src/Microsoft365/camel/camel-m365-provider.c:42
 msgid "Connection"
 msgstr "Kapcsolat"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
+#: ../src/EWS/camel/camel-ews-provider.c:56
 #: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "K_apcsolat időtúllépése %s (másodperc)"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
+#: ../src/EWS/camel/camel-ews-provider.c:58
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Használandó _egyidejű kapcsolatok száma"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:60
 msgid "Override _User-Agent header value"
 msgstr "_User-Agent fejlécérték felülbírálása"
 
-#: ../src/EWS/camel/camel-ews-provider.c:85
+#: ../src/EWS/camel/camel-ews-provider.c:63
+msgid "Al_ways connect with HTTP/1"
+msgstr "Kapcsolódás _mindig HTTP/1 használatával"
+
+#: ../src/EWS/camel/camel-ews-provider.c:88
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:90
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -239,11 +243,11 @@ msgstr ""
 "Ezzel az opcióval az Exchange kiszolgálóhoz sima szöveges jelszóval fog "
 "kapcsolódni NTLM hitelesítés használatával."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:98
 msgid "Basic"
 msgstr "Alap"
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -251,11 +255,11 @@ msgstr ""
 "Ezzel az opcióval az Exchange kiszolgálóhoz sima szöveges jelszóval fog "
 "kapcsolódni alap hitelesítés használatával."
 
-#: ../src/EWS/camel/camel-ews-provider.c:105
+#: ../src/EWS/camel/camel-ews-provider.c:108
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -290,16 +294,16 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:652
-#: ../src/EWS/camel/camel-ews-store.c:1479
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Checking “Out of Office” settings"
 msgstr "„Házon kívül” állapot beállításainak ellenőrzése"
 
-#: ../src/EWS/camel/camel-ews-store.c:1485
+#: ../src/EWS/camel/camel-ews-store.c:1482
 msgid "Look up Exchange server categories"
 msgstr "Exchange kiszolgáló kategóriáinak keresése"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1561
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -308,47 +312,47 @@ msgstr[0] ""
 msgstr[1] ""
 "A jelszó %d napon belül le fog járni. Módosításához nyissa meg ezt: „%s”."
 
-#: ../src/EWS/camel/camel-ews-store.c:1567
+#: ../src/EWS/camel/camel-ews-store.c:1564
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "A jelszó egy napon belül le fog járni."
 msgstr[1] "A jelszó %d napon belül le fog járni."
 
-#: ../src/EWS/camel/camel-ews-store.c:1793
+#: ../src/EWS/camel/camel-ews-store.c:1790
 msgid "Updating foreign folder structure"
 msgstr "Távoli mappaszerkezet frissítése"
 
-#: ../src/EWS/camel/camel-ews-store.c:1929
+#: ../src/EWS/camel/camel-ews-store.c:1928
 msgid "Updating foreign folders"
 msgstr "Távoli mappák frissítése"
 
-#: ../src/EWS/camel/camel-ews-store.c:2345
+#: ../src/EWS/camel/camel-ews-store.c:2344
 #: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nincs %s nevű mappa"
 
-#: ../src/EWS/camel/camel-ews-store.c:2692
+#: ../src/EWS/camel/camel-ews-store.c:2691
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nem lehet listázni a nyilvános EWS mappákat kapcsolat nélküli módban"
 
-#: ../src/EWS/camel/camel-ews-store.c:2765
+#: ../src/EWS/camel/camel-ews-store.c:2764
 msgid "Cannot find any EWS public folders"
 msgstr "Nem található egyetlen EWS nyilvános mappa sem"
 
-#: ../src/EWS/camel/camel-ews-store.c:2878
+#: ../src/EWS/camel/camel-ews-store.c:2876
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "A mappa („%s”) nem hozható létre, mert már létezik"
 
-#: ../src/EWS/camel/camel-ews-store.c:2893
+#: ../src/EWS/camel/camel-ews-store.c:2891
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "A szülő mappa (%s) nem létezik"
 
-#: ../src/EWS/camel/camel-ews-store.c:2903
+#: ../src/EWS/camel/camel-ews-store.c:2901
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -356,130 +360,128 @@ msgstr ""
 "Nem hozható létre mappa a(z) „%s” alatt, mert az csak más felhasználók "
 "mappáihoz van használatban"
 
-#: ../src/EWS/camel/camel-ews-store.c:2913
+#: ../src/EWS/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Nem hozható létre mappa a(z) „%s” alatt, mert az csak a nyilvános mappákhoz "
 "van használatban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3020
+#: ../src/EWS/camel/camel-ews-store.c:3018
 #: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "A mappa nem létezik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3030
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nem távolítható el a(z) „%s” mappa, mert az csak más felhasználók mappáihoz "
 "van használatban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3041
+#: ../src/EWS/camel/camel-ews-store.c:3039
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Nem távolítható el a(z) „%s” mappa, mert az csak a nyilvános mappákhoz van "
 "használatban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
-#: ../src/EWS/camel/camel-ews-store.c:3296
+#: ../src/EWS/camel/camel-ews-store.c:3198
+#: ../src/EWS/camel/camel-ews-store.c:3294
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A(z) %s mappa nem létezik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3209
+#: ../src/EWS/camel/camel-ews-store.c:3207
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nem változott a(z) %s mappa fő rekordja"
 
-#: ../src/EWS/camel/camel-ews-store.c:3252
+#: ../src/EWS/camel/camel-ews-store.c:3250
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nem lehet egyszerre átnevezni és mozgatni a mappát"
 
-#: ../src/EWS/camel/camel-ews-store.c:3283
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3281
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nem található a(z) %s szülőmappa mappaazonosítója"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3296
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3294
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Beérkezett üzenetek"
 
-#: ../src/EWS/camel/camel-ews-store.c:3355
-#: ../src/EWS/camel/camel-ews-transport.c:449
+#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "%s Exchange kiszolgáló"
 
-#: ../src/EWS/camel/camel-ews-store.c:3358
+#: ../src/EWS/camel/camel-ews-store.c:3356
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange szolgáltatás %s számára ezen: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3402
+#: ../src/EWS/camel/camel-ews-store.c:3400
 #: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "A Kuka mappa nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3462
+#: ../src/EWS/camel/camel-ews-store.c:3460
 #: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "A Levélszemét mappa nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3653
+#: ../src/EWS/camel/camel-ews-store.c:3651
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nem lehet EWS mappákra feliratkozni kapcsolat nélküli módban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3676
+#: ../src/EWS/camel/camel-ews-store.c:3674
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nem lehet feliratkozni a(z) „%s” mappára, nem érhető el nyilvános mappa"
 
-#: ../src/EWS/camel/camel-ews-store.c:3686
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nem lehet feliratkozni a(z) „%s” mappára, a mappa nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3695
+#: ../src/EWS/camel/camel-ews-store.c:3693
 #, c-format
-#| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr ""
 "Nem lehet feliratkozni a(z) „%s” mappára, a mappaazonosító nem található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3706
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
-#| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
-"Nem lehet feliratkozni a(z) „%s” mappára, a nyilvános mappagyökér nem"
-" található"
+"Nem lehet feliratkozni a(z) „%s” mappára, a nyilvános mappagyökér nem "
+"található"
 
-#: ../src/EWS/camel/camel-ews-store.c:3782
+#: ../src/EWS/camel/camel-ews-store.c:3780
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nem lehet EWS mappákról leiratkozni kapcsolat nélküli módban"
 
-#: ../src/EWS/camel/camel-ews-store.c:3893
+#: ../src/EWS/camel/camel-ews-store.c:3891
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "A művelet befejezéséhez a hálózatra kapcsolódva kell dolgoznia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3965
-#: ../src/EWS/camel/camel-ews-store.c:4002
+#: ../src/EWS/camel/camel-ews-store.c:3963
+#: ../src/EWS/camel/camel-ews-store.c:4000
 msgid "Unsetting the “Out of Office” status"
 msgstr "„Házon kívül” állapot törlése"
 
@@ -497,27 +499,27 @@ msgstr "Nyilvános mappák"
 msgid "Invalid folder URI “%s”"
 msgstr "Érvénytelen mappa URI: „%s”"
 
-#: ../src/EWS/camel/camel-ews-transport.c:452
+#: ../src/EWS/camel/camel-ews-transport.c:450
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Exchange levélkézbesítés %s segítségével"
 
-#: ../src/EWS/camel/camel-ews-transport.c:501
+#: ../src/EWS/camel/camel-ews-transport.c:499
 #: ../src/Microsoft365/camel/camel-m365-transport.c:438
 msgid "Cannot send message with no From address"
 msgstr "Nem küldhető el a levél a feladó címe nélkül"
 
-#: ../src/EWS/camel/camel-ews-transport.c:507
+#: ../src/EWS/camel/camel-ews-transport.c:505
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "Az Exchange kiszolgáló nem tud több Feladó címmel rendelkező üzenetet küldeni"
 
-#: ../src/EWS/camel/camel-ews-transport.c:517
+#: ../src/EWS/camel/camel-ews-transport.c:515
 #: ../src/Microsoft365/camel/camel-m365-transport.c:453
 msgid "Failed to read From address"
 msgstr "Nem sikerült olvasni a feladó címét"
 
-#: ../src/EWS/camel/camel-ews-transport.c:527
+#: ../src/EWS/camel/camel-ews-transport.c:525
 #: ../src/Microsoft365/camel/camel-m365-transport.c:463
 #, c-format
 msgid "Service not connected"
@@ -549,12 +551,12 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A CreateItem hívás nem adott vissza új üzenetazonosítót"
 
-#: ../src/EWS/common/e-ews-connection.c:344
+#: ../src/EWS/common/e-ews-connection.c:349
 #, c-format
 msgid "No response: %s"
 msgstr "Nincs válasz: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:509
+#: ../src/EWS/common/e-ews-connection.c:514
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -565,7 +567,7 @@ msgstr[1] ""
 "Az Exchange kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:%02d "
 "perc)"
 
-#: ../src/EWS/common/e-ews-connection.c:515
+#: ../src/EWS/common/e-ews-connection.c:520
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -576,59 +578,59 @@ msgstr[1] ""
 "Az Exchange kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d "
 "másodperc)"
 
-#: ../src/EWS/common/e-ews-connection.c:644
+#: ../src/EWS/common/e-ews-connection.c:649
 msgid "Authentication failed"
 msgstr "A hitelesítés sikertelen"
 
-#: ../src/EWS/common/e-ews-connection.c:2389
+#: ../src/EWS/common/e-ews-connection.c:2426
 msgid "Failed to parse autodiscover response XML"
 msgstr "Az automatikus felderítésre adott válasz XML feldolgozása sikertelen"
 
-#: ../src/EWS/common/e-ews-connection.c:2395
+#: ../src/EWS/common/e-ews-connection.c:2432
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nem sikerült megtalálni az <Autodiscover> elemet"
 
-#: ../src/EWS/common/e-ews-connection.c:2405
+#: ../src/EWS/common/e-ews-connection.c:2442
 msgid "Failed to find <Response> element"
 msgstr "Nem sikerült megtalálni a <Response> elemet"
 
-#: ../src/EWS/common/e-ews-connection.c:2415
+#: ../src/EWS/common/e-ews-connection.c:2452
 msgid "Failed to find <Account> element"
 msgstr "Nem sikerült megtalálni az <Account> elemet"
 
-#: ../src/EWS/common/e-ews-connection.c:2460
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Az <ASUrl> nem található az automatikus felderítésre adott válaszban"
 
-#: ../src/EWS/common/e-ews-connection.c:2536
+#: ../src/EWS/common/e-ews-connection.c:2573
 msgid "URL cannot be NULL"
 msgstr "Az URL nem lehet NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:2954
+#: ../src/EWS/common/e-ews-connection.c:2991
 msgid "Email address is missing a domain part"
 msgstr "Az e-mail címből hiányzik a tartomány rész"
 
-#: ../src/EWS/common/e-ews-connection.c:3163
+#: ../src/EWS/common/e-ews-connection.c:3200
 msgid "Failed to parse oab XML"
 msgstr "Nem sikerült feldolgozni az oab XML-t"
 
-#: ../src/EWS/common/e-ews-connection.c:3201
+#: ../src/EWS/common/e-ews-connection.c:3238
 msgid "Failed to find <OAB> element\n"
 msgstr "Nem sikerült megtalálni az <OAB> elemet\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8730
+#: ../src/EWS/common/e-ews-connection.c:8795
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Legalább Microsoft Exchange 2010 SP1 kiszolgálót igényel"
 
-#: ../src/EWS/common/e-ews-connection.c:8831
+#: ../src/EWS/common/e-ews-connection.c:8896
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Legalább Microsoft Exchange 2013 kiszolgálót igényel"
 
-#: ../src/EWS/common/e-ews-connection.c:8984
+#: ../src/EWS/common/e-ews-connection.c:9049
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Legalább Microsoft Exchange 2010 kiszolgálót igényel"
 
-#: ../src/EWS/common/e-ews-connection.c:9124
+#: ../src/EWS/common/e-ews-connection.c:9189
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Legalább Microsoft Exchange 2007 SP1 kiszolgálót igényel"
 
@@ -742,49 +744,53 @@ msgid "Fetching folder list…"
 msgstr "Mappalista letöltése…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:824
+#: ../src/EWS/evolution/e-ews-config-utils.c:833
+#: ../src/EWS/evolution/e-ews-config-utils.c:842
+#: ../src/EWS/evolution/e-ews-config-utils.c:851
+#: ../src/EWS/evolution/e-ews-config-utils.c:860
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Feliratkozás más EWS felhasználó mappájára…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1011
+#: ../src/EWS/evolution/e-ews-config-utils.c:1047
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr ""
 "Nem szerkeszthetők a(z) „%s” mappa jogosultságai, válasszon másik mappát."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1092
+#: ../src/EWS/evolution/e-ews-config-utils.c:1128
 msgid "Folder Sizes…"
 msgstr "Mappaméretek…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1099
+#: ../src/EWS/evolution/e-ews-config-utils.c:1135
 msgid "Subscribe to folder of other user…"
 msgstr "Feliratkozás más felhasználó mappájára…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1108
-#: ../src/EWS/evolution/e-ews-config-utils.c:1444
-#: ../src/EWS/evolution/e-ews-config-utils.c:1482
-#: ../src/EWS/evolution/e-ews-config-utils.c:1520
-#: ../src/EWS/evolution/e-ews-config-utils.c:1558
+#: ../src/EWS/evolution/e-ews-config-utils.c:1144
+#: ../src/EWS/evolution/e-ews-config-utils.c:1502
+#: ../src/EWS/evolution/e-ews-config-utils.c:1540
+#: ../src/EWS/evolution/e-ews-config-utils.c:1578
+#: ../src/EWS/evolution/e-ews-config-utils.c:1616
 msgid "Permissions…"
 msgstr "Jogosultságok…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1110
+#: ../src/EWS/evolution/e-ews-config-utils.c:1146
 msgid "Edit EWS folder permissions"
 msgstr "EWS mappajogosultságok szerkesztése"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1446
+#: ../src/EWS/evolution/e-ews-config-utils.c:1504
 msgid "Edit EWS calendar permissions"
 msgstr "EWS naptárjogosultságok szerkesztése"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1484
+#: ../src/EWS/evolution/e-ews-config-utils.c:1542
 msgid "Edit EWS tasks permissions"
 msgstr "EWS feladatjogosultságok szerkesztése"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1522
+#: ../src/EWS/evolution/e-ews-config-utils.c:1580
 msgid "Edit EWS memos permissions"
 msgstr "EWS feljegyzésjogosultságok szerkesztése"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1560
+#: ../src/EWS/evolution/e-ews-config-utils.c:1618
 msgid "Edit EWS contacts permissions"
 msgstr "EWS névjegyjogosultságok szerkesztése"
 
@@ -870,7 +876,7 @@ msgid "Unknown"
 msgstr "Ismeretlen"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
-#: ../src/EWS/evolution/e-ews-search-user.c:414
+#: ../src/EWS/evolution/e-ews-search-user.c:425
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Név"
@@ -994,57 +1000,57 @@ msgstr "Látható mappa"
 msgid "Reading folder permissions, please wait…"
 msgstr "Mappajogosultságok olvasása, kis türelmet…"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:151
 msgid "Unset on Server"
 msgstr "Törlés a kiszolgálón"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:152
 msgid "Unset the “Out of Office” status"
 msgstr "„Házon kívül” állapot törlése"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:189
+#: ../src/EWS/evolution/e-ews-search-user.c:198
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
 msgstr[0] "Nem találhatók felhasználók, csak egy névjegy"
 msgstr[1] "Nem találhatók felhasználók, csak %d névjegy"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:194
+#: ../src/EWS/evolution/e-ews-search-user.c:203
 msgid "No users found"
 msgstr "Nem találhatók felhasználók"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:198
+#: ../src/EWS/evolution/e-ews-search-user.c:207
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "Egy felhasználó található"
 msgstr[1] "%d felhasználó található"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:204
+#: ../src/EWS/evolution/e-ews-search-user.c:213
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] "100-nál több felhasználó található, de csak az első %d jelenik meg"
 msgstr[1] "100-nál több felhasználó található, de csak az első %d jelenik meg"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:338
-#: ../src/EWS/evolution/e-ews-search-user.c:523
+#: ../src/EWS/evolution/e-ews-search-user.c:347
+#: ../src/EWS/evolution/e-ews-search-user.c:534
 msgid "Search for a user"
 msgstr "Felhasználó keresése"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:356
 msgid "Searching…"
 msgstr "Keresés…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:420
+#: ../src/EWS/evolution/e-ews-search-user.c:431
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:457
+#: ../src/EWS/evolution/e-ews-search-user.c:468
 msgid "Choose EWS user…"
 msgstr "Válasszon EWS felhasználót…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:480
+#: ../src/EWS/evolution/e-ews-search-user.c:491
 msgid "_Search:"
 msgstr "_Keresés:"
 
@@ -1162,60 +1168,60 @@ msgstr "Automatikus feltérképezési szolgáltatás lekérdezése"
 msgid "Fetch _URL"
 msgstr "_URL lekérése"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:169
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Beállítás"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:187
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:211
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "_Felhasználónév:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:201
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "_Host URL:"
 msgstr "_Gép URL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:220
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:244
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:234
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:258
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "_Más felhasználó postafiókjának megnyitása"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:278
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:302
 msgid "S_earch…"
 msgstr "_Keresés…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:313
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Hitelesítés"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:340
 msgid "_Override Office365 OAuth2 settings"
 msgstr "Office365 OAuth2 beállítások felülbírálása"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:320
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:398
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:422
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Súgó…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:327
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "_Alkalmazásazonosító:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:374
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Nincs beállítva alapértelmezett alkalmazásazonosító"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1225,59 +1231,59 @@ msgstr "Az alapértelmezett alkalmazásazonosító: „%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "_Bérlőzonosító:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:404
 msgid "Default tenant ID is “common“"
 msgstr "Az alapértelmezett bérlőazonosító: „common”"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:407
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Az alapértelmezett bérlőazonosító: „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Speciális beállítások"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:406
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "_Végpontgép:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:429
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:432
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Az alapértelmezett végpontgép: „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
 msgid "Red_irect URI:"
 msgstr "Át_irányítási URI:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:485
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Az alapértelmezett átirányítási URI: „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:488
 msgid "Re_source URI:"
 msgstr "_Erőforrás URI:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:511
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1286,24 +1292,24 @@ msgstr ""
 "Az alapértelmezett erőforrás URI a gép URL-ből van származtatva, vagy végső "
 "soron visszaválthat „%s” értékre."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:761
 msgid "Host URL is not valid"
 msgstr "A gép URL nem érvényes"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:765
 msgid "Host URL cannot be empty"
 msgstr "A gép URL nem lehet üres"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
 msgid "OAB URL is not valid"
 msgstr "Az OAB URL nem érvényes"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:786
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "A felhasználónév nem lehet üres"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:800
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Az alkalmazásazonosító nem lehet üres"
@@ -1452,7 +1458,7 @@ msgid "Locating offline address books"
 msgstr "Kapcsolat nélküli címjegyzék keresése"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:552
+#: ../src/EWS/registry/e-ews-backend.c:505
 msgid "Global Address List"
 msgstr "Globális címlista"
 
@@ -1607,13 +1613,13 @@ msgstr "A mappára fel lett iratkozva."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "„{0}” felhasználó mappájára sikeresen fel lett iratkozva."
 
-#: ../src/EWS/registry/e-ews-backend.c:1094
+#: ../src/EWS/registry/e-ews-backend.c:1045
 #: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nem határozható meg megfelelő mappaosztály a(z) „%s” nevű új mappához"
 
-#: ../src/EWS/registry/e-ews-backend.c:1183
+#: ../src/EWS/registry/e-ews-backend.c:1134
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -1638,11 +1644,11 @@ msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Csak egyszerű feladatokat lehet eltárolni a Microsoft 365 feladatmappában"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1630
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "A Microsoft 365 naptár nem tud egy ismétlődésnél többet tárolni"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1639
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1650,43 +1656,42 @@ msgstr ""
 "A Microsoft 365 naptár nem tud RDATE, EXDATE vagy RRULE tulajdonsággal "
 "rendelkező összetevőt tárolni"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1749
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Ismeretlen ismétlődési gyakoriság (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1901
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "A Microsoft 365 naptár nem tud egy eseményemlékeztetőnél többet tárolni"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1934
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "A Microsoft 365 eseménynek csak az esemény kezdete előtt lehet emlékeztetője"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1947
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "A Microsoft 365 feladatnak csak abszolút idővel rendelkező emlékeztetője "
 "lehet"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2273
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
 #, c-format
-#| msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "A Microsoft 365 feladatnak nem lehetnek mellékleteik."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2376
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nem lehet a(z) „%s” URI-val rendelkező mellékletet eltárolni"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 msgid "Failed to read attachment URI"
 msgstr "Nem sikerült beolvasni melléklet URI-ját"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2392
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
 msgid "Failed to get inline attachment data"
 msgstr "Nem sikerült lekérni a beágyazott melléklet adatait"
 
