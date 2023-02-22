@@ -5,15 +5,15 @@
 # Mario Blättermann <mario.blaettermann@gmail.com>, 2011-2012, 2015-2018, 2021.
 # Johannes Maibaum <jmaibaum@gmail.com>, 2021.
 # Philipp Kiemle <philipp.kiemle@gmail.com>, 2021.
-# Jürgen Benvenuti <gastornis@posteo.org>, 2022, 2023
+# Jürgen Benvenuti <gastornis@posteo.org>, 2022, 2023.
 # Christian Kirbach <christian.kirbach@gmail.com>, 2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-02-03 19:51+0000\n"
-"PO-Revision-Date: 2023-02-04 12:58+0100\n"
+"POT-Creation-Date: 2023-02-21 08:21+0000\n"
+"PO-Revision-Date: 2023-02-22 19:33+0100\n"
 "Last-Translator: Jürgen Benvenuti <gastornis@posteo.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -668,7 +668,7 @@ msgstr ""
 "Ordner kann nicht hinzugefügt werden, der Ordner existiert bereits als »%s«"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:144
+#: ../src/EWS/common/e-oauth2-service-office365.c:155
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -1186,60 +1186,60 @@ msgstr "Autodiscover-Dienst wird abgefragt"
 msgid "Fetch _URL"
 msgstr "Adresse _holen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:194
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:211
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:212
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "Benutzer_name:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:226
 msgid "_Host URL:"
 msgstr "Rec_hneradresse:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:244
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:245
 msgid "OAB U_RL:"
 msgstr "OAB-Ad_resse:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:258
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:259
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "_Postfach eines anderen Benutzers öffnen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:302
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
 msgid "S_earch…"
 msgstr "_Suchen …"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:313
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:314
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Legitimierung"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:340
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
 msgid "_Override Office365 OAuth2 settings"
 msgstr "OAuth2-Einstellungen von _Office365 überschreiben"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:422
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Hilfe …"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "Anwen_dungskennung:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:374
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Es wurde keine Vorgabe-Anwendungskennung festgelegt"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1249,59 +1249,59 @@ msgstr "Vorgabe-Anwendungskennung ist »%s«"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "_Tenant-ID:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:404
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
 msgid "Default tenant ID is “common“"
 msgstr "Standard-Tenant-ID ist »common«"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:407
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Standard-Tenant-ID ist »%s«"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Erweiterte Einstellungen"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "_Endpunkt-Rechner:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Standard-Endpunkt-Rechner ist »%s«"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
 msgid "Red_irect URI:"
 msgstr "We_iterleitungsadresse:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:485
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Vorgabe-Weiterleitungsadresse ist »%s«"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:488
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
 msgid "Re_source URI:"
 msgstr "Adresse der Re_ssource:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:511
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1310,24 +1310,28 @@ msgstr ""
 "Die Standardadresse der Ressource wird aus der Rechneradresse abgeleitet "
 "oder es wird, falls nötig, auf »%s« ausgewichen."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:761
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "_Protokoll Version 2.0 verwenden (für Schul- und Organisationskonten)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
 msgid "Host URL is not valid"
 msgstr "Host-Adresse ist ungültig"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:765
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "Host URL cannot be empty"
 msgstr "Die Adresse darf nicht leer sein"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
 msgid "OAB URL is not valid"
 msgstr "OAB-Adresse ist ungültig"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:786
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Benutzername darf nicht leer sein"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:800
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Anwendungskennung darf nicht leer sein"
@@ -1481,7 +1485,7 @@ msgid "Locating offline address books"
 msgstr "Offline-Adressbuch wird gesucht"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:552
+#: ../src/EWS/registry/e-ews-backend.c:505
 msgid "Global Address List"
 msgstr "Globale Adressliste"
 
@@ -1645,7 +1649,7 @@ msgstr "Ordner wurde abonniert."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Ordner des Benutzers »{0}« wurde erfolgreich abonniert."
 
-#: ../src/EWS/registry/e-ews-backend.c:1101
+#: ../src/EWS/registry/e-ews-backend.c:1045
 #: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
@@ -1653,7 +1657,7 @@ msgstr ""
 "Es konnte keine passende Ordnerklasse für einen neuen Ordner namens »%s« "
 "ermittelt werden"
 
-#: ../src/EWS/registry/e-ews-backend.c:1190
+#: ../src/EWS/registry/e-ews-backend.c:1134
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Die Datenquelle »%s« ist kein »Exchange Web Services«-Ordner"
@@ -1817,7 +1821,7 @@ msgstr ""
 
 # Leerzeichen zwischen Wort und Zahl fehlt.
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
