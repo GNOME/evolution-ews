@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-02-02 12:45+0000\n"
-"PO-Revision-Date: 2023-02-19 21:49+0200\n"
+"POT-Creation-Date: 2023-02-21 08:21+0000\n"
+"PO-Revision-Date: 2023-02-26 22:36+0200\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -621,19 +621,19 @@ msgstr "Nepavyko perskaityti oab XML"
 msgid "Failed to find <OAB> element\n"
 msgstr "Nepavyko rasti <OAB> elemento\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8766
+#: ../src/EWS/common/e-ews-connection.c:8795
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Būtinas bent Microsoft Exchange 2010 SP1 serveris"
 
-#: ../src/EWS/common/e-ews-connection.c:8867
+#: ../src/EWS/common/e-ews-connection.c:8896
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Būtinas bent Microsoft Exchange 2013 serveris"
 
-#: ../src/EWS/common/e-ews-connection.c:9020
+#: ../src/EWS/common/e-ews-connection.c:9049
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Būtinas bent Microsoft Exchange 2010 serveris"
 
-#: ../src/EWS/common/e-ews-connection.c:9160
+#: ../src/EWS/common/e-ews-connection.c:9189
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Būrinas bent Microsoft Exchange 2007 SP1 serveris"
 
@@ -661,7 +661,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Negalima pridėti aplanko, aplankas jau yra kaip „%s“"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:144
+#: ../src/EWS/common/e-oauth2-service-office365.c:155
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -1166,60 +1166,60 @@ msgstr "Užklausiama automatinio aptikimo tarnybos"
 msgid "Fetch _URL"
 msgstr "Parsiųsti _URL"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:194
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Konfigūracija"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:211
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:212
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "Naudotojo _vardas:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:226
 msgid "_Host URL:"
 msgstr "_Serverio URL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:244
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:245
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:258
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:259
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Atverti kito naudotojo pašto dėžutę"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:302
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
 msgid "S_earch…"
 msgstr "I_eškoti…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:313
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:314
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Tapatybės patvirtinimas"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:340
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
 msgid "_Override Office365 OAuth2 settings"
 msgstr "_Naudoti vietoj Office365 OAuth2 nustatymų"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:422
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Žinynas…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "Programos I_D:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:374
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Nenustatytas numatytasis programos ID"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1229,59 +1229,59 @@ msgstr "Numatytasis programos ID yra „%s“"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "Į_monės ID:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:404
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
 msgid "Default tenant ID is “common“"
 msgstr "Numatytasis įmonės ID yra „common“"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:407
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Numatytasis įmonės ID yra „%s“"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Sudėtingesni nustatymai"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:430
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "_Prieigos taško kompiuteris:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:453
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:456
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Numatytasis prieigos taško kompiuteris yra „%s“"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:459
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
 msgid "Red_irect URI:"
 msgstr "_Nukreipimo URI:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:482
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:485
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Numatytasis nukreipimo URI yra „%s“"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:488
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
 msgid "Re_source URI:"
 msgstr "_Ištekliaus URI:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:511
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1290,24 +1290,28 @@ msgstr ""
 "Numatytasis ištekliaus URI yra sudaromas iš kompiuterio URL arba galiausiai "
 "naudojamas „%s“."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:761
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "Naudoti _protokolo versiją 2.0 (mokyklų ir organizacijų paskyroms)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
 msgid "Host URL is not valid"
 msgstr "Serverio URL yra netinkamas"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:765
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "Host URL cannot be empty"
 msgstr "Serverio URL negali būti tuščias"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
 msgid "OAB URL is not valid"
 msgstr "OAB URL yra netinkamas"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:786
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Naudotojo vardas negali būti tuščias"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:800
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Programos ID negali būti tuščias"
@@ -1453,7 +1457,7 @@ msgid "Locating offline address books"
 msgstr "Surandamos adresų knygos atsijungimo veiksenoje"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:552
+#: ../src/EWS/registry/e-ews-backend.c:505
 msgid "Global Address List"
 msgstr "Visuotinis adresų sąrašas"
 
@@ -1607,13 +1611,13 @@ msgstr "Prisiregistruota prie aplanko."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Prie naudotojo „{0}“ aplanko sėkmingai prisiregistruota."
 
-#: ../src/EWS/registry/e-ews-backend.c:1101
+#: ../src/EWS/registry/e-ews-backend.c:1045
 #: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nepavyko nustatyti tinkamos aplanko klasės aplankui pavadinimu „%s“"
 
-#: ../src/EWS/registry/e-ews-backend.c:1190
+#: ../src/EWS/registry/e-ews-backend.c:1134
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Duomenų šaltinis „%s“ nereprezentuoja Exchange Web Services aplanko"
@@ -1775,7 +1779,7 @@ msgstr ""
 "365 serverio"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
