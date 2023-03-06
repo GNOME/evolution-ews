@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-02-21 08:21+0000\n"
-"PO-Revision-Date: 2023-02-23 05:33+0300\n"
+"POT-Creation-Date: 2023-03-01 22:08+0000\n"
+"PO-Revision-Date: 2023-03-06 16:20+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -526,7 +526,7 @@ msgid ""
 "com server"
 msgstr ""
 "Bu seçenek Office365.com sunucusuna bağlanmak için bir OAuth 2.0 erişim "
-"belirteci kullanacak"
+"jetonu kullanacak"
 
 #: ../src/EWS/common/e-ews-calendar-utils.c:1226
 #, c-format
@@ -1269,7 +1269,7 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
 msgid "Use _protocol version 2.0 (for school and organization accounts)"
-msgstr ""
+msgstr "İletişim kuralı sürüm 2.0ʼı kullan (okul ve kurum hesapları için)"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
 msgid "Host URL is not valid"
@@ -1750,7 +1750,7 @@ msgid ""
 "365 server"
 msgstr ""
 "Bu seçenek Microsoft 365 sunucusuna bağlanmak için bir OAuth 2.0 erişim "
-"belirteci kullanacak"
+"jetonu kullanacak"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
