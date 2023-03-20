@@ -57,6 +57,12 @@ CamelFolder * camel_ews_folder_new (CamelStore *store, const gchar *folder_dir, 
 void ews_update_summary ( CamelFolder *folder, GList *item_list, GCancellable *cancellable, GError **error);
 void		camel_ews_folder_remove_cached_message	(CamelEwsFolder *ews_folder,
 							 const gchar *uid);
+gboolean	camel_ews_folder_get_apply_filters	(CamelEwsFolder *self);
+void		camel_ews_folder_set_apply_filters	(CamelEwsFolder *sefl,
+							 gboolean apply_filters);
+gboolean	camel_ews_folder_get_check_folder	(CamelEwsFolder *self);
+void		camel_ews_folder_set_check_folder	(CamelEwsFolder *self,
+							 gboolean check_folder);
 
 G_END_DECLS
 

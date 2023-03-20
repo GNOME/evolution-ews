@@ -3478,9 +3478,11 @@ ews_can_refresh_folder (CamelStore *store,
                         CamelFolderInfo *info,
                         GError **error)
 {
+	CamelFolder *folder;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
-	gboolean check_all;
+	gboolean check_all, res = FALSE;
+	GError *local_error = NULL;
 
 	/* Skip unselectable folders from automatic refresh */
 	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0)
@@ -3493,12 +3495,24 @@ ews_can_refresh_folder (CamelStore *store,
 
 	g_object_unref (settings);
 
-	if (check_all)
+	if (check_all || CAMEL_STORE_CLASS (camel_ews_store_parent_class)->can_refresh_folder (store, info, &local_error))
 		return TRUE;
 
-	/* Delegate decision to parent class */
-	return CAMEL_STORE_CLASS (camel_ews_store_parent_class)->
-		can_refresh_folder (store, info, error);
+	if (local_error) {
+		g_propagate_error (error, local_error);
+		return FALSE;
+	}
+
+	folder = camel_store_get_folder_sync (store, info->full_name, 0, NULL, &local_error);
+	if (folder && CAMEL_IS_EWS_FOLDER (folder))
+		res = camel_ews_folder_get_check_folder (CAMEL_EWS_FOLDER (folder));
+
+	g_clear_object (&folder);
+
+	if (local_error)
+		g_propagate_error (error, local_error);
+
+	return res;
 }
 
 static gboolean

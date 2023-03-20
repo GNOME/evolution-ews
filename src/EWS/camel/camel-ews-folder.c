@@ -65,12 +65,23 @@ struct _CamelEwsFolderPrivate {
 	GMutex state_lock;
 	GCond fetch_cond;
 	GHashTable *fetching_uids;
+
+	gboolean apply_filters;
+	gboolean check_folder;
 };
 
 static gboolean ews_delete_messages (CamelFolder *folder, const GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
 static gboolean ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error);
 
 #define d(x)
+
+/* The custom property ID is a CamelArg artifact.
+ * It still identifies the property in state files. */
+enum {
+	PROP_0,
+	PROP_APPLY_FILTERS = 0x2501,
+	PROP_CHECK_FOLDER = 0x2502
+};
 
 G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
@@ -1938,6 +1949,9 @@ camel_ews_folder_new (CamelStore *store,
 		if (filter_junk)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
 	} else {
+		if (camel_ews_folder_get_apply_filters (ews_folder))
+			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+
 		if (filter_junk && !filter_junk_inbox)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
 	}
@@ -3046,6 +3060,54 @@ ews_cmp_uids (CamelFolder *folder,
 }
 
 static void
+ews_folder_set_property (GObject *object,
+			 guint property_id,
+			 const GValue *value,
+			 GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_APPLY_FILTERS:
+			camel_ews_folder_set_apply_filters (
+				CAMEL_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_CHECK_FOLDER:
+			camel_ews_folder_set_check_folder (
+				CAMEL_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+ews_folder_get_property (GObject *object,
+			 guint property_id,
+			 GValue *value,
+			 GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_APPLY_FILTERS:
+			g_value_set_boolean (
+				value,
+				camel_ews_folder_get_apply_filters (
+				CAMEL_EWS_FOLDER (object)));
+			return;
+
+		case PROP_CHECK_FOLDER:
+			g_value_set_boolean (
+				value,
+				camel_ews_folder_get_check_folder (
+				CAMEL_EWS_FOLDER (object)));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
 ews_folder_dispose (GObject *object)
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (object);
@@ -3136,6 +3198,8 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	CamelFolderClass *folder_class;
 
 	object_class = G_OBJECT_CLASS (class);
+	object_class->set_property = ews_folder_set_property;
+	object_class->get_property = ews_folder_get_property;
 	object_class->dispose = ews_folder_dispose;
 	object_class->finalize = ews_folder_finalize;
 	object_class->constructed = ews_folder_constructed;
@@ -3156,6 +3220,30 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	folder_class->transfer_messages_to_sync = ews_transfer_messages_to_sync;
 	folder_class->prepare_content_refresh = ews_prepare_content_refresh;
 	folder_class->get_filename = ews_get_filename;
+
+	g_object_class_install_property (
+		object_class,
+		PROP_APPLY_FILTERS,
+		g_param_spec_boolean (
+			"apply-filters",
+			"Apply Filters",
+			_("Apply message _filters to this folder"),
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_EXPLICIT_NOTIFY |
+			CAMEL_PARAM_PERSISTENT));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_CHECK_FOLDER,
+		g_param_spec_boolean (
+			"check-folder",
+			"Check Folder",
+			_("Always check for _new mail in this folder"),
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_EXPLICIT_NOTIFY |
+			CAMEL_PARAM_PERSISTENT));
 }
 
 static void
@@ -3178,4 +3266,92 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	camel_folder_set_lock_async (folder, TRUE);
 }
 
-/** End **/
+static void
+camel_ews_folder_update_flags (CamelEwsFolder *self)
+{
+	CamelFolder *folder = CAMEL_FOLDER (self);
+	CamelSettings *settings;
+	CamelStore *store;
+	gboolean filter_inbox = FALSE, filter_junk = FALSE, filter_junk_inbox = FALSE;
+	guint32 flags;
+
+	store = camel_folder_get_parent_store (folder);
+	if (!store)
+		return;
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+	g_object_get (
+		settings,
+		"filter-inbox", &filter_inbox,
+		"filter-junk", &filter_junk,
+		"filter-junk-inbox", &filter_junk_inbox,
+		NULL);
+
+	g_clear_object (&settings);
+
+	flags = camel_folder_get_flags (folder) & (~(CAMEL_FOLDER_FILTER_RECENT | CAMEL_FOLDER_FILTER_JUNK));
+
+	if (!g_ascii_strcasecmp (camel_folder_get_full_name (folder), "Inbox") ||
+	    folder_has_inbox_type (CAMEL_EWS_STORE (store), camel_folder_get_full_name (folder))) {
+		if (filter_inbox)
+			flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		if (filter_junk)
+			flags |= CAMEL_FOLDER_FILTER_JUNK;
+	} else {
+		if (camel_ews_folder_get_apply_filters (self))
+			flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		if (filter_junk && !filter_junk_inbox)
+			flags |= CAMEL_FOLDER_FILTER_JUNK;
+	}
+
+	camel_folder_set_flags (folder, flags);
+}
+
+gboolean
+camel_ews_folder_get_apply_filters (CamelEwsFolder *self)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (self), FALSE);
+
+	return self->priv->apply_filters;
+}
+
+void
+camel_ews_folder_set_apply_filters (CamelEwsFolder *self,
+				    gboolean apply_filters)
+{
+	g_return_if_fail (CAMEL_IS_EWS_FOLDER (self));
+
+	if ((self->priv->apply_filters ? 1 : 0) == (apply_filters ? 1 : 0))
+		return;
+
+	self->priv->apply_filters = apply_filters;
+
+	g_object_notify (G_OBJECT (self), "apply-filters");
+	camel_ews_folder_update_flags (self);
+}
+
+gboolean
+camel_ews_folder_get_check_folder (CamelEwsFolder *self)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (self), FALSE);
+
+	return self->priv->check_folder;
+}
+
+void
+camel_ews_folder_set_check_folder (CamelEwsFolder *self,
+				   gboolean check_folder)
+{
+	g_return_if_fail (CAMEL_IS_EWS_FOLDER (self));
+
+	if ((self->priv->check_folder ? 1 : 0) == (check_folder ? 1 : 0))
+		return;
+
+	self->priv->check_folder = check_folder;
+
+	g_object_notify (G_OBJECT (self), "check-folder");
+	camel_ews_folder_update_flags (self);
+}

@@ -54,6 +54,16 @@ CamelFolder *	camel_m365_folder_new		(CamelStore *store,
 						 GCancellable *cancellable,
 						 GError **error);
 const gchar *	camel_m365_folder_get_id	(CamelM365Folder *m365_folder);
+gboolean	camel_m365_folder_get_apply_filters
+						(CamelM365Folder *self);
+void		camel_m365_folder_set_apply_filters
+						(CamelM365Folder *self,
+						 gboolean apply_filters);
+gboolean	camel_m365_folder_get_check_folder
+						(CamelM365Folder *self);
+void		camel_m365_folder_set_check_folder
+						(CamelM365Folder *self,
+						 gboolean check_folder);
 
 G_END_DECLS
 

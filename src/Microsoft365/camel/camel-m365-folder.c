@@ -59,6 +59,17 @@ struct _CamelM365FolderPrivate {
 	GMutex get_message_lock;
 	GCond get_message_cond;
 	GHashTable *get_message_hash; /* borrowed gchar *uid ~> NULL */
+
+	gboolean apply_filters;
+	gboolean check_folder;
+};
+
+/* The custom property ID is a CamelArg artifact.
+ * It still identifies the property in state files. */
+enum {
+	PROP_0,
+	PROP_APPLY_FILTERS = 0x2501,
+	PROP_CHECK_FOLDER = 0x2502
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (CamelM365Folder, camel_m365_folder, CAMEL_TYPE_OFFLINE_FOLDER)
@@ -1545,6 +1556,54 @@ m365_folder_get_filename (CamelFolder *folder,
 }
 
 static void
+m365_folder_set_property (GObject *object,
+			  guint property_id,
+			  const GValue *value,
+			  GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_APPLY_FILTERS:
+			camel_m365_folder_set_apply_filters (
+				CAMEL_M365_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_CHECK_FOLDER:
+			camel_m365_folder_set_check_folder (
+				CAMEL_M365_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+m365_folder_get_property (GObject *object,
+			  guint property_id,
+			  GValue *value,
+			  GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_APPLY_FILTERS:
+			g_value_set_boolean (
+				value,
+				camel_m365_folder_get_apply_filters (
+				CAMEL_M365_FOLDER (object)));
+			return;
+
+		case PROP_CHECK_FOLDER:
+			g_value_set_boolean (
+				value,
+				camel_m365_folder_get_check_folder (
+				CAMEL_M365_FOLDER (object)));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
 m365_folder_constructed (GObject *object)
 {
 	CamelSettings *settings;
@@ -1624,6 +1683,8 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 	CamelFolderClass *folder_class;
 
 	object_class = G_OBJECT_CLASS (klass);
+	object_class->set_property = m365_folder_set_property;
+	object_class->get_property = m365_folder_get_property;
 	object_class->constructed = m365_folder_constructed;
 	object_class->dispose = m365_folder_dispose;
 	object_class->finalize = m365_folder_finalize;
@@ -1644,6 +1705,30 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 	folder_class->transfer_messages_to_sync = m365_folder_transfer_messages_to_sync;
 	folder_class->prepare_content_refresh = m365_folder_prepare_content_refresh;
 	folder_class->get_filename = m365_folder_get_filename;
+
+	g_object_class_install_property (
+		object_class,
+		PROP_APPLY_FILTERS,
+		g_param_spec_boolean (
+			"apply-filters",
+			"Apply Filters",
+			_("Apply message _filters to this folder"),
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_EXPLICIT_NOTIFY |
+			CAMEL_PARAM_PERSISTENT));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_CHECK_FOLDER,
+		g_param_spec_boolean (
+			"check-folder",
+			"Check Folder",
+			_("Always check for _new mail in this folder"),
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_EXPLICIT_NOTIFY |
+			CAMEL_PARAM_PERSISTENT));
 }
 
 static void
@@ -1796,6 +1881,9 @@ camel_m365_folder_new (CamelStore *store,
 		if (filter_junk)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
 	} else {
+		if (camel_m365_folder_get_apply_filters (m365_folder))
+			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+
 		if (filter_junk && !filter_junk_inbox)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
 	}
@@ -1816,4 +1904,93 @@ camel_m365_folder_get_id (CamelM365Folder *m365_folder)
 	g_return_val_if_fail (CAMEL_IS_M365_FOLDER (m365_folder), NULL);
 
 	return m365_folder->priv->id;
+}
+
+static void
+camel_m365_folder_update_flags (CamelM365Folder *self)
+{
+	CamelFolder *folder = CAMEL_FOLDER (self);
+	CamelSettings *settings;
+	CamelStore *store;
+	gboolean filter_inbox = FALSE, filter_junk = FALSE, filter_junk_inbox = FALSE;
+	guint32 flags;
+
+	store = camel_folder_get_parent_store (folder);
+	if (!store)
+		return;
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+	g_object_get (
+		settings,
+		"filter-inbox", &filter_inbox,
+		"filter-junk", &filter_junk,
+		"filter-junk-inbox", &filter_junk_inbox,
+		NULL);
+
+	g_clear_object (&settings);
+
+	flags = camel_folder_get_flags (folder) & (~(CAMEL_FOLDER_FILTER_RECENT | CAMEL_FOLDER_FILTER_JUNK));
+
+	if (m365_folder_has_inbox_type (CAMEL_M365_STORE (store), camel_folder_get_full_name (folder))) {
+		if (filter_inbox)
+			flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		if (filter_junk)
+			flags |= CAMEL_FOLDER_FILTER_JUNK;
+	} else {
+		if (camel_m365_folder_get_apply_filters (self))
+			flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		if (filter_junk && !filter_junk_inbox)
+			flags |= CAMEL_FOLDER_FILTER_JUNK;
+	}
+
+	camel_folder_set_flags (folder, flags);
+}
+
+gboolean
+camel_m365_folder_get_apply_filters (CamelM365Folder *self)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_FOLDER (self), FALSE);
+
+	return self->priv->apply_filters;
+}
+
+void
+camel_m365_folder_set_apply_filters (CamelM365Folder *self,
+				     gboolean apply_filters)
+{
+	g_return_if_fail (CAMEL_IS_M365_FOLDER (self));
+
+	if ((self->priv->apply_filters ? 1 : 0) == (apply_filters ? 1 : 0))
+		return;
+
+	self->priv->apply_filters = apply_filters;
+
+	g_object_notify (G_OBJECT (self), "apply-filters");
+	camel_m365_folder_update_flags (self);
+}
+
+gboolean
+camel_m365_folder_get_check_folder (CamelM365Folder *self)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_FOLDER (self), FALSE);
+
+	return self->priv->check_folder;
+}
+
+void
+camel_m365_folder_set_check_folder (CamelM365Folder *self,
+				    gboolean check_folder)
+{
+	g_return_if_fail (CAMEL_IS_M365_FOLDER (self));
+
+	if ((self->priv->check_folder ? 1 : 0) == (check_folder ? 1 : 0))
+		return;
+
+	self->priv->check_folder = check_folder;
+
+	g_object_notify (G_OBJECT (self), "check-folder");
+	camel_m365_folder_update_flags (self);
 }
