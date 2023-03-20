@@ -1,32 +1,32 @@
 # Indonesian translation for evolution-ews.
 # Copyright (C) 2012 evolution-ews' COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
-# Andika Triwidada <andika@gmail.com>, 2012-2014, 2018, 2020.
+# Andika Triwidada <andika@gmail.com>, 2012-2014, 2018, 2020, 2023.
 # Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017-2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2022-10-05 07:55+0000\n"
-"PO-Revision-Date: 2022-11-16 10:51+0700\n"
-"Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
+"POT-Creation-Date: 2023-03-18 12:46+0000\n"
+"PO-Revision-Date: 2023-03-20 11:42+0700\n"
+"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.2.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:68
+#: ../src/EWS/camel/camel-ews-provider.c:71
 #: ../src/EWS/evolution/e-ews-config-lookup.c:222
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Layanan Web Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:73
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses peladen Exchange memakai Layanan Web"
 
@@ -49,32 +49,32 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Luang"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Sibuk"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2046
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Sementara"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2624
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2898
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2626
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2900
 msgid "Cannot determine EWS ItemId"
 msgstr "Tidak dapat menentukan ItemId EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3197
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3199
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -82,11 +82,11 @@ msgstr ""
 "Tidak bisa membuat pertemuan yang diorganisasi oleh pengguna lain dalam "
 "kalender Exchange Web Services."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3234
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3236
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Rapat daring hanya dapat dibuat di Kalender pengguna utama."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3948
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
@@ -104,7 +104,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Tidak dapat menemukan sumber bantuan Microsoft 365 untuk kalender “%s”"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2089
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2180
 msgid "Invalid occurrence ID"
 msgstr "ID kejadian tidak valid"
 
@@ -158,76 +158,80 @@ msgstr "Menyegarkan folder “%s”"
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Tak bisa melakukan aksi pada folder ketika dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
+#: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Checking for new mail"
 msgstr "Sedang memeriksa surat baru"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
+#: ../src/EWS/camel/camel-ews-provider.c:33
 #: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "C_heck for new messages in all folders"
 msgstr "C_ek pesan baru dalam semua folder"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:35
 msgid "_Listen for server change notifications"
 msgstr "_Dengarkan notifikasi perubahan peladen"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:38
 #: ../src/Microsoft365/camel/camel-m365-provider.c:30
 msgid "Options"
 msgstr "Opsi"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/EWS/camel/camel-ews-provider.c:40
 #: ../src/Microsoft365/camel/camel-m365-provider.c:32
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "Ter_apkan penyaring pada pesan baru dalam Kotak Masuk pada peladen ini"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:42
 #: ../src/Microsoft365/camel/camel-m365-provider.c:34
 msgid "Check new messages for _Junk contents"
 msgstr "Periksa pesan baru untuk isi _Spam"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
+#: ../src/EWS/camel/camel-ews-provider.c:44
 #: ../src/Microsoft365/camel/camel-m365-provider.c:36
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Ha_nya periksa pesan SPAM pada folder IN_BOX"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:46
 #: ../src/Microsoft365/camel/camel-m365-provider.c:38
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "_Sinkronkan surat jauh ke lokal di semua folder"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:49
 msgid "Show _Public Folders beside user folders"
 msgstr "Tampilkan Folder _Publik di sebelah folder pengguna"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/EWS/camel/camel-ews-provider.c:52
 #: ../src/Microsoft365/camel/camel-m365-provider.c:42
 msgid "Connection"
 msgstr "Koneksi"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
+#: ../src/EWS/camel/camel-ews-provider.c:56
 #: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Tenggang wak_tu koneksi (dalam detik) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
+#: ../src/EWS/camel/camel-ews-provider.c:58
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Cacah koneksi be_rsamaan untuk digunakan"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:60
 msgid "Override _User-Agent header value"
 msgstr "Timpa nilai header _User-Agent"
 
-#: ../src/EWS/camel/camel-ews-provider.c:85
+#: ../src/EWS/camel/camel-ews-provider.c:63
+msgid "Al_ways connect with HTTP/1"
+msgstr "Se_lalu menyambung memakai HTTP/1"
+
+#: ../src/EWS/camel/camel-ews-provider.c:88
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:90
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -235,11 +239,11 @@ msgstr ""
 "Opsi ini akan menyambung ke peladen Exchange menggunakan sandi teks polos "
 "dengan autentikasi NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:98
 msgid "Basic"
 msgstr "Dasar"
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -247,11 +251,11 @@ msgstr ""
 "Opsi ini akan menyambung ke peladen Exchange menggunakan sandi teks polos "
 "dengan autentikasi Dasar."
 
-#: ../src/EWS/camel/camel-ews-provider.c:105
+#: ../src/EWS/camel/camel-ews-provider.c:108
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -286,62 +290,62 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:652
-#: ../src/EWS/camel/camel-ews-store.c:1479
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Checking “Out of Office” settings"
 msgstr "Memeriksa pengaturan \"Di Luar Kantor\""
 
-#: ../src/EWS/camel/camel-ews-store.c:1485
+#: ../src/EWS/camel/camel-ews-store.c:1482
 msgid "Look up Exchange server categories"
 msgstr "Mencari kategori peladen Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1561
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] ""
 "Kata sandi akan kedaluwarsa dalam %d hari. Buka \"%s\" untuk menggantinya."
 
-#: ../src/EWS/camel/camel-ews-store.c:1567
+#: ../src/EWS/camel/camel-ews-store.c:1564
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Kata sandi akan kedaluwarsa dalam %d hari."
 
-#: ../src/EWS/camel/camel-ews-store.c:1793
+#: ../src/EWS/camel/camel-ews-store.c:1790
 msgid "Updating foreign folder structure"
 msgstr "Memutakhirkan struktur folder asing"
 
-#: ../src/EWS/camel/camel-ews-store.c:1929
+#: ../src/EWS/camel/camel-ews-store.c:1928
 msgid "Updating foreign folders"
 msgstr "Memutakhirkan folder asing"
 
-#: ../src/EWS/camel/camel-ews-store.c:2345
+#: ../src/EWS/camel/camel-ews-store.c:2344
 #: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Tak ada folder begitu: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2692
+#: ../src/EWS/camel/camel-ews-store.c:2691
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Tak bisa membaca daftar folder publik EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:2765
+#: ../src/EWS/camel/camel-ews-store.c:2764
 msgid "Cannot find any EWS public folders"
 msgstr "Tak bisa temukan folder publik EWS manapun"
 
-#: ../src/EWS/camel/camel-ews-store.c:2878
+#: ../src/EWS/camel/camel-ews-store.c:2876
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Tak bisa membuat folder “%s”, folder telah ada"
 
-#: ../src/EWS/camel/camel-ews-store.c:2893
+#: ../src/EWS/camel/camel-ews-store.c:2891
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Folder induk %s tidak ada"
 
-#: ../src/EWS/camel/camel-ews-store.c:2903
+#: ../src/EWS/camel/camel-ews-store.c:2901
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -349,120 +353,120 @@ msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder "
 "pengguna lain"
 
-#: ../src/EWS/camel/camel-ews-store.c:2913
+#: ../src/EWS/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3020
+#: ../src/EWS/camel/camel-ews-store.c:3018
 #: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Folder tidak ada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3030
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder pengguna lain"
 
-#: ../src/EWS/camel/camel-ews-store.c:3041
+#: ../src/EWS/camel/camel-ews-store.c:3039
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
-#: ../src/EWS/camel/camel-ews-store.c:3296
+#: ../src/EWS/camel/camel-ews-store.c:3198
+#: ../src/EWS/camel/camel-ews-store.c:3294
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Folder %s tidak ada"
 
-#: ../src/EWS/camel/camel-ews-store.c:3209
+#: ../src/EWS/camel/camel-ews-store.c:3207
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Tidak ada catatan kunci perubahan bagi folder %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3252
+#: ../src/EWS/camel/camel-ews-store.c:3250
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Tak bisa sekaligus mengubah nama dan memindah folder di saat yang sama"
 
-#: ../src/EWS/camel/camel-ews-store.c:3283
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3281
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Tak bisa temukan ID folder bagi folder induk %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3296
-#: ../src/EWS/camel/camel-ews-store.c:3306
+#: ../src/EWS/camel/camel-ews-store.c:3294
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Inbox"
 
-#: ../src/EWS/camel/camel-ews-store.c:3355
-#: ../src/EWS/camel/camel-ews-transport.c:449
+#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "Peladen Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3358
+#: ../src/EWS/camel/camel-ews-store.c:3356
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Layanan Exchange untuk %s pada %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3402
+#: ../src/EWS/camel/camel-ews-store.c:3400
 #: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Tak bisa temukan folder Tong Sampah"
 
-#: ../src/EWS/camel/camel-ews-store.c:3462
+#: ../src/EWS/camel/camel-ews-store.c:3460
 #: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Tak bisa temukan folder Sampah"
 
-#: ../src/EWS/camel/camel-ews-store.c:3653
+#: ../src/EWS/camel/camel-ews-store.c:3651
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Tak bisa berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3676
+#: ../src/EWS/camel/camel-ews-store.c:3674
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersedia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3686
+#: ../src/EWS/camel/camel-ews-store.c:3684
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3695
+#: ../src/EWS/camel/camel-ews-store.c:3693
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Tak bisa berlangganan folder “%s”, ID folder tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3706
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Tak bisa berlangganan folder “%s”, root folder publik tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3782
+#: ../src/EWS/camel/camel-ews-store.c:3780
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3893
+#: ../src/EWS/camel/camel-ews-store.c:3891
 #: ../src/Microsoft365/camel/camel-m365-store.c:1772
 #: ../src/Microsoft365/camel/camel-m365-store.c:1785
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/EWS/camel/camel-ews-store.c:3965
-#: ../src/EWS/camel/camel-ews-store.c:4002
+#: ../src/EWS/camel/camel-ews-store.c:3963
+#: ../src/EWS/camel/camel-ews-store.c:4000
 msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
@@ -480,26 +484,26 @@ msgstr "Folder Publik"
 msgid "Invalid folder URI “%s”"
 msgstr "URI folder tidak valid \"%s\""
 
-#: ../src/EWS/camel/camel-ews-transport.c:452
+#: ../src/EWS/camel/camel-ews-transport.c:450
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Pengantaran surel Exchange melalui %s"
 
-#: ../src/EWS/camel/camel-ews-transport.c:501
+#: ../src/EWS/camel/camel-ews-transport.c:499
 #: ../src/Microsoft365/camel/camel-m365-transport.c:438
 msgid "Cannot send message with no From address"
 msgstr "Tak bisa mengirim pesan tanpa alamat Dari"
 
-#: ../src/EWS/camel/camel-ews-transport.c:507
+#: ../src/EWS/camel/camel-ews-transport.c:505
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Peladen Exchange tak bisa mengirim pesan dengan alamat Dari berganda"
 
-#: ../src/EWS/camel/camel-ews-transport.c:517
+#: ../src/EWS/camel/camel-ews-transport.c:515
 #: ../src/Microsoft365/camel/camel-m365-transport.c:453
 msgid "Failed to read From address"
 msgstr "Gagal membaca alamat Dari"
 
-#: ../src/EWS/camel/camel-ews-transport.c:527
+#: ../src/EWS/camel/camel-ews-transport.c:525
 #: ../src/Microsoft365/camel/camel-m365-transport.c:463
 #, c-format
 msgid "Service not connected"
@@ -532,78 +536,78 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
 
-#: ../src/EWS/common/e-ews-connection.c:344
+#: ../src/EWS/common/e-ews-connection.c:349
 #, c-format
 msgid "No response: %s"
 msgstr "Tak ada respon: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:509
+#: ../src/EWS/common/e-ews-connection.c:514
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Peladen Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
 
-#: ../src/EWS/common/e-ews-connection.c:515
+#: ../src/EWS/common/e-ews-connection.c:520
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Peladen Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
-#: ../src/EWS/common/e-ews-connection.c:644
+#: ../src/EWS/common/e-ews-connection.c:649
 msgid "Authentication failed"
 msgstr "Autentikasi gagal"
 
-#: ../src/EWS/common/e-ews-connection.c:2389
+#: ../src/EWS/common/e-ews-connection.c:2426
 msgid "Failed to parse autodiscover response XML"
 msgstr "Gagal mengurai XML respon autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2395
+#: ../src/EWS/common/e-ews-connection.c:2432
 msgid "Failed to find <Autodiscover> element"
 msgstr "Gagal menemukan elemen <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2405
+#: ../src/EWS/common/e-ews-connection.c:2442
 msgid "Failed to find <Response> element"
 msgstr "Gagal menemukan elemen <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2415
+#: ../src/EWS/common/e-ews-connection.c:2452
 msgid "Failed to find <Account> element"
 msgstr "Gagal menemukan elemen <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2460
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dalam respon autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2536
+#: ../src/EWS/common/e-ews-connection.c:2573
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:2954
+#: ../src/EWS/common/e-ews-connection.c:2991
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/EWS/common/e-ews-connection.c:3163
+#: ../src/EWS/common/e-ews-connection.c:3200
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:3201
+#: ../src/EWS/common/e-ews-connection.c:3238
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8730
+#: ../src/EWS/common/e-ews-connection.c:8795
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8831
+#: ../src/EWS/common/e-ews-connection.c:8896
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:8984
+#: ../src/EWS/common/e-ews-connection.c:9049
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9124
+#: ../src/EWS/common/e-ews-connection.c:9189
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Memerlukan setidaknya peladen Microsoft Exchange 2007 SP1"
 
@@ -631,7 +635,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Tak bisa menambah folder, folder telah ada sebagai “%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:144
+#: ../src/EWS/common/e-oauth2-service-office365.c:155
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -715,48 +719,52 @@ msgid "Fetching folder list…"
 msgstr "Mengambil daftar folder…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:824
+#: ../src/EWS/evolution/e-ews-config-utils.c:833
+#: ../src/EWS/evolution/e-ews-config-utils.c:842
+#: ../src/EWS/evolution/e-ews-config-utils.c:851
+#: ../src/EWS/evolution/e-ews-config-utils.c:860
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Berlangganan ke folder pengguna EWS lain…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1011
+#: ../src/EWS/evolution/e-ews-config-utils.c:1047
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Tak bisa menyunting hak akses folder “%s”, pilih folder lain."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1092
+#: ../src/EWS/evolution/e-ews-config-utils.c:1128
 msgid "Folder Sizes…"
 msgstr "Ukuran Folder…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1099
+#: ../src/EWS/evolution/e-ews-config-utils.c:1135
 msgid "Subscribe to folder of other user…"
 msgstr "Berlangganan ke folder milik pengguna lain…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1108
-#: ../src/EWS/evolution/e-ews-config-utils.c:1444
-#: ../src/EWS/evolution/e-ews-config-utils.c:1482
-#: ../src/EWS/evolution/e-ews-config-utils.c:1520
-#: ../src/EWS/evolution/e-ews-config-utils.c:1558
+#: ../src/EWS/evolution/e-ews-config-utils.c:1144
+#: ../src/EWS/evolution/e-ews-config-utils.c:1502
+#: ../src/EWS/evolution/e-ews-config-utils.c:1540
+#: ../src/EWS/evolution/e-ews-config-utils.c:1578
+#: ../src/EWS/evolution/e-ews-config-utils.c:1616
 msgid "Permissions…"
 msgstr "Izin…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1110
+#: ../src/EWS/evolution/e-ews-config-utils.c:1146
 msgid "Edit EWS folder permissions"
 msgstr "Sunting hak akses folder EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1446
+#: ../src/EWS/evolution/e-ews-config-utils.c:1504
 msgid "Edit EWS calendar permissions"
 msgstr "Sunting hak akses kalender EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1484
+#: ../src/EWS/evolution/e-ews-config-utils.c:1542
 msgid "Edit EWS tasks permissions"
 msgstr "Sunting hak akses tugas EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1522
+#: ../src/EWS/evolution/e-ews-config-utils.c:1580
 msgid "Edit EWS memos permissions"
 msgstr "Sunting hak akses memo EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1560
+#: ../src/EWS/evolution/e-ews-config-utils.c:1618
 msgid "Edit EWS contacts permissions"
 msgstr "Sunting hak akses kontak EWS"
 
@@ -842,7 +850,7 @@ msgid "Unknown"
 msgstr "Tak dikenal"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
-#: ../src/EWS/evolution/e-ews-search-user.c:414
+#: ../src/EWS/evolution/e-ews-search-user.c:425
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Nama"
@@ -966,55 +974,55 @@ msgstr "Folder nampak"
 msgid "Reading folder permissions, please wait…"
 msgstr "Sedang membaca hak akses folder, silakan tunggu…"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:151
 msgid "Unset on Server"
 msgstr "Hapus Tatanan pada Peladen"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:152
 msgid "Unset the “Out of Office” status"
 msgstr "Menghapus status \"Di Luar Kantor\""
 
-#: ../src/EWS/evolution/e-ews-search-user.c:189
+#: ../src/EWS/evolution/e-ews-search-user.c:198
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
 msgstr[0] "Tak ditemukan pengguna, hanya %d kontak"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:194
+#: ../src/EWS/evolution/e-ews-search-user.c:203
 msgid "No users found"
 msgstr "Tak ditemukan pengguna"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:198
+#: ../src/EWS/evolution/e-ews-search-user.c:207
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "Ditemukan %d pengguna"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:204
+#: ../src/EWS/evolution/e-ews-search-user.c:213
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] ""
 "Ditemukan lebih dari 100 pengguna, tapi hanya menampilkan %d pertama"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:338
-#: ../src/EWS/evolution/e-ews-search-user.c:523
+#: ../src/EWS/evolution/e-ews-search-user.c:347
+#: ../src/EWS/evolution/e-ews-search-user.c:534
 msgid "Search for a user"
 msgstr "Cari seorang pengguna"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:356
 msgid "Searching…"
 msgstr "Mencari…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:420
+#: ../src/EWS/evolution/e-ews-search-user.c:431
 msgid "E-mail"
 msgstr "Surel"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:457
+#: ../src/EWS/evolution/e-ews-search-user.c:468
 msgid "Choose EWS user…"
 msgstr "Pilih pengguna EWS…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:480
+#: ../src/EWS/evolution/e-ews-search-user.c:491
 msgid "_Search:"
 msgstr "_Cari:"
 
@@ -1129,60 +1137,60 @@ msgstr "Mengquery layanan Autodiscover"
 msgid "Fetch _URL"
 msgstr "_URL Ambil"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:169
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:194
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Konfigurasi"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:187
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:212
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "_Nama pengguna:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:201
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:226
 msgid "_Host URL:"
 msgstr "URL _Host:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:220
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:245
 msgid "OAB U_RL:"
 msgstr "U_RL OAB:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:234
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:259
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Buka _Kotak surat pengguna lain"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:278
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
 msgid "S_earch…"
 msgstr "_Cari…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:314
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Autentikasi"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
 msgid "_Override Office365 OAuth2 settings"
 msgstr "Timpa setelan _OAuth2 Office365"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:320
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:398
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Bantuan…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:327
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "I_D Aplikasi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Tidak diatur ID aplikasi baku apapun"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1192,59 +1200,59 @@ msgstr "ID aplikasi baku adalah \"%s\""
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "ID _Tenant:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
 msgid "Default tenant ID is “common“"
 msgstr "ID tenant baku adalah \"common\""
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "ID tenant baku adalah \"%s\""
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "Peng_aturan Lanjutan"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:406
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "Host _endpoint:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:429
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:432
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Host endpoint asali adalah \"%s\""
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
 msgid "Red_irect URI:"
 msgstr "URI Pengal_ihan:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "URI pengalihan baku adalah \"%s\""
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
 msgid "Re_source URI:"
 msgstr "URI _Sumber Daya:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1253,24 +1261,28 @@ msgstr ""
 "URI sumber daya default berasal dari URL Host, atau akhirnya dapat jatuh "
 "kembali ke \"%s\"."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "Gunakan _protokol versi 2.0 (untuk akun sekolah dan organisasi)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
 msgid "Host URL is not valid"
 msgstr "URL host “%s” tak valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "Host URL cannot be empty"
 msgstr "URL host tak boleh kosong"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
 msgid "OAB URL is not valid"
 msgstr "URL OAB “%s” tak valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Nama pengguna tak boleh kosong"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "ID aplikasi tak boleh kosong"
@@ -1418,7 +1430,7 @@ msgid "Locating offline address books"
 msgstr "Mencari buku alamat luring"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:552
+#: ../src/EWS/registry/e-ews-backend.c:505
 msgid "Global Address List"
 msgstr "Daftar Alamat Global"
 
@@ -1574,14 +1586,14 @@ msgstr "Folder telah dilanggani."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Folder pengguna \"{0}\" telah berhasil dilanggani."
 
-#: ../src/EWS/registry/e-ews-backend.c:1094
+#: ../src/EWS/registry/e-ews-backend.c:1045
 #: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Tak bisa menentukan kelas folder yang cocok bagi folder baru bernama “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1183
+#: ../src/EWS/registry/e-ews-backend.c:1134
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -1604,12 +1616,12 @@ msgstr "Hanya dapat menyimpan acara sederhana ke dalam kalender Microsoft 365"
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "Hanya dapat menyimpan tugas sederhana ke folder tugas Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1630
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr ""
 "Kalender Microsoft 365 tidak dapat menyimpan lebih dari satu pengulangan"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1639
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1617,40 +1629,40 @@ msgstr ""
 "Kalender Microsoft 365 tidak dapat menyimpan komponen dengan properti RDATE, "
 "EXDATE, atau RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1749
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Frekuensi pengulangan tidak diketahui (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1901
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Kalender Microsoft 365 tidak dapat menyimpan lebih dari satu pengingat acara"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1934
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Acara Microsoft 365 hanya dapat memiliki pengingat sebelum acara dimulai"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1947
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Tugas Microsoft 365 hanya bisa memiliki pengingat dengan waktu absolut"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2273
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Tugas Microsoft 365 tidak dapat memiliki lampiran."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2376
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Tak bisa menyimpan lampiran dengan URI \"%s\""
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 msgid "Failed to read attachment URI"
 msgstr "Gagal membaca URI lampiran"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2392
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
 msgid "Failed to get inline attachment data"
 msgstr "Gagal mendapat data lampiran inline"
 
@@ -1741,7 +1753,7 @@ msgstr ""
 "Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
@@ -1799,21 +1811,3 @@ msgstr "U_RI pengalihan:"
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Sumber data \"%s\" tak merepresentasikan suatu folder Microsoft 365"
-
-#~ msgid ""
-#~ "Cannot add messages into a Microsoft 365 account from another account. "
-#~ "Only messages from the same account can be moved/copied between the "
-#~ "Microsoft 365 folders."
-#~ msgstr ""
-#~ "Tidak dapat menambahkan pesan ke akun Microsoft 365 dari akun lain. Hanya "
-#~ "pesan dari akun yang sama yang dapat dipindahkan/disalin di antara folder "
-#~ "Microsoft 365."
-
-#~ msgid "URL “%s” is not valid"
-#~ msgstr "URL “%s” tak valid"
-
-#~ msgid "No items found"
-#~ msgstr "Tak temukan butir"
-
-#~ msgid "Unknown error"
-#~ msgstr "Galat tak dikenal"
