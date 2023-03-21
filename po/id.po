@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-02-21 08:21+0000\n"
-"PO-Revision-Date: 2023-03-20 11:46+0700\n"
+"POT-Creation-Date: 2023-03-20 10:54+0000\n"
+"PO-Revision-Date: 2023-03-21 09:55+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -108,29 +108,29 @@ msgstr "Tidak dapat menemukan sumber bantuan Microsoft 365 untuk kalender “%s�
 msgid "Invalid occurrence ID"
 msgstr "ID kejadian tidak valid"
 
-#: ../src/EWS/camel/camel-ews-folder.c:353
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Tak bisa membuka berkas temporer mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:361
+#: ../src/EWS/camel/camel-ews-folder.c:372
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Tak bisa menghasilkan pengurai dari mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:370
+#: ../src/EWS/camel/camel-ews-folder.c:381
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Tak bisa mengura mimecontent permintaan rapat!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:454
-#: ../src/EWS/camel/camel-ews-folder.c:664
+#: ../src/EWS/camel/camel-ews-folder.c:465
+#: ../src/EWS/camel/camel-ews-folder.c:675
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Tak bisa membuat berkas singgahan"
 
-#: ../src/EWS/camel/camel-ews-folder.c:781
-#: ../src/EWS/camel/camel-ews-folder.c:925
+#: ../src/EWS/camel/camel-ews-folder.c:792
+#: ../src/EWS/camel/camel-ews-folder.c:936
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Tak bisa membuat path singgahan “%s”: %s"
@@ -138,25 +138,35 @@ msgstr "Tak bisa membuat path singgahan “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:939
+#: ../src/EWS/camel/camel-ews-folder.c:950
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Gagal memindah berkas singgahan pesan dari “%s” to “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1878
+#: ../src/EWS/camel/camel-ews-folder.c:1889
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Tak bisa memuat ringkasan untuk %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2350
+#: ../src/EWS/camel/camel-ews-folder.c:2364
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Menyegarkan folder “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2543
+#: ../src/EWS/camel/camel-ews-folder.c:2557
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Tak bisa melakukan aksi pada folder ketika dalam mode luring"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3230
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+msgid "Apply message _filters to this folder"
+msgstr "Terapkan penyaring pesan ke _folder ini"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3242
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+msgid "Always check for _new mail in this folder"
+msgstr "Selalu periksa pesa_n baru dalam folder ini"
 
 #: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
@@ -429,44 +439,44 @@ msgstr "Tak bisa temukan folder Tong Sampah"
 msgid "Could not locate Junk folder"
 msgstr "Tak bisa temukan folder Sampah"
 
-#: ../src/EWS/camel/camel-ews-store.c:3651
+#: ../src/EWS/camel/camel-ews-store.c:3665
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Tak bisa berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3688
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersedia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3684
+#: ../src/EWS/camel/camel-ews-store.c:3698
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3693
+#: ../src/EWS/camel/camel-ews-store.c:3707
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Tak bisa berlangganan folder “%s”, ID folder tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3718
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Tak bisa berlangganan folder “%s”, root folder publik tak ditemukan"
 
-#: ../src/EWS/camel/camel-ews-store.c:3780
+#: ../src/EWS/camel/camel-ews-store.c:3794
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/EWS/camel/camel-ews-store.c:3891
-#: ../src/Microsoft365/camel/camel-m365-store.c:1772
-#: ../src/Microsoft365/camel/camel-m365-store.c:1785
+#: ../src/EWS/camel/camel-ews-store.c:3905
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
+#: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/EWS/camel/camel-ews-store.c:3963
-#: ../src/EWS/camel/camel-ews-store.c:4000
+#: ../src/EWS/camel/camel-ews-store.c:3977
+#: ../src/EWS/camel/camel-ews-store.c:4014
 msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
@@ -1666,20 +1676,20 @@ msgstr "Gagal membaca URI lampiran"
 msgid "Failed to get inline attachment data"
 msgstr "Gagal mendapat data lampiran inline"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:587
-#: ../src/Microsoft365/camel/camel-m365-folder.c:989
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:502
+#: ../src/Microsoft365/camel/camel-m365-folder.c:598
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
 msgid "Invalid folder state (missing parent store)"
 msgstr "Keadaan folder tidak valid (penyimpanan induk hilang)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Folder \"%s\" tidak sesuai dengan folder manapun yang diketahui"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Tak bisa memuat ringkasan untuk \"%s\""
