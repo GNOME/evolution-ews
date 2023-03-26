@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-05 15:23+0100\n"
-"PO-Revision-Date: 2023-03-05 15:24+0100\n"
+"POT-Creation-Date: 2023-03-26 14:33+0200\n"
+"PO-Revision-Date: 2023-03-26 14:34+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -111,29 +111,29 @@ msgstr ""
 msgid "Invalid occurrence ID"
 msgstr "Nieprawidłowy identyfikator wystąpienia"
 
-#: ../src/EWS/camel/camel-ews-folder.c:353
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Nie można otworzyć tymczasowego pliku treści MIME."
 
-#: ../src/EWS/camel/camel-ews-folder.c:361
+#: ../src/EWS/camel/camel-ews-folder.c:372
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Nie można utworzyć parsera z treści MIME."
 
-#: ../src/EWS/camel/camel-ews-folder.c:370
+#: ../src/EWS/camel/camel-ews-folder.c:381
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nie można przetworzyć treści MIME żądania spotkania."
 
-#: ../src/EWS/camel/camel-ews-folder.c:454
-#: ../src/EWS/camel/camel-ews-folder.c:664
+#: ../src/EWS/camel/camel-ews-folder.c:465
+#: ../src/EWS/camel/camel-ews-folder.c:675
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nie można utworzyć pliku bufora"
 
-#: ../src/EWS/camel/camel-ews-folder.c:781
-#: ../src/EWS/camel/camel-ews-folder.c:925
+#: ../src/EWS/camel/camel-ews-folder.c:792
+#: ../src/EWS/camel/camel-ews-folder.c:936
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Nie można utworzyć ścieżki bufora „%s”: %s"
@@ -141,26 +141,36 @@ msgstr "Nie można utworzyć ścieżki bufora „%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:939
+#: ../src/EWS/camel/camel-ews-folder.c:950
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr ""
 "Przeniesienie pliku bufora wiadomości z „%s” do „%s” się nie powiodło: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1878
+#: ../src/EWS/camel/camel-ews-folder.c:1889
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać zestawienia dla %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2350
+#: ../src/EWS/camel/camel-ews-folder.c:2364
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Odświeżanie katalogu „%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2543
+#: ../src/EWS/camel/camel-ews-folder.c:2557
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3230
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+msgid "Apply message _filters to this folder"
+msgstr "_Filtrowanie wiadomości w tym katalogu"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3242
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+msgid "Always check for _new mail in this folder"
+msgstr "Sprawdzanie _nowych wiadomości w tym katalogu przez cały czas"
 
 #: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
@@ -441,49 +451,49 @@ msgstr "Nie można ustalić położenia katalogu Kosz"
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/EWS/camel/camel-ews-store.c:3651
+#: ../src/EWS/camel/camel-ews-store.c:3665
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3688
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, żaden katalog publiczny nie jest "
 "dostępny"
 
-#: ../src/EWS/camel/camel-ews-store.c:3684
+#: ../src/EWS/camel/camel-ews-store.c:3698
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nie można subskrybować katalogu „%s”, nie odnaleziono katalogu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3693
+#: ../src/EWS/camel/camel-ews-store.c:3707
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, nie odnaleziono identyfikatora katalogu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3718
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, nie odnaleziono głównego katalogu "
 "publicznego"
 
-#: ../src/EWS/camel/camel-ews-store.c:3780
+#: ../src/EWS/camel/camel-ews-store.c:3794
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/EWS/camel/camel-ews-store.c:3891
-#: ../src/Microsoft365/camel/camel-m365-store.c:1772
-#: ../src/Microsoft365/camel/camel-m365-store.c:1785
+#: ../src/EWS/camel/camel-ews-store.c:3905
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
+#: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/EWS/camel/camel-ews-store.c:3963
-#: ../src/EWS/camel/camel-ews-store.c:4000
+#: ../src/EWS/camel/camel-ews-store.c:3977
+#: ../src/EWS/camel/camel-ews-store.c:4014
 msgid "Unsetting the “Out of Office” status"
 msgstr "Usuwanie ustawienia stanu obecności poza biurem"
 
@@ -1716,20 +1726,20 @@ msgstr "Odczytanie adresu URI załącznika się nie powiodło"
 msgid "Failed to get inline attachment data"
 msgstr "Uzyskanie danych załącznika w treści wiadomości się nie powiodło"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:587
-#: ../src/Microsoft365/camel/camel-m365-folder.c:989
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:502
+#: ../src/Microsoft365/camel/camel-m365-folder.c:598
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
 msgid "Invalid folder state (missing parent store)"
 msgstr "Nieprawidłowy stan katalogu (brak przechowalni nadrzędnej)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Katalog „%s” nie odpowiada żadnemu znanemu katalogowi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nie można wczytać zestawienia dla „%s”"
