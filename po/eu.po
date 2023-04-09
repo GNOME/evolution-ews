@@ -18,8 +18,8 @@
 msgid ""
 msgstr "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-03-18 12:46+0000\n"
-"PO-Revision-Date: 2023-03-26 10:00+0100\n"
+"POT-Creation-Date: 2023-03-26 08:28+0000\n"
+"PO-Revision-Date: 2023-04-09 10:00+0100\n"
 "Last-Translator: Asier Sarasua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
@@ -112,29 +112,29 @@ msgstr "Ez da aurkitu Microsoft365 laguntzaren iturburua “%s” egutegirako"
 msgid "Invalid occurrence ID"
 msgstr "Agerraldiaren ID baliogabea"
 
-#: ../src/EWS/camel/camel-ews-folder.c:353
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Ezin da MIME edukia duen aldi baterako fitxategia ireki"
 
-#: ../src/EWS/camel/camel-ews-folder.c:361
+#: ../src/EWS/camel/camel-ews-folder.c:372
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Ezin da analizatzailea sortu MIME edukitik"
 
-#: ../src/EWS/camel/camel-ews-folder.c:370
+#: ../src/EWS/camel/camel-ews-folder.c:381
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Ezin da bilera-eskaeraren MIME edukia analizatu"
 
-#: ../src/EWS/camel/camel-ews-folder.c:454
-#: ../src/EWS/camel/camel-ews-folder.c:664
+#: ../src/EWS/camel/camel-ews-folder.c:465
+#: ../src/EWS/camel/camel-ews-folder.c:675
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Ezin da cacheko fitxategia sortu"
 
-#: ../src/EWS/camel/camel-ews-folder.c:781
-#: ../src/EWS/camel/camel-ews-folder.c:925
+#: ../src/EWS/camel/camel-ews-folder.c:792
+#: ../src/EWS/camel/camel-ews-folder.c:936
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Ezin izan da “%s” cache-bidea sortu: %s"
@@ -142,25 +142,35 @@ msgstr "Ezin izan da “%s” cache-bidea sortu: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:939
+#: ../src/EWS/camel/camel-ews-folder.c:950
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Huts egin du mezuen cache-fitxategia “%s” kokalekutik “%s” kokalekura lekuz aldatzeak: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1878
+#: ../src/EWS/camel/camel-ews-folder.c:1889
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ezin izan da %s(r)en laburpena kargatu"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2350
+#: ../src/EWS/camel/camel-ews-folder.c:2364
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "”%s” karpeta freskatzen"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2543
+#: ../src/EWS/camel/camel-ews-folder.c:2557
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ezin da karpetan ekintzarik landu lineaz kanpo moduan"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3230
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+msgid "Apply message _filters to this folder"
+msgstr "Aplikatu mezuen _iragazkiak karpeta honi"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3242
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+msgid "Always check for _new mail in this folder"
+msgstr "Begiratu beti mezu _berriak dauden karpeta honetan"
 
 #: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
@@ -424,44 +434,44 @@ msgstr "Ezin izan da Zakarrontzia karpeta aurkitu"
 msgid "Could not locate Junk folder"
 msgstr "Ezin izan da Baztergarria karpeta aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3651
+#: ../src/EWS/camel/camel-ews-store.c:3665
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Ezin dira EWS-ko karpetak harpidetu lineaz kanpo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3688
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Ezin da “%s” karpetara harpidetu, ez dago karpeta publikorik erabilgarri"
 
-#: ../src/EWS/camel/camel-ews-store.c:3684
+#: ../src/EWS/camel/camel-ews-store.c:3698
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Ezin da “%s” karpetara harpidetu, karpeta ez da aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3693
+#: ../src/EWS/camel/camel-ews-store.c:3707
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Ezin da “%s” karpetara harpidetu, karpetaren IDa ez da aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3718
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Ezin da “%s” karpetara harpidetu, karpeta publikoaren erroa ez da aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3780
+#: ../src/EWS/camel/camel-ews-store.c:3794
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Ezin da EWS karpeten harpidetza eten lineaz kanpo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3891
-#: ../src/Microsoft365/camel/camel-m365-store.c:1772
-#: ../src/Microsoft365/camel/camel-m365-store.c:1785
+#: ../src/EWS/camel/camel-ews-store.c:3905
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
+#: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Linean jardun behar duzu lanean eragiketa hau bukatzeko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3963
-#: ../src/EWS/camel/camel-ews-store.c:4000
+#: ../src/EWS/camel/camel-ews-store.c:3977
+#: ../src/EWS/camel/camel-ews-store.c:4014
 msgid "Unsetting the “Out of Office” status"
 msgstr "“Bulegotik kanpo” egoeraren ezarpena kentzen"
 
@@ -1627,20 +1637,20 @@ msgstr "Huts egin du eranskinaren URIa irakurtzeak"
 msgid "Failed to get inline attachment data"
 msgstr "Huts egin du barneko eranskin-datuak eskuratzeak"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:587
-#: ../src/Microsoft365/camel/camel-m365-folder.c:989
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:502
+#: ../src/Microsoft365/camel/camel-m365-folder.c:598
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
 msgid "Invalid folder state (missing parent store)"
 msgstr "Karpeta-egoera baliogabea (biltegi gurasoa falta da)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "“%s” karpeta ez da karpeta ezaguna"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ezin izan da “%s”(r)en laburpena kargatu"
