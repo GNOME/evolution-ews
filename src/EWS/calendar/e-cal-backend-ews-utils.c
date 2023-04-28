@@ -2162,7 +2162,6 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 	i_cal_time_set_timezone (dtstart, timezone);
 
 	o_time = i_cal_time_new_from_string (rid);
-	i_cal_time_set_timezone (o_time, timezone);
 
 	ritr = i_cal_recur_iterator_new (rrule, dtstart);
 
@@ -2170,8 +2169,24 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 	     next && !i_cal_time_is_null_time (next);
 	     g_object_unref (next), next = i_cal_recur_iterator_next (ritr), index++) {
 		/* Make sure the date is compared with the expected timezone, not converted into UTC */
-		if (i_cal_time_compare_date_only_tz (o_time, next, timezone) == 0) {
+		if (i_cal_time_compare (o_time, next) == 0) {
 			break;
+		}
+	}
+
+	/* if cannot find an exact time, try with the date part only */
+	if (!next || i_cal_time_is_null_time (next)) {
+		g_clear_object (&ritr);
+		g_clear_object (&next);
+		index = 1;
+		ritr = i_cal_recur_iterator_new (rrule, dtstart);
+		for (next = i_cal_recur_iterator_next (ritr);
+		     next && !i_cal_time_is_null_time (next);
+		     g_object_unref (next), next = i_cal_recur_iterator_next (ritr), index++) {
+			/* Make sure the date is compared with the expected timezone */
+			if (i_cal_time_compare_date_only_tz (o_time, next, timezone) == 0) {
+				break;
+			}
 		}
 	}
 
