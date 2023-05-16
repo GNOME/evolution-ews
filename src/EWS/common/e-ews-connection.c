@@ -2911,6 +2911,13 @@ e_ews_autodiscover_prepare_requests_and_send_sync (AutodiscoverData *ad,
 		ews_autodiscover_send_request (ad, request, cancellable, local_error ? NULL : &local_error);
 	}
 
+	if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+	    camel_ews_settings_get_auth_mechanism (ad->settings) == EWS_AUTH_TYPE_OAUTH2) {
+		/* To ask for the credentials when being OAuth2 and the secret is not found in the keyring */
+		local_error->domain = E_SOUP_SESSION_ERROR;
+		local_error->code = SOUP_STATUS_UNAUTHORIZED;
+	}
+
 	if (local_error && (!ad->error ||
 	    (!g_error_matches (ad->error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED) &&
 	    (!ad->error || (ad->error->domain != G_IO_ERROR && ad->error->domain != G_TLS_ERROR))))) {
