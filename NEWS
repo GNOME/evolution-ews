@@ -1,3 +1,13 @@
+Evolution-EWS 3.48.2 2023-05-26
+-------------------------------
+
+Bug Fixes:
+	I#232 - Sometimes fails to delete recurring event occurrence
+	I#234 - Ask for OAuth2 credentials for autodiscovery
+
+Translations:
+	Hugo Carvalho (pt)
+
 Evolution-EWS 3.48.1 2023-04-21
 -------------------------------
 
