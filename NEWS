@@ -1,3 +1,27 @@
+Evolution-EWS 3.49.1 2023-06-30
+-------------------------------
+
+Bug Fixes:
+	I#225 - Mail: Add per-folder option to always check for new mail
+	I#232 - Sometimes fails to delete recurring event occurrence
+	I#234 - Ask for OAuth2 credentials for autodiscovery
+
+Miscellaneous:
+	DOAP: Update mailing-list URL; add link to Discourse support-forum (Andre Klapper)
+	CI: Use org.freedesktop.Sdk.Extension.vala in nightly flatpak manifest
+
+Translations:
+	Andika Triwidada (id)
+	Asier Sarasua Garmendia (eu)
+	Enrico Nicoletto (pt_BR)
+	Hugo Carvalho (pt)
+	Jiri Eischmann (cs)
+	Мирослав Николић (sr)
+	Piotr Drąg (pl)
+	Sabri Ünal (tr)
+	Sergej A (ru)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.48.0 2023-03-17
 -------------------------------
 
