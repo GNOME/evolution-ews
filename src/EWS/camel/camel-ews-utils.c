@@ -1116,7 +1116,8 @@ camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
 	if (!from)
 		from = e_ews_item_get_sender (item);
 	tmp = form_email_string_from_mb (cnc, from, cancellable);
-	camel_message_info_set_from (mi, tmp);
+	if (tmp && *tmp)
+		camel_message_info_set_from (mi, tmp);
 	g_free (tmp);
 
 	tmp = form_recipient_list (cnc, e_ews_item_get_to_recipients (item), cancellable);

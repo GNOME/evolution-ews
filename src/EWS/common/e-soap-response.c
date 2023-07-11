@@ -442,6 +442,7 @@ e_soap_response_xmldoc_from_message_sync (ESoapResponse *response,
 			response->priv->ctxt->sax->startElementNs = soap_sax_startElementNs;
 			response->priv->ctxt->sax->endElementNs = soap_sax_endElementNs;
 			response->priv->ctxt->sax->characters = soap_sax_characters;
+			xmlCtxtUseOptions (response->priv->ctxt, XML_PARSE_RECOVER | XML_PARSE_HUGE | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
 		} else {
 			xmlParseChunk (response->priv->ctxt, buffer, nread, 0);
 		}
