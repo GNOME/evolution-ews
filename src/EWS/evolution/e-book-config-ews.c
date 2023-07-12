@@ -117,12 +117,17 @@ static void
 book_config_ews_insert_widgets (ESourceConfigBackend *backend,
 				ESource *scratch_source)
 {
+	ESourceConfig *config;
+
 	if (!scratch_source)
 		return;
 
 	book_config_ews_maybe_insert_gal_options (backend, scratch_source);
 
-	e_source_config_add_refresh_interval (e_source_config_backend_get_config (backend), scratch_source);
+	config = e_source_config_backend_get_config (backend);
+
+	e_source_config_add_refresh_interval (config, scratch_source);
+	e_source_config_add_refresh_on_metered_network (config, scratch_source);
 }
 
 static void
