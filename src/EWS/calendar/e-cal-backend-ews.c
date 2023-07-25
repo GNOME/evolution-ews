@@ -4010,6 +4010,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 
 			convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 			convert_data.response_type = (gchar *) response_type;
+			convert_data.icomp = subcomp;
 			convert_data.item_id = item_id;
 			convert_data.change_key = change_key;
 

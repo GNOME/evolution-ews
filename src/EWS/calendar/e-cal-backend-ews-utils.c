@@ -2271,6 +2271,24 @@ e_cal_backend_ews_prepare_accept_item_request (ESoapRequest *request,
 	else
 		e_soap_request_start_element (request, "TentativelyAcceptItem", NULL, NULL);
 
+	if (data->icomp) {
+		const gchar *comment = NULL;
+		ICalProperty *prop;
+
+		prop = i_cal_component_get_first_property (data->icomp, I_CAL_COMMENT_PROPERTY);
+		if (prop)
+			comment = i_cal_property_get_comment (prop);
+
+		if (comment && *comment) {
+			e_soap_request_start_element (request, "Body", NULL, NULL);
+			e_soap_request_add_attribute (request, "BodyType", "Text", NULL, NULL);
+			e_soap_request_write_string (request, comment);
+			e_soap_request_end_element (request); /* Body */
+		}
+
+		g_clear_object (&prop);
+	}
+
 	e_soap_request_start_element (request, "ReferenceItemId", NULL, NULL);
 	e_soap_request_add_attribute (request, "Id", data->item_id, NULL, NULL);
 	e_soap_request_add_attribute (request, "ChangeKey", data->change_key, NULL, NULL);
