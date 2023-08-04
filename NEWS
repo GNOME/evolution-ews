@@ -1,3 +1,19 @@
+Evolution-EWS 3.49.2 2023-08-04
+-------------------------------
+
+Bug Fixes:
+	I#238 - Parse XML responses in recovery mode
+	I#242 - Calendar: Provide user comments in the invitation response
+	eds-I#59 - CalDAV: Allow to disable schedule reply on remove
+	eds-I#180 - Add option to reduce book/cal data usage when on a metered connection
+
+Miscellaneous:
+	OALComboBox: Always prefer collection ESource when fetching list of OABs
+
+Translations:
+	Balázs Úr (hu)
+	Danial Behzadi (fa)
+
 Evolution-EWS 3.49.1 2023-06-30
 -------------------------------
 
