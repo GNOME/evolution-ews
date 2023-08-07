@@ -436,7 +436,9 @@ e_ews_connection_process_request_sync (EEwsConnection *cnc,
 	pd.prepare_data = e_soup_session_prepare_message_send_sync (E_SOUP_SESSION (cnc->priv->soup.session), pd.message, cancellable, error);
 
 	if (!pd.prepare_data) {
-		if (error && g_error_matches (*error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		if (error && (g_error_matches (*error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+			      /* Returned by the OAuth2 service when the token cannot be refreshed */
+			      g_error_matches (*error, G_IO_ERROR, G_IO_ERROR_CONNECTION_REFUSED))) {
 			(*error)->domain = EWS_CONNECTION_ERROR;
 			(*error)->code = EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED;
 		}
