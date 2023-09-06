@@ -2266,6 +2266,8 @@ ecb_ews_load_component_sync (ECalMetaBackend *meta_backend,
 		}
 	}
 
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+
 	if (!components && e_cal_meta_backend_refresh_sync (meta_backend, cancellable, NULL)) {
 		ECalCache *cal_cache;
 
@@ -2283,8 +2285,6 @@ ecb_ews_load_component_sync (ECalMetaBackend *meta_backend,
 			g_object_unref (cal_cache);
 		}
 	}
-
-	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 
 	ecb_ews_convert_error_to_edc_error (error);
 	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
