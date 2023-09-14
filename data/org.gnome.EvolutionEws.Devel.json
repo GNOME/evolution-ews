@@ -1,5 +1,5 @@
 {
-	"app-id": "org.gnome.evolution-ews-nightly",
+	"app-id": "org.gnome.EvolutionEws.Devel",
 	"runtime": "org.gnome.Platform",
 	"runtime-version": "master",
 	"sdk": "org.gnome.Sdk",
@@ -240,7 +240,7 @@
 				"/share/GConf"
 			],
 			"config-opts": [
-				"-DDBUS_SERVICES_PREFIX=org.gnome.evolution-ews-nightly",
+				"-DDBUS_SERVICES_PREFIX=org.gnome.EvolutionEws.Devel",
 				"-DEXTENSIONS_DIR=/app/evolution/extensions",
 				"-DENABLE_FILE_LOCKING=fcntl",
 				"-DENABLE_DOT_LOCKING=OFF",
@@ -363,7 +363,7 @@
 				"cflags": "-DTEMP_HOME=1 -Wno-deprecated-declarations"
 			},
 			"config-opts": [
-				"-DOVERRIDE_APPLICATION_ID=org.gnome.evolution-ews-nightly",
+				"-DOVERRIDE_APPLICATION_ID=org.gnome.EvolutionEws.Devel",
 				"-DENABLE_AUTOAR=OFF",
 				"-DENABLE_CONTACT_MAPS=OFF",
 				"-DENABLE_GNOME_DESKTOP=OFF",
@@ -398,7 +398,7 @@
 				}
 			],
 			"post-install": [
-				"mv /app/share/applications/org.gnome.Evolution.desktop /app/share/applications/org.gnome.evolution-ews-nightly.desktop"
+				"mv /app/share/applications/org.gnome.Evolution.desktop /app/share/applications/org.gnome.EvolutionEws.Devel.desktop"
 			]
 		},
 
