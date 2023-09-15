@@ -1,3 +1,15 @@
+Evolution-EWS 3.50.0 2023-09-15
+-------------------------------
+
+Miscellaneous:
+	Calendar: Unlock connection lock before refreshing the calendar on component load
+	ci: Rename org.gnome.evolution-ews.nightly to org.gnome.EvolutionEws.Devel
+
+Translations:
+	Aurimas Černius (lt)
+	Daniel Rusek (cs)
+	Martin Srebotnjak (sl)
+
 Evolution-EWS 3.49.3 2023-09-01
 -------------------------------
 
