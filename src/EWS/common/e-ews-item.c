@@ -113,6 +113,7 @@ struct _EEwsItemPrivate {
 	gchar *msg_id;
 	gchar *in_replyto;
 	gchar *references;
+	gchar *preview;
 	gboolean has_attachments;
 	gboolean is_read;
 	EwsImportance importance;
@@ -208,6 +209,7 @@ e_ews_item_dispose (GObject *object)
 	g_clear_pointer (&priv->uid, g_free);
 	g_clear_pointer (&priv->in_replyto, g_free);
 	g_clear_pointer (&priv->references, g_free);
+	g_clear_pointer (&priv->preview, g_free);
 	g_clear_pointer (&priv->date_header, g_free);
 	g_clear_pointer (&priv->timezone, g_free);
 	g_clear_pointer (&priv->start_timezone, g_free);
@@ -1634,6 +1636,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->from = e_ews_item_mailbox_from_soap_param (subparam1);
 		} else if (!g_ascii_strcasecmp (name, "InternetMessageId")) {
 			priv->msg_id = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "Preview")) {
+			priv->preview = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "UID")) {
 			priv->uid = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "IsRead")) {
@@ -1851,6 +1855,14 @@ e_ews_item_get_msg_id (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const gchar *) item->priv->msg_id;
+}
+
+const gchar *
+e_ews_item_get_preview (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->preview;
 }
 
 const gchar *

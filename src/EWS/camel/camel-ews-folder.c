@@ -52,6 +52,7 @@ which needs to be better organized via functions */
 #define SUMMARY_MESSAGE_PROPS ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
 		   "message:BccRecipients message:IsRead message:References message:InternetMessageId " \
 		   SUMMARY_MESSAGE_FLAGS
+#define SUMMARY_MESSAGE_PROPS_2013 SUMMARY_MESSAGE_PROPS " item:Preview"
 
 #define SUMMARY_POSTITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS " message:From message:Sender"
 
@@ -537,7 +538,10 @@ ews_message_from_properties_sync (CamelEwsFolder *ews_folder,
 	g_return_val_if_fail (out_items != NULL, FALSE);
 
 	add_props = e_ews_additional_props_new ();
-	add_props->field_uri = g_strdup (SUMMARY_MESSAGE_PROPS " item:Body item:Attachments");
+	if (e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2013))
+		add_props->field_uri = g_strdup (SUMMARY_MESSAGE_PROPS_2013 " item:Body item:Attachments");
+	else
+		add_props->field_uri = g_strdup (SUMMARY_MESSAGE_PROPS " item:Body item:Attachments");
 	add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
 
 	if (!e_ews_connection_get_items_sync (cnc, pri, ids, "IdOnly", add_props,
@@ -2045,7 +2049,9 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		EEwsAdditionalProps *add_props;
 
 		add_props = e_ews_additional_props_new ();
-		add_props->field_uri = g_strdup (is_drafts_folder ? SUMMARY_MESSAGE_PROPS : SUMMARY_MESSAGE_FLAGS);
+		add_props->field_uri = g_strdup (is_drafts_folder ?
+			(e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2013) ? SUMMARY_MESSAGE_PROPS_2013 : SUMMARY_MESSAGE_PROPS) :
+			SUMMARY_MESSAGE_FLAGS);
 		add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
 
 		e_ews_connection_get_items_sync (
@@ -2182,7 +2188,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		EEwsAdditionalProps *add_props;
 
 		add_props = e_ews_additional_props_new ();
-		add_props->field_uri = g_strdup (SUMMARY_MESSAGE_PROPS);
+		add_props->field_uri = g_strdup (e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2013) ? SUMMARY_MESSAGE_PROPS_2013 : SUMMARY_MESSAGE_PROPS);
 		add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
 
 		e_ews_connection_get_items_sync (

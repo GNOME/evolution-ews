@@ -1106,6 +1106,7 @@ camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
 	camel_message_info_set_uid (mi, id->id);
 	camel_message_info_set_size (mi, e_ews_item_get_size (item));
 	camel_message_info_set_subject (mi, e_ews_item_get_subject (item));
+	camel_message_info_set_preview (mi, e_ews_item_get_preview (item));
 	camel_ews_message_info_set_item_type (CAMEL_EWS_MESSAGE_INFO (mi), item_type);
 	camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
 
