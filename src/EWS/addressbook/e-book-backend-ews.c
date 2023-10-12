@@ -97,6 +97,7 @@ struct _EBookBackendEwsPrivate {
 	gchar *folder_id;
 	gboolean is_gal;
 	gboolean fetching_gal_photos;
+	gboolean gal_oab_broken; /* to use ResolveNames when OAB cannot be found or is misconfigured */
 
 	guint subscription_key;
 
@@ -3431,7 +3432,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 
 	ews_settings = ebb_ews_get_collection_settings (bbews);
 
-	if (camel_ews_settings_get_oab_offline (ews_settings))
+	if (!bbews->priv->gal_oab_broken && camel_ews_settings_get_oab_offline (ews_settings))
 		return TRUE;
 
 	meta_backend = E_BOOK_META_BACKEND (bbews);
@@ -3806,6 +3807,8 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 
 	bbews = E_BOOK_BACKEND_EWS (meta_backend);
 
+	bbews->priv->gal_oab_broken = FALSE;
+
 	g_rec_mutex_lock (&bbews->priv->cnc_lock);
 
 	if (bbews->priv->cnc) {
@@ -3908,6 +3911,7 @@ ebb_ews_disconnect_sync (EBookMetaBackend *meta_backend,
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_EWS (meta_backend), FALSE);
 
 	bbews = E_BOOK_BACKEND_EWS (meta_backend);
+	bbews->priv->gal_oab_broken = FALSE;
 
 	ebb_ews_unset_connection (bbews, TRUE);
 
@@ -4052,6 +4056,8 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 			g_slist_free_full (full_l, (GDestroyNotify) ews_oal_details_free);
 			g_slist_free_full (deltas, (GDestroyNotify) ews_oal_details_free);
 
+			bbews->priv->gal_oab_broken = !success && (!local_error || !g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED));
+
 			if (success)
 				*out_new_sync_tag = etag;
 			else
@@ -4061,6 +4067,8 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 				g_prefix_error (&local_error, "%s", _("Failed to update GAL:"));
 				g_propagate_error (error, local_error);
 			}
+		} else {
+			bbews->priv->gal_oab_broken = TRUE;
 		}
 
 		g_free (oab_url);
