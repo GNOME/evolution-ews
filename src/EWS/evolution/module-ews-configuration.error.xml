@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<error-list domain="ews">
+<error-list domain="ews" translation-domain="evolution-ews">
 
   <error type="warning" id="autodiscovery-error">
     <_primary>Autodiscovery query failed.</_primary>
