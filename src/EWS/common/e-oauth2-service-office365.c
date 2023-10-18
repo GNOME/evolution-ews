@@ -26,8 +26,8 @@
 #define REFRESH_PATH_V2 "oauth2/v2.0/token"
 
 #define OFFICE365_SCOPE "offline_access" \
-			" openid" \
-			" https://outlook.office.com/EWS.AccessAsUser.All"
+			" openid"
+#define OFFICE365_HOST_SCOPE_SUFFIX "EWS.AccessAsUser.All"
 
 struct _EOAuth2ServiceOffice365Private
 {
@@ -390,6 +390,16 @@ eos_office365_get_resource_uri (EOAuth2Service *service,
 	return OFFICE365_FALLBACK_RESOURCE_URI;
 }
 
+static const gchar*
+eos_office365_get_oauth2_v2_scope (EOAuth2Service *service,
+				   ESource *source)
+{
+	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
+
+	return eos_office365_cache_string_take (oauth2_office365,
+		g_strdup_printf ("%s %s/%s", OFFICE365_SCOPE, eos_office365_get_resource_uri (service, source), OFFICE365_HOST_SCOPE_SUFFIX));
+}
+
 static void
 eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 						ESource *source,
@@ -406,7 +416,7 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 	if (ews_settings &&
 	    camel_ews_settings_get_override_oauth2 (ews_settings) &&
 	    camel_ews_settings_get_use_oauth2_v2 (ews_settings))
-		e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
+		e_oauth2_service_util_set_to_form (uri_query, "scope", eos_office365_get_oauth2_v2_scope (service, source));
 	else
 		e_oauth2_service_util_set_to_form (uri_query, "resource", eos_office365_get_resource_uri (service, source));
 }
@@ -428,7 +438,7 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 	if (ews_settings &&
 	    camel_ews_settings_get_override_oauth2 (ews_settings) &&
 	    camel_ews_settings_get_use_oauth2_v2 (ews_settings))
-		e_oauth2_service_util_set_to_form (form, "scope", OFFICE365_SCOPE);
+		e_oauth2_service_util_set_to_form (form, "scope", eos_office365_get_oauth2_v2_scope (service, source));
 	else
 		e_oauth2_service_util_set_to_form (form, "resource", eos_office365_get_resource_uri (service, source));
 }
