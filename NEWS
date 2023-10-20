@@ -1,3 +1,14 @@
+Evolution-EWS 3.50.1 2023-10-20
+-------------------------------
+
+Bug Fixes:
+	I#246 - Search in online GAL when OAB is misconfigured
+	I#247 - Text from .error file not translated in the GUI
+	M!9 - Fix scope for OAuth2 v2 being hard-coded to O365 (Mara Sophie Grosch)
+
+Translations:
+	Alan Mortensen (da)
+
 Evolution-EWS 3.50.0 2023-09-15
 -------------------------------
 
