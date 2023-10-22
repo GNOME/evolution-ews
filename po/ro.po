@@ -7,72 +7,77 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-32\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2021-09-17 15:34+0000\n"
-"PO-Revision-Date: 2022-01-07 13:20+0100\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2023-10-19 17:16+0000\n"
+"PO-Revision-Date: 2023-10-14 12:01+0300\n"
+"Last-Translator: Florentina Mușat <florentina [dot] musat [dot] 28 [at] "
+"gmail [dot] com>\n"
 "Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n"
-"%100<=19) ? 1 : 2);\n"
-"X-Generator: Poedit 3.0.1\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && "
+"n%100<=19) ? 1 : 2);\n"
+"X-Generator: Poedit 3.4\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:68
-#: ../src/EWS/evolution/e-ews-config-lookup.c:240
+#: ../src/EWS/camel/camel-ews-provider.c:71
+#: ../src/EWS/evolution/e-ews-config-lookup.c:222
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Servicii web Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:73
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Pentru accesarea serverelor Exchange folosind servicii web"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3973
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
+msgid "Fetching contact photos…"
+msgstr "Se preiau fotografiile de contact…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
 msgid "Failed to update GAL:"
 msgstr "Eroare la actualizarea GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4138
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nu s-a putut salva lista de contacte, este suportată numai pentru servere "
 "EWS 2010 sau ulterior"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4236
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
 msgid "Failed to set contact photo:"
 msgstr "Eșec la stabilirea fotografiei de contact:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2034
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2036
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Liber"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2037
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupat"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "În afara serviciului"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2043
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Tentativă"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2621
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2895
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2623
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2897
 msgid "Cannot determine EWS ItemId"
 msgstr "Nu s-a putut determina Id-ul elementului EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3192
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3196
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -80,38 +85,57 @@ msgstr ""
 "Nu se pot crea întâlniri organizate de utilizatori într-un calendar Servicii "
 "Web Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3902
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3233
+msgid "Online meeting can be created only in the main user Calendar."
+msgstr ""
+"Întâlnirea online poate fi creată doar în calendarul utilizatorului "
+"principal."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4122
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nu s-a putut găsi utilizatorul „%s” printre participanți"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2102
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:40
+msgid ""
+"Cannot connect to the server, repeat the action once you login to the server."
+msgstr ""
+"Nu se poate conecta la server, repetați acțiunea după ce vă autentificați la "
+"server."
+
+#. Translators: The '%s' is replaced with a UID of the collection source
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
+#, c-format
+msgid "Cannot find Microsoft365 helper source for calendar “%s”"
+msgstr "Nu se găsește sursa de ajutor Microsoft 365 pentru calendarul „%s”"
+
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2195
 msgid "Invalid occurrence ID"
 msgstr "ID ocurență nevalidă"
 
-#: ../src/EWS/camel/camel-ews-folder.c:353
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Nu s-a putut deschide fișierul temporar cu conținut mime!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:361
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Nu s-a putut genera analizatorul pentru conținutul mime!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:370
+#: ../src/EWS/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nu s-a putut parsa cererea de întâlnire conținut mime!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:454
-#: ../src/EWS/camel/camel-ews-folder.c:664
+#: ../src/EWS/camel/camel-ews-folder.c:466
+#: ../src/EWS/camel/camel-ews-folder.c:679
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nu s-a putut crea fișierul cache"
 
-#: ../src/EWS/camel/camel-ews-folder.c:781
-#: ../src/EWS/camel/camel-ews-folder.c:925
+#: ../src/EWS/camel/camel-ews-folder.c:796
+#: ../src/EWS/camel/camel-ews-folder.c:940
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Nu s-a putut crea calea cache „%s”: %s"
@@ -119,98 +143,112 @@ msgstr "Nu s-a putut crea calea cache „%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:939
+#: ../src/EWS/camel/camel-ews-folder.c:954
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Eșec la mutarea fișierului de mesaj cache de la „%s” la „%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1878
+#: ../src/EWS/camel/camel-ews-folder.c:1893
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nu s-a putut încărca sumarul pentru %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2350
+#: ../src/EWS/camel/camel-ews-folder.c:2370
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Se reîmprospătează dosarul „%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2543
+#: ../src/EWS/camel/camel-ews-folder.c:2563
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
 "Nu se pot executa acțiuni pe dosar în timp ce sunteți în modul deconectat"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
+#: ../src/EWS/camel/camel-ews-folder.c:3236
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+msgid "Apply message _filters to this folder"
+msgstr "Aplică _filtre de mesaj acestui dosar"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3248
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+msgid "Always check for _new mail in this folder"
+msgstr "Verifică întotdeauna după email _nou în acest dosar"
+
+#: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Checking for new mail"
 msgstr "Se verifică după noi emailuri"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
+#: ../src/EWS/camel/camel-ews-provider.c:33
 #: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "C_heck for new messages in all folders"
 msgstr "V_erifică pentru mesaje noi în toate dosarele"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:35
 msgid "_Listen for server change notifications"
 msgstr "Ascu_ltă după notificări de modificare ale serverului"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:38
 #: ../src/Microsoft365/camel/camel-m365-provider.c:30
 msgid "Options"
 msgstr "Opțiuni"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/EWS/camel/camel-ews-provider.c:40
 #: ../src/Microsoft365/camel/camel-m365-provider.c:32
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplică filtre noilor mesaje din inbox pe acest server"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:42
 #: ../src/Microsoft365/camel/camel-m365-provider.c:34
 msgid "Check new messages for _Junk contents"
 msgstr "Verifică noile mesaje pentru conținut _spam"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
+#: ../src/EWS/camel/camel-ews-provider.c:44
 #: ../src/Microsoft365/camel/camel-m365-provider.c:36
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Verifică pentru mesaje spam numai în dosarul IN_BOX"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:46
 #: ../src/Microsoft365/camel/camel-m365-provider.c:38
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr ""
 "Sincroni_zează emailurile de la distanță cu cele locale pentru toate dosarele"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:49
 msgid "Show _Public Folders beside user folders"
 msgstr "Arată dosare _publice alături de dosarele utilizatorului"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/EWS/camel/camel-ews-provider.c:52
 #: ../src/Microsoft365/camel/camel-m365-provider.c:42
 msgid "Connection"
 msgstr "Conexiune"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
+#: ../src/EWS/camel/camel-ews-provider.c:56
 #: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Conexiune expira_tă (în secunde) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
+#: ../src/EWS/camel/camel-ews-provider.c:58
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Numă_r de conexiuni concurente de folosit"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:60
 msgid "Override _User-Agent header value"
 msgstr "Suprascrie valoarea antetului _User-Agent"
 
-#: ../src/EWS/camel/camel-ews-provider.c:85
+#: ../src/EWS/camel/camel-ews-provider.c:63
+msgid "Al_ways connect with HTTP/1"
+msgstr "Conectează întotde_auna cu HTTP/1"
+
+#: ../src/EWS/camel/camel-ews-provider.c:88
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:90
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -218,11 +256,11 @@ msgstr ""
 "Această opțiune va conecta la serverul Exchange folosind parolă în text clar "
 "cu autentificare NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:98
 msgid "Basic"
 msgstr "Bază"
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -230,11 +268,11 @@ msgstr ""
 "Această opțiune va conecta la serverul Exchange folosind parolă în text clar "
 "cu autentificare de bază."
 
-#: ../src/EWS/camel/camel-ews-provider.c:105
+#: ../src/EWS/camel/camel-ews-provider.c:108
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -242,8 +280,8 @@ msgstr ""
 "Această opțiune va conecta la serverul Exchange folosind autentificare "
 "Kerberos/GSSAPI."
 
-#: ../src/EWS/camel/camel-ews-store.c:316
-#: ../src/Microsoft365/camel/camel-m365-store.c:76
+#: ../src/EWS/camel/camel-ews-store.c:314
+#: ../src/Microsoft365/camel/camel-m365-store.c:73
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesiunea nu are nicio cale de stocare"
@@ -252,7 +290,7 @@ msgstr "Sesiunea nu are nicio cale de stocare"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:353
+#: ../src/EWS/camel/camel-ews-store.c:351
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -262,23 +300,23 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:508
+#: ../src/EWS/camel/camel-ews-store.c:506
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/EWS/camel/camel-ews-store.c:654
-#: ../src/EWS/camel/camel-ews-store.c:1481
+#: ../src/EWS/camel/camel-ews-store.c:652
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Checking “Out of Office” settings"
 msgstr "Se verifică configurările „Absent de la birou”"
 
-#: ../src/EWS/camel/camel-ews-store.c:1487
+#: ../src/EWS/camel/camel-ews-store.c:1482
 msgid "Look up Exchange server categories"
 msgstr "Se caută categoriile serverului Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1563
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -286,7 +324,7 @@ msgstr[0] "Parola va expira în %d zi. Deschideți „%s” pentru a o schimba."
 msgstr[1] "Parola va expira în %d zile. Deschideți „%s” pentru a o schimba."
 msgstr[2] "Parola va expira în %d de zile. Deschideți „%s” pentru a o schimba."
 
-#: ../src/EWS/camel/camel-ews-store.c:1569
+#: ../src/EWS/camel/camel-ews-store.c:1564
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
@@ -294,40 +332,40 @@ msgstr[0] "Parola va expira într-o zi."
 msgstr[1] "Parola va expira în %d zile."
 msgstr[2] "Parola va expira în %d de zile."
 
-#: ../src/EWS/camel/camel-ews-store.c:1795
+#: ../src/EWS/camel/camel-ews-store.c:1790
 msgid "Updating foreign folder structure"
 msgstr "Se actualizează structura de dosare străine"
 
-#: ../src/EWS/camel/camel-ews-store.c:1931
+#: ../src/EWS/camel/camel-ews-store.c:1928
 msgid "Updating foreign folders"
 msgstr "Se actualizează dosarele străine"
 
-#: ../src/EWS/camel/camel-ews-store.c:2347
-#: ../src/Microsoft365/camel/camel-m365-store.c:631
+#: ../src/EWS/camel/camel-ews-store.c:2344
+#: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nu există asemenea dosar: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2700
+#: ../src/EWS/camel/camel-ews-store.c:2691
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nu se poate lista dosarele publice EWS în modul deconectat"
 
-#: ../src/EWS/camel/camel-ews-store.c:2773
+#: ../src/EWS/camel/camel-ews-store.c:2764
 msgid "Cannot find any EWS public folders"
 msgstr "Nu s-au putut găsi niciun dosar public EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:2886
-#: ../src/Microsoft365/camel/camel-m365-store.c:694
+#: ../src/EWS/camel/camel-ews-store.c:2876
+#: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nu s-a putut crea dosarul „%s”, dosarul există deja"
 
-#: ../src/EWS/camel/camel-ews-store.c:2901
+#: ../src/EWS/camel/camel-ews-store.c:2891
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Dosarul părinte %s nu există"
 
-#: ../src/EWS/camel/camel-ews-store.c:2911
+#: ../src/EWS/camel/camel-ews-store.c:2901
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -335,113 +373,123 @@ msgstr ""
 "Nu s-a putut crea dosarul sub „%s”, este folosit numai pentru dosare ale "
 "altor utilizatori"
 
-#: ../src/EWS/camel/camel-ews-store.c:2921
+#: ../src/EWS/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Nu s-a putut crea dosarul sub „%s”, este folosit numai pentru dosarele "
 "publice"
 
-#: ../src/EWS/camel/camel-ews-store.c:3028
-#: ../src/Microsoft365/camel/camel-m365-store.c:882
+#: ../src/EWS/camel/camel-ews-store.c:3018
+#: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Dosarul nu există"
 
-#: ../src/EWS/camel/camel-ews-store.c:3038
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nu se poate elimina dosarul „%s”, este folosit numai pentru dosarele altor "
 "utilizatori"
 
-#: ../src/EWS/camel/camel-ews-store.c:3049
+#: ../src/EWS/camel/camel-ews-store.c:3039
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Nu se poate elimina dosarul „%s”, este folosit numai pentru dosare publice"
 
-#: ../src/EWS/camel/camel-ews-store.c:3208
-#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3198
+#: ../src/EWS/camel/camel-ews-store.c:3294
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Dosarul %s nu există"
 
-#: ../src/EWS/camel/camel-ews-store.c:3217
+#: ../src/EWS/camel/camel-ews-store.c:3207
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Niciun record de modificare de cheie pentru dosarul %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3260
+#: ../src/EWS/camel/camel-ews-store.c:3250
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nu se poate redenumi și muta un dosar în același timp"
 
-#: ../src/EWS/camel/camel-ews-store.c:3291
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3281
+#: ../src/EWS/camel/camel-ews-store.c:3304
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nu s-a găsit ID-ul dosarului pentru dosarul părinte %s"
 
 #. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3294
 #: ../src/EWS/camel/camel-ews-store.c:3304
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:463
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:747
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Inbox"
 
-#: ../src/EWS/camel/camel-ews-store.c:3363
-#: ../src/EWS/camel/camel-ews-transport.c:302
+#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3366
+#: ../src/EWS/camel/camel-ews-store.c:3356
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Serviciu Exchange pentru %s pe %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3410
-#: ../src/Microsoft365/camel/camel-m365-store.c:1456
+#: ../src/EWS/camel/camel-ews-store.c:3400
+#: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nu s-a putut localiza dosarul Gunoi"
 
-#: ../src/EWS/camel/camel-ews-store.c:3470
-#: ../src/Microsoft365/camel/camel-m365-store.c:1514
+#: ../src/EWS/camel/camel-ews-store.c:3460
+#: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nu s-a putut localiza dosarul Spam"
 
-#: ../src/EWS/camel/camel-ews-store.c:3661
+#: ../src/EWS/camel/camel-ews-store.c:3665
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nu se poate abona la dosare EWS în modul deconectat"
 
-#: ../src/EWS/camel/camel-ews-store.c:3684
+#: ../src/EWS/camel/camel-ews-store.c:3688
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Nu se poate abona dosarul „%s”, niciun dosar public disponibil"
 
-#: ../src/EWS/camel/camel-ews-store.c:3694
+#: ../src/EWS/camel/camel-ews-store.c:3698
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nu se poate abona dosarul „%s”, dosarul nu a fost găsit"
 
-#: ../src/EWS/camel/camel-ews-store.c:3785
+#: ../src/EWS/camel/camel-ews-store.c:3707
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Nu se poate abona dosarul „%s”, ID-ul dosarului nu a fost găsit"
+
+#: ../src/EWS/camel/camel-ews-store.c:3718
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "Nu se poate abona dosarul „%s”, dosarul public nu a fost găsit"
+
+#: ../src/EWS/camel/camel-ews-store.c:3794
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nu se poate dezabona de la dosare EWS în modul deconectat"
 
-#: ../src/EWS/camel/camel-ews-store.c:3902
-#: ../src/Microsoft365/camel/camel-m365-store.c:1774
+#: ../src/EWS/camel/camel-ews-store.c:3905
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
+#: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Trebuie să lucrați în modul online pentru a completa această operație"
 
-#: ../src/EWS/camel/camel-ews-store.c:3979
-#: ../src/EWS/camel/camel-ews-store.c:4016
+#: ../src/EWS/camel/camel-ews-store.c:3977
+#: ../src/EWS/camel/camel-ews-store.c:4014
 msgid "Unsetting the “Out of Office” status"
 msgstr "Se destabilește starea „Absent de la birou”"
 
@@ -453,29 +501,35 @@ msgstr "Dosare străine"
 msgid "Public Folders"
 msgstr "Dosare publice"
 
-#: ../src/EWS/camel/camel-ews-transport.c:305
+#: ../src/EWS/camel/camel-ews-transport.c:173
+#: ../src/Microsoft365/camel/camel-m365-transport.c:172
+#, c-format
+msgid "Invalid folder URI “%s”"
+msgstr "URI de dosar nevalid „%s”"
+
+#: ../src/EWS/camel/camel-ews-transport.c:450
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Livrare email Exchange prin %s"
 
-#: ../src/EWS/camel/camel-ews-transport.c:354
-#: ../src/Microsoft365/camel/camel-m365-transport.c:291
+#: ../src/EWS/camel/camel-ews-transport.c:499
+#: ../src/Microsoft365/camel/camel-m365-transport.c:438
 msgid "Cannot send message with no From address"
 msgstr "Nu se pot trimite mesaje fără a avea o adresă în câmpul „De la”"
 
-#: ../src/EWS/camel/camel-ews-transport.c:360
+#: ../src/EWS/camel/camel-ews-transport.c:505
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "Serverul Exchange nu poate trimite mesaje cu adrese multiple în câmpul „De "
 "la”"
 
-#: ../src/EWS/camel/camel-ews-transport.c:370
-#: ../src/Microsoft365/camel/camel-m365-transport.c:306
+#: ../src/EWS/camel/camel-ews-transport.c:515
+#: ../src/Microsoft365/camel/camel-m365-transport.c:453
 msgid "Failed to read From address"
 msgstr "Eșec la citire de la adresă"
 
-#: ../src/EWS/camel/camel-ews-transport.c:380
-#: ../src/Microsoft365/camel/camel-m365-transport.c:316
+#: ../src/EWS/camel/camel-ews-transport.c:525
+#: ../src/Microsoft365/camel/camel-m365-transport.c:463
 #, c-format
 msgid "Service not connected"
 msgstr "Serviciu neconectat"
@@ -492,7 +546,7 @@ msgstr ""
 "Această opțiune va folosi un jeton de acces OAuth 2.0 pentru a vă conecta la "
 "serverul Office365.com"
 
-#: ../src/EWS/common/e-ews-calendar-utils.c:1207
+#: ../src/EWS/common/e-ews-calendar-utils.c:1226
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
@@ -501,25 +555,17 @@ msgstr ""
 "Nu s-a putut stoca această recurență. Schimbați-o într-o simplă recurență "
 "zilnică, săptămânală, lunară sau anuală fără excepții și cu o dată de start."
 
-#: ../src/EWS/common/e-ews-camel-common.c:388
+#: ../src/EWS/common/e-ews-camel-common.c:387
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Apelul CreateItem a eșuat să returneze un ID pentru noul mesaj"
 
-#: ../src/EWS/common/e-ews-connection.c:809
-msgid "Operation Cancelled"
-msgstr "Operație anulată"
-
-#: ../src/EWS/common/e-ews-connection.c:979
-msgid "Authentication failed"
-msgstr "Autentificare eșuată"
-
-#: ../src/EWS/common/e-ews-connection.c:1001
+#: ../src/EWS/common/e-ews-connection.c:349
 #, c-format
 msgid "No response: %s"
 msgstr "Niciun răspuns: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1064
+#: ../src/EWS/common/e-ews-connection.c:516
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -530,7 +576,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Serverul Exchange este ocupat, se așteaptă reîncercarea (%d:%02d de minute)"
 
-#: ../src/EWS/common/e-ews-connection.c:1070
+#: ../src/EWS/common/e-ews-connection.c:522
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -541,73 +587,70 @@ msgstr[1] ""
 msgstr[2] ""
 "Serverul Exchange este ocupat, se așteaptă reîncercarea (%d de secunde)"
 
-#: ../src/EWS/common/e-ews-connection.c:3214
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:651
+msgid "Authentication failed"
+msgstr "Autentificare eșuată"
+
+#: ../src/EWS/common/e-ews-connection.c:2428
 msgid "Failed to parse autodiscover response XML"
 msgstr "Eșec la parsarea răspunsului XML autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:3221
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2434
 msgid "Failed to find <Autodiscover> element"
 msgstr "Eșec la găsirea elementului <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:3232
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2444
 msgid "Failed to find <Response> element"
 msgstr "Eșec la găsirea elementului <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:3243
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2454
 msgid "Failed to find <Account> element"
 msgstr "Eșec la găsirea elementului <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:3289
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2499
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Eșec la găsirea <ASUrl> în răspunsul autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:3475
+#: ../src/EWS/common/e-ews-connection.c:2575
 msgid "URL cannot be NULL"
 msgstr "URL nu poate fi NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3483
-#, c-format
-msgid "URL “%s” is not valid"
-msgstr "URL-ul „%s” nu este valid"
-
-#: ../src/EWS/common/e-ews-connection.c:3780
+#: ../src/EWS/common/e-ews-connection.c:3000
 msgid "Email address is missing a domain part"
 msgstr "Adresei de email îi lipsește porțiunea cu domeniul"
 
-#: ../src/EWS/common/e-ews-connection.c:4089
+#: ../src/EWS/common/e-ews-connection.c:3209
 msgid "Failed to parse oab XML"
 msgstr "Eșec la parsarea oab XML"
 
-#: ../src/EWS/common/e-ews-connection.c:4097
+#: ../src/EWS/common/e-ews-connection.c:3247
 msgid "Failed to find <OAB> element\n"
 msgstr "Eșec la găsirea elementului <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5386
-msgid "No items found"
-msgstr "Niciun element găsit"
+#: ../src/EWS/common/e-ews-connection.c:8804
+msgid "Requires at least Microsoft Exchange 2010 SP1 server"
+msgstr "Necesită cel puțin un server Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:11851
+#: ../src/EWS/common/e-ews-connection.c:8905
+msgid "Requires at least Microsoft Exchange 2013 server"
+msgstr "Necesită cel puțin un server Microsoft Exchange 2013"
+
+#: ../src/EWS/common/e-ews-connection.c:9058
+msgid "Requires at least Microsoft Exchange 2010 server"
+msgstr "Necesită cel puțin un server Microsoft Exchange 2010"
+
+#: ../src/EWS/common/e-ews-connection.c:9198
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Necesită cel puțin un server Microsoft Exchange 2007 SP1"
 
-#: ../src/EWS/common/e-ews-connection-utils.c:185
+#: ../src/EWS/common/e-ews-connection-utils.c:206
 #, c-format
 msgid "Password expired. Change password at “%s”."
 msgstr "Parola a expirat. Schimbați parola la „%s”."
 
-#: ../src/EWS/common/e-ews-connection-utils.c:188
+#: ../src/EWS/common/e-ews-connection-utils.c:209
 msgid "Password expired."
 msgstr "Parola a expirat."
-
-#: ../src/EWS/common/e-ews-connection-utils.c:422
-#: ../src/Microsoft365/common/e-m365-connection.c:236
-msgid "Unknown error"
-msgstr "Eroare necunoscută"
 
 #: ../src/EWS/common/e-ews-folder.c:781
 msgid "Cannot add folder, unsupported folder type"
@@ -624,7 +667,7 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nu se poate adăuga dosar, dosarul există deja ca „%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:144
+#: ../src/EWS/common/e-oauth2-service-office365.c:155
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -649,26 +692,36 @@ msgstr "_Obține fotografiile contactelor"
 msgid "Tries to look up for user photo"
 msgstr "Încearcă să găsească fotografia utilizatorului"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:181
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
+msgid "Online Meeting"
+msgstr "Întâlnire online"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
+msgid "Create the meeting as an online meeting in the main user calendar"
+msgstr ""
+"Creează întâlnirea ca o întâlnire online în calendarul utilizatorului "
+"principal"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
 msgstr "Autodescoperire Servicii Web Exchange"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:224
+#: ../src/EWS/evolution/e-ews-config-lookup.c:207
 #, c-format
 msgid "User: %s"
 msgstr "Utilizator: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:229
+#: ../src/EWS/evolution/e-ews-config-lookup.c:212
 #, c-format
 msgid "Host URL: %s"
 msgstr "URL gazdă: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:234
+#: ../src/EWS/evolution/e-ews-config-lookup.c:216
 #, c-format
 msgid "OAB URL: %s"
 msgstr "OAB URL: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:311
+#: ../src/EWS/evolution/e-ews-config-lookup.c:313
 #, c-format
 msgid "Requires password to continue."
 msgstr "Necesită parola pentru a continua."
@@ -687,61 +740,65 @@ msgstr "Dimensiune"
 msgid "Unable to retrieve folder size information"
 msgstr "Nu s-a putut obține informațiile despre dimensiunea dosarelor"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:742
+#: ../src/EWS/evolution/e-ews-config-utils.c:744
 msgid "Folder Sizes"
 msgstr "Dimensiunile dosarelor"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:745
+#: ../src/EWS/evolution/e-ews-config-utils.c:747
 msgid "_Close"
 msgstr "În_chide"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:759
+#: ../src/EWS/evolution/e-ews-config-utils.c:761
 msgid "Fetching folder list…"
 msgstr "Se preia lista cu dosare…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:822
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:646
+#: ../src/EWS/evolution/e-ews-config-utils.c:824
+#: ../src/EWS/evolution/e-ews-config-utils.c:833
+#: ../src/EWS/evolution/e-ews-config-utils.c:842
+#: ../src/EWS/evolution/e-ews-config-utils.c:851
+#: ../src/EWS/evolution/e-ews-config-utils.c:860
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Abonează-te la dosarul altui utilizator EWS…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1009
+#: ../src/EWS/evolution/e-ews-config-utils.c:1047
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nu se pot edita permisiunile dosarului „%s”, alegeți alt dosar."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1088
+#: ../src/EWS/evolution/e-ews-config-utils.c:1128
 msgid "Folder Sizes…"
 msgstr "Dimensiuni dosare…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1095
+#: ../src/EWS/evolution/e-ews-config-utils.c:1135
 msgid "Subscribe to folder of other user…"
 msgstr "Abonează-te la dosarul altui utilizator…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1104
-#: ../src/EWS/evolution/e-ews-config-utils.c:1440
-#: ../src/EWS/evolution/e-ews-config-utils.c:1478
-#: ../src/EWS/evolution/e-ews-config-utils.c:1516
-#: ../src/EWS/evolution/e-ews-config-utils.c:1554
+#: ../src/EWS/evolution/e-ews-config-utils.c:1144
+#: ../src/EWS/evolution/e-ews-config-utils.c:1502
+#: ../src/EWS/evolution/e-ews-config-utils.c:1540
+#: ../src/EWS/evolution/e-ews-config-utils.c:1578
+#: ../src/EWS/evolution/e-ews-config-utils.c:1616
 msgid "Permissions…"
 msgstr "Permisiuni…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1106
+#: ../src/EWS/evolution/e-ews-config-utils.c:1146
 msgid "Edit EWS folder permissions"
 msgstr "Editare permisiuni dosare EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1442
+#: ../src/EWS/evolution/e-ews-config-utils.c:1504
 msgid "Edit EWS calendar permissions"
 msgstr "Editare permisiuni calendare EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1480
+#: ../src/EWS/evolution/e-ews-config-utils.c:1542
 msgid "Edit EWS tasks permissions"
 msgstr "Editare permisiuni sarcini EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1518
+#: ../src/EWS/evolution/e-ews-config-utils.c:1580
 msgid "Edit EWS memos permissions"
 msgstr "Editare permisiuni memouri EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1556
+#: ../src/EWS/evolution/e-ews-config-utils.c:1618
 msgid "Edit EWS contacts permissions"
 msgstr "Editare permisiuni contacte EWS"
 
@@ -827,7 +884,7 @@ msgid "Unknown"
 msgstr "Necunoscut"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
-#: ../src/EWS/evolution/e-ews-search-user.c:414
+#: ../src/EWS/evolution/e-ews-search-user.c:425
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Nume"
@@ -841,7 +898,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "Editează permisiunile dosarului EWS…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:667
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:679
 msgid "Account:"
 msgstr "Cont:"
 
@@ -951,15 +1008,15 @@ msgstr "Vizibilitatea dosarului"
 msgid "Reading folder permissions, please wait…"
 msgstr "Se citesc permisiunile dosarului, așteptați…"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:164
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:151
 msgid "Unset on Server"
 msgstr "Destabilește pe Server"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:165
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:152
 msgid "Unset the “Out of Office” status"
 msgstr "Destabilește starea „Absent de la birou”"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:189
+#: ../src/EWS/evolution/e-ews-search-user.c:198
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
@@ -967,11 +1024,11 @@ msgstr[0] "Niciun utilizator găsit, numai un contact"
 msgstr[1] "Niciun utilizator găsit, numai %d contacte"
 msgstr[2] "Niciun utilizator găsit, numai %d de contacte"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:194
+#: ../src/EWS/evolution/e-ews-search-user.c:203
 msgid "No users found"
 msgstr "Niciun utilizator găsit"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:198
+#: ../src/EWS/evolution/e-ews-search-user.c:207
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
@@ -979,7 +1036,7 @@ msgstr[0] "S-a găsit un utilizator"
 msgstr[1] "S-au găsit %d utilizatori"
 msgstr[2] "S-au găsit %d de utilizatori"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:204
+#: ../src/EWS/evolution/e-ews-search-user.c:213
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
@@ -990,24 +1047,24 @@ msgstr[1] ""
 msgstr[2] ""
 "S-au găsit mai mult de 100 de utilizatori, dar se afișează numai primii %d"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:338
-#: ../src/EWS/evolution/e-ews-search-user.c:523
+#: ../src/EWS/evolution/e-ews-search-user.c:347
+#: ../src/EWS/evolution/e-ews-search-user.c:534
 msgid "Search for a user"
 msgstr "Caută după utilizator"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:356
 msgid "Searching…"
 msgstr "Se caută…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:420
+#: ../src/EWS/evolution/e-ews-search-user.c:431
 msgid "E-mail"
 msgstr "Email"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:457
+#: ../src/EWS/evolution/e-ews-search-user.c:468
 msgid "Choose EWS user…"
 msgstr "Alegeți utilizator EWS…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:480
+#: ../src/EWS/evolution/e-ews-search-user.c:491
 msgid "_Search:"
 msgstr "_Caută:"
 
@@ -1027,11 +1084,11 @@ msgstr ""
 "modul deconectat"
 
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:314
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
 msgid "Availability"
 msgstr "Disponibilitate"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:332
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:344
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:96
 #, c-format
 msgid ""
@@ -1041,68 +1098,68 @@ msgstr ""
 "Dosarul „%s” nu a fost găsit. Fie nu există sau nu aveți permisiunea de a-l "
 "accesa."
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:351
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:363
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nu se poate adăuga dosarul, nu se poate determina tipul dosarului"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:465
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:748
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:477
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:760
 msgid "Contacts"
 msgstr "Contacte"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:467
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:749
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:479
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
 msgid "Calendar"
 msgstr "Calendar"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:469
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:750
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:481
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:762
 msgid "Free/Busy as Calendar"
 msgstr "Liber/Ocupat ca un Calendar"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:471
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:751
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:483
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:763
 msgid "Memos"
 msgstr "Memouri"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:473
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:752
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:485
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
 msgid "Tasks"
 msgstr "Sarcini"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:490
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:502
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
 "Se testează disponibilitatea dosarului „%s” al utilizatorului „%s”, "
 "așteptați…"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:529
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:541
 msgid "Cannot search for user when the account is offline"
 msgstr "Nu se poate căuta utilizatorul când contul este în modul deconectat"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:692
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:704
 msgid "User"
 msgstr "Utilizator"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:699
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:711
 msgid "_User:"
 msgstr "_Utilizator:"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:714
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:726
 msgid "C_hoose…"
 msgstr "_Alege…"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:730
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:742
 msgid "_Folder name:"
 msgstr "Nume _dosar:"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:773
 msgid "Include _subfolders"
 msgstr "Include _subdosare"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:843
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:855
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Numele de utilizator „%s” este ambiguu, specificați-l mai precis"
@@ -1112,74 +1169,74 @@ msgstr "Numele de utilizator „%s” este ambiguu, specificați-l mai precis"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:879
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:891
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:267
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:261
 msgid "Querying Autodiscover service"
 msgstr "Se interoghează serviciul de autodescoperire"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:360
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:354
 msgid "Fetch _URL"
 msgstr "_URL preluare"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:169
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:194
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Configurare"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:187
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:212
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "_Nume de utilizator:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:201
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:226
 msgid "_Host URL:"
 msgstr "URL _gazdă:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:220
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:245
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:234
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:259
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Deschide _căsuța poștală a altui utilizator"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:278
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
 msgid "S_earch…"
 msgstr "Căutar_e…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:314
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Autentificare"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
 msgid "_Override Office365 OAuth2 settings"
 msgstr "_Suprascrie configurările OAuth2 di Office365"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:320
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:398
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Ajutor…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:327
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "I_D aplicație:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:350
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Nu este stabilit niciun ID implicit pentru aplicație"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:351
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1189,59 +1246,59 @@ msgstr "ID-ul implicit pentru aplicație este „%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "ID _Tenant:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
 msgid "Default tenant ID is “common“"
 msgstr "ID-ul de tenant implicit este „common”"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "ID-ul de tenant implicit este „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:388
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "Configurări _avansate"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:406
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "Gazdă punct _final:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:429
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:432
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Punctul final implicit este „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
 msgid "Red_irect URI:"
 msgstr "URI red_irecționare:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "URI-ul implicit pentru redirecționare este „%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
 msgid "Re_source URI:"
 msgstr "URI re_sursă:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1250,24 +1307,30 @@ msgstr ""
 "URI-ul resursei implicite este derivat din URL-ul gazdei, sau poate reveni "
 "la „%s”."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:734
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr ""
+"Utilizează _protocolul versiunea 2.0 (pentru conturile de școală și "
+"organizație)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
 msgid "Host URL is not valid"
 msgstr "URL-ul gazdei nu este valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:738
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "Host URL cannot be empty"
 msgstr "URL-ul gazdei nu poate fi gol"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:749
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
 msgid "OAB URL is not valid"
 msgstr "URL-ul OAB nu este valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:759
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Numele de utilizator nu poate fi gol"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:773
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "ID-ul aplicației nu poate fi gol"
@@ -1334,7 +1397,7 @@ msgid "Retrieving current user permissions, please wait…"
 msgstr "Se preiau permisiunile curente ale utilizatorului, așteptați…"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1001
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1623
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1548
 msgid "Delegates"
 msgstr "Delegați"
 
@@ -1376,7 +1439,7 @@ msgstr "Numai d_elegaților mei"
 msgid "My delegates a_nd me"
 msgstr "Delegații mei și _mie"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1695
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1620
 msgid "Retrieving “Delegates” settings"
 msgstr "Se preiau configurările „Delegaților”"
 
@@ -1416,7 +1479,7 @@ msgid "Locating offline address books"
 msgstr "Se localizează agendele offline"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
-#: ../src/EWS/registry/e-ews-backend.c:546
+#: ../src/EWS/registry/e-ews-backend.c:505
 msgid "Global Address List"
 msgstr "Agendă globală"
 
@@ -1572,21 +1635,21 @@ msgstr "S-a abonat la dosar."
 msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Dosarul utilizatorului „{0}” a fost abonat cu succes."
 
-#: ../src/EWS/registry/e-ews-backend.c:1000
-#: ../src/Microsoft365/registry/e-m365-backend.c:689
+#: ../src/EWS/registry/e-ews-backend.c:1045
+#: ../src/Microsoft365/registry/e-m365-backend.c:670
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Nu s-a putut determina o clasă de dosare adecvată pentru noul dosar numit "
 "„%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1089
+#: ../src/EWS/registry/e-ews-backend.c:1134
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Sursa de date „%s” nu reprezintă un dosar de Servicii Web Exchange"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
 msgid "Folder ID is not set"
 msgstr "ID-ul dosarului nu este stabilit"
 
@@ -1594,11 +1657,19 @@ msgstr "ID-ul dosarului nu este stabilit"
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Nu se poate salva lista de contacte într-o agendă Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr "Poate stoca numai evenimente simple în calendarul Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr "Poate stoca numai sarcini simple în dosarul de sarcini Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Calendarul Microsoft 365 nu poate stoca mai mult de o apariție"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1672
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1606,71 +1677,59 @@ msgstr ""
 "Calendarul Microsoft 365 nu poate stoca componentul cu proprietățile RDATE, "
 "EXDATE sau RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Frecvență de recurență necunoscută (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1927
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Calendarul Microsoft 365 nu poate stoca mai mult de un memento pentru "
 "eveniment"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Evenimentul Microsoft 365 poate avea doar un singur memento înainte de a "
 "începe"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Sarcina Microsoft 365 poate avea numai un memento cu timp absolut"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
+#, c-format
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Sarcina Microsoft 365 nu poate să aibă atașamente."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nu se poate stoca atașamentul cu URI „%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 msgid "Failed to read attachment URI"
 msgstr "Eșec la citire URI-ului atașamentului"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
 msgid "Failed to get inline attachment data"
 msgstr "Eșec la obținerea datelor atașamentului înglobat"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
-msgid "Can store only simple events into Microsoft 365 calendar"
-msgstr "Poate stoca numai evenimente simple în calendarul Microsoft 365"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3226
-msgid "Can store only simple tasks into Microsoft 365 task folder"
-msgstr "Poate stoca numai sarcini simple în dosarul de sarcini Microsoft 365"
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:610
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+#: ../src/Microsoft365/camel/camel-m365-folder.c:502
+#: ../src/Microsoft365/camel/camel-m365-folder.c:598
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
 msgid "Invalid folder state (missing parent store)"
 msgstr "Stare nevalidă a dosarului (lipsesc informațiile despre părinte)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:633
-msgid ""
-"Cannot add messages into a Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-msgstr ""
-"Nu se pot adăuga mesaje într-un cont Microsoft 365 dintr-un alt cont. Numai "
-"mesajele din același cont pot fi mutate/copiate între dosarele Microsoft 365."
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Dosarul „%s” nu corespunde niciunui dosar cunoscut"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nu s-a putut încărca sumarul pentru „%s”"
@@ -1683,50 +1742,50 @@ msgstr "Microsoft 365"
 msgid "For accessing Microsoft 365 server"
 msgstr "Pentru accesarea serverului Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:144
-#: ../src/Microsoft365/camel/camel-m365-transport.c:257
+#: ../src/Microsoft365/camel/camel-m365-store.c:141
+#: ../src/Microsoft365/camel/camel-m365-transport.c:404
 msgid "Microsoft 365 server"
 msgstr "Server Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:146
+#: ../src/Microsoft365/camel/camel-m365-store.c:143
 msgid "Mail receive via Microsoft 365"
 msgstr "Primirea de email-uri prin Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:201
-#: ../src/Microsoft365/common/e-m365-connection.c:1521
+#: ../src/Microsoft365/camel/camel-m365-store.c:198
+#: ../src/Microsoft365/common/e-m365-connection.c:1244
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "URI-ul este malformat: „%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:534
+#: ../src/Microsoft365/camel/camel-m365-store.c:532
 msgid "Look up Microsoft 365 categories"
 msgstr "Se caută categoriile Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:543
-#: ../src/Microsoft365/camel/camel-m365-transport.c:183
+#: ../src/Microsoft365/camel/camel-m365-store.c:541
+#: ../src/Microsoft365/camel/camel-m365-transport.c:330
 msgid "Failed to create connection"
 msgstr "Eșec la crearea conexiunii"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:708
+#: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Dosarul părinte „%s” nu există"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:895
+#: ../src/Microsoft365/camel/camel-m365-store.c:893
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Nu s-a găsit dosarul „Elemente șterse”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:986
-#: ../src/Microsoft365/camel/camel-m365-store.c:1024
+#: ../src/Microsoft365/camel/camel-m365-store.c:984
+#: ../src/Microsoft365/camel/camel-m365-store.c:1022
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Dosarul „%s” nu există"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:259
+#: ../src/Microsoft365/camel/camel-m365-transport.c:406
 msgid "Mail delivery via Microsoft 365"
 msgstr "Livrare email prin Microsoft 3655"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:297
+#: ../src/Microsoft365/camel/camel-m365-transport.c:444
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr ""
 "Serverul Microsoft 365 nu poate trimite mesaje cu adrese multiple în câmpul "
@@ -1745,12 +1804,12 @@ msgstr ""
 "serverul Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:162
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1179
+#: ../src/Microsoft365/common/e-m365-connection.c:888
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1762,7 +1821,7 @@ msgstr[2] ""
 "Serverul Microsoft 365 este ocupat, se așteaptă reîncercarea (%d:%02d de "
 "minute)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1185
+#: ../src/Microsoft365/common/e-m365-connection.c:894
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1773,7 +1832,16 @@ msgstr[1] ""
 msgstr[2] ""
 "Serverul Microsoft 365 este ocupat, se așteaptă reîncercarea (%d de secunde)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:2037
+#: ../src/Microsoft365/common/e-m365-connection.c:1019
+#: ../src/Microsoft365/common/e-m365-connection.c:1046
+msgid "Invalid data"
+msgstr "Date nevalide"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
+msgid "Operation was cancelled"
+msgstr "Operația a fost anulată"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1729
 msgid "Failed to parse own Json data"
 msgstr "Eșec la parsarea datelor Json proprii"
 
@@ -1798,10 +1866,29 @@ msgstr "Tenant-ul implicit este „%s”"
 msgid "_Redirect URI:"
 msgstr "URI _redirecționare:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:780
+#: ../src/Microsoft365/registry/e-m365-backend.c:761
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Sursa de date „%s” nu reprezintă un dosar Microsoft 365"
+
+#, c-format
+#~ msgid "URL “%s” is not valid"
+#~ msgstr "URL-ul „%s” nu este valid"
+
+#~ msgid "No items found"
+#~ msgstr "Niciun element găsit"
+
+#~ msgid "Unknown error"
+#~ msgstr "Eroare necunoscută"
+
+#~ msgid ""
+#~ "Cannot add messages into a Microsoft 365 account from another account. "
+#~ "Only messages from the same account can be moved/copied between the "
+#~ "Microsoft 365 folders."
+#~ msgstr ""
+#~ "Nu se pot adăuga mesaje într-un cont Microsoft 365 dintr-un alt cont. "
+#~ "Numai mesajele din același cont pot fi mutate/copiate între dosarele "
+#~ "Microsoft 365."
 
 #~ msgid "User “%s” was not found on the server"
 #~ msgstr "Utilizatorul „%s” nu a fost găsit pe server"
