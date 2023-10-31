@@ -1276,6 +1276,10 @@ convert_vevent_calcomp_to_xml (ESoapRequest *request,
 			"EvolutionEWSEndTimeZone",
 			ical_location_end);
 	}
+	if (!ical_location_start && dtstart && i_cal_time_is_utc (dtstart))
+		ical_location_start = "UTC";
+	if (!ical_location_end && dtend && i_cal_time_is_utc (dtend))
+		ical_location_end = "UTC";
 
 	is_all_day_event = check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end);
 
@@ -1715,6 +1719,11 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 		ical_location_start = i_cal_timezone_get_location (tzid_start);
 		old_ical_location_start = zone ? i_cal_timezone_get_location (zone) : NULL;
 
+		if (!ical_location_start && dtstart && i_cal_time_is_utc (dtstart))
+			ical_location_start = "UTC";
+		if (!old_ical_location_start && dtstart_old && i_cal_time_is_utc (dtstart_old))
+			old_ical_location_start = "UTC";
+
 		if (g_strcmp0 (ical_location_start, old_ical_location_start) != 0)
 			dt_start_changed_timezone_name = TRUE;
 	}
@@ -1731,6 +1740,11 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 
 		ical_location_end = i_cal_timezone_get_location (tzid_end);
 		old_ical_location_end = zone ? i_cal_timezone_get_location (zone) : NULL;
+
+		if (!ical_location_end && dtend && i_cal_time_is_utc (dtend))
+			ical_location_end = "UTC";
+		if (!old_ical_location_end && dtend_old && i_cal_time_is_utc (dtend_old))
+			old_ical_location_end = "UTC";
 
 		if (g_strcmp0 (ical_location_end, old_ical_location_end) != 0)
 			dt_end_changed_timezone_name = TRUE;
@@ -2326,6 +2340,11 @@ e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
 	if (!dt || !i_cal_time_is_valid_time (dt) ||
 	    i_cal_time_is_null_time (dt)) {
 		g_clear_object (&dt);
+		g_object_unref (prop);
+		return dt;
+	}
+
+	if (i_cal_time_is_utc (dt)) {
 		g_object_unref (prop);
 		return dt;
 	}
