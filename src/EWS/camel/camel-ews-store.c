@@ -463,8 +463,6 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 		gint count = GPOINTER_TO_INT (value);
 
 		if (!count) {
-			CamelFolderInfo *fi;
-
 			if (needs_public && g_str_equal (key, EWS_PUBLIC_FOLDER_ROOT_ID))
 				continue;
 
@@ -524,8 +522,6 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 		camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (ews_store), fi);
 		camel_folder_info_free (fi);
 	} else if (has_foreign && !needs_foreign) {
-		CamelFolderInfo *fi;
-
 		fi = camel_ews_utils_build_folder_info (ews_store, EWS_FOREIGN_FOLDER_ROOT_ID);
 		camel_ews_store_summary_remove_folder (ews_store->summary, EWS_FOREIGN_FOLDER_ROOT_ID, NULL);
 
@@ -554,8 +550,6 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 		camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (ews_store), fi);
 		camel_folder_info_free (fi);
 	} else if (has_public && !needs_public) {
-		CamelFolderInfo *fi;
-
 		fi = camel_ews_utils_build_folder_info (ews_store, EWS_PUBLIC_FOLDER_ROOT_ID);
 		camel_ews_store_summary_remove_folder (ews_store->summary, EWS_PUBLIC_FOLDER_ROOT_ID, NULL);
 
@@ -2662,7 +2656,7 @@ ews_get_folder_info_sync (CamelStore *store,
 	gboolean initial_setup = FALSE;
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
-	gboolean includes_last_folder;
+	gboolean includes_last_folder = TRUE;
 	gboolean success;
 	GError *local_error = NULL;
 
@@ -2681,7 +2675,6 @@ ews_get_folder_info_sync (CamelStore *store,
 	}
 
 	if ((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0) {
-		gboolean includes_last_folder = TRUE;
 		GSList *folders = NULL, *to_check = NULL;
 		EwsFolderId *folder_id;
 
@@ -2798,6 +2791,7 @@ ews_get_folder_info_sync (CamelStore *store,
 	}
 
 	connection = camel_ews_store_ref_connection (ews_store);
+	includes_last_folder = TRUE;
 
 	success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,
 		&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,

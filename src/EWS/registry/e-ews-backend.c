@@ -1063,7 +1063,6 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 
 		if (out_folder_id != NULL) {
 			ESourceEwsFolder *extension;
-			const gchar *extension_name;
 
 			extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 			extension = e_source_get_extension (source, extension_name);

@@ -1605,7 +1605,7 @@ ecb_ews_components_to_infos (ECalMetaBackend *meta_backend,
 	g_hash_table_iter_init (&iter, sorted_by_uids);
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
 		const gchar *uid = key;
-		GSList *instances = value, *link;
+		GSList *instances = value;
 		ICalComponent *icomp, *merged;
 		ECalComponent *comp;
 		ECalMetaBackendInfo *nfo;
@@ -1912,7 +1912,6 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 		ESourceEwsFolder *ews_folder;
 		EEWSFreeBusyData fbdata;
 		GSList *free_busy = NULL, *link;
-		gboolean success;
 		time_t today;
 
 		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (cbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
@@ -2104,6 +2103,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 
 			e_cal_backend_notify_error (E_CAL_BACKEND (cbews), local_error->message);
 			g_clear_error (&local_error);
+			success = TRUE;
 		} else {
 			g_propagate_error (error, local_error);
 		}
@@ -3128,8 +3128,6 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		success = uid && e_cal_cache_get_components_by_uid (cal_cache, uid, &existing, cancellable, error) && existing;
 
 		if (success) {
-			GSList *link;
-
 			/* This is for offline changes, where the component in the cache
 			   is already modified, while the original, the one on the server,
 			   is different. Using the cached component in this case generates
@@ -3214,9 +3212,9 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 				if (folders) {
 					EEwsFolder *folder = folders->data;
-					const EwsFolderId *fid = folder ? e_ews_folder_get_id (folder) : NULL;
+					const EwsFolderId *tmp_fid = folder ? e_ews_folder_get_id (folder) : NULL;
 
-					is_user_calendar = fid && g_strcmp0 (cbews->priv->folder_id, fid->id) == 0;
+					is_user_calendar = tmp_fid && g_strcmp0 (cbews->priv->folder_id, tmp_fid->id) == 0;
 				}
 
 				g_slist_free_full (folders, g_object_unref);
@@ -3291,16 +3289,16 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 		if (success && item && e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT) {
 			EEwsAdditionalProps *add_props;
-			GSList *items, *items_req = NULL;
+			GSList *subitems, *items_req = NULL;
 
 			add_props = e_ews_additional_props_new ();
 			add_props->field_uri = g_strdup ("calendar:UID");
 
-			items = g_slist_append (NULL, ews_id->id);
+			subitems = g_slist_append (NULL, ews_id->id);
 
 			/* get calender uid from server*/
 			success = e_ews_connection_get_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
-				items, "IdOnly", add_props, FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
+				subitems, "IdOnly", add_props, FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
 				&items_req, NULL, NULL, cancellable, error) && items_req != NULL;
 
 			e_ews_additional_props_free (add_props);
@@ -3324,7 +3322,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			}
 
 			g_slist_free_full (items_req, g_object_unref);
-			g_slist_free (items);
+			g_slist_free (subitems);
 		}
 
 		/* attachments */
@@ -3398,9 +3396,9 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		}
 
 		if (success && items) {
-			EEwsItem *item = items->data;
 			const EwsId *item_id;
 
+			item = items->data;
 			item_id = e_ews_item_get_id (item);
 			*out_new_uid = g_strdup (item_id->id);
 		}

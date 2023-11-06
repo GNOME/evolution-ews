@@ -715,9 +715,8 @@ ews_decode_oab_prop (EwsOabDecoder *eod, GInputStream *stream,
 			d (g_print ("prop id %X prop type: multi-num %d \n", prop_id, num);)
 
 			for (i = 0; i < num; i++) {
-				gpointer val;
-
 				if (prop_type == EWS_PTYP_MULTIPLEINTEGER32) {
+					gpointer val;
 					guint32 v = 0;
 
 					v = ews_decode_uint32 (eod, stream, cancellable, error);
@@ -944,12 +943,12 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 		/* Check the contact map and store the data in EContact */
 		index = g_hash_table_lookup (eod->priv->prop_index_dict, GINT_TO_POINTER (prop_id));
 		if (contact && index) {
-			gint i = GPOINTER_TO_INT (index);
+			gint idx = GPOINTER_TO_INT (index);
 
-			if (prop_map[i - 1].populate_function)
-				prop_map[i - 1].populate_function (contact, prop_map[i - 1].field, val, (gpointer) eod);
+			if (prop_map[idx - 1].populate_function)
+				prop_map[idx - 1].populate_function (contact, prop_map[idx - 1].field, val, (gpointer) eod);
 			else
-				prop_map[i - 1].defered_populate_function (dset, prop_id, val);
+				prop_map[idx - 1].defered_populate_function (dset, prop_id, val);
 		}
 		ews_destroy_oab_prop (prop_id, val);
 		if (*error)

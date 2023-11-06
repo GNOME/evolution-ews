@@ -1521,7 +1521,6 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 		subparam != NULL;
 		subparam = e_soap_parameter_get_next_child (subparam)) {
 		ESoapParameter *subparam1;
-		const gchar *name;
 		gchar *value = NULL;
 
 		name = e_soap_parameter_get_name (subparam);

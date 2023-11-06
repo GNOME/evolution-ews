@@ -5527,7 +5527,7 @@ e_ews_process_create_folder_response (EEwsConnection *cnc,
 			return FALSE;
 
 		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "CreateFolderResponseMessage")) {
-			ESoapParameter *param, *node;
+			ESoapParameter *node;
 			EwsFolderId *fid = NULL;
 			const gchar *folder_element;
 
@@ -6000,13 +6000,13 @@ e_ews_process_create_attachments_response (EEwsConnection *cnc,
 
 		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "CreateAttachmentResponseMessage")) {
 			/* http://msdn.microsoft.com/en-us/library/aa565877%28v=EXCHG.80%29.aspx */
-			ESoapParameter *subparam, *attspara, *last_relevant = NULL, *attparam;
+			ESoapParameter *attsubparam, *attspara, *last_relevant = NULL, *attparam;
 
 			attspara = e_soap_parameter_get_first_child_by_name (param, "Attachments");
 
-			for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
-				if (!g_ascii_strcasecmp (e_soap_parameter_get_name (subparam), "FileAttachment")) {
-					attparam = e_soap_parameter_get_first_child (subparam);
+			for (attsubparam = e_soap_parameter_get_first_child (attspara); attsubparam != NULL; attsubparam = e_soap_parameter_get_next_child (attsubparam)) {
+				if (!g_ascii_strcasecmp (e_soap_parameter_get_name (attsubparam), "FileAttachment")) {
+					attparam = e_soap_parameter_get_first_child (attsubparam);
 					last_relevant = attparam;
 
 					if (out_attachments_ids)
@@ -6329,7 +6329,6 @@ e_ews_process_get_attachments_response (EEwsConnection *cnc,
 			ESoapParameter *subattsparam, *attspara;
 			EEwsAttachmentInfo *info = NULL;
 			EEwsItem *item;
-			const gchar *name;
 
 			attspara = e_soap_parameter_get_first_child_by_name (subparam, "Attachments");
 

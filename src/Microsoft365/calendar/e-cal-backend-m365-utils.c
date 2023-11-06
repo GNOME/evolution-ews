@@ -241,7 +241,7 @@ ecb_m365_add_date_time_zone (EM365Connection *cnc,
 		old_value = old_comp ? i_cal_component_get_dtend (old_comp) : NULL;
 		add_func = e_m365_event_add_end;
 	} else if (prop_kind == I_CAL_COMPLETED_PROPERTY) {
-		ICalProperty *new_prop, *old_prop;
+		ICalProperty *old_prop;
 
 		new_prop = i_cal_component_get_first_property (new_comp, prop_kind);
 		old_prop = old_comp ? i_cal_component_get_first_property (old_comp, prop_kind) : NULL;
@@ -1778,8 +1778,10 @@ ecb_m365_add_recurrence (EM365Connection *cnc,
 
 			if (!i_cal_recurrence_get_count (new_rrule)) {
 				ICalTime *until;
-				gint yy = 0, mm = 0, dd = 0;
 
+				yy = 0;
+				mm = 0;
+				dd = 0;
 				until = i_cal_recurrence_get_until (new_rrule);
 
 				if (until)
@@ -2251,7 +2253,7 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 			  ICalComponent *old_comp,
 			  ICalPropertyKind prop_kind,
 			  const gchar *m365_id,
-			  JsonBuilder *builder,
+			  JsonBuilder *in_builder,
 			  GCancellable *cancellable,
 			  GError **error)
 {
@@ -2324,7 +2326,7 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 		for (link = save_attachs; link && success; link = g_slist_next (link)) {
 			ICalProperty *prop = link->data;
 			ICalAttach *attach;
-			JsonBuilder *builder = NULL;
+			JsonBuilder *attbuilder = NULL;
 
 			attach = i_cal_property_get_attach (prop);
 
@@ -2373,9 +2375,9 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 
 							bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (base64_stream));
 
-							builder = json_builder_new_immutable ();
-							e_m365_attachment_begin_attachment (builder, E_M365_ATTACHMENT_DATA_TYPE_FILE);
-							e_m365_file_attachment_add_content_bytes (builder, (const gchar *) bytes->data);
+							attbuilder = json_builder_new_immutable ();
+							e_m365_attachment_begin_attachment (attbuilder, E_M365_ATTACHMENT_DATA_TYPE_FILE);
+							e_m365_file_attachment_add_content_bytes (attbuilder, (const gchar *) bytes->data);
 						}
 
 						g_object_unref (base64_stream);
@@ -2400,15 +2402,15 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 				base64_data = i_cal_attach_get_data (attach);
 
 				if (base64_data) {
-					builder = json_builder_new_immutable ();
-					e_m365_attachment_begin_attachment (builder, E_M365_ATTACHMENT_DATA_TYPE_FILE);
-					e_m365_file_attachment_add_content_bytes (builder, base64_data);
+					attbuilder = json_builder_new_immutable ();
+					e_m365_attachment_begin_attachment (attbuilder, E_M365_ATTACHMENT_DATA_TYPE_FILE);
+					e_m365_file_attachment_add_content_bytes (attbuilder, base64_data);
 				} else {
 					g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_OTHER_ERROR, _("Failed to get inline attachment data")));
 				}
 			}
 
-			if (builder) {
+			if (attbuilder) {
 				ICalParameter *param;
 				const gchar *tmp;
 
@@ -2418,7 +2420,7 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 					tmp = i_cal_parameter_get_filename (param);
 
 					if (tmp && *tmp)
-						e_m365_attachment_add_name (builder, tmp);
+						e_m365_attachment_add_name (attbuilder, tmp);
 
 					g_clear_object (&param);
 				}
@@ -2429,22 +2431,22 @@ ecb_m365_add_attachments (EM365Connection *cnc,
 					tmp = i_cal_parameter_get_fmttype (param);
 
 					if (tmp && *tmp)
-						e_m365_attachment_add_content_type (builder, tmp);
+						e_m365_attachment_add_content_type (attbuilder, tmp);
 					else
-						e_m365_attachment_add_content_type (builder, "application/octet-stream");
+						e_m365_attachment_add_content_type (attbuilder, "application/octet-stream");
 
 					g_clear_object (&param);
 				} else {
-					e_m365_attachment_add_content_type (builder, "application/octet-stream");
+					e_m365_attachment_add_content_type (attbuilder, "application/octet-stream");
 				}
 
-				e_m365_attachment_end_attachment (builder);
+				e_m365_attachment_end_attachment (attbuilder);
 
 				success = add_attachment_func (cnc, NULL,
 					group_id, folder_id, m365_id,
-					builder, NULL, cancellable, error);
+					attbuilder, NULL, cancellable, error);
 
-				g_object_unref (builder);
+				g_object_unref (attbuilder);
 			}
 
 			g_object_unref (attach);
