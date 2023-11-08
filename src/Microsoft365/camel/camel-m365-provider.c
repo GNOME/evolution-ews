@@ -84,8 +84,7 @@ camel_provider_module_init (void)
 
 	g_type_ensure (CAMEL_TYPE_SASL_XOAUTH2_MICROSOFT365);
 
-	if (g_strcmp0 (g_getenv ("ENABLE_M365"), "1") == 0)
-		camel_provider_register (&m365_provider);
+	camel_provider_register (&m365_provider);
 }
 
 static void

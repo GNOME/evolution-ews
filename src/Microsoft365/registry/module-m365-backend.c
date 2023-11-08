@@ -28,11 +28,8 @@ e_module_load (GTypeModule *type_module)
 	e_oauth2_service_microsoft365_type_register (type_module);
 	e_source_m365_folder_type_register (type_module);
 	e_source_m365_deltas_type_register (type_module);
-
-	if (g_strcmp0 (g_getenv ("ENABLE_M365"), "1") == 0) {
-		e_m365_backend_type_register (type_module);
-		e_m365_backend_factory_type_register (type_module);
-	}
+	e_m365_backend_type_register (type_module);
+	e_m365_backend_factory_type_register (type_module);
 }
 
 G_MODULE_EXPORT void
