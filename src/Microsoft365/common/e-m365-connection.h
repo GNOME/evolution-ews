@@ -17,6 +17,9 @@
 #include "e-m365-enums.h"
 #include "e-m365-json-utils.h"
 
+#define E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS	"folder-id::orgContacts"
+#define E_M365_ARTIFICIAL_FOLDER_ID_USERS		"folder-id::users"
+
 /* Currently, as of 2020-06-17, there is a limitation to 20 requests:
    https://docs.microsoft.com/en-us/graph/known-issues#json-batching */
 #define E_M365_BATCH_MAX_REQUESTS 20
@@ -336,6 +339,14 @@ gboolean	e_m365_connection_get_contact_sync
 						 EM365Contact **out_contact,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_get_contacts_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 GPtrArray *ids, /* const gchar * */
+						 GPtrArray **out_contacts, /* EM365Contact * */
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_m365_connection_create_contact_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
@@ -357,6 +368,42 @@ gboolean	e_m365_connection_delete_contact_sync
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *folder_id,
 						 const gchar *contact_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_org_contacts_accessible_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_org_contact_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *contact_id,
+						 EM365Contact **out_contact,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_org_contacts_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 GPtrArray *ids, /* const gchar * */
+						 GPtrArray **out_contacts, /* EM365Contact * */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_users_accessible_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_user_sync	(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *user_id,
+						 EM365Contact **out_contact,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_users_sync(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 GPtrArray *ids, /* const gchar * */
+						 GPtrArray **out_contacts, /* EM365Contact * */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_list_calendar_groups_sync

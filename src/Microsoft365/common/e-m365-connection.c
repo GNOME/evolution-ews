@@ -23,6 +23,11 @@
 #define M365_RETRY_IO_ERROR_SECONDS 3
 #define X_EVO_M365_DATA "X-EVO-M365-DATA"
 
+#define ORG_CONTACTS_PROPS "addresses,companyName,department,displayName,givenName,id,jobTitle,mail,mailNickname,phones,proxyAddresses,surname"
+#define USERS_PROPS	"aboutMe,birthday,businessPhones,city,companyName,country,createdDateTime,department,displayName,faxNumber,givenName," \
+			"id,imAddresses,jobTitle,mail,mailNickname,mobilePhone,mySite,officeLocation,otherMails,postalCode,proxyAddresses," \
+			"state,streetAddress,surname"
+
 typedef enum _CSMFlags {
 	CSM_DEFAULT		= 0,
 	CSM_DISABLE_RESPONSE	= 1 << 0
@@ -1282,6 +1287,12 @@ e_m365_connection_authenticate_sync (EM365Connection *cnc,
 
 		success = e_m365_connection_get_contacts_folder_sync (cnc, user_override, folder_id, "displayName", &object, cancellable, &local_error);
 		break;
+	case E_M365_FOLDER_KIND_ORG_CONTACTS:
+		success = e_m365_connection_get_org_contacts_accessible_sync (cnc, user_override, cancellable, &local_error);
+		break;
+	case E_M365_FOLDER_KIND_USERS:
+		success = e_m365_connection_get_users_accessible_sync (cnc, user_override, cancellable, &local_error);
+		break;
 	case E_M365_FOLDER_KIND_CALENDAR:
 		if (folder_id && !*folder_id)
 			folder_id = NULL;
@@ -2337,13 +2348,15 @@ e_m365_connection_rename_mail_folder_sync (EM365Connection *cnc,
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/message-delta?view=graph-rest-1.0&tabs=http
-   https://docs.microsoft.com/en-us/graph/api/contact-delta?view=graph-rest-1.0&tabs=http */
+   https://docs.microsoft.com/en-us/graph/api/contact-delta?view=graph-rest-1.0&tabs=http
+   https://learn.microsoft.com/en-us/graph/api/orgcontact-delta?view=graph-rest-1.0&tabs=http
+   https://learn.microsoft.com/en-us/graph/api/user-delta?view=graph-rest-1.0&tabs=http */
 
 gboolean
 e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 					  const gchar *user_override, /* for which user, NULL to use the account user */
 					  EM365FolderKind kind,
-					  const gchar *folder_id, /* folder ID to get delta messages in */
+					  const gchar *folder_id, /* folder ID to get delta messages in, nullable for orgContacts, users */
 					  const gchar *select, /* properties to select, nullable */
 					  const gchar *delta_link, /* previous delta link */
 					  guint max_page_size, /* 0 for default by the server */
@@ -2358,7 +2371,6 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (folder_id != NULL, FALSE);
 	g_return_val_if_fail (out_delta_link != NULL, FALSE);
 	g_return_val_if_fail (func != NULL, FALSE);
 
@@ -2366,15 +2378,25 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
-		const gchar *kind_str = NULL, *kind_path_str = NULL;
+		const gchar *api_part = NULL;
+		const gchar *kind_str = NULL;
+		const gchar *kind_path_str = NULL;
 		gchar *uri;
 
 		switch (kind) {
 		case E_M365_FOLDER_KIND_CONTACTS:
+			g_return_val_if_fail (folder_id != NULL, FALSE);
 			kind_str = "contactFolders";
 			kind_path_str = "contacts";
 			break;
+		case E_M365_FOLDER_KIND_ORG_CONTACTS:
+			api_part = "contacts";
+			break;
+		case E_M365_FOLDER_KIND_USERS:
+			api_part = "users";
+			break;
 		case E_M365_FOLDER_KIND_MAIL:
+			g_return_val_if_fail (folder_id != NULL, FALSE);
 			kind_str = "mailFolders";
 			kind_path_str = "messages";
 			break;
@@ -2383,9 +2405,7 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 			break;
 		}
 
-		g_return_val_if_fail (kind_str != NULL && kind_path_str != NULL, FALSE);
-
-		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		uri = e_m365_connection_construct_uri (cnc, api_part == NULL, user_override, E_M365_API_V1_0, api_part,
 			kind_str,
 			folder_id,
 			kind_path_str,
@@ -3205,6 +3225,34 @@ e_m365_connection_update_contact_photo_sync (EM365Connection *cnc,
 
 /* https://docs.microsoft.com/en-us/graph/api/contact-get?view=graph-rest-1.0&tabs=http */
 
+static SoupMessage *
+e_m365_connection_prepare_get_contact (EM365Connection *cnc,
+				       const gchar *user_override, /* for which user, NULL to use the account user */
+				       const gchar *folder_id,
+				       const gchar *contact_id,
+				       GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), NULL);
+	g_return_val_if_fail (folder_id != NULL, NULL);
+	g_return_val_if_fail (contact_id != NULL, NULL);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"contactFolders",
+		folder_id,
+		"contacts",
+		"", contact_id,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	g_free (uri);
+
+	return message;
+}
+
 gboolean
 e_m365_connection_get_contact_sync (EM365Connection *cnc,
 				    const gchar *user_override, /* for which user, NULL to use the account user */
@@ -3216,35 +3264,197 @@ e_m365_connection_get_contact_sync (EM365Connection *cnc,
 {
 	SoupMessage *message;
 	gboolean success;
-	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (folder_id != NULL, FALSE);
 	g_return_val_if_fail (contact_id != NULL, FALSE);
 	g_return_val_if_fail (out_contact != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
-		"contactFolders",
-		folder_id,
-		"contacts",
-		"", contact_id,
-		NULL);
+	message = e_m365_connection_prepare_get_contact (cnc, user_override, folder_id, contact_id, error);
 
-	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
-
-	if (!message) {
-		g_free (uri);
-
+	if (!message)
 		return FALSE;
-	}
-
-	g_free (uri);
 
 	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_contact, cancellable, error);
 
 	g_clear_object (&message);
 
 	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/orgcontact-get?view=graph-rest-1.0&tabs=http */
+
+static SoupMessage *
+e_m365_connection_prepare_get_org_contact (EM365Connection *cnc,
+					   const gchar *user_override, /* for which user, NULL to use the account user */
+					   const gchar *contact_id,
+					   GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+
+	uri = e_m365_connection_construct_uri (cnc, FALSE, user_override, E_M365_API_V1_0,
+		"contacts",
+		NULL,
+		NULL,
+		contact_id,
+		"$select", ORG_CONTACTS_PROPS,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	g_free (uri);
+
+	return message;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http */
+
+static SoupMessage *
+e_m365_connection_prepare_get_user (EM365Connection *cnc,
+				    const gchar *user_override, /* for which user, NULL to use the account user */
+				    const gchar *user_id,
+				    GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+
+	uri = e_m365_connection_construct_uri (cnc, FALSE, user_override, E_M365_API_V1_0,
+		"users",
+		NULL,
+		NULL,
+		user_id,
+		"$select", USERS_PROPS,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	g_free (uri);
+
+	return message;
+}
+
+static gboolean
+e_m365_connection_get_contacts_internal_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      EM365FolderKind folder_kind,
+					      const gchar *folder_id,
+					      GPtrArray *ids, /* const gchar * */
+					      GPtrArray **out_contacts, /* EM365Contact * */
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	GPtrArray *requests;
+	guint total, done = 0, ii;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_kind == E_M365_FOLDER_KIND_CONTACTS ||
+			      folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS ||
+			      folder_kind == E_M365_FOLDER_KIND_USERS, FALSE);
+	if (folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (ids != NULL, FALSE);
+	g_return_val_if_fail (out_contacts != NULL, FALSE);
+
+	*out_contacts = NULL;
+	total = ids->len;
+	requests = g_ptr_array_new_full (MIN (E_M365_BATCH_MAX_REQUESTS, MIN (total, 50)), g_object_unref);
+
+	for (ii = 0; ii < ids->len && success; ii++) {
+		const gchar *id = g_ptr_array_index (ids, ii);
+		SoupMessage *message = NULL;
+
+		switch (folder_kind) {
+		case E_M365_FOLDER_KIND_CONTACTS:
+			message = e_m365_connection_prepare_get_contact (cnc, user_override, folder_id, id, error);
+			break;
+		case E_M365_FOLDER_KIND_ORG_CONTACTS:
+			message = e_m365_connection_prepare_get_org_contact (cnc, user_override, id, error);
+			break;
+		case E_M365_FOLDER_KIND_USERS:
+			message = e_m365_connection_prepare_get_user (cnc, user_override, id, error);
+			break;
+		default:
+			break;
+		}
+
+		if (!message) {
+			success = FALSE;
+			break;
+		}
+
+		g_ptr_array_add (requests, message);
+
+		if (requests->len == E_M365_BATCH_MAX_REQUESTS || ii + 1 >= ids->len) {
+			if (!*out_contacts)
+				*out_contacts = g_ptr_array_new_full (ids->len, (GDestroyNotify) json_object_unref);
+
+			if (requests->len == 1) {
+				EM365Contact *contact = NULL;
+
+				success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, &contact, cancellable, error);
+
+				if (success)
+					g_ptr_array_add (*out_contacts, contact);
+			} else {
+				success = e_m365_connection_batch_request_sync (cnc, E_M365_API_V1_0, requests, cancellable, error);
+
+				if (success) {
+					guint jj;
+
+					for (jj = 0; jj < requests->len && success; jj++) {
+						JsonNode *node = NULL;
+
+						message = g_ptr_array_index (requests, jj);
+						success = e_m365_connection_json_node_from_message (message, NULL, &node, cancellable, error);
+
+						if (success && node && JSON_NODE_HOLDS_OBJECT (node)) {
+							JsonObject *response;
+
+							response = json_node_get_object (node);
+
+							if (response)
+								g_ptr_array_add (*out_contacts, json_object_ref (response));
+							else
+								success = FALSE;
+						} else {
+							success = FALSE;
+						}
+
+						if (node)
+							json_node_unref (node);
+					}
+				}
+			}
+
+			g_ptr_array_remove_range (requests, 0, requests->len);
+
+			done += requests->len;
+
+			camel_operation_progress (cancellable, done * 100.0 / total);
+		}
+	}
+
+	g_ptr_array_free (requests, TRUE);
+
+	if (!success && *out_contacts && !(*out_contacts)->len)
+		g_clear_pointer (out_contacts, g_ptr_array_unref);
+
+	return success;
+}
+
+gboolean
+e_m365_connection_get_contacts_sync (EM365Connection *cnc,
+				     const gchar *user_override, /* for which user, NULL to use the account user */
+				     const gchar *folder_id,
+				     GPtrArray *ids, /* const gchar * */
+				     GPtrArray **out_contacts, /* EM365Contact * */
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	return e_m365_connection_get_contacts_internal_sync (cnc, user_override, E_M365_FOLDER_KIND_CONTACTS,
+		folder_id, ids, out_contacts, cancellable, error);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/user-post-contacts?view=graph-rest-1.0&tabs=http */
@@ -3376,6 +3586,182 @@ e_m365_connection_delete_contact_sync (EM365Connection *cnc,
 	g_clear_object (&message);
 
 	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/orgcontact-list?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_org_contacts_accessible_sync (EM365Connection *cnc,
+						    const gchar *user_override, /* for which user, NULL to use the account user */
+						    GCancellable *cancellable,
+						    GError **error)
+{
+	EM365ResponseData rd;
+	GSList *contacts = NULL;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, FALSE, user_override, E_M365_API_V1_0,
+		"contacts",
+		NULL, NULL, NULL,
+		"$top", "1",
+		"$select", "id",
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.read_only_once = TRUE;
+	rd.out_items = &contacts;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	/* ignore returned contact, the call is used only to check whether the end point can be accessed */
+	g_slist_free_full (contacts, (GDestroyNotify) json_object_unref);
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/orgcontact-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_org_contact_sync (EM365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					const gchar *contact_id,
+					EM365Contact **out_contact,
+					GCancellable *cancellable,
+					GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (contact_id != NULL, FALSE);
+	g_return_val_if_fail (out_contact != NULL, FALSE);
+
+	message = e_m365_connection_prepare_get_org_contact (cnc, user_override, contact_id, error);
+
+	if (!message)
+		return FALSE;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_contact, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+gboolean
+e_m365_connection_get_org_contacts_sync (EM365Connection *cnc,
+					 const gchar *user_override, /* for which user, NULL to use the account user */
+					 GPtrArray *ids, /* const gchar * */
+					 GPtrArray **out_contacts, /* EM365Contact * */
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	return e_m365_connection_get_contacts_internal_sync (cnc, user_override, E_M365_FOLDER_KIND_ORG_CONTACTS,
+		NULL, ids, out_contacts, cancellable, error);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_users_accessible_sync (EM365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	EM365ResponseData rd;
+	GSList *contacts = NULL;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, FALSE, user_override, E_M365_API_V1_0,
+		"users",
+		NULL, NULL, NULL,
+		"$top", "1",
+		"$select", "id",
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.read_only_once = TRUE;
+	rd.out_items = &contacts;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	/* ignore returned contact, the call is used only to check whether the end point can be accessed */
+	g_slist_free_full (contacts, (GDestroyNotify) json_object_unref);
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_user_sync (EM365Connection *cnc,
+				 const gchar *user_override, /* for which user, NULL to use the account user */
+				 const gchar *user_id,
+				 EM365Contact **out_contact,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (user_id != NULL, FALSE);
+	g_return_val_if_fail (out_contact != NULL, FALSE);
+
+	message = e_m365_connection_prepare_get_user (cnc, user_override, user_id, error);
+
+	if (!message)
+		return FALSE;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_contact, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+gboolean
+e_m365_connection_get_users_sync (EM365Connection *cnc,
+				  const gchar *user_override, /* for which user, NULL to use the account user */
+				  GPtrArray *ids, /* const gchar * */
+				  GPtrArray **out_contacts, /* EM365Contact * */
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	return e_m365_connection_get_contacts_internal_sync (cnc, user_override, E_M365_FOLDER_KIND_USERS,
+		NULL, ids, out_contacts, cancellable, error);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/user-list-calendargroups?view=graph-rest-1.0&tabs=http */

@@ -22,20 +22,23 @@
    https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 */
 
-#define MICROSOFT365_SCOPE	"Calendars.ReadWrite " \
-				"Calendars.ReadWrite.Shared " \
-				"Contacts.ReadWrite " \
-				"Contacts.ReadWrite.Shared " \
-				"Mail.ReadWrite " \
-				"Mail.ReadWrite.Shared " \
-				"Mail.Send " \
-				"Mail.Send.Shared " \
-				"MailboxSettings.Read " \
-				/*"Notes.Create "*/ \
-				/*"Notes.ReadWrite.All "*/ \
-				"offline_access " \
-				"Tasks.ReadWrite " \
-				"Tasks.ReadWrite.Shared "
+#define MICROSOFT365_SCOPE	"Calendars.ReadWrite" \
+				" Calendars.ReadWrite.Shared" \
+				" Contacts.ReadWrite" \
+				" Contacts.ReadWrite.Shared" \
+				" Mail.ReadWrite" \
+				" Mail.ReadWrite.Shared" \
+				" Mail.Send" \
+				" Mail.Send.Shared" \
+				" MailboxSettings.Read" \
+				/* " Notes.Create" */ \
+				/* " Notes.ReadWrite.All" */ \
+				" offline_access" \
+				" People.Read" \
+				" Tasks.ReadWrite" \
+				" Tasks.ReadWrite.Shared" \
+				" User.Read" \
+				" User.ReadBasic.All" /* User.Read.All requires admin approval */
 
 struct _EOAuth2ServiceMicrosoft365Private
 {

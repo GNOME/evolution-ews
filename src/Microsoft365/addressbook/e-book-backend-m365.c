@@ -39,6 +39,7 @@ struct _EBookBackendM365Private {
 	GRecMutex property_lock;
 	EM365Connection *cnc;
 	gchar *folder_id;
+	EM365FolderKind folder_kind;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendM365, e_book_backend_m365, E_TYPE_BOOK_META_BACKEND)
@@ -171,6 +172,39 @@ ebb_m365_contact_add_birthday (EBookBackendM365 *bbm365,
 }
 
 static gboolean
+ebb_m365_contact_get_home_page (EBookBackendM365 *bbm365,
+				EM365Contact *m365_contact,
+				EContact *inout_contact,
+				EContactField field_id,
+				EM365Connection *cnc,
+				GCancellable *cancellable,
+				GError **error)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_get_business_home_page);
+	else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_user_get_my_site);
+
+	return TRUE;
+}
+
+static gboolean
+ebb_m365_contact_add_home_page (EBookBackendM365 *bbm365,
+				EContact *new_contact,
+				EContact *old_contact,
+				EContactField field_id,
+				const gchar *m365_id,
+				JsonBuilder *builder,
+				GCancellable *cancellable,
+				GError **error)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		ebb_m365_contact_add_string_attribute (new_contact, old_contact, field_id, builder, e_m365_contact_add_business_home_page);
+
+	return TRUE;
+}
+
+static gboolean
 ebb_m365_contact_get_address (EBookBackendM365 *bbm365,
 			      EM365Contact *m365_contact,
 			      EContact *inout_contact,
@@ -179,33 +213,63 @@ ebb_m365_contact_get_address (EBookBackendM365 *bbm365,
 			      GCancellable *cancellable,
 			      GError **error)
 {
-	EM365PhysicalAddress *phys_address = NULL;
+	EContactAddress addr;
 
-	if (field_id == E_CONTACT_ADDRESS_WORK)
-		phys_address = e_m365_contact_get_business_address (m365_contact);
-	else if (field_id == E_CONTACT_ADDRESS_HOME)
-		phys_address = e_m365_contact_get_home_address (m365_contact);
-	else if (field_id == E_CONTACT_ADDRESS_OTHER)
-		phys_address = e_m365_contact_get_other_address (m365_contact);
-	else
-		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
+	memset (&addr, 0, sizeof (EContactAddress));
 
-	if (phys_address) {
-		EContactAddress addr;
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS) {
+		EM365PhysicalAddress *phys_address = NULL;
 
-		memset (&addr, 0, sizeof (EContactAddress));
-
-		addr.locality = (gchar *) e_m365_physical_address_get_city (phys_address);
-		addr.country = (gchar *) e_m365_physical_address_get_country_or_region (phys_address);
-		addr.code = (gchar *) e_m365_physical_address_get_postal_code (phys_address);
-		addr.region = (gchar *) e_m365_physical_address_get_state (phys_address);
-		addr.street = (gchar *) e_m365_physical_address_get_street (phys_address);
-
-		if (addr.locality || addr.country || addr.code || addr.region || addr.street)
-			e_contact_set (inout_contact, field_id, &addr);
+		if (field_id == E_CONTACT_ADDRESS_WORK)
+			phys_address = e_m365_contact_get_business_address (m365_contact);
+		else if (field_id == E_CONTACT_ADDRESS_HOME)
+			phys_address = e_m365_contact_get_home_address (m365_contact);
+		else if (field_id == E_CONTACT_ADDRESS_OTHER)
+			phys_address = e_m365_contact_get_other_address (m365_contact);
 		else
-			e_contact_set (inout_contact, field_id, NULL);
+			g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
+
+		if (phys_address) {
+			addr.locality = (gchar *) e_m365_physical_address_get_city (phys_address);
+			addr.country = (gchar *) e_m365_physical_address_get_country_or_region (phys_address);
+			addr.code = (gchar *) e_m365_physical_address_get_postal_code (phys_address);
+			addr.region = (gchar *) e_m365_physical_address_get_state (phys_address);
+			addr.street = (gchar *) e_m365_physical_address_get_street (phys_address);
+		}
+	} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS && field_id == E_CONTACT_ADDRESS_WORK) {
+		addr.locality = (gchar *) e_m365_contact_user_get_city (m365_contact);
+		addr.country = (gchar *) e_m365_contact_user_get_country (m365_contact);
+		addr.code = (gchar *) e_m365_contact_user_get_postal_code (m365_contact);
+		addr.region = (gchar *) e_m365_contact_user_get_state (m365_contact);
+		addr.street = (gchar *) e_m365_contact_user_get_street_address (m365_contact);
+	} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS && field_id == E_CONTACT_ADDRESS_WORK) {
+		JsonArray *values = e_m365_contact_org_get_addresses (m365_contact);
+
+		if (values) {
+			guint ii, len;
+
+			len = json_array_get_length (values);
+
+			for (ii = 0; ii < len; ii++) {
+				EM365PhysicalAddress *phys_address = json_array_get_object_element (values, ii);
+
+				if (phys_address) {
+					addr.locality = (gchar *) e_m365_physical_address_get_city (phys_address);
+					addr.country = (gchar *) e_m365_physical_address_get_country_or_region (phys_address);
+					addr.code = (gchar *) e_m365_physical_address_get_postal_code (phys_address);
+					addr.region = (gchar *) e_m365_physical_address_get_state (phys_address);
+					addr.street = (gchar *) e_m365_physical_address_get_street (phys_address);
+					/* only one supported */
+					break;
+				}
+			}
+		}
 	}
+
+	if (addr.locality || addr.country || addr.code || addr.region || addr.street)
+		e_contact_set (inout_contact, field_id, &addr);
+	else
+		e_contact_set (inout_contact, field_id, NULL);
 
 	return TRUE;
 }
@@ -273,6 +337,74 @@ ebb_m365_contact_add_address (EBookBackendM365 *bbm365,
 
 	e_contact_address_free (new_addr);
 	e_contact_address_free (old_addr);
+
+	return TRUE;
+}
+
+static gboolean
+ebb_m365_contact_get_nick_name (EBookBackendM365 *bbm365,
+				EM365Contact *m365_contact,
+				EContact *inout_contact,
+				EContactField field_id,
+				EM365Connection *cnc,
+				GCancellable *cancellable,
+				GError **error)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_get_nick_name);
+	else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_org_get_mail_nickname);
+	else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_user_get_mail_nickname);
+
+	return TRUE;
+}
+
+static gboolean
+ebb_m365_contact_add_nick_name (EBookBackendM365 *bbm365,
+				EContact *new_contact,
+				EContact *old_contact,
+				EContactField field_id,
+				const gchar *m365_id,
+				JsonBuilder *builder,
+				GCancellable *cancellable,
+				GError **error)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		ebb_m365_contact_add_string_attribute (new_contact, old_contact, field_id, builder, e_m365_contact_add_nick_name);
+
+	return TRUE;
+}
+
+static gboolean
+ebb_m365_contact_get_note (EBookBackendM365 *bbm365,
+			   EM365Contact *m365_contact,
+			   EContact *inout_contact,
+			   EContactField field_id,
+			   EM365Connection *cnc,
+			   GCancellable *cancellable,
+			   GError **error)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_get_personal_notes);
+	else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS)
+		ebb_m365_contact_get_string_attribute (m365_contact, inout_contact, field_id, e_m365_contact_user_get_about_me);
+
+	return TRUE;
+}
+
+static gboolean
+ebb_m365_contact_add_note (EBookBackendM365 *bbm365,
+			   EContact *new_contact,
+			   EContact *old_contact,
+			   EContactField field_id,
+			   const gchar *m365_id,
+			   JsonBuilder *builder,
+			   GCancellable *cancellable,
+			   GError **error)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		ebb_m365_contact_add_string_attribute (new_contact, old_contact, field_id, builder, e_m365_contact_add_personal_notes);
 
 	return TRUE;
 }
@@ -354,37 +486,104 @@ ebb_m365_contact_get_phone (EBookBackendM365 *bbm365,
 			    GCancellable *cancellable,
 			    GError **error)
 {
-	JsonArray *values = NULL;
-	const gchar *type_val = NULL;
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS ||
+	    (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS && field_id == E_CONTACT_PHONE_BUSINESS)) {
+		JsonArray *values = NULL;
+		const gchar *type_val = NULL;
 
-	if (field_id == E_CONTACT_PHONE_BUSINESS) {
-		values = e_m365_contact_get_business_phones (m365_contact);
-		type_val = "WORK";
-	} else if (field_id == E_CONTACT_PHONE_HOME) {
-		values = e_m365_contact_get_home_phones (m365_contact);
-		type_val = "HOME";
-	} else {
-		g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
-	}
+		if (field_id == E_CONTACT_PHONE_BUSINESS) {
+			values = e_m365_contact_get_business_phones (m365_contact);
+			type_val = "WORK";
+		} else if (field_id == E_CONTACT_PHONE_HOME) {
+			values = e_m365_contact_get_home_phones (m365_contact);
+			type_val = "HOME";
+		} else {
+			g_warning ("%s: Uncaught field '%s'", G_STRFUNC, e_contact_vcard_attribute (field_id));
+		}
 
-	if (values) {
-		EVCard *vcard = E_VCARD (inout_contact);
-		guint ii, len;
+		if (values) {
+			EVCard *vcard = E_VCARD (inout_contact);
+			guint ii, len;
 
-		len = json_array_get_length (values);
+			len = json_array_get_length (values);
 
-		for (ii = 0; ii < len; ii++) {
-			const gchar *str = json_array_get_string_element (values, len - ii - 1);
+			for (ii = 0; ii < len; ii++) {
+				const gchar *str = json_array_get_string_element (values, len - ii - 1);
 
-			if (str && *str) {
-				EVCardAttributeParam *param;
-				EVCardAttribute *attr;
+				if (str && *str) {
+					EVCardAttributeParam *param;
+					EVCardAttribute *attr;
 
-				attr = e_vcard_attribute_new (NULL, EVC_TEL);
-				param = e_vcard_attribute_param_new (EVC_TYPE);
+					attr = e_vcard_attribute_new (NULL, EVC_TEL);
+					param = e_vcard_attribute_param_new (EVC_TYPE);
 
-				e_vcard_attribute_add_param_with_value (attr, param, type_val);
-				e_vcard_add_attribute_with_value (vcard, attr, str);
+					e_vcard_attribute_add_param_with_value (attr, param, type_val);
+					e_vcard_add_attribute_with_value (vcard, attr, str);
+				}
+			}
+		}
+	} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS && field_id == E_CONTACT_PHONE_HOME) {
+		e_contact_set (inout_contact, E_CONTACT_PHONE_HOME_FAX, e_m365_contact_user_get_fax_number (m365_contact));
+		e_contact_set (inout_contact, E_CONTACT_PHONE_MOBILE, e_m365_contact_user_get_mobile_phone (m365_contact));
+	} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS && field_id == E_CONTACT_PHONE_BUSINESS) {
+		JsonArray *values;
+
+		values = e_m365_contact_org_get_phones (m365_contact);
+		if (values) {
+			gboolean had_business = FALSE;
+			gboolean had_home = FALSE;
+			guint ii, len;
+
+			len = json_array_get_length (values);
+
+			for (ii = 0; ii < len; ii++) {
+				EM365Phone *phone = json_array_get_object_element (values, len - ii - 1);
+				const gchar *number = phone ? e_m365_phone_get_number (phone) : NULL;
+
+				if (number && *number) {
+					EContactField fld = E_CONTACT_FIELD_LAST;
+
+					switch (e_m365_phone_get_type (phone)) {
+					case E_M365_PHONE_HOME:
+						fld = had_home ? E_CONTACT_PHONE_HOME_2 : E_CONTACT_PHONE_HOME;
+						had_home = TRUE;
+						break;
+					case E_M365_PHONE_BUSINESS:
+						fld = had_business ? E_CONTACT_PHONE_BUSINESS_2 : E_CONTACT_PHONE_BUSINESS;
+						had_business = TRUE;
+						break;
+					case E_M365_PHONE_MOBILE:
+						fld = E_CONTACT_PHONE_MOBILE;
+						break;
+					case E_M365_PHONE_OTHER:
+						fld = E_CONTACT_PHONE_OTHER;
+						break;
+					case E_M365_PHONE_ASSISTANT:
+						fld = E_CONTACT_PHONE_ASSISTANT;
+						break;
+					case E_M365_PHONE_HOMEFAX:
+						fld = E_CONTACT_PHONE_HOME_FAX;
+						break;
+					case E_M365_PHONE_BUSINESSFAX:
+						fld = E_CONTACT_PHONE_BUSINESS_FAX;
+						break;
+					case E_M365_PHONE_OTHERFAX:
+						fld = E_CONTACT_PHONE_OTHER_FAX;
+						break;
+					case E_M365_PHONE_PAGER:
+						fld = E_CONTACT_PHONE_PAGER;
+						break;
+					case E_M365_PHONE_RADIO:
+						fld = E_CONTACT_PHONE_RADIO;
+						break;
+					case E_M365_PHONE_NOT_SET:
+					case E_M365_PHONE_UNKNOWN:
+						break;
+					}
+
+					if (fld != E_CONTACT_FIELD_LAST)
+						e_contact_set (inout_contact, fld, number);
+				}
 			}
 		}
 	}
@@ -599,43 +798,107 @@ ebb_m365_contact_get_emails (EBookBackendM365 *bbm365,
 			     GCancellable *cancellable,
 			     GError **error)
 {
-	JsonArray *values;
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS) {
+		JsonArray *values;
 
-	values = e_m365_contact_get_email_addresses (m365_contact);
+		values = e_m365_contact_get_email_addresses (m365_contact);
 
-	if (values) {
-		EVCard *vcard = E_VCARD (inout_contact);
-		guint ii, len;
+		if (values) {
+			EVCard *vcard = E_VCARD (inout_contact);
+			guint ii, len;
 
-		len = json_array_get_length (values);
+			len = json_array_get_length (values);
 
-		for (ii = 0; ii < len; ii++) {
-			EM365EmailAddress *address = json_array_get_object_element (values, len - ii - 1);
+			for (ii = 0; ii < len; ii++) {
+				EM365EmailAddress *address = json_array_get_object_element (values, len - ii - 1);
 
-			if (address) {
-				EVCardAttribute *attr;
+				if (address) {
+					EVCardAttribute *attr;
 
-				attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
-				e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
+					attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+					e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
 
-				if (g_strcmp0 (e_m365_email_address_get_name (address), e_m365_email_address_get_address (address)) == 0) {
-					e_vcard_add_attribute_with_value (vcard, attr, e_m365_email_address_get_address (address));
-				} else {
-					gchar *formatted;
+					if (g_strcmp0 (e_m365_email_address_get_name (address), e_m365_email_address_get_address (address)) == 0) {
+						e_vcard_add_attribute_with_value (vcard, attr, e_m365_email_address_get_address (address));
+					} else {
+						gchar *formatted;
 
-					formatted = camel_internet_address_format_address (
-						e_m365_email_address_get_name (address),
-						e_m365_email_address_get_address (address));
+						formatted = camel_internet_address_format_address (
+							e_m365_email_address_get_name (address),
+							e_m365_email_address_get_address (address));
 
-					if (formatted && *formatted)
-						e_vcard_add_attribute_with_value (vcard, attr, formatted);
-					else
-						e_vcard_attribute_free (attr);
+						if (formatted && *formatted)
+							e_vcard_add_attribute_with_value (vcard, attr, formatted);
+						else
+							e_vcard_attribute_free (attr);
 
-					g_free (formatted);
+						g_free (formatted);
+					}
 				}
 			}
 		}
+	} else {
+		GHashTable *known_mails = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
+		EVCard *vcard = E_VCARD (inout_contact);
+		EVCardAttribute *attr;
+		JsonArray *proxy_addresses = NULL;
+		JsonArray *other_mails = NULL;
+		const gchar *mail = NULL;
+		guint ii, len;
+
+		if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS) {
+			proxy_addresses = e_m365_contact_org_get_proxy_addresses (m365_contact);
+			mail = e_m365_contact_org_get_mail (m365_contact);
+		} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS) {
+			proxy_addresses = e_m365_contact_user_get_proxy_addresses (m365_contact);
+			other_mails = e_m365_contact_user_get_other_mails (m365_contact);
+			mail = e_m365_contact_user_get_mail (m365_contact);
+		}
+
+		/* add it to the vCard as the last, because "add_attribute" prepends it */
+		if (mail && *mail)
+			g_hash_table_add (known_mails, (gpointer) mail);
+
+		len = proxy_addresses ? json_array_get_length (proxy_addresses) : 0;
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *address = json_array_get_string_element (proxy_addresses, len - ii - 1);
+
+			if (address && *address) {
+				/* accept only SMTP: addresses and skip any other */
+				if (g_ascii_strncasecmp (address, "smtp:", 5) == 0)
+					address += 5;
+				else
+					continue;
+
+				if (g_hash_table_add (known_mails, (gpointer) address)) {
+					attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+					e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
+					e_vcard_add_attribute_with_value (vcard, attr, address);
+				}
+			}
+		}
+
+		len = other_mails ? json_array_get_length (other_mails) : 0;
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *address = json_array_get_string_element (other_mails, len - ii - 1);
+
+			if (address && *address &&
+			    g_hash_table_add (known_mails, (gpointer) address)) {
+				attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+				e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
+				e_vcard_add_attribute_with_value (vcard, attr, address);
+			}
+		}
+
+		if (mail && *mail) {
+			attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+			e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
+			e_vcard_add_attribute_with_value (vcard, attr, mail);
+		}
+
+		g_hash_table_unref (known_mails);
 	}
 
 	return TRUE;
@@ -1036,16 +1299,18 @@ ebb_m365_contact_get_photo (EBookBackendM365 *bbm365,
 
 	LOCK (bbm365);
 
-	if (e_m365_connection_get_contact_photo_sync (cnc, NULL, bbm365->priv->folder_id,
-		e_m365_contact_get_id (m365_contact), &photo_data, cancellable, &local_error) &&
-	    photo_data && photo_data->len) {
-		EContactPhoto *photo;
+	if (bbm365->priv->folder_id) {
+		if (e_m365_connection_get_contact_photo_sync (cnc, NULL, bbm365->priv->folder_id,
+			e_m365_contact_get_id (m365_contact), &photo_data, cancellable, &local_error) &&
+		    photo_data && photo_data->len) {
+			EContactPhoto *photo;
 
-		photo = e_contact_photo_new ();
-		e_contact_photo_set_inlined (photo, photo_data->data, photo_data->len);
-		e_contact_photo_set_mime_type (photo, "image/jpeg");
-		e_contact_set (inout_contact, field_id, photo);
-		e_contact_photo_free (photo);
+			photo = e_contact_photo_new ();
+			e_contact_photo_set_inlined (photo, photo_data->data, photo_data->len);
+			e_contact_photo_set_mime_type (photo, "image/jpeg");
+			e_contact_set (inout_contact, field_id, photo);
+			e_contact_photo_free (photo);
+		}
 	}
 
 	UNLOCK (bbm365);
@@ -1113,7 +1378,8 @@ ebb_m365_contact_add_photo (EBookBackendM365 *bbm365,
 
 		LOCK (bbm365);
 
-		if (!e_m365_connection_update_contact_photo_sync (bbm365->priv->cnc, NULL, bbm365->priv->folder_id,
+		if (bbm365->priv->folder_id &&
+		    !e_m365_connection_update_contact_photo_sync (bbm365->priv->cnc, NULL, bbm365->priv->folder_id,
 			m365_id ? m365_id : e_contact_get_const (new_contact, E_CONTACT_UID), jpeg_photo, cancellable, &local_error)) {
 			if (local_error) {
 				g_propagate_error (error, local_error);
@@ -1164,7 +1430,7 @@ struct _mappings {
 	STRING_FIELD	(E_CONTACT_ASSISTANT,		e_m365_contact_get_assistant_name,	e_m365_contact_add_assistant_name),
 	COMPLEX_FIELD	(E_CONTACT_BIRTH_DATE,		ebb_m365_contact_get_birthday,		ebb_m365_contact_add_birthday),
 	COMPLEX_FIELD	(E_CONTACT_ADDRESS_WORK,	ebb_m365_contact_get_address,		ebb_m365_contact_add_address),
-	STRING_FIELD	(E_CONTACT_HOMEPAGE_URL,	e_m365_contact_get_business_home_page,	e_m365_contact_add_business_home_page),
+	COMPLEX_FIELD	(E_CONTACT_HOMEPAGE_URL,	ebb_m365_contact_get_home_page,		ebb_m365_contact_add_home_page),
 	COMPLEX_FIELD	(E_CONTACT_PHONE_BUSINESS,	ebb_m365_contact_get_phone,		ebb_m365_contact_add_phone),
 	COMPLEX_FIELD	(E_CONTACT_CATEGORIES,		ebb_m365_contact_get_categories,	ebb_m365_contact_add_categories),
 	STRING_FIELD	(E_CONTACT_ORG,			e_m365_contact_get_company_name,	e_m365_contact_add_company_name),
@@ -1180,10 +1446,10 @@ struct _mappings {
 	STRING_FIELD	(E_CONTACT_MANAGER,		e_m365_contact_get_manager,		e_m365_contact_add_manager),
 	COMPLEX_FIELD	(E_CONTACT_NAME,		ebb_m365_contact_get_middle_name,	ebb_m365_contact_add_middle_name),
 	STRING_FIELD	(E_CONTACT_PHONE_MOBILE,	e_m365_contact_get_mobile_phone,	e_m365_contact_add_mobile_phone),
-	STRING_FIELD	(E_CONTACT_NICKNAME,		e_m365_contact_get_nick_name,		e_m365_contact_add_nick_name),
+	COMPLEX_FIELD	(E_CONTACT_NICKNAME,		ebb_m365_contact_get_nick_name,		ebb_m365_contact_add_nick_name),
 	STRING_FIELD	(E_CONTACT_OFFICE,		e_m365_contact_get_office_location,	e_m365_contact_add_office_location),
 	COMPLEX_FIELD	(E_CONTACT_ADDRESS_OTHER,	ebb_m365_contact_get_address,		ebb_m365_contact_add_address),
-	STRING_FIELD	(E_CONTACT_NOTE,		e_m365_contact_get_personal_notes,	e_m365_contact_add_personal_notes),
+	COMPLEX_FIELD	(E_CONTACT_NOTE,		ebb_m365_contact_get_note,		ebb_m365_contact_add_note),
 	STRING_FIELD 	(E_CONTACT_ROLE,		e_m365_contact_get_profession,		e_m365_contact_add_profession),
 	STRING_FIELD 	(E_CONTACT_SPOUSE,		e_m365_contact_get_spouse_name,		e_m365_contact_add_spouse_name),
 	STRING_FIELD	(E_CONTACT_FAMILY_NAME,		e_m365_contact_get_surname,		e_m365_contact_add_surname),
@@ -1406,8 +1672,28 @@ ebb_m365_connect_sync (EBookMetaBackend *meta_backend,
 		if (folder_id) {
 			cnc = e_m365_connection_new_for_backend (backend, registry, source, m365_settings);
 
-			*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_CONTACTS, NULL, folder_id,
-				out_certificate_pem, out_certificate_errors, cancellable, error);
+			if (g_ascii_strcasecmp (folder_id, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS) == 0) {
+				*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_ORG_CONTACTS, NULL, NULL,
+					out_certificate_pem, out_certificate_errors, cancellable, error);
+
+				bbm365->priv->folder_kind = E_M365_FOLDER_KIND_ORG_CONTACTS;
+
+				/* do not store artificial folder id */
+				g_clear_pointer (&folder_id, g_free);
+			} else if (g_ascii_strcasecmp (folder_id, E_M365_ARTIFICIAL_FOLDER_ID_USERS) == 0) {
+				*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_USERS, NULL, NULL,
+					out_certificate_pem, out_certificate_errors, cancellable, error);
+
+				bbm365->priv->folder_kind = E_M365_FOLDER_KIND_USERS;
+
+				/* do not store artificial folder id */
+				g_clear_pointer (&folder_id, g_free);
+			} else {
+				*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_CONTACTS, NULL, folder_id,
+					out_certificate_pem, out_certificate_errors, cancellable, error);
+
+				bbm365->priv->folder_kind = E_M365_FOLDER_KIND_CONTACTS;
+			}
 
 			if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 				bbm365->priv->cnc = g_object_ref (cnc);
@@ -1419,8 +1705,6 @@ ebb_m365_connect_sync (EBookMetaBackend *meta_backend,
 
 				folder_id = NULL;
 				success = TRUE;
-
-				e_book_backend_set_writable (E_BOOK_BACKEND (bbm365), TRUE);
 			}
 		} else {
 			*out_auth_result = E_SOURCE_AUTHENTICATION_ERROR;
@@ -1429,6 +1713,8 @@ ebb_m365_connect_sync (EBookMetaBackend *meta_backend,
 
 		g_clear_object (&cnc);
 		g_free (folder_id);
+
+		e_book_backend_set_writable (E_BOOK_BACKEND (bbm365), bbm365->priv->folder_id != NULL);
 	}
 
 	UNLOCK (bbm365);
@@ -1451,6 +1737,7 @@ ebb_m365_disconnect_sync (EBookMetaBackend *meta_backend,
 typedef struct _ObjectsDeltaData {
 	EBookBackendM365 *bbm365;
 	ECache *cache;
+	GPtrArray *ids;
 	GSList **out_created_objects;
 	GSList **out_modified_objects;
 	GSList **out_removed_objects;
@@ -1484,33 +1771,7 @@ ebb_m365_get_objects_delta_cb (EM365Connection *cnc,
 			*(odd->out_removed_objects) = g_slist_prepend (*(odd->out_removed_objects),
 				e_book_meta_backend_info_new (id, NULL, NULL, NULL));
 		} else {
-			GSList **out_slist;
-			EContact *vcard;
-			gchar *object;
-
-			if (e_cache_contains (odd->cache, id, E_CACHE_INCLUDE_DELETED))
-				out_slist = odd->out_modified_objects;
-			else
-				out_slist = odd->out_created_objects;
-
-			vcard = ebb_m365_json_contact_to_vcard (odd->bbm365, contact, cnc, &object, cancellable, error);
-
-			g_clear_object (&vcard);
-
-			if (!g_cancellable_is_cancelled (cancellable))
-				g_warn_if_fail (object != NULL);
-
-			if (object) {
-				EBookMetaBackendInfo *nfo;
-
-				nfo = e_book_meta_backend_info_new (id,
-					e_m365_contact_get_change_key (contact),
-					object, NULL);
-
-				nfo->extra = object; /* assumes ownership, to avoid unnecessary re-allocation */
-
-				*out_slist = g_slist_prepend (*out_slist, nfo);
-			}
+			g_ptr_array_add (odd->ids, g_strdup (id));
 		}
 	}
 
@@ -1553,6 +1814,7 @@ ebb_m365_get_changes_sync (EBookMetaBackend *meta_backend,
 
 	odd.bbm365 = bbm365;
 	odd.cache = E_CACHE (book_cache);
+	odd.ids = g_ptr_array_new_with_free_func (g_free);
 	odd.out_created_objects = out_created_objects;
 	odd.out_modified_objects = out_modified_objects;
 	odd.out_removed_objects = out_removed_objects;
@@ -1560,7 +1822,7 @@ ebb_m365_get_changes_sync (EBookMetaBackend *meta_backend,
 	LOCK (bbm365);
 
 	success = e_m365_connection_get_objects_delta_sync (bbm365->priv->cnc, NULL,
-		E_M365_FOLDER_KIND_CONTACTS, bbm365->priv->folder_id, NULL, last_sync_tag, 0,
+		bbm365->priv->folder_kind, bbm365->priv->folder_id, "id", last_sync_tag, 0,
 		ebb_m365_get_objects_delta_cb, &odd,
 		out_new_sync_tag, cancellable, &local_error);
 
@@ -1585,11 +1847,74 @@ ebb_m365_get_changes_sync (EBookMetaBackend *meta_backend,
 		g_slist_free_full (known_uids, g_free);
 
 		success = e_m365_connection_get_objects_delta_sync (bbm365->priv->cnc, NULL,
-			E_M365_FOLDER_KIND_CONTACTS, bbm365->priv->folder_id, NULL, NULL, 0,
+			bbm365->priv->folder_kind, bbm365->priv->folder_id, "id", NULL, 0,
 			ebb_m365_get_objects_delta_cb, &odd,
 			out_new_sync_tag, cancellable, &local_error);
 	} else if (local_error) {
 		g_propagate_error (error, local_error);
+	}
+
+	if (success && odd.ids->len) {
+		GPtrArray *contacts = NULL;
+
+		switch (bbm365->priv->folder_kind) {
+		case E_M365_FOLDER_KIND_CONTACTS:
+			success = e_m365_connection_get_contacts_sync (bbm365->priv->cnc, NULL,
+				bbm365->priv->folder_id, odd.ids, &contacts, cancellable, error);
+			break;
+		case E_M365_FOLDER_KIND_ORG_CONTACTS:
+			success = e_m365_connection_get_org_contacts_sync (bbm365->priv->cnc, NULL,
+				odd.ids, &contacts, cancellable, error);
+			break;
+		case E_M365_FOLDER_KIND_USERS:
+			success = e_m365_connection_get_users_sync (bbm365->priv->cnc, NULL,
+				odd.ids, &contacts, cancellable, error);
+			break;
+		default:
+			break;
+		}
+
+		/* process them also on failure, because it could fail in following batch requests */
+		if (contacts != NULL) {
+			guint ii;
+
+			for (ii = 0; ii < contacts->len; ii++) {
+				EM365Contact *contact = g_ptr_array_index (contacts, ii);
+				GSList **out_slist;
+				EContact *vcard;
+				gchar *object;
+				const gchar *id = e_m365_contact_get_id (contact);
+
+				if (!id)
+					continue;
+
+				if (e_cache_contains (odd.cache, id, E_CACHE_INCLUDE_DELETED))
+					out_slist = odd.out_modified_objects;
+				else
+					out_slist = odd.out_created_objects;
+
+				vcard = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, &object, cancellable, error);
+
+				g_clear_object (&vcard);
+
+				if (!g_cancellable_is_cancelled (cancellable))
+					g_warn_if_fail (object != NULL);
+
+				if (object) {
+					EBookMetaBackendInfo *nfo;
+
+					nfo = e_book_meta_backend_info_new (id,
+						e_m365_contact_get_change_key (contact),
+						object, NULL);
+
+					nfo->extra = object; /* assumes ownership, to avoid unnecessary re-allocation */
+
+					*out_slist = g_slist_prepend (*out_slist, nfo);
+				}
+			}
+
+			g_ptr_array_unref (contacts);
+		}
 	}
 
 	UNLOCK (bbm365);
@@ -1597,6 +1922,7 @@ ebb_m365_get_changes_sync (EBookMetaBackend *meta_backend,
 	ebb_m365_convert_error_to_client_error (error);
 	ebb_m365_maybe_disconnect_sync (bbm365, error, cancellable);
 
+	g_clear_pointer (&odd.ids, g_ptr_array_unref);
 	g_clear_object (&book_cache);
 
 	return success;
@@ -1624,8 +1950,18 @@ ebb_m365_load_contact_sync (EBookMetaBackend *meta_backend,
 
 	LOCK (bbm365);
 
-	success = e_m365_connection_get_contact_sync (bbm365->priv->cnc, NULL,
-		bbm365->priv->folder_id, uid, &contact, cancellable, error);
+	if (bbm365->priv->folder_id) {
+		success = e_m365_connection_get_contact_sync (bbm365->priv->cnc, NULL,
+			bbm365->priv->folder_id, uid, &contact, cancellable, error);
+	} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS) {
+		success = e_m365_connection_get_org_contact_sync (bbm365->priv->cnc, NULL,
+			uid, &contact, cancellable, error);
+	} else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS) {
+		success = e_m365_connection_get_user_sync (bbm365->priv->cnc, NULL,
+			uid, &contact, cancellable, error);
+	} else {
+		g_warn_if_reached ();
+	}
 
 	if (success) {
 		*out_contact = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, out_extra, cancellable, error);
@@ -1672,6 +2008,21 @@ ebb_m365_save_contact_sync (EBookMetaBackend *meta_backend,
 	bbm365 = E_BOOK_BACKEND_M365 (meta_backend);
 
 	LOCK (bbm365);
+
+	if (!bbm365->priv->folder_id) {
+		const gchar *text = "Cannot modify contact"; /* this should not happen, thus not localized */
+
+		if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS)
+			text = _("Cannot modify organizational contact");
+		else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS)
+			text = _("Cannot modify user contact");
+
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, text));
+
+		UNLOCK (bbm365);
+
+		return FALSE;
+	}
 
 	if (e_vcard_get_attribute (E_VCARD (contact), EVC_PHOTO)) {
 		tmp_contact = e_contact_duplicate (contact);
@@ -1759,8 +2110,20 @@ ebb_m365_remove_contact_sync (EBookMetaBackend *meta_backend,
 
 	LOCK (bbm365);
 
-	success = e_m365_connection_delete_contact_sync (bbm365->priv->cnc, NULL,
-		bbm365->priv->folder_id, uid, cancellable, error);
+	if (bbm365->priv->folder_id) {
+		success = e_m365_connection_delete_contact_sync (bbm365->priv->cnc, NULL,
+			bbm365->priv->folder_id, uid, cancellable, error);
+	} else {
+		const gchar *text = "Cannot remove contact"; /* this should not happen, thus not localized */
+
+		if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS)
+			text = _("Cannot remove organizational contact");
+		else if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS)
+			text = _("Cannot remove user contact");
+
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, text));
+		success = FALSE;
+	}
 
 	UNLOCK (bbm365);
 

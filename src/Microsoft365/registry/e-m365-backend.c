@@ -273,13 +273,15 @@ m365_backend_forget_folders_hash (EM365Backend *m365_backend,
 }
 
 static void
-m365_backend_forget_folders (EM365Backend *m365_backend,
-			     const gchar *extension_name,
-			     gboolean with_the_default)
+m365_backend_forget_book_folders (EM365Backend *m365_backend,
+				  const gchar *extension_name)
 {
 	GHashTable *ids;
 
-	ids = m365_backend_get_known_folder_ids (m365_backend, extension_name, with_the_default);
+	ids = m365_backend_get_known_folder_ids (m365_backend, extension_name, FALSE);
+
+	g_hash_table_remove (ids, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS);
+	g_hash_table_remove (ids, E_M365_ARTIFICIAL_FOLDER_ID_USERS);
 
 	m365_backend_forget_folders_hash (m365_backend, extension_name, ids);
 
@@ -361,7 +363,7 @@ m365_backend_sync_contact_folders_sync (EM365Backend *m365_backend,
 		g_clear_pointer (&old_delta_link, g_free);
 		g_clear_error (&error);
 
-		m365_backend_forget_folders (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, FALSE);
+		m365_backend_forget_book_folders (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK);
 
 		success = e_m365_connection_get_folders_delta_sync (cnc, NULL, E_M365_FOLDER_KIND_CONTACTS, NULL, NULL, 0,
 			m365_backend_got_contact_folders_delta_cb, m365_backend, &new_delta_link, cancellable, &error);
@@ -373,6 +375,20 @@ m365_backend_sync_contact_folders_sync (EM365Backend *m365_backend,
 	g_clear_pointer (&old_delta_link, g_free);
 	g_clear_pointer (&new_delta_link, g_free);
 	g_clear_error (&error);
+
+	if (e_m365_connection_get_org_contacts_accessible_sync (cnc, NULL, cancellable, NULL)) {
+		m365_backend_update_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK,
+			E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS, NULL, _("Organizational Contacts"), TRUE, NULL);
+	} else {
+		m365_backend_remove_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS);
+	}
+
+	if (e_m365_connection_get_users_accessible_sync (cnc, NULL, cancellable, NULL)) {
+		m365_backend_update_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK,
+			E_M365_ARTIFICIAL_FOLDER_ID_USERS, NULL, _("Organizational Users"), TRUE, NULL);
+	} else {
+		m365_backend_remove_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, E_M365_ARTIFICIAL_FOLDER_ID_USERS);
+	}
 }
 
 static void

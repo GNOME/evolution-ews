@@ -725,7 +725,7 @@ e_m365_get_date_time_offset_member (JsonObject *object,
 		if (!dt) {
 			gint len = strlen (value);
 
-			/* 2020-07-14T00:00:00.0000000 , eventually with 'Z' at the end */
+			/* 2020-07-14T00:00:00.0000000 , possibly with 'Z' at the end */
 			if (len == 27 && value[4] == '-' && value[7] == '-' && value[10] == 'T' && value[13] == ':' && value[16] == ':' && value[19] == '.') {
 				gchar tmp[32];
 
@@ -738,8 +738,11 @@ e_m365_get_date_time_offset_member (JsonObject *object,
 		}
 
 		if (dt) {
-			res = (time_t) g_date_time_to_unix (dt);
-			exists = TRUE;
+			/* Ignore default/unset birthday "0001-01-01T08:00:00Z" */
+			if (g_date_time_get_year (dt) > 1000) {
+				res = (time_t) g_date_time_to_unix (dt);
+				exists = TRUE;
+			}
 			g_date_time_unref (dt);
 		}
 	}
@@ -2259,6 +2262,120 @@ e_m365_contact_add_yomi_surname (JsonBuilder *builder,
 				 const gchar *value)
 {
 	e_m365_json_add_nonempty_or_null_string_member (builder, "yomiSurname", value);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/orgcontact?view=graph-rest-1.0
+   only properties added on top of the EM365Contact */
+
+JsonArray * /* EM365PhysicalAddress * */
+e_m365_contact_org_get_addresses (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "addresses");
+}
+
+const gchar *
+e_m365_contact_org_get_mail (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "mail", NULL);
+}
+
+const gchar *
+e_m365_contact_org_get_mail_nickname (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "mailNickname", NULL);
+}
+
+JsonArray * /* EM365Phone * */
+e_m365_contact_org_get_phones (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "phones");
+}
+
+JsonArray * /* const gchar * */
+e_m365_contact_org_get_proxy_addresses (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "proxyAddresses");
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0
+   only properties added on top of the EM365Contact */
+
+const gchar *
+e_m365_contact_user_get_about_me (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "aboutMe", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_city (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "city", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_country (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "country", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_fax_number (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "faxNumber", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_mail (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "mail", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_mail_nickname (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "mailNickname", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_mobile_phone (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "mobilePhone", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_my_site (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "mySite", NULL);
+}
+
+JsonArray * /* const gchar * */
+e_m365_contact_user_get_other_mails (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "otherMails");
+}
+
+const gchar *
+e_m365_contact_user_get_postal_code (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "postalCode", NULL);
+}
+
+JsonArray * /* const gchar * */
+e_m365_contact_user_get_proxy_addresses (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "proxyAddresses");
+}
+
+const gchar *
+e_m365_contact_user_get_state (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "state", NULL);
+}
+
+const gchar *
+e_m365_contact_user_get_street_address (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "streetAddress", NULL);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/calendargroup?view=graph-rest-1.0 */

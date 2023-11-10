@@ -672,6 +672,26 @@ const gchar *	e_m365_contact_get_yomi_surname		(EM365Contact *contact);
 void		e_m365_contact_add_yomi_surname		(JsonBuilder *builder,
 							 const gchar *value);
 
+JsonArray *	e_m365_contact_org_get_addresses	(EM365Contact *contact); /* EM365PhysicalAddress * */
+const gchar *	e_m365_contact_org_get_mail		(EM365Contact *contact);
+const gchar *	e_m365_contact_org_get_mail_nickname	(EM365Contact *contact);
+JsonArray *	e_m365_contact_org_get_phones		(EM365Contact *contact); /* EM365Phone * */
+JsonArray *	e_m365_contact_org_get_proxy_addresses	(EM365Contact *contact); /* const gchar * */
+
+const gchar *	e_m365_contact_user_get_about_me	(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_city		(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_country		(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_fax_number	(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_mail		(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_mail_nickname	(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_mobile_phone	(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_my_site		(EM365Contact *contact);
+JsonArray *	e_m365_contact_user_get_other_mails	(EM365Contact *contact); /* const gchar * */
+const gchar *	e_m365_contact_user_get_postal_code	(EM365Contact *contact);
+JsonArray *	e_m365_contact_user_get_proxy_addresses	(EM365Contact *contact); /* const gchar * */
+const gchar *	e_m365_contact_user_get_state		(EM365Contact *contact);
+const gchar *	e_m365_contact_user_get_street_address	(EM365Contact *contact);
+
 const gchar *	e_m365_calendar_group_get_id		(EM365CalendarGroup *group);
 const gchar *	e_m365_calendar_group_get_change_key	(EM365CalendarGroup *group);
 const gchar *	e_m365_calendar_group_get_class_id	(EM365CalendarGroup *group);
