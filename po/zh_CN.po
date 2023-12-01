@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-05-08 21:56+0000\n"
-"PO-Revision-Date: 2023-08-08 20:29-0400\n"
+"POT-Creation-Date: 2023-11-10 10:41+0000\n"
+"PO-Revision-Date: 2023-12-01 10:44-0500\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -30,59 +30,59 @@ msgstr "Exchange Web 服务"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "用于使用 Web 服务来访问 Exchange 服务器"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
 msgid "Fetching contact photos…"
 msgstr "正在获取联系人照片……"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
 msgid "Failed to update GAL:"
 msgstr "更新 GAL 失败："
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr "无法保存联系人列表，只支持 EWS Server 2010 或更高版本"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
 msgid "Failed to set contact photo:"
 msgstr "设置联系人照片失败："
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2035
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "空闲"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2038
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "忙碌"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "不在办公室"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2046
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "不确定"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2626
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2900
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2623
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2897
 msgid "Cannot determine EWS ItemId"
 msgstr "无法确定 EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3199
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3194
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr "无法在 Exchange Web 服务的日历上创建由其他用户组织的会议。"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3236
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3231
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "在线会议只能在主用户的日历中创建。"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4120
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "在与会者中无法找到用户“%s”"
@@ -98,33 +98,33 @@ msgstr "无法连接到服务器，请在您登入服务器后重复进行操作
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "无法找到日历“%s”的 Microsoft365 帮助来源。"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2195
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2209
 msgid "Invalid occurrence ID"
 msgstr "事件 ID 无效"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "无法打开 mimecontent 临时文件！"
 
-#: ../src/EWS/camel/camel-ews-folder.c:372
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "无法由 mimecontent 生成解析器！"
 
-#: ../src/EWS/camel/camel-ews-folder.c:381
+#: ../src/EWS/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "无法解析会议请求的 mimecontent！"
 
-#: ../src/EWS/camel/camel-ews-folder.c:465
-#: ../src/EWS/camel/camel-ews-folder.c:675
+#: ../src/EWS/camel/camel-ews-folder.c:466
+#: ../src/EWS/camel/camel-ews-folder.c:679
 #, c-format
 msgid "Unable to create cache file"
 msgstr "无法创建缓存文件"
 
-#: ../src/EWS/camel/camel-ews-folder.c:792
-#: ../src/EWS/camel/camel-ews-folder.c:936
+#: ../src/EWS/camel/camel-ews-folder.c:796
+#: ../src/EWS/camel/camel-ews-folder.c:940
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "无法创建缓存路径“%s”：%s"
@@ -132,32 +132,32 @@ msgstr "无法创建缓存路径“%s”：%s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:950
+#: ../src/EWS/camel/camel-ews-folder.c:954
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "无法将消息缓存文件从“%s”移动到“%s”：%s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1889
+#: ../src/EWS/camel/camel-ews-folder.c:1893
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "无法加载 %s 汇总"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2364
+#: ../src/EWS/camel/camel-ews-folder.c:2370
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "正在刷新文件夹“%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2557
+#: ../src/EWS/camel/camel-ews-folder.c:2563
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "在离线模式时无法对该文件夹执行操作"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3230
+#: ../src/EWS/camel/camel-ews-folder.c:3236
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1715
 msgid "Apply message _filters to this folder"
 msgstr "在该文件夹中应用消息过滤器(_F)"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3242
+#: ../src/EWS/camel/camel-ews-folder.c:3248
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1727
 msgid "Always check for _new mail in this folder"
 msgstr "总是在该文件夹中检查新邮件(_N)"
@@ -281,185 +281,185 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:506
+#: ../src/EWS/camel/camel-ews-store.c:504
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/EWS/camel/camel-ews-store.c:652
-#: ../src/EWS/camel/camel-ews-store.c:1476
+#: ../src/EWS/camel/camel-ews-store.c:646
+#: ../src/EWS/camel/camel-ews-store.c:1470
 msgid "Checking “Out of Office” settings"
 msgstr "正在检查“不在办公室”设置"
 
-#: ../src/EWS/camel/camel-ews-store.c:1482
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Look up Exchange server categories"
 msgstr "查找 Exchange 服务器类别"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1558
+#: ../src/EWS/camel/camel-ews-store.c:1552
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "密码将在 %d 天后到期。打开“%s”以更改密码。"
 
-#: ../src/EWS/camel/camel-ews-store.c:1564
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "密码将在 %d 天后到期。"
 
-#: ../src/EWS/camel/camel-ews-store.c:1790
+#: ../src/EWS/camel/camel-ews-store.c:1784
 msgid "Updating foreign folder structure"
 msgstr "正在更新外部文件夹结构"
 
-#: ../src/EWS/camel/camel-ews-store.c:1928
+#: ../src/EWS/camel/camel-ews-store.c:1922
 msgid "Updating foreign folders"
 msgstr "正在更新外部文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:2344
+#: ../src/EWS/camel/camel-ews-store.c:2338
 #: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "无此文件夹：%s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2691
+#: ../src/EWS/camel/camel-ews-store.c:2684
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "在离线模式时无法列出 EWS 公共文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:2764
+#: ../src/EWS/camel/camel-ews-store.c:2757
 msgid "Cannot find any EWS public folders"
 msgstr "无法找到任何 EWS 公共文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:2876
+#: ../src/EWS/camel/camel-ews-store.c:2870
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "无法创建文件夹“%s”，文件夹已存在"
 
-#: ../src/EWS/camel/camel-ews-store.c:2891
+#: ../src/EWS/camel/camel-ews-store.c:2885
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "父文件夹 %s 不存在"
 
-#: ../src/EWS/camel/camel-ews-store.c:2901
+#: ../src/EWS/camel/camel-ews-store.c:2895
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr "无法在“%s”下创建文件夹，该文件夹仅用于其他用户的文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:2911
+#: ../src/EWS/camel/camel-ews-store.c:2905
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "无法在“%s”下创建文件夹，该文件夹仅用于公共文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3018
+#: ../src/EWS/camel/camel-ews-store.c:3012
 #: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "文件夹不存在"
 
-#: ../src/EWS/camel/camel-ews-store.c:3028
+#: ../src/EWS/camel/camel-ews-store.c:3022
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr "无法移除文件夹“%s”，该文件夹仅用于其他用户的文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3039
+#: ../src/EWS/camel/camel-ews-store.c:3033
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "无法移除文件夹“%s”，该文件夹仅用于公共文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3198
-#: ../src/EWS/camel/camel-ews-store.c:3294
+#: ../src/EWS/camel/camel-ews-store.c:3192
+#: ../src/EWS/camel/camel-ews-store.c:3288
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "文件夹 %s 不存在"
 
-#: ../src/EWS/camel/camel-ews-store.c:3207
+#: ../src/EWS/camel/camel-ews-store.c:3201
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "没有文件夹 %s 的更改密钥记录"
 
-#: ../src/EWS/camel/camel-ews-store.c:3250
+#: ../src/EWS/camel/camel-ews-store.c:3244
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "不能同时重命名和移动一个文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3281
-#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3275
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "无法找到父文件夹 %s 的文件夹 ID"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3294
-#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3288
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "收件箱"
 
-#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-store.c:3347
 #: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange 服务器 %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3356
+#: ../src/EWS/camel/camel-ews-store.c:3350
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s 在 %s 上的 Exchange 服务"
 
-#: ../src/EWS/camel/camel-ews-store.c:3400
+#: ../src/EWS/camel/camel-ews-store.c:3394
 #: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "无法定位回收站文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3460
+#: ../src/EWS/camel/camel-ews-store.c:3454
 #: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "无法定位垃圾邮件文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3665
+#: ../src/EWS/camel/camel-ews-store.c:3659
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "在离线模式时无法订阅 EWS 文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3688
+#: ../src/EWS/camel/camel-ews-store.c:3682
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "无法订阅文件夹“%s”，没有可用的公共文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3698
+#: ../src/EWS/camel/camel-ews-store.c:3692
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "无法订阅文件夹“%s”，找不到该文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3707
+#: ../src/EWS/camel/camel-ews-store.c:3701
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "无法订阅文件夹“%s”，找不到文件夹编号"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3712
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "无法订阅文件夹“%s”，找不到公共文件夹根"
 
-#: ../src/EWS/camel/camel-ews-store.c:3794
+#: ../src/EWS/camel/camel-ews-store.c:3788
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "在离线模式时无法取消订阅 EWS 文件夹"
 
-#: ../src/EWS/camel/camel-ews-store.c:3905
+#: ../src/EWS/camel/camel-ews-store.c:3899
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "您必须在线才能完成此操作"
 
-#: ../src/EWS/camel/camel-ews-store.c:3977
-#: ../src/EWS/camel/camel-ews-store.c:4014
+#: ../src/EWS/camel/camel-ews-store.c:3971
+#: ../src/EWS/camel/camel-ews-store.c:4008
 msgid "Unsetting the “Out of Office” status"
 msgstr "正在解除“不在办公室”状态"
 
@@ -531,71 +531,71 @@ msgstr "CreateItem 调用未能返回新消息的 ID"
 msgid "No response: %s"
 msgstr "无响应：%s"
 
-#: ../src/EWS/common/e-ews-connection.c:514
+#: ../src/EWS/common/e-ews-connection.c:516
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Exchange 服务器正忙，正在等待重试（%d:%02d 分钟）"
 
-#: ../src/EWS/common/e-ews-connection.c:520
+#: ../src/EWS/common/e-ews-connection.c:522
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Exchange 服务器正忙，正在等待重试（%d 秒）"
 
-#: ../src/EWS/common/e-ews-connection.c:649
+#: ../src/EWS/common/e-ews-connection.c:651
 msgid "Authentication failed"
 msgstr "认证失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2426
+#: ../src/EWS/common/e-ews-connection.c:2428
 msgid "Failed to parse autodiscover response XML"
 msgstr "解析自动发现响应 XML 失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2432
+#: ../src/EWS/common/e-ews-connection.c:2434
 msgid "Failed to find <Autodiscover> element"
 msgstr "查找 <Autodiscover> 元素失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2442
+#: ../src/EWS/common/e-ews-connection.c:2444
 msgid "Failed to find <Response> element"
 msgstr "查找 <Response> 元素失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2454
 msgid "Failed to find <Account> element"
 msgstr "查找 <Account> 元素失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2497
+#: ../src/EWS/common/e-ews-connection.c:2499
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "在自动发现响应中查找 <ASUrl> 失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2573
+#: ../src/EWS/common/e-ews-connection.c:2575
 msgid "URL cannot be NULL"
 msgstr "URL 不能为空值"
 
-#: ../src/EWS/common/e-ews-connection.c:2991
+#: ../src/EWS/common/e-ews-connection.c:3000
 msgid "Email address is missing a domain part"
 msgstr "电子邮件地址缺少域部分"
 
-#: ../src/EWS/common/e-ews-connection.c:3200
+#: ../src/EWS/common/e-ews-connection.c:3209
 msgid "Failed to parse oab XML"
 msgstr "解析 oab XML 失败"
 
-#: ../src/EWS/common/e-ews-connection.c:3238
+#: ../src/EWS/common/e-ews-connection.c:3247
 msgid "Failed to find <OAB> element\n"
 msgstr "查找 <OAB> 元素失败\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8795
+#: ../src/EWS/common/e-ews-connection.c:8803
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "至少需要 Microsoft Exchange 2010 SP1 服务器"
 
-#: ../src/EWS/common/e-ews-connection.c:8896
+#: ../src/EWS/common/e-ews-connection.c:8904
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "至少需要 Microsoft Exchange 2013 服务器"
 
-#: ../src/EWS/common/e-ews-connection.c:9049
+#: ../src/EWS/common/e-ews-connection.c:9057
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "至少需要 Microsoft Exchange 2010 服务器"
 
-#: ../src/EWS/common/e-ews-connection.c:9189
+#: ../src/EWS/common/e-ews-connection.c:9197
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "至少需要 Microsoft Exchange 2007 SP1 服务器"
 
@@ -1557,24 +1557,40 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "用户“{0}”的文件夹已被成功订阅。"
 
 #: ../src/EWS/registry/e-ews-backend.c:1045
-#: ../src/Microsoft365/registry/e-m365-backend.c:670
+#: ../src/Microsoft365/registry/e-m365-backend.c:686
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "无法为名为“%s”的新文件夹确定合适的文件夹类"
 
-#: ../src/EWS/registry/e-ews-backend.c:1134
+#: ../src/EWS/registry/e-ews-backend.c:1133
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "数据源“%s”不代表 Exchange Web 服务文件夹"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1711
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
 msgid "Folder ID is not set"
 msgstr "文件夹 ID 未设置"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2004
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "无法将联系人列表保存到 Microsoft 365 地址簿中"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2016
+msgid "Cannot modify organizational contact"
+msgstr "无法修改组织联系人"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2018
+msgid "Cannot modify user contact"
+msgstr "无法修改用户联系人"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+msgid "Cannot remove organizational contact"
+msgstr "无法移除组织联系人"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+msgid "Cannot remove user contact"
+msgstr "无法移除用户联系人"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
@@ -1599,33 +1615,33 @@ msgstr "Microsoft 365 日历无法存储具有 RDATE、EXDATE 或 RRULE 属性�
 msgid "Unknown recurrence frequency (%d)"
 msgstr "未知重复频率（%d）"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr "Microsoft 365 日历无法存储一个以上的事件提醒"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr "Microsoft 365 事件在事件开始之前只能有一个提醒"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 任务只能有一个使用绝对时间的提醒"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 任务不能带有附件。"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "无法存储 URI 为“%s”的附件"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
 msgid "Failed to read attachment URI"
 msgstr "读取附件 URI 失败"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
 msgid "Failed to get inline attachment data"
 msgstr "获取内联附件数据失败"
 
@@ -1665,7 +1681,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "通过 Microsoft 365 接收邮件"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1249
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "格式错误的 URI：“%s”"
@@ -1713,33 +1729,33 @@ msgid ""
 msgstr "此选项会使用 OAuth 2.0 访问令牌来连接到 Microsoft 365 服务器"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:886
+#: ../src/Microsoft365/common/e-m365-connection.c:893
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Microsoft 365 服务器正忙，正在等待重试（%d:%02d 分钟）"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:892
+#: ../src/Microsoft365/common/e-m365-connection.c:899
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Microsoft 365 服务器正忙，正在等待重试（%d 秒）"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1017
-#: ../src/Microsoft365/common/e-m365-connection.c:1044
+#: ../src/Microsoft365/common/e-m365-connection.c:1024
+#: ../src/Microsoft365/common/e-m365-connection.c:1051
 msgid "Invalid data"
 msgstr "无效数据"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1042
+#: ../src/Microsoft365/common/e-m365-connection.c:1049
 msgid "Operation was cancelled"
 msgstr "操作已取消"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1725
+#: ../src/Microsoft365/common/e-m365-connection.c:1740
 msgid "Failed to parse own Json data"
 msgstr "解析自己的 Json 数据失败"
 
@@ -1764,7 +1780,15 @@ msgstr "默认 tenant 为“%s”"
 msgid "_Redirect URI:"
 msgstr "重定向 URI(_R)："
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:761
+#: ../src/Microsoft365/registry/e-m365-backend.c:381
+msgid "Organizational Contacts"
+msgstr "组织联系人"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:388
+msgid "Organizational Users"
+msgstr "组织用户"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:777
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "数据源“%s”不代表 Microsoft 365 文件夹"
