@@ -1,3 +1,12 @@
+Evolution-EWS 3.50.2 2023-12-01
+-------------------------------
+
+Bug Fixes:
+	I#248 - Calendar: Don't convert UTC times to local timezone
+
+Translations:
+	Florentina Mușat (ro)
+
 Evolution-EWS 3.50.1 2023-10-20
 -------------------------------
 
