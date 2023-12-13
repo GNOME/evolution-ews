@@ -344,7 +344,7 @@ ews_get_calendar_mime_part (CamelMimePart *mimepart)
 }
 
 static gchar *
-ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
+ews_update_mtgrequest_mime_calendar_itemid (const gchar *mime_fname,
                                             const EwsId *calendar_item_id,
                                             gboolean is_calendar_UID,
 					    const EwsId *mail_item_id,
@@ -404,6 +404,35 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		if (ba && ba->len) {
 			g_byte_array_append (ba, (guint8 *) "\0", 1);
 			icomp = i_cal_parser_parse_string ((gchar *) ba->data);
+			if (!icomp) {
+				const gchar *content = (const gchar *) ba->data;
+				const gchar *begin_vcalendar, *end_vcalendar;
+
+				/* Workaround Office365.com error, which returns invalid iCalendar object (without 'END:VCALENDAR'),
+				   in the MimeContent's text/calendar attachments as of 2023-12-12. */
+				begin_vcalendar = camel_strstrcase (content, "BEGIN:VCALENDAR");
+				end_vcalendar = camel_strstrcase (content, "END:VCALENDAR");
+
+				/* If it exists, then it should be alone on a separate line */
+				if (!(begin_vcalendar && (begin_vcalendar == content || begin_vcalendar[-1] == '\n') &&
+				    (begin_vcalendar[15 /* strlen ("BEGIN:VCALENDAR") */] == '\r' || begin_vcalendar[15] == '\n')))
+					begin_vcalendar = NULL;
+
+				/* If it exists, then it should be alone on a separate line and not at the very beginning of the mime_content */
+				if (!(end_vcalendar && end_vcalendar > content && end_vcalendar[-1] == '\n' &&
+				    (end_vcalendar[13 /* strlen ("END:VCALENDAR") */] == '\r' || end_vcalendar[13] == '\n' || end_vcalendar[13] == '\0')))
+					end_vcalendar = NULL;
+
+				if (begin_vcalendar && !end_vcalendar) {
+					g_byte_array_remove_index (ba, ba->len - 1);
+					#define add_str(_str) g_byte_array_append (ba, (guint8 *) _str, strlen (_str))
+					add_str ("\r\nEND:VCALENDAR\r\n");
+					#undef add_str
+					g_byte_array_append (ba, (guint8 *) "\0", 1);
+
+					icomp = i_cal_parser_parse_string ((const gchar *) ba->data);
+				}
+			}
 		}
 		if (icomp) {
 			ICalComponent *subcomp;
@@ -922,7 +951,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		e_ews_additional_props_free (add_props);
 		g_slist_free (html_body_ids);
 
-		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, e_ews_item_get_id (items->data), html_body, error);
+		mime_fname_new = ews_update_mtgrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, e_ews_item_get_id (items->data), html_body, error);
 		if (mime_fname_new)
 			mime_content = (const gchar *) mime_fname_new;
 
