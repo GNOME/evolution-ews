@@ -1071,6 +1071,26 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		 */
 		if (!e_cal_util_component_has_property (icomp, I_CAL_ATTENDEE_PROPERTY)) {
 			e_cal_util_component_remove_property_by_kind (icomp, I_CAL_ORGANIZER_PROPERTY, TRUE);
+		} else if (i_cal_component_count_properties (icomp, I_CAL_ORGANIZER_PROPERTY) == 1 &&
+			   i_cal_component_count_properties (icomp, I_CAL_ATTENDEE_PROPERTY) == 1) {
+			/* Outlook 2019 adds the ORGANIZER and the ATTENDEE for plain events, having
+			   them both address the same user, thus not a real meeting, verify that
+			   and remove the properties if it's so. */
+			ICalProperty *organizer, *attendee;
+
+			organizer = i_cal_component_get_first_property (icomp, I_CAL_ORGANIZER_PROPERTY);
+			attendee = i_cal_component_get_first_property (icomp, I_CAL_ATTENDEE_PROPERTY);
+
+			if (organizer && attendee &&
+			    i_cal_property_get_organizer (organizer) &&
+			    i_cal_property_get_attendee (attendee) &&
+			    g_ascii_strcasecmp (i_cal_property_get_organizer (organizer), i_cal_property_get_attendee (attendee)) == 0) {
+				e_cal_util_component_remove_property_by_kind (icomp, I_CAL_ORGANIZER_PROPERTY, TRUE);
+				e_cal_util_component_remove_property_by_kind (icomp, I_CAL_ATTENDEE_PROPERTY, TRUE);
+			}
+
+			g_clear_object (&organizer);
+			g_clear_object (&attendee);
 		}
 
 		i_cal_component_set_uid (icomp, uid ? uid : item_id->id);
