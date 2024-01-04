@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-03-18 12:46+0000\n"
-"PO-Revision-Date: 2023-09-11 20:55+0200\n"
+"POT-Creation-Date: 2023-09-16 12:01+0000\n"
+"PO-Revision-Date: 2024-01-04 14:23+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -34,10 +34,8 @@ msgid "For accessing Exchange servers using Web Services"
 msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:2881
-#, fuzzy
-#| msgid "_Fetch contact photos"
 msgid "Fetching contact photos…"
-msgstr "_Pridobi slike stikov"
+msgstr "Pridobivanje fotografij stikov ..."
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:4061
 msgid "Failed to update GAL:"
@@ -54,32 +52,32 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Nastavljanje slike stika je spodletelo:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2036
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Prosto"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zasedeno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2044
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2046
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2043
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Poskusno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2626
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2900
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2623
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2897
 msgid "Cannot determine EWS ItemId"
 msgstr ""
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3199
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3196
 #, fuzzy
 #| msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgid ""
@@ -87,11 +85,11 @@ msgid ""
 "calendar."
 msgstr "Vir podatkov »%s« ne predstavlja mape spletnih storitev Exchange"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3236
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3233
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4122
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Med prisotnimi ni mogoče najti uporabnika »%s«"
@@ -107,33 +105,33 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr ""
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2180
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2195
 msgid "Invalid occurrence ID"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:353
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Ni mogoče odpreti začasne datoteke vsebine MIME."
 
-#: ../src/EWS/camel/camel-ews-folder.c:361
+#: ../src/EWS/camel/camel-ews-folder.c:372
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Ni mogoče ustvariti razčlenjevalnika iz vsebine MIME!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:370
+#: ../src/EWS/camel/camel-ews-folder.c:381
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Ni mogoče razčleniti zahtev srečanj vsebine MIME!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:454
-#: ../src/EWS/camel/camel-ews-folder.c:664
+#: ../src/EWS/camel/camel-ews-folder.c:465
+#: ../src/EWS/camel/camel-ews-folder.c:675
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Ni mogoče ustvariti datoteke predpomnilnika"
 
-#: ../src/EWS/camel/camel-ews-folder.c:781
-#: ../src/EWS/camel/camel-ews-folder.c:925
+#: ../src/EWS/camel/camel-ews-folder.c:792
+#: ../src/EWS/camel/camel-ews-folder.c:936
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Ni mogoče ustvariti poti predpomnilnika »%s«: %s"
@@ -141,25 +139,35 @@ msgstr "Ni mogoče ustvariti poti predpomnilnika »%s«: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:939
+#: ../src/EWS/camel/camel-ews-folder.c:950
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Premikanje datoteke predpomnilnika iz »%s« v »%s« je spodletelo: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1878
+#: ../src/EWS/camel/camel-ews-folder.c:1889
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2350
+#: ../src/EWS/camel/camel-ews-folder.c:2364
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Osveževanje mape »%s«"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2543
+#: ../src/EWS/camel/camel-ews-folder.c:2557
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanja na mapi v načinu brez povezave"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3230
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+msgid "Apply message _filters to this folder"
+msgstr ""
+
+#: ../src/EWS/camel/camel-ews-folder.c:3242
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+msgid "Always check for _new mail in this folder"
+msgstr "Vedno preveri, ali je v tej mapi _nova pošta"
 
 #: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
@@ -203,7 +211,7 @@ msgstr "_Uskladi oddaljeno pošto vseh map"
 
 #: ../src/EWS/camel/camel-ews-provider.c:49
 msgid "Show _Public Folders beside user folders"
-msgstr ""
+msgstr "Pokaži _javne mape poleg uporabniških map"
 
 #: ../src/EWS/camel/camel-ews-provider.c:52
 #: ../src/Microsoft365/camel/camel-m365-provider.c:42
@@ -220,8 +228,9 @@ msgstr "Časovna pre_koračitev povezave (v sekundah) %s"
 
 #: ../src/EWS/camel/camel-ews-provider.c:58
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
+#, fuzzy
 msgid "Numbe_r of concurrent connections to use"
-msgstr ""
+msgstr "_Število sočasnih povezav za uporabo"
 
 #: ../src/EWS/camel/camel-ews-provider.c:60
 msgid "Override _User-Agent header value"
@@ -439,46 +448,46 @@ msgstr "Mape Smeti ni mogoče najti"
 msgid "Could not locate Junk folder"
 msgstr "Mape za vsiljeno pošto ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3651
+#: ../src/EWS/camel/camel-ews-store.c:3665
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave se ni mogoče naročiti na mape EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:3674
+#: ../src/EWS/camel/camel-ews-store.c:3688
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker ustrezne javne mape ni na voljo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3684
+#: ../src/EWS/camel/camel-ews-store.c:3698
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3693
+#: ../src/EWS/camel/camel-ews-store.c:3707
 #, fuzzy, c-format
 #| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3718
 #, fuzzy, c-format
 #| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3780
+#: ../src/EWS/camel/camel-ews-store.c:3794
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče preklicati naročil na mape EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:3891
-#: ../src/Microsoft365/camel/camel-m365-store.c:1772
-#: ../src/Microsoft365/camel/camel-m365-store.c:1785
+#: ../src/EWS/camel/camel-ews-store.c:3905
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
+#: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3963
-#: ../src/EWS/camel/camel-ews-store.c:4000
+#: ../src/EWS/camel/camel-ews-store.c:3977
+#: ../src/EWS/camel/camel-ews-store.c:4014
 msgid "Unsetting the “Out of Office” status"
 msgstr "Poteka preklic nastavitve stanja »Izven pisarne«"
 
@@ -551,7 +560,7 @@ msgstr ""
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:514
+#: ../src/EWS/common/e-ews-connection.c:516
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -568,7 +577,7 @@ msgstr[3] ""
 "Strežnik Exchange je zaseden, poskus povezovanja bo ponovljen čez %d:%02d "
 "minute."
 
-#: ../src/EWS/common/e-ews-connection.c:520
+#: ../src/EWS/common/e-ews-connection.c:522
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -581,63 +590,65 @@ msgstr[2] ""
 msgstr[3] ""
 "Strežnik Exchange je zaseden, poskus povezovanja bo ponovljen čez %d sekunde."
 
-#: ../src/EWS/common/e-ews-connection.c:649
+#: ../src/EWS/common/e-ews-connection.c:651
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/EWS/common/e-ews-connection.c:2426
+#: ../src/EWS/common/e-ews-connection.c:2428
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/EWS/common/e-ews-connection.c:2432
+#: ../src/EWS/common/e-ews-connection.c:2434
 msgid "Failed to find <Autodiscover> element"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2442
+#: ../src/EWS/common/e-ews-connection.c:2444
 msgid "Failed to find <Response> element"
 msgstr "Iskanje predmeta <odziva> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2454
 msgid "Failed to find <Account> element"
 msgstr "Iskanje predmeta <računa> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2497
+#: ../src/EWS/common/e-ews-connection.c:2499
 #, fuzzy
 #| msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/EWS/common/e-ews-connection.c:2573
+#: ../src/EWS/common/e-ews-connection.c:2575
 msgid "URL cannot be NULL"
 msgstr "URL ne sme biti NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:2991
+#: ../src/EWS/common/e-ews-connection.c:3000
 msgid "Email address is missing a domain part"
 msgstr "V elektronskem naslovu manjka del z domeno"
 
-#: ../src/EWS/common/e-ews-connection.c:3200
+#: ../src/EWS/common/e-ews-connection.c:3209
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke imenika OAB XML je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:3238
+#: ../src/EWS/common/e-ews-connection.c:3247
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje imenika <OAB> je spodletelo.\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8795
+#: ../src/EWS/common/e-ews-connection.c:8804
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr ""
+"Potrebujete vsaj strežnik Microsoft Exchange 2010 s servisnim paketom SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8896
+#: ../src/EWS/common/e-ews-connection.c:8905
 msgid "Requires at least Microsoft Exchange 2013 server"
-msgstr ""
+msgstr "Potrebujete vsaj strežnik Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9049
+#: ../src/EWS/common/e-ews-connection.c:9058
 msgid "Requires at least Microsoft Exchange 2010 server"
-msgstr ""
+msgstr "Potrebujete vsaj strežnik Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9189
+#: ../src/EWS/common/e-ews-connection.c:9198
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr ""
+"Potrebujete vsaj strežnik Microsoft Exchange 2007 s servisnim paketom SP1"
 
 #: ../src/EWS/common/e-ews-connection-utils.c:206
 #, c-format
@@ -669,8 +680,9 @@ msgid "Office365"
 msgstr "Office365"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:88
+#, fuzzy
 msgid "Use only _primary contact email address"
-msgstr ""
+msgstr "Uporabi samo _primarni e-poštni naslov stika"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:89
 msgid ""
@@ -684,11 +696,11 @@ msgstr "_Pridobi slike stikov"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:102
 msgid "Tries to look up for user photo"
-msgstr ""
+msgstr "Poskuša poiskati fotografijo uporabnika"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
 msgid "Online Meeting"
-msgstr ""
+msgstr "Spletni sestanek"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
 msgid "Create the meeting as an online meeting in the main user calendar"
@@ -1304,6 +1316,7 @@ msgstr ""
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
 msgid "Use _protocol version 2.0 (for school and organization accounts)"
 msgstr ""
+"Uporabi _protokol različice 2.0 (za šolske račune in račune organizacij)"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
 msgid "Host URL is not valid"
@@ -1561,11 +1574,11 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
 msgid "Click the Subscribe button to add it to Evolution."
-msgstr ""
+msgstr "Kliknite gumb Naroči se, da ga dodate v Evolution."
 
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:125
 msgid "Subscribe"
-msgstr ""
+msgstr "Naroči se"
 
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:134
 msgid "Failed to extract sharing information from provided data."
@@ -1609,11 +1622,11 @@ msgstr "Na računu Exchange »{0}« je določeno stanje »Izven pisarne«."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
 msgid "Failed to subscribe user folder."
-msgstr ""
+msgstr "Ni se bilo mogoče naročiti na uporabniško mapo."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
 msgid "Folder had been subscribed."
-msgstr ""
+msgstr "Naročanje na mapo je uspelo."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:9
 msgid "Folder of user “{0}” had been subscribed successfully."
@@ -1696,20 +1709,20 @@ msgstr "Branje iz naslova je spodletelo"
 msgid "Failed to get inline attachment data"
 msgstr "Nastavljanje slike stika je spodletelo:"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:587
-#: ../src/Microsoft365/camel/camel-m365-folder.c:989
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1350
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:502
+#: ../src/Microsoft365/camel/camel-m365-folder.c:598
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
 msgid "Invalid folder state (missing parent store)"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1718
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1737
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ni mogoče naložiti povzetka za »%s«"
@@ -1732,7 +1745,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr ""
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1244
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr ""
@@ -1743,10 +1756,8 @@ msgstr ""
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:541
 #: ../src/Microsoft365/camel/camel-m365-transport.c:330
-#, fuzzy
-#| msgid "Failed to set contact photo:"
 msgid "Failed to create connection"
-msgstr "Nastavljanje slike stika je spodletelo:"
+msgstr "Povezave ni bilo mogoče ustvariti"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
@@ -1790,7 +1801,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:886
+#: ../src/Microsoft365/common/e-m365-connection.c:888
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1807,7 +1818,7 @@ msgstr[3] ""
 "Strežnik Microsoft 365 je zaseden, poskus povezovanja bo ponovljen čez %d:"
 "%02d minute."
 
-#: ../src/Microsoft365/common/e-m365-connection.c:892
+#: ../src/Microsoft365/common/e-m365-connection.c:894
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1824,16 +1835,16 @@ msgstr[3] ""
 "Strežnik Microsoft 365 je zaseden, poskus povezovanja bo ponovljen čez %d "
 "sekunde."
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1017
-#: ../src/Microsoft365/common/e-m365-connection.c:1044
+#: ../src/Microsoft365/common/e-m365-connection.c:1019
+#: ../src/Microsoft365/common/e-m365-connection.c:1046
 msgid "Invalid data"
 msgstr "Neveljavni podatki"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1042
+#: ../src/Microsoft365/common/e-m365-connection.c:1044
 msgid "Operation was cancelled"
 msgstr "Opravilo je bilo preklicano"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1725
+#: ../src/Microsoft365/common/e-m365-connection.c:1729
 #, fuzzy
 #| msgid "Failed to parse oab XML"
 msgid "Failed to parse own Json data"
