@@ -1,3 +1,31 @@
+Evolution-EWS 3.51.1 2024-01-05
+-------------------------------
+
+Bug Fixes:
+	I#245 - Enable Microsoft365 (Microsoft Graph API) part in preview mode
+	I#246 - Search in online GAL when OAB is misconfigured
+	I#247 - Text from .error file not translated in the GUI
+	I#248 - Calendar: Don't convert UTC times to local timezone
+	I#250 - Mail: Calendar attachments can be broken by the server
+	I#251 - Workaround Outlook 2019 ORGANIZER and ATTENDEE addition into plain events
+	evo-I#935 - Camel: Populate message preview with server-side value
+	M!9 - Fix scope for OAuth2 v2 being hard-coded to O365 (Mara Sophie Grosch)
+
+Miscellaneous:
+	build: Use -Wshadow build option, if available
+	Microsoft365: Read Organizational Contacts and Users
+	Update Flatpak manifest
+
+Translations:
+	Alan Mortensen (da)
+	Boyuan Yang (zh_CN)
+	Florentina Mușat (ro)
+	Jürgen Benvenuti (de)
+	Kukuh Syafaat (id)
+	Martin (sl)
+	Sabri Ünal (tr)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.50.0 2023-09-15
 -------------------------------
 
