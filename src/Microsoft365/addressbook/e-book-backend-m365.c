@@ -1939,7 +1939,7 @@ ebb_m365_load_contact_sync (EBookMetaBackend *meta_backend,
 {
 	EBookBackendM365 *bbm365;
 	EM365Contact *contact = NULL;
-	gboolean success;
+	gboolean success = FALSE;
 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (uid != NULL, FALSE);
