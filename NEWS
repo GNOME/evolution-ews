@@ -1,3 +1,13 @@
+Evolution-EWS 3.50.3 2024-01-05
+-------------------------------
+
+Bug Fixes:
+	I#250 - Mail: Calendar attachments can be broken by the server
+	I#251 - Workaround Outlook 2019 ORGANIZER and ATTENDEE addition into plain events
+
+Translations:
+	Martin (sl)
+
 Evolution-EWS 3.50.2 2023-12-01
 -------------------------------
 
