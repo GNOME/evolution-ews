@@ -1093,6 +1093,17 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			g_clear_object (&attendee);
 		}
 
+		if (e_ews_item_get_event_url (item)) {
+			prop = i_cal_component_get_first_property (icomp, I_CAL_URL_PROPERTY);
+			if (prop) {
+				i_cal_property_set_url (prop, e_ews_item_get_event_url (item));
+				g_object_unref (prop);
+			} else {
+				prop = i_cal_property_new_url (e_ews_item_get_event_url (item));
+				i_cal_component_take_property (icomp, prop);
+			}
+		}
+
 		i_cal_component_set_uid (icomp, uid ? uid : item_id->id);
 
 		e_cal_util_component_set_x_property (icomp, "X-EVOLUTION-ITEMID", item_id->id);
@@ -1366,11 +1377,10 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 		modified_occurrences = e_ews_item_get_modified_occurrences (item);
 		if (modified_occurrences) {
 			EEwsAdditionalProps *modified_add_props;
+			EEwsExtendedFieldURI *ext_uri;
 
 			modified_add_props = e_ews_additional_props_new ();
 			if (e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010)) {
-				EEwsExtendedFieldURI *ext_uri;
-
 				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
 
 				ext_uri = e_ews_extended_field_uri_new ();
@@ -1387,6 +1397,12 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 			} else {
 				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
 			}
+
+			ext_uri = e_ews_extended_field_uri_new ();
+			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+			ext_uri->prop_name = g_strdup ("EvolutionEWSURL");
+			ext_uri->prop_type = g_strdup ("String");
+			modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
 
 			success = ecb_ews_get_items_sync (cbews, modified_occurrences, "IdOnly", modified_add_props, out_components, cancellable, error);
 
@@ -1450,11 +1466,10 @@ ecb_ews_fetch_items_sync (ECalBackendEws *cbews,
 
 	if (event_ids) {
 		EEwsAdditionalProps *add_props;
+		EEwsExtendedFieldURI *ext_uri;
 
 		add_props = e_ews_additional_props_new ();
 		if (e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010)) {
-			EEwsExtendedFieldURI *ext_uri;
-
 			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
 
 			ext_uri = e_ews_extended_field_uri_new ();
@@ -1471,6 +1486,12 @@ ecb_ews_fetch_items_sync (ECalBackendEws *cbews,
 		} else {
 			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
 		}
+
+		ext_uri = e_ews_extended_field_uri_new ();
+		ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+		ext_uri->prop_name = g_strdup ("EvolutionEWSURL");
+		ext_uri->prop_type = g_strdup ("String");
+		add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
 
 		success = ecb_ews_get_items_sync (cbews, event_ids, "IdOnly", add_props, out_components, cancellable, error);
 

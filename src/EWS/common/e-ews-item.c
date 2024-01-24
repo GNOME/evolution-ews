@@ -127,6 +127,7 @@ struct _EEwsItemPrivate {
 	gchar *contact_photo_id;
 	gchar *iana_start_time_zone;
 	gchar *iana_end_time_zone;
+	gchar *event_url;
 
 	GSList *to_recipients;
 	GSList *cc_recipients;
@@ -217,6 +218,7 @@ e_ews_item_dispose (GObject *object)
 	g_clear_pointer (&priv->contact_photo_id, g_free);
 	g_clear_pointer (&priv->iana_start_time_zone, g_free);
 	g_clear_pointer (&priv->iana_end_time_zone, g_free);
+	g_clear_pointer (&priv->event_url, g_free);
 
 	g_slist_free_full (priv->to_recipients, (GDestroyNotify) e_ews_mailbox_free);
 	priv->to_recipients = NULL;
@@ -523,6 +525,8 @@ parse_extended_property (EEwsItemPrivate *priv,
 			priv->iana_start_time_zone = g_strdup (value);
 		} else if (g_strcmp0 (name, "EvolutionEWSEndTimeZone") == 0) {
 			priv->iana_end_time_zone = g_strdup (value);
+		} else if (g_strcmp0 (name, "EvolutionEWSURL") == 0) {
+			priv->event_url = value && *value ? g_strdup (value) : NULL;
 		} else {
 			GHashTable *set_hash = g_hash_table_lookup (priv->mapi_extended_sets, setid);
 
@@ -2066,6 +2070,14 @@ e_ews_item_get_iana_end_time_zone (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return item->priv->iana_end_time_zone;
+}
+
+const gchar *
+e_ews_item_get_event_url (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->event_url;
 }
 
 EwsMailbox *

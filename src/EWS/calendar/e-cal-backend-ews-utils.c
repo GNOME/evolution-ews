@@ -1250,6 +1250,18 @@ convert_vevent_calcomp_to_xml (ESoapRequest *request,
 	else
 		e_ews_request_write_string_parameter (request, "ReminderIsSet", NULL, "false");
 
+	prop = i_cal_component_get_first_property (icomp, I_CAL_URL_PROPERTY);
+	if (prop) {
+		value = i_cal_property_get_url (prop);
+		if (value && *value) {
+			e_ews_request_add_extended_property_distinguished_name_string (request,
+				"PublicStrings",
+				"EvolutionEWSURL",
+				value);
+		}
+		g_object_unref (prop);
+	}
+
 	/* start time, end time and meeting time zone */
 	dtstart = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
 	tzid_start = dtstart ? i_cal_time_get_timezone (dtstart) : NULL;
@@ -1919,6 +1931,51 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 		e_ews_request_start_set_item_field (request, "MeetingTimeZone", "calendar", "CalendarItem");
 		ewscal_set_meeting_timezone (request, tzid_start ? tzid_start : convert_data->default_zone, icomp);
 		e_ews_request_end_set_item_field (request);
+	}
+
+	prop = i_cal_component_get_first_property (icomp, I_CAL_URL_PROPERTY);
+	if (prop) {
+		ICalProperty *old_prop;
+		gboolean changed = FALSE;
+
+		old_prop = i_cal_component_get_first_property (icomp_old, I_CAL_URL_PROPERTY);
+		if (old_prop)
+			old_value = i_cal_property_get_url (old_prop);
+		else
+			old_value = NULL;
+
+		value = i_cal_property_get_url (prop);
+
+		changed = g_strcmp0 (old_value, value) != 0;
+
+		if (changed && value && *value) {
+			e_ews_request_add_set_item_field_extended_distinguished_name_string (request,
+				NULL,
+				"CalendarItem",
+				"PublicStrings",
+				"EvolutionEWSURL",
+				value);
+		} else if (changed) {
+			e_ews_request_add_delete_item_field_extended_distinguished_name (request,
+				"PublicStrings",
+				"EvolutionEWSURL",
+				E_EWS_MESSAGE_DATA_TYPE_STRING);
+		}
+
+		g_clear_object (&old_prop);
+		g_object_unref (prop);
+	} else {
+		ICalProperty *old_prop;
+
+		old_prop = i_cal_component_get_first_property (icomp_old, I_CAL_URL_PROPERTY);
+		if (old_prop) {
+			e_ews_request_add_delete_item_field_extended_distinguished_name (request,
+				"PublicStrings",
+				"EvolutionEWSURL",
+				E_EWS_MESSAGE_DATA_TYPE_STRING);
+
+			g_object_unref (old_prop);
+		}
 	}
 
 	e_ews_request_end_item_change (request);

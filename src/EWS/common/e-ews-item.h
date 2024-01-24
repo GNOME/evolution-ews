@@ -456,6 +456,7 @@ const gchar *	e_ews_item_get_iana_start_time_zone
 						(EEwsItem *item);
 const gchar *	e_ews_item_get_iana_end_time_zone
 						(EEwsItem *item);
+const gchar *	e_ews_item_get_event_url	(EEwsItem *item);
 
 /* Folder Permissions */
 EEwsPermission *e_ews_permission_new		(EEwsPermissionUserType user_type,
