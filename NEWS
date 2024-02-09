@@ -1,3 +1,15 @@
+Evolution-EWS 3.51.2 2024-02-09
+-------------------------------
+
+Bug Fixes:
+	I#256 - Calendar: Store "Web page" in ExtendedProperty
+
+Miscellaneous:
+	build: Bump CMake version requirement to 3.15
+
+Translations:
+	Pavel Koulikov (ru)
+
 Evolution-EWS 3.51.1 2024-01-05
 -------------------------------
 
