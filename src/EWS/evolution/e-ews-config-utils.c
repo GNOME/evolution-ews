@@ -331,18 +331,15 @@ e_ews_config_utils_open_connection_for (ESource *source,
                                         GError **perror)
 {
 	EEwsConnection *conn = NULL;
-	CamelNetworkSettings *network_settings;
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (source != NULL, NULL);
 	g_return_val_if_fail (ews_settings != NULL, NULL);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
-
 	/* use the one from mailer, if there, otherwise open new */
 	conn = e_ews_connection_find (
 		connect_url && *connect_url ? connect_url : camel_ews_settings_get_hosturl (ews_settings),
-		camel_network_settings_get_user (network_settings));
+		ews_settings);
 	if (conn) {
 		if (try_credentials_func &&
 		    try_credentials_func (conn, NULL, user_data, cancellable, perror) != E_SOURCE_AUTHENTICATION_ACCEPTED) {

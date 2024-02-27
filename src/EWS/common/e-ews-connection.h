@@ -471,7 +471,7 @@ void		e_ews_connection_set_last_subscription_id
 						(EEwsConnection *cnc,
 						 const gchar *subscription_id);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
-						 const gchar *username);
+						 CamelEwsSettings *ews_settings);
 GSList *	e_ews_connection_list_existing	(void); /* EEwsConnection * */
 
 gboolean	e_ews_autodiscover_ws_url_sync	(ESource *source,

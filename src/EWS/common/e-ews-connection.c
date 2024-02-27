@@ -1631,10 +1631,32 @@ e_ews_attachment_info_set_id (EEwsAttachmentInfo *info,
 
 /* Connection APIS */
 
+static gchar *
+e_ews_connection_construct_hash_key (const gchar *uri,
+				     CamelEwsSettings *ews_settings)
+{
+	gchar *impersonate_user = NULL, *user, *hash_key;
+
+	user = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (ews_settings));
+
+	if (camel_ews_settings_get_use_impersonation (ews_settings))
+		impersonate_user = camel_ews_settings_dup_impersonate_user (ews_settings);
+
+	if (impersonate_user && *impersonate_user)
+		hash_key = g_strdup_printf ("%s#%s@%s", impersonate_user, user, uri);
+	else
+		hash_key = g_strdup_printf ("%s@%s", user, uri);
+
+	g_free (impersonate_user);
+	g_free (user);
+
+	return hash_key;
+}
+
 /**
  * e_ews_connection_find
  * @uri: Exchange server uri
- * @username:
+ * @ews_settings: a #CamelEwsSettings
  *
  * Find an existing connection for this user/uri, if it exists.
  *
@@ -1642,7 +1664,7 @@ e_ews_attachment_info_set_id (EEwsAttachmentInfo *info,
  **/
 EEwsConnection *
 e_ews_connection_find (const gchar *uri,
-                       const gchar *username)
+                       CamelEwsSettings *ews_settings)
 {
 	EEwsConnection *cnc;
 	gchar *hash_key;
@@ -1651,12 +1673,8 @@ e_ews_connection_find (const gchar *uri,
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf (
-			"%s@%s",
-			username ? username : "",
-			uri);
-		cnc = g_hash_table_lookup (
-			loaded_connections_permissions, hash_key);
+		hash_key = e_ews_connection_construct_hash_key (uri, ews_settings);
+		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
 		g_free (hash_key);
 
 		if (E_IS_EWS_CONNECTION (cnc) &&
@@ -1722,20 +1740,15 @@ e_ews_connection_new_full (ESource *source,
 			   CamelEwsSettings *settings,
 			   gboolean allow_connection_reuse)
 {
-	CamelNetworkSettings *network_settings;
 	EEwsConnection *cnc;
 	gchar *hash_key;
-	gchar *user;
 
 	if (source)
 		g_return_val_if_fail (E_IS_SOURCE (source), NULL);
 	g_return_val_if_fail (uri != NULL, NULL);
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_dup_user (network_settings);
-	hash_key = g_strdup_printf ("%s@%s", user, uri);
-	g_free (user);
+	hash_key = e_ews_connection_construct_hash_key (uri, settings);
 
 	g_mutex_lock (&connecting);
 

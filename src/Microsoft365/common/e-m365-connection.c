@@ -81,6 +81,36 @@ m365_log_enabled (void)
 	return log_enabled == 1;
 }
 
+static gchar *
+m365_connection_construct_hash_key (CamelM365Settings *settings)
+{
+	gchar *user;
+	gchar *hash_key = NULL;
+
+	user = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (settings));
+
+	if (camel_m365_settings_get_use_impersonation (settings)) {
+		gchar *impersonate_user;
+
+		impersonate_user = camel_m365_settings_dup_impersonate_user (settings);
+
+		if (impersonate_user && *impersonate_user)
+			hash_key = g_strdup_printf ("%s#%s", impersonate_user, user ? user : "no-user");
+
+		g_free (impersonate_user);
+	}
+
+	if (!hash_key)
+		hash_key = g_steal_pointer (&user);
+
+	if (!hash_key)
+		hash_key = g_strdup ("no-user");
+
+	g_free (user);
+
+	return hash_key;
+}
+
 static void
 m365_connection_set_settings (EM365Connection *cnc,
 			      CamelM365Settings *settings)
@@ -309,10 +339,7 @@ m365_connection_constructed (GObject *object)
 		soup_session_remove_feature_by_type (cnc->priv->soup_session, SOUP_TYPE_AUTH_NEGOTIATE);
 	soup_session_add_feature_by_type (cnc->priv->soup_session, E_TYPE_SOUP_AUTH_BEARER);
 
-	cnc->priv->hash_key = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (cnc->priv->settings));
-
-	if (!cnc->priv->hash_key)
-		cnc->priv->hash_key = g_strdup ("no-user");
+	cnc->priv->hash_key = m365_connection_construct_hash_key (cnc->priv->settings);
 
 	e_binding_bind_property (
 		cnc, "proxy-resolver",
@@ -562,7 +589,7 @@ e_m365_connection_new_full (ESource *source,
 	EM365Connection *cnc;
 
 	if (allow_reuse) {
-		gchar *hash_key = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (settings));
+		gchar *hash_key = m365_connection_construct_hash_key (settings);
 
 		if (hash_key) {
 			G_LOCK (opened_connections);
