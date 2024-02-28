@@ -4167,6 +4167,13 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 	else
 		response_type = NULL;
 
+	if (!item_id && e_cal_util_component_has_organizer (subcomp) &&
+	    e_cal_util_component_has_attendee (subcomp) &&
+	    !ecb_ews_organizer_is_user (cbews, comp)) {
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, _("Cannot create meetings organized by other users in an Exchange Web Services calendar.")));
+		return FALSE;
+	}
+
 	while (pass < 2) {
 		/*in case we do not have item id we will create item with mime content only*/
 		if (!item_id || (response_type && g_ascii_strcasecmp (response_type, "NEEDS-ACTION") == 0)) {
