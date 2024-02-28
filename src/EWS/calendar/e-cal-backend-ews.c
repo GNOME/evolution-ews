@@ -3598,7 +3598,7 @@ ecb_ews_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 static gboolean
 ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 				      CamelAddress *from,
-				      CamelInternetAddress *recipient,
+				      CamelInternetAddress *recipients,
 				      const gchar *subject,
 				      const gchar *body,
 				      const gchar *calobj,
@@ -3675,12 +3675,12 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 	message = camel_mime_message_new ();
 	camel_mime_message_set_subject (message, subject);
 	camel_mime_message_set_from (message, CAMEL_INTERNET_ADDRESS (from));
-	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipient);
+	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipients);
 
 	camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) multi);
 	g_object_unref (multi);
 
-	success = camel_ews_utils_create_mime_message (cbews->priv->cnc, "SendOnly", NULL, message, NULL, from, NULL, NULL, NULL, cancellable, error);
+	success = camel_ews_utils_create_mime_message (cbews->priv->cnc, "SendAndSaveCopy", NULL, message, NULL, from, NULL, NULL, NULL, cancellable, error);
 
 	g_object_unref (message);
 	g_object_unref (vcal);
@@ -4565,7 +4565,6 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 	ECalBackendEws *cbews;
 	ICalComponentKind kind;
 	ICalComponent *icomp, *subcomp = NULL;
-	gchar *subcalobj;
 	gboolean success = TRUE;
 
 	g_return_if_fail (E_IS_CAL_BACKEND_EWS (sync_backend));
@@ -4606,6 +4605,7 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 		gchar *new_body_content, *org_cn;
 		ICalProperty *prop, *org_prop;
 		CamelInternetAddress *org_addr = camel_internet_address_new ();
+		CamelInternetAddress *attendees_addr = camel_internet_address_new ();
 
 		new_body_content = e_cal_util_component_dup_x_property (subcomp, "X-EVOLUTION-RETRACT-COMMENT");
 		prop = i_cal_component_get_first_property (subcomp, I_CAL_SUMMARY_PROPERTY);
@@ -4625,29 +4625,34 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 		for (prop = i_cal_component_get_first_property (subcomp, I_CAL_ATTENDEE_PROPERTY);
 		     prop && success;
 		     g_object_unref (prop), prop = i_cal_component_get_next_property (subcomp, I_CAL_ATTENDEE_PROPERTY)) {
-			CamelInternetAddress *attendee_addr = camel_internet_address_new ();
 			gchar *att_cn;
 
 			attendee = e_cal_util_strip_mailto (i_cal_property_get_attendee (prop));
 			if (!attendee || g_ascii_strcasecmp (org_email, attendee) == 0)
 				continue;
 
-			subcalobj = i_cal_component_as_ical_string (subcomp);
 			att_cn = i_cal_property_get_parameter_as_string (prop, "CN");
 
-			camel_internet_address_add (attendee_addr, att_cn, attendee);
+			camel_internet_address_add (attendees_addr, att_cn, attendee);
 
-			success = ecb_ews_send_cancellation_email_sync (cbews, CAMEL_ADDRESS (org_addr), attendee_addr,
+			g_free (att_cn);
+		}
+
+		if (camel_address_length (CAMEL_ADDRESS (attendees_addr)) > 0) {
+			gchar *subcalobj;
+
+			subcalobj = i_cal_component_as_ical_string (subcomp);
+
+			success = ecb_ews_send_cancellation_email_sync (cbews, CAMEL_ADDRESS (org_addr), attendees_addr,
 				subject, new_body_content, subcalobj, cancellable, error);
 
-			g_object_unref (attendee_addr);
 			g_free (subcalobj);
-			g_free (att_cn);
 		}
 
 		g_free (org_cn);
 		g_free (new_body_content);
 		g_clear_object (&org_prop);
+		g_object_unref (attendees_addr);
 		g_object_unref (org_addr);
 		g_object_unref (subcomp);
 		subcomp = i_cal_component_get_next_component (icomp, kind);
@@ -4750,7 +4755,6 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			E_CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
 			E_CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT,
 			E_CAL_STATIC_CAPABILITY_SAVE_SCHEDULES,
-			E_CAL_STATIC_CAPABILITY_RETRACT_SUPPORTED,
 			E_CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START,
 			E_CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			E_CAL_STATIC_CAPABILITY_ALL_DAY_EVENT_AS_TIME,
