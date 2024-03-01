@@ -1,3 +1,17 @@
+Evolution-EWS 3.51.3 2024-03-01
+-------------------------------
+
+Bug Fixes:
+	I#259 - Retract dialog can duplicate cancellation mails
+	I#260 - Do not change organizer when adding meeting from mail
+	I#261 - Impersonate mailbox uses original user's connection
+	eds-I#522 - build: Make sure tests run in serial
+
+Translations:
+	Anders Jonsson (sv)
+	Asier Sarasua Garmendia (eu)
+	Sabri Ünal (tr)
+
 Evolution-EWS 3.51.2 2024-02-09
 -------------------------------
 
