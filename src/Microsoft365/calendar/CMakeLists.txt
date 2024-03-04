@@ -27,7 +27,6 @@ target_compile_definitions(ecalbackendmicrosoft365 PRIVATE
 
 target_compile_options(ecalbackendmicrosoft365 PUBLIC
 	${CAMEL_CFLAGS}
-	${EVOLUTION_CALENDAR_CFLAGS}
 	${LIBEBACKEND_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBEDATACAL_CFLAGS}
@@ -41,7 +40,6 @@ target_include_directories(ecalbackendmicrosoft365 PUBLIC
 	${CMAKE_SOURCE_DIR}/src/Microsoft365
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
-	${EVOLUTION_CALENDAR_INCLUDE_DIRS}
 	${LIBEBACKEND_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBEDATACAL_INCLUDE_DIRS}
@@ -51,7 +49,6 @@ target_include_directories(ecalbackendmicrosoft365 PUBLIC
 target_link_libraries(ecalbackendmicrosoft365
 	${DEPENDENCIES}
 	${CAMEL_LDFLAGS}
-	${EVOLUTION_CALENDAR_LDFLAGS}
 	${LIBEBACKEND_LDFLAGS}
 	${LIBECAL_LDFLAGS}
 	${LIBEDATACAL_LDFLAGS}

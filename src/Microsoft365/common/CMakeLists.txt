@@ -31,7 +31,6 @@ target_compile_definitions(evolution-microsoft365 PRIVATE
 
 target_compile_options(evolution-microsoft365 PUBLIC
 	${CAMEL_CFLAGS}
-	${EVOLUTION_CALENDAR_CFLAGS}
 	${JSON_GLIB_CFLAGS}
 	${LIBEBACKEND_CFLAGS}
 	${LIBECAL_CFLAGS}
@@ -48,7 +47,6 @@ target_include_directories(evolution-microsoft365 PUBLIC
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CAMEL_INCLUDE_DIRS}
-	${EVOLUTION_CALENDAR_INCLUDE_DIRS}
 	${JSON_GLIB_INCLUDE_DIRS}
 	${LIBEBACKEND_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
@@ -59,7 +57,6 @@ target_include_directories(evolution-microsoft365 PUBLIC
 
 target_link_libraries(evolution-microsoft365
 	${CAMEL_LDFLAGS}
-	${EVOLUTION_CALENDAR_LDFLAGS}
 	${JSON_GLIB_LDFLAGS}
 	${LIBEBACKEND_LDFLAGS}
 	${LIBECAL_LDFLAGS}
