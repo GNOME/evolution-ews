@@ -342,7 +342,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
 	ews_backend->priv->oauth2_override_check = widget;
 
-	markup = g_markup_printf_escaped ("(<a href=\"https://wiki.gnome.org/Apps/Evolution/EWS/OAuth2\">%s</a>)", _("Help…"));
+	markup = g_markup_printf_escaped ("(<a href=\"https://gitlab.gnome.org/GNOME/evolution/-/wikis/EWS-OAuth2\">%s</a>)", _("Help…"));
 	widget = gtk_label_new (markup);
 	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
@@ -420,7 +420,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	markup = g_markup_printf_escaped ("(<a href=\"https://wiki.gnome.org/Apps/Evolution/EWS/OAuth2#Alternative_endpoints\">%s</a>)", _("Help…"));
+	markup = g_markup_printf_escaped ("(<a href=\"https://gitlab.gnome.org/GNOME/evolution/-/wikis/EWS-OAuth2#alternative-endpoints\">%s</a>)", _("Help…"));
 	widget = gtk_label_new (markup);
 	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);

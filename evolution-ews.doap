@@ -7,7 +7,7 @@
   <name xml:lang="en">evolution-ews</name>
   <shortdesc xml:lang="en">MS Exchange integration through Exchange Web Services</shortdesc>
   <description>MS Exchange integration for the Evolution application</description>
-  <homepage rdf:resource="https://wiki.gnome.org/Apps/Evolution" />
+  <homepage rdf:resource="https://gitlab.gnome.org/GNOME/evolution/-/wikis/home" />
   <mailing-list rdf:resource="https://lists.osuosl.org/mailman/listinfo/evolution-users" />
   <support-forum rdf:resource="https://discourse.gnome.org/tag/evolution" />
   <download-page rdf:resource="https://download.gnome.org/sources/evolution-ews" />
