@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-09-16 12:01+0000\n"
-"PO-Revision-Date: 2024-03-09 16:02+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
+"POT-Creation-Date: 2024-03-09 14:03+0000\n"
+"PO-Revision-Date: 2024-03-09 16:10+0200\n"
 "Last-Translator: Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>\n"
 "Language-Team: Latvian <lata-l10n@googlegroups.com>\n"
 "Language: lv\n"
@@ -30,65 +30,64 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Lai piekļūtu Exchange serveriem, izmantojot Web Services"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2881
-#| msgid "Failed to set contact photo:"
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
 msgid "Fetching contact photos…"
 msgstr "Saņem kontakta fotogrāfijas…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4061
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
 msgid "Failed to update GAL:"
 msgstr "Neizdevās atjaunināt GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4226
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nevar saglabāt kontaktu sarakstu, to atbalsta tikai EWS serveris 2010 vai "
 "jaunāks"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4324
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
 msgid "Failed to set contact photo:"
 msgstr "Neizdevās iestatīt kontakta fotogrāfiju:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2036
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Brīvs"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2039
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Aizņemts"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2041
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ārpus biroja"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2043
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Pagaidu"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2623
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2897
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
 msgid "Cannot determine EWS ItemId"
 msgstr "Nevar noteikt EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3196
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4173
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr ""
-"Nevar izveidot sapulci, ko organizē citi lietotāji Exchange Web Services"
-" kalendārā."
+"Nevar izveidot sapulci, ko organizē citi lietotāji Exchange Web Services "
+"kalendārā."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3233
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Tiešsaistes sapulci var izveidot tikai galvenā lietotāja kalendārā."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:4122
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4161
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Starp dalībniekiem nevar atrast lietotāju “%s”"
@@ -97,8 +96,8 @@ msgstr "Starp dalībniekiem nevar atrast lietotāju “%s”"
 msgid ""
 "Cannot connect to the server, repeat the action once you login to the server."
 msgstr ""
-"Nevar savienoties ar serveri, atkārtojiet darbību, kad būsiet ierakstījies"
-" serverī."
+"Nevar savienoties ar serveri, atkārtojiet darbību, kad būsiet ierakstījies "
+"serverī."
 
 #. Translators: The '%s' is replaced with a UID of the collection source
 #: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
@@ -106,33 +105,33 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Nevar atrast Microsoft365 palīga avotu kalendāram “%s”"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2195
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
 msgid "Invalid occurrence ID"
 msgstr "Nederīgs instances ID"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Neizdevās atvērt mimecontent pagaidu datni!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:372
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Neizdevās izveidot parseri no mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:381
+#: ../src/EWS/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Neizdevās saprast tikšanās pieprasījuma mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:465
-#: ../src/EWS/camel/camel-ews-folder.c:675
+#: ../src/EWS/camel/camel-ews-folder.c:495
+#: ../src/EWS/camel/camel-ews-folder.c:708
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nevarē izveidot kešatmiņas datni"
 
-#: ../src/EWS/camel/camel-ews-folder.c:792
-#: ../src/EWS/camel/camel-ews-folder.c:936
+#: ../src/EWS/camel/camel-ews-folder.c:825
+#: ../src/EWS/camel/camel-ews-folder.c:969
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Nevar izveidot kešatmiņas ceļu “%s” — %s"
@@ -140,34 +139,33 @@ msgstr "Nevar izveidot kešatmiņas ceļu “%s” — %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:950
+#: ../src/EWS/camel/camel-ews-folder.c:983
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Neizdevās pārvietot vēstuļu kešatmiņas datni no “%s” uz “%s” — %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1889
+#: ../src/EWS/camel/camel-ews-folder.c:1922
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nevar ielādēt %s kopsavilkumu"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2364
+#: ../src/EWS/camel/camel-ews-folder.c:2399
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Atsvaidzina mapi “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2557
+#: ../src/EWS/camel/camel-ews-folder.c:2592
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nevar veikt darbības ar mapi, kamēr atrodas nesaistes režīmā"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3230
+#: ../src/EWS/camel/camel-ews-folder.c:3265
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1715
 msgid "Apply message _filters to this folder"
 msgstr "Šai mapei attiecināt vēstuļu _filtrus"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3242
+#: ../src/EWS/camel/camel-ews-folder.c:3277
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1727
-#| msgid "Only check for Junk messages in the IN_BOX folder"
 msgid "Always check for _new mail in this folder"
 msgstr "Vienmēr pārbaudīt jau_no pastu šajā mapē"
 
@@ -296,24 +294,23 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:506
+#: ../src/EWS/camel/camel-ews-store.c:504
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/EWS/camel/camel-ews-store.c:652
-#: ../src/EWS/camel/camel-ews-store.c:1476
+#: ../src/EWS/camel/camel-ews-store.c:646
+#: ../src/EWS/camel/camel-ews-store.c:1470
 msgid "Checking “Out of Office” settings"
 msgstr "Pārbauda “ārpus biroja” iestatījumus"
 
-#: ../src/EWS/camel/camel-ews-store.c:1482
-#| msgid "Exchange server %s"
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Look up Exchange server categories"
 msgstr "Uzmeklēt Exchange servera kategorijas"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1558
+#: ../src/EWS/camel/camel-ews-store.c:1552
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -321,7 +318,7 @@ msgstr[0] "Parole izbeigsies pēc %d dienas. Atveriet “%s”, lai to mainītu.
 msgstr[1] "Parole izbeigsies pēc %d dienām. Atveriet “%s”, lai to mainītu."
 msgstr[2] "Parole izbeigsies pēc %d dienām. Atveriet “%s”, lai to mainītu."
 
-#: ../src/EWS/camel/camel-ews-store.c:1564
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
@@ -329,160 +326,158 @@ msgstr[0] "Parole izbeigsies pēc %d dienas."
 msgstr[1] "Parole izbeigsies pēc %d dienām."
 msgstr[2] "Parole izbeigsies pēc %d dienām."
 
-#: ../src/EWS/camel/camel-ews-store.c:1790
+#: ../src/EWS/camel/camel-ews-store.c:1784
 msgid "Updating foreign folder structure"
 msgstr "Atjaunina ārējo mapju struktūru"
 
-#: ../src/EWS/camel/camel-ews-store.c:1928
+#: ../src/EWS/camel/camel-ews-store.c:1922
 msgid "Updating foreign folders"
 msgstr "Atjaunina ārējās mapes"
 
-#: ../src/EWS/camel/camel-ews-store.c:2344
+#: ../src/EWS/camel/camel-ews-store.c:2338
 #: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nav tādas mapes: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2691
+#: ../src/EWS/camel/camel-ews-store.c:2684
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nevar uzskaitīt EWS publiskās mapes nesaistes režīmā"
 
-#: ../src/EWS/camel/camel-ews-store.c:2764
+#: ../src/EWS/camel/camel-ews-store.c:2757
 msgid "Cannot find any EWS public folders"
 msgstr "Nevar atrast EWS publiskās mapes"
 
-#: ../src/EWS/camel/camel-ews-store.c:2876
+#: ../src/EWS/camel/camel-ews-store.c:2870
 #: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nevar izveidot mapi “%s” — mape jau eksistē"
 
-#: ../src/EWS/camel/camel-ews-store.c:2891
+#: ../src/EWS/camel/camel-ews-store.c:2885
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Vecāka mape %s neeksistē"
 
-#: ../src/EWS/camel/camel-ews-store.c:2901
+#: ../src/EWS/camel/camel-ews-store.c:2895
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
 "Nevar izveidot mapi zem “%s”, to izmanto mapēm tikai citiem lietotājiem"
 
-#: ../src/EWS/camel/camel-ews-store.c:2911
+#: ../src/EWS/camel/camel-ews-store.c:2905
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Nevar izveidot mapi zem “%s”, to izmanto tikai publiskām mapēm"
 
-#: ../src/EWS/camel/camel-ews-store.c:3018
+#: ../src/EWS/camel/camel-ews-store.c:3012
 #: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mape neeksistē"
 
-#: ../src/EWS/camel/camel-ews-store.c:3028
+#: ../src/EWS/camel/camel-ews-store.c:3022
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr "Nevar izņemt mapi “%s”, to izmanto tikai mapēm citiem lietotājiem"
 
-#: ../src/EWS/camel/camel-ews-store.c:3039
+#: ../src/EWS/camel/camel-ews-store.c:3033
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Nevar izņemt mapi “%s”, to izmanto tikai publiskām mapēm"
 
-#: ../src/EWS/camel/camel-ews-store.c:3198
-#: ../src/EWS/camel/camel-ews-store.c:3294
+#: ../src/EWS/camel/camel-ews-store.c:3192
+#: ../src/EWS/camel/camel-ews-store.c:3288
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mape %s neeksistē"
 
-#: ../src/EWS/camel/camel-ews-store.c:3207
+#: ../src/EWS/camel/camel-ews-store.c:3201
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Mapei %s nav maiņas atslēgas ieraksta"
 
-#: ../src/EWS/camel/camel-ews-store.c:3250
+#: ../src/EWS/camel/camel-ews-store.c:3244
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nevar vienlaicīgi pārdēvēt un pārvietot mapi"
 
-#: ../src/EWS/camel/camel-ews-store.c:3281
-#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3275
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nevar atrast mapes ID vecāka mapei %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3294
-#: ../src/EWS/camel/camel-ews-store.c:3304
+#: ../src/EWS/camel/camel-ews-store.c:3288
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Iesūtne"
 
-#: ../src/EWS/camel/camel-ews-store.c:3353
+#: ../src/EWS/camel/camel-ews-store.c:3347
 #: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange serveris %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3356
+#: ../src/EWS/camel/camel-ews-store.c:3350
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s Exchange serviss %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3400
+#: ../src/EWS/camel/camel-ews-store.c:3394
 #: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nevarēja atrast miskastes mapi"
 
-#: ../src/EWS/camel/camel-ews-store.c:3460
+#: ../src/EWS/camel/camel-ews-store.c:3454
 #: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nevarēja atrast mēstuļu mapi"
 
-#: ../src/EWS/camel/camel-ews-store.c:3665
+#: ../src/EWS/camel/camel-ews-store.c:3659
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nevar abonēt EWS mapes nesaistes režīmā"
 
-#: ../src/EWS/camel/camel-ews-store.c:3688
+#: ../src/EWS/camel/camel-ews-store.c:3682
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Nevar abonēt mapi “%s”, nav pieejamas publiskās mapes"
 
-#: ../src/EWS/camel/camel-ews-store.c:3698
+#: ../src/EWS/camel/camel-ews-store.c:3692
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nevar abonēt mapi “%s”, mape nav atrasta"
 
-#: ../src/EWS/camel/camel-ews-store.c:3707
+#: ../src/EWS/camel/camel-ews-store.c:3701
 #, c-format
-#| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Nevar abonēt mapi “%s”, mapes ID nav atrasts"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3712
 #, c-format
-#| msgid "Cannot subscribe folder “%s”, folder not found"
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Nevar abonēt mapi “%s”, publiskās mapes sakne nav atrasta"
 
-#: ../src/EWS/camel/camel-ews-store.c:3794
+#: ../src/EWS/camel/camel-ews-store.c:3788
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nevar pārtraukt EWS mapes abonēšanu nesaistes režīmā"
 
-#: ../src/EWS/camel/camel-ews-store.c:3905
+#: ../src/EWS/camel/camel-ews-store.c:3899
 #: ../src/Microsoft365/camel/camel-m365-store.c:1787
 #: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Jums ir jāstrādā tiešsaistē, lai izpildītu šo darbību"
 
-#: ../src/EWS/camel/camel-ews-store.c:3977
-#: ../src/EWS/camel/camel-ews-store.c:4014
+#: ../src/EWS/camel/camel-ews-store.c:3971
+#: ../src/EWS/camel/camel-ews-store.c:4008
 msgid "Unsetting the “Out of Office” status"
 msgstr "Atstata “ārpus biroja” iestatījumus"
 
@@ -497,7 +492,6 @@ msgstr "Publiskās mapes"
 #: ../src/EWS/camel/camel-ews-transport.c:173
 #: ../src/Microsoft365/camel/camel-m365-transport.c:172
 #, c-format
-#| msgid "Refreshing folder “%s”"
 msgid "Invalid folder URI “%s”"
 msgstr "Nederīgs mapes URI “%s”"
 
@@ -544,9 +538,9 @@ msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
 "monthly or yearly recurrence without exceptions and with start date."
 msgstr ""
-"Nevar saglabāt šo atkārtojošos instanci. Mainiet to uz vienkāršu vienas"
-" dienas, nedēļas, mēneša vai gada atkārtošanos bez izņēmumiem un ar sākuma"
-" datumu."
+"Nevar saglabāt šo atkārtojošos instanci. Mainiet to uz vienkāršu vienas "
+"dienas, nedēļas, mēneša vai gada atkārtošanos bez izņēmumiem un ar sākuma "
+"datumu."
 
 #: ../src/EWS/common/e-ews-camel-common.c:387
 #, c-format
@@ -584,56 +578,55 @@ msgstr[2] ""
 msgid "Authentication failed"
 msgstr "Autentifikācija neizdevās"
 
-#: ../src/EWS/common/e-ews-connection.c:2428
+#: ../src/EWS/common/e-ews-connection.c:2441
 msgid "Failed to parse autodiscover response XML"
 msgstr "Neizdevās saprast automātiskās atklāšanas atbildes XML"
 
-#: ../src/EWS/common/e-ews-connection.c:2434
+#: ../src/EWS/common/e-ews-connection.c:2447
 msgid "Failed to find <Autodiscover> element"
 msgstr "Neizdevās atrast <Autodiscover> elementu"
 
-#: ../src/EWS/common/e-ews-connection.c:2444
+#: ../src/EWS/common/e-ews-connection.c:2457
 msgid "Failed to find <Response> element"
 msgstr "Neizdevās atrast <Response> elementu"
 
-#: ../src/EWS/common/e-ews-connection.c:2454
+#: ../src/EWS/common/e-ews-connection.c:2467
 msgid "Failed to find <Account> element"
 msgstr "Neizdevās atrast <Account> elementu"
 
-#: ../src/EWS/common/e-ews-connection.c:2499
-#| msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+#: ../src/EWS/common/e-ews-connection.c:2512
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Neizdevās atrast <ASUrl> automātiskās atklāšanas atbildē"
 
-#: ../src/EWS/common/e-ews-connection.c:2575
+#: ../src/EWS/common/e-ews-connection.c:2588
 msgid "URL cannot be NULL"
 msgstr "URL nevar būt NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3000
+#: ../src/EWS/common/e-ews-connection.c:3013
 msgid "Email address is missing a domain part"
 msgstr "E-pasta adresei trūkst domēna daļas"
 
-#: ../src/EWS/common/e-ews-connection.c:3209
+#: ../src/EWS/common/e-ews-connection.c:3222
 msgid "Failed to parse oab XML"
 msgstr "Neizdevās saprast oab XML"
 
-#: ../src/EWS/common/e-ews-connection.c:3247
+#: ../src/EWS/common/e-ews-connection.c:3260
 msgid "Failed to find <OAB> element\n"
 msgstr "Neizdevās atrast <OAB> elementu\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8804
+#: ../src/EWS/common/e-ews-connection.c:8816
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Ir vajadzīgs vismaz Microsoft Exchange 2010 SP1 serveris"
 
-#: ../src/EWS/common/e-ews-connection.c:8905
+#: ../src/EWS/common/e-ews-connection.c:8917
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Ir vajadzīgs vismaz Microsoft Exchange 2013 serveris"
 
-#: ../src/EWS/common/e-ews-connection.c:9058
+#: ../src/EWS/common/e-ews-connection.c:9070
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Ir vajadzīgs vismaz Microsoft Exchange 2010 serveris"
 
-#: ../src/EWS/common/e-ews-connection.c:9198
+#: ../src/EWS/common/e-ews-connection.c:9210
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Ir vajadzīgs vismaz Microsoft Exchange 2007 SP1 serveris"
 
@@ -675,11 +668,10 @@ msgid ""
 "When checked, the contacts looked up in the online Global Address List will "
 "contain only the primary email address"
 msgstr ""
-"Ja šī opcija ir atzīmēta, tiešsaistes globālajā adrešu sarakstā uzmeklētās"
-" kontaktpersonas satur tikai primāro e-pasta adresi"
+"Ja šī opcija ir atzīmēta, tiešsaistes globālajā adrešu sarakstā uzmeklētās "
+"kontaktpersonas satur tikai primāro e-pasta adresi"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:101
-#| msgid "Failed to set contact photo:"
 msgid "_Fetch contact photos"
 msgstr "Saņemt kontaktu _fotogrāfijas"
 
@@ -716,87 +708,82 @@ msgstr "OAB URL: %s"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:313
 #, c-format
-#| msgid "Requires user password to continue"
 msgid "Requires password to continue."
 msgstr "Lai turpinātu, ir nepieciešama parole."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-ews-config-utils.c:559
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Mape"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:572
+#: ../src/EWS/evolution/e-ews-config-utils.c:569
 msgid "Size"
 msgstr "Izmērs"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:610
-#: ../src/EWS/evolution/e-ews-config-utils.c:615
+#: ../src/EWS/evolution/e-ews-config-utils.c:607
+#: ../src/EWS/evolution/e-ews-config-utils.c:612
 msgid "Unable to retrieve folder size information"
 msgstr "Neizdevās iegūt informāciju par mapes izmēru"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:744
+#: ../src/EWS/evolution/e-ews-config-utils.c:741
 msgid "Folder Sizes"
 msgstr "Mapju izmēri"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:747
+#: ../src/EWS/evolution/e-ews-config-utils.c:744
 msgid "_Close"
 msgstr "Ai_zvērt"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:761
+#: ../src/EWS/evolution/e-ews-config-utils.c:758
 msgid "Fetching folder list…"
 msgstr "Iegūst mapju sarakstu..."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:824
-#: ../src/EWS/evolution/e-ews-config-utils.c:833
-#: ../src/EWS/evolution/e-ews-config-utils.c:842
-#: ../src/EWS/evolution/e-ews-config-utils.c:851
-#: ../src/EWS/evolution/e-ews-config-utils.c:860
+#: ../src/EWS/evolution/e-ews-config-utils.c:821
+#: ../src/EWS/evolution/e-ews-config-utils.c:830
+#: ../src/EWS/evolution/e-ews-config-utils.c:839
+#: ../src/EWS/evolution/e-ews-config-utils.c:848
+#: ../src/EWS/evolution/e-ews-config-utils.c:857
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
-#| msgid "Subscribe to folder of other EWS user..."
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Abonēt cita EWS lietotāja mapi…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1047
+#: ../src/EWS/evolution/e-ews-config-utils.c:1044
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Nevar rediģēt atļaujas mapei “%s”. Izvēlieties citu mapi."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1128
-#| msgid "Folder Sizes"
+#: ../src/EWS/evolution/e-ews-config-utils.c:1125
 msgid "Folder Sizes…"
 msgstr "Mapju izmēri…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1135
-#| msgid "Subscribe to folder of other user..."
+#: ../src/EWS/evolution/e-ews-config-utils.c:1132
 msgid "Subscribe to folder of other user…"
 msgstr "Abonēt cita lietotāja mapi…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1144
-#: ../src/EWS/evolution/e-ews-config-utils.c:1502
-#: ../src/EWS/evolution/e-ews-config-utils.c:1540
-#: ../src/EWS/evolution/e-ews-config-utils.c:1578
-#: ../src/EWS/evolution/e-ews-config-utils.c:1616
-#| msgid "Permissions"
+#: ../src/EWS/evolution/e-ews-config-utils.c:1141
+#: ../src/EWS/evolution/e-ews-config-utils.c:1499
+#: ../src/EWS/evolution/e-ews-config-utils.c:1537
+#: ../src/EWS/evolution/e-ews-config-utils.c:1575
+#: ../src/EWS/evolution/e-ews-config-utils.c:1613
 msgid "Permissions…"
 msgstr "Atļaujas…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1146
+#: ../src/EWS/evolution/e-ews-config-utils.c:1143
 msgid "Edit EWS folder permissions"
 msgstr "Rediģēt EWS mapju atļaujas"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1504
+#: ../src/EWS/evolution/e-ews-config-utils.c:1501
 msgid "Edit EWS calendar permissions"
 msgstr "Rediģēt EWS kalendāru atļaujas"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1542
+#: ../src/EWS/evolution/e-ews-config-utils.c:1539
 msgid "Edit EWS tasks permissions"
 msgstr "Rediģēt EWS uzdevumu atļaujas"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1580
+#: ../src/EWS/evolution/e-ews-config-utils.c:1577
 msgid "Edit EWS memos permissions"
 msgstr "Rediģēt EWS memo atļaujas"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1618
+#: ../src/EWS/evolution/e-ews-config-utils.c:1615
 msgid "Edit EWS contacts permissions"
 msgstr "Rediģēt EWS kontaktu atļaujas"
 
@@ -863,7 +850,6 @@ msgid "Custom"
 msgstr "Pielāgotas"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:248
-#| msgid "Writing folder permissions, please wait..."
 msgid "Writing folder permissions, please wait…"
 msgstr "Raksta mapes atļaujas. Lūdzu, uzgaidiet…"
 
@@ -893,7 +879,6 @@ msgid "Permission level"
 msgstr "Pieejas līmenis"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:912
-#| msgid "Edit EWS folder permissions"
 msgid "Edit EWS folder permissions…"
 msgstr "Rediģēt EWS mapju atļaujas…"
 
@@ -1005,7 +990,6 @@ msgid "Folder visible"
 msgstr "Mapes redzamība"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1298
-#| msgid "Reading folder permissions, please wait..."
 msgid "Reading folder permissions, please wait…"
 msgstr "Nolasa mapes atļaujas. Lūdzu, uzgaidiet…"
 
@@ -1051,7 +1035,6 @@ msgid "Search for a user"
 msgstr "Meklēt lietotāju"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:356
-#| msgid "Searching..."
 msgid "Searching…"
 msgstr "Meklē…"
 
@@ -1060,7 +1043,6 @@ msgid "E-mail"
 msgstr "E-pasts"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:468
-#| msgid "Choose EWS user..."
 msgid "Choose EWS user…"
 msgstr "Izvēlieties EWS lietotāju…"
 
@@ -1078,7 +1060,6 @@ msgid "Mailbox — %s"
 msgstr "Pastkaste — %s"
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:264
-#| msgid "Cannot test foreign folder availability while in offline mode"
 msgid "Cannot test foreign folder availability when the account is offline"
 msgstr "Nevar pārbaudīt ārējo mapi, kamēr konts ir nesaistes režīmā"
 
@@ -1129,7 +1110,6 @@ msgstr "Uzdevumi"
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:502
 #, c-format
-#| msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr "Pārbauda mapes “%s” no lietotāja “%s” pieejamību. Lūdzu, uzgaidiet…"
 
@@ -1146,7 +1126,6 @@ msgid "_User:"
 msgstr "_Lietotājs:"
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:726
-#| msgid "C_hoose..."
 msgid "C_hoose…"
 msgstr "I_zvēlēties…"
 
@@ -1206,7 +1185,6 @@ msgid "Open _Mailbox of other user"
 msgstr "Atvērt cita lietotāja _pastkasti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
-#| msgid "S_earch..."
 msgid "S_earch…"
 msgstr "M_eklēt…"
 
@@ -1248,14 +1226,12 @@ msgstr "Noklusējuma lietotnes ID ir “%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
-#| msgid "_Tenant:"
 msgid "_Tenant ID:"
 msgstr "_Tenant ID:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant ID is “common“"
 msgstr "Noklusējuma tenant ID ir “common”"
 
@@ -1263,13 +1239,11 @@ msgstr "Noklusējuma tenant ID ir “common”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant ID is “%s”"
 msgstr "Noklusējuma tenant ID ir “%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
-#| msgid "EWS Settings"
 msgid "_Advanced Settings"
 msgstr "P_aplašinātie iestatījumi"
 
@@ -1283,12 +1257,10 @@ msgstr "Galapunkta r_esursdators:"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
-#| msgid "Default tenant is “%s”"
 msgid "Default endpoint host is “%s”"
 msgstr "Noklusējuma galapunkta resursdators ir “%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
-#| msgid "_Redirect URI:"
 msgid "Red_irect URI:"
 msgstr "Pāradresēšanas UR_I:"
 
@@ -1301,7 +1273,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "Noklusējuma pāradresēšanas URI ir “%s”"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
-#| msgid "_Redirect URI:"
 msgid "Re_source URI:"
 msgstr "Re_sursa URI:"
 
@@ -1311,15 +1282,14 @@ msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
 "back to “%s”."
 msgstr ""
-"Noklusējuma resursa URI ir iegūts no resursdatora URL, vai arī tas var"
-" atkāpties uz “%s”."
+"Noklusējuma resursa URI ir iegūts no resursdatora URL, vai arī tas var "
+"atkāpties uz “%s”."
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
 msgid "Use _protocol version 2.0 (for school and organization accounts)"
 msgstr "Izmantot _protokola versiju 2.0 (skolām un organizāciju kontiem)"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
-#| msgid "URL “%s” is not valid"
 msgid "Host URL is not valid"
 msgstr "Resursdatora URL nav derīgs"
 
@@ -1328,7 +1298,6 @@ msgid "Host URL cannot be empty"
 msgstr "Resursdatora URL nevar būt tukšs"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
-#| msgid "URL “%s” is not valid"
 msgid "OAB URL is not valid"
 msgstr "OAB URL nav derīgs"
 
@@ -1400,7 +1369,6 @@ msgid "Delegate can see my _private items"
 msgstr "Delegāts var redzēt manus _privātos vienumus"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:878
-#| msgid "Retrieving current user permissions, please wait..."
 msgid "Retrieving current user permissions, please wait…"
 msgstr "Saņem pašreizējā lietotāja atļaujas, lūdzu, uzgaidiet…"
 
@@ -1475,10 +1443,10 @@ msgid ""
 "already locally stored messages. The change will take effect the next time "
 "the folders are refreshed."
 msgstr ""
-"Dažkārt mapes var desinhronizēties, piemēram, pēc ilgstoša posma, kad nav"
-" savienojuma ar serveri. Atiestatot sinhronizācijas tagus, mapes tiek pilnībā"
-" atjauninātas. Tas neizraisa lokāli saglabātu ziņojumu lejupielādi. Izmaiņas"
-" stāsies spēkā nākamajā mapju atsvaidzināšanas reizē."
+"Dažkārt mapes var desinhronizēties, piemēram, pēc ilgstoša posma, kad nav "
+"savienojuma ar serveri. Atiestatot sinhronizācijas tagus, mapes tiek pilnībā "
+"atjauninātas. Tas neizraisa lokāli saglabātu ziņojumu lejupielādi. Izmaiņas "
+"stāsies spēkā nākamajā mapju atsvaidzināšanas reizē."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
@@ -1639,25 +1607,40 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Lietotāja “{0}” mape tika sekmīgi abonēta."
 
 #: ../src/EWS/registry/e-ews-backend.c:1045
-#: ../src/Microsoft365/registry/e-m365-backend.c:670
+#: ../src/Microsoft365/registry/e-m365-backend.c:686
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Neizdevās noteikt atbilstošu mapes klasi jaunajai mape “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1134
+#: ../src/EWS/registry/e-ews-backend.c:1133
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Datu avots “%s” neatspoguļo Exchange Web Services mapi"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1427
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1711
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
-#| msgid "Folder does not exist"
 msgid "Folder ID is not set"
 msgstr "Mapes ID nav iestatīts"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1668
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2004
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Kontaktu sarakstu nevar saglabāt Microsoft 365 adrešu grāmatā"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2016
+msgid "Cannot modify organizational contact"
+msgstr "Nevar modificēt organizācijas kontaktu"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2018
+msgid "Cannot modify user contact"
+msgstr "Nevar modificēt lietotāja kontaktu"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+msgid "Cannot remove organizational contact"
+msgstr "Nevar izņemt organizācijas kontaktu"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+msgid "Cannot remove user contact"
+msgstr "Nevar izņemt lietotāja kontaktu"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
 msgid "Can store only simple events into Microsoft 365 calendar"
@@ -1676,46 +1659,45 @@ msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
 msgstr ""
-"Microsoft 365 kalendārā nevar saglabāt komponenti ar īpašībām RDATE, EXDATE"
-" un RRULE"
+"Microsoft 365 kalendārā nevar saglabāt komponenti ar īpašībām RDATE, EXDATE "
+"un RRULE"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Nezināms atkārtošanās biežums (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1916
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Microsoft 365 kalendārā nevar saglabāt vairāk kā vienu notikuma atkārtošanos"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1949
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
-"Microsoft 365 notikumam var būt tikai viens atgādinājums pirms notikuma sākuma"
+"Microsoft 365 notikumam var būt tikai viens atgādinājums pirms notikuma "
+"sākuma"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1962
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Microsoft 365 uzdevumam var būt tikai viens atgādinājums ar absolūtu laiku"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2288
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 uzdevumam nevar būt pielikumu."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2391
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nevar saglabāt pielikumu ar URI “%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
-#| msgid "Failed to read From address"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
 msgid "Failed to read attachment URI"
 msgstr "Neizdevās nolasīt pielikuma URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2407
-#| msgid "Failed to set contact photo:"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
 msgid "Failed to get inline attachment data"
 msgstr "Neizdevās saņemt tekstā iekļautos pielikuma datus"
 
@@ -1734,7 +1716,6 @@ msgstr "Mape “%s” neatbilst nevienai zināmai mapei"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
-#| msgid "Could not load summary for %s"
 msgid "Could not load summary for “%s”"
 msgstr "Nevarēja ielādēt “%s” kopsavilkumu"
 
@@ -1756,9 +1737,8 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Pasta saņemšana no Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1244
+#: ../src/Microsoft365/common/e-m365-connection.c:1276
 #, c-format
-#| msgid "Default redirect URI is “%s”"
 msgid "Malformed URI: “%s”"
 msgstr "Slikti noformēts URI — “%s”"
 
@@ -1768,80 +1748,66 @@ msgstr "Uzmeklēt Microsoft 365 kategorijas"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:541
 #: ../src/Microsoft365/camel/camel-m365-transport.c:330
-#| msgid "Failed to set contact photo:"
 msgid "Failed to create connection"
 msgstr "Neizdevās izveidot savienojumu"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
-#| msgid "Parent folder %s does not exist"
 msgid "Parent folder “%s” does not exist"
 msgstr "Vecāka mape “%s” neeksistē"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:893
-#| msgid "Cannot find folder ID for parent folder %s"
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Nevar atrast mapi “Dzēstie vienumi”"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:984
 #: ../src/Microsoft365/camel/camel-m365-store.c:1022
 #, c-format
-#| msgid "Folder %s does not exist"
 msgid "Folder “%s” does not exist"
 msgstr "Mape “%s” neeksistē"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:406
-#| msgid "Exchange mail delivery via %s"
 msgid "Mail delivery via Microsoft 365"
 msgstr "Pasta nosūtīšana caur Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:444
-#| msgid "Exchange server cannot send message with multiple From addresses"
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Microsoft 365 serveris nevar nosūtīt vēstules ar vairākām “No” adresēm"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
-#| msgid "OAuth2 (Office365)"
 msgid "OAuth2 (Microsoft 365)"
 msgstr "OAuth2 (Microsoft 365)"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:15
-#| msgid ""
-#| "This option will use an OAuth 2.0 access token to connect to the "
-#| "Office365.com server"
 msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Microsoft "
 "365 server"
 msgstr ""
-"Šī opcija izmantos OAuth 2.0 piekļuves marķieri, lai savienotos ar Microsoft"
-" 365 serveri"
+"Šī opcija izmantos OAuth 2.0 piekļuves marķieri, lai savienotos ar Microsoft "
+"365 serveri"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:164
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:888
+#: ../src/Microsoft365/common/e-m365-connection.c:920
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
-"Microsoft 365 serveris ir aizņemts, gaida līdz mēģinās vēlreiz (%d:%02d"
-" minūte)"
+"Microsoft 365 serveris ir aizņemts, gaida līdz mēģinās vēlreiz (%d:%02d "
+"minūte)"
 msgstr[1] ""
-"Microsoft 365 serveris ir aizņemts; gaida, lai mēģinātu vēlreiz (%d:%02d"
-" minūtes)"
+"Microsoft 365 serveris ir aizņemts; gaida, lai mēģinātu vēlreiz (%d:%02d "
+"minūtes)"
 msgstr[2] ""
-"Microsoft 365 serveris ir aizņemts; gaida, lai mēģinātu vēlreiz (%d:%02d"
-" minūtes)"
+"Microsoft 365 serveris ir aizņemts; gaida, lai mēģinātu vēlreiz (%d:%02d "
+"minūtes)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:894
+#: ../src/Microsoft365/common/e-m365-connection.c:926
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d second)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
@@ -1851,30 +1817,26 @@ msgstr[1] ""
 msgstr[2] ""
 "Microsoft 365 serveris ir aizņemts; gaida, lai mēģinātu vēlreiz (%d sekunžu)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1019
-#: ../src/Microsoft365/common/e-m365-connection.c:1046
+#: ../src/Microsoft365/common/e-m365-connection.c:1051
+#: ../src/Microsoft365/common/e-m365-connection.c:1078
 msgid "Invalid data"
 msgstr "Nederīgi dati"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1044
-#| msgid "Operation Cancelled"
+#: ../src/Microsoft365/common/e-m365-connection.c:1076
 msgid "Operation was cancelled"
 msgstr "Darbība tika atcelta"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1729
-#| msgid "Failed to parse oab XML"
+#: ../src/Microsoft365/common/e-m365-connection.c:1767
 msgid "Failed to parse own Json data"
 msgstr "Neizdevās pasēt paša Json datus"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
-#| msgid "_Override Office365 OAuth2 settings"
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "Pārrakstīt Microsoft 365 _OAuth2 iestatījumus"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
-#| msgid "Default tenant is “%s”"
 msgid "Default tenant is “common“"
 msgstr "Noklusējuma tenant ir “common”"
 
@@ -1889,9 +1851,16 @@ msgstr "Noklusējuma tenant ir “%s”"
 msgid "_Redirect URI:"
 msgstr "Pā_radresēšanas URI:"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:761
+#: ../src/Microsoft365/registry/e-m365-backend.c:381
+msgid "Organizational Contacts"
+msgstr "Organizācijas kontakti"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:388
+msgid "Organizational Users"
+msgstr "Organizācijas lietotāji"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:777
 #, c-format
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Datu avots “%s” neatspoguļo Microsoft 365 mapi"
 
