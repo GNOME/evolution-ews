@@ -910,7 +910,7 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"use-oauth2-v2",
 			"Use OAuth2 v2",
 			NULL,
-			FALSE,
+			TRUE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -921,6 +921,7 @@ camel_ews_settings_init (CamelEwsSettings *settings)
 {
 	settings->priv = camel_ews_settings_get_instance_private (settings);
 	g_mutex_init (&settings->priv->property_lock);
+	settings->priv->use_oauth2_v2 = TRUE;
 
 	e_binding_bind_property_full (settings, "hosturl",
 				     settings, "host",
