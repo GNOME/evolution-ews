@@ -1,3 +1,21 @@
+Evolution-EWS 3.52.0 2024-03-15
+-------------------------------
+
+Bug Fixes:
+	I#264 - Use OAuth2 protocol 2.0 by default
+
+Miscellaneous:
+	build: Correct overlinking on the m365 part
+	SetupBuildFlags.cmake: Remove "-Wl,--no-undefined" from compiler flags
+	Replace https://wiki.gnome.org/Apps/Evolution in the sources
+
+Translations:
+	Alan Mortensen (da)
+	Balázs Úr (hu)
+	Daniel Rusek (cs)
+	Piotr Drąg (pl)
+	Rūdolfs Mazurs (lv)
+
 Evolution-EWS 3.51.3 2024-03-01
 -------------------------------
 
