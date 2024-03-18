@@ -1915,7 +1915,7 @@ ecb_m365_add_reminder (EM365Connection *cnc,
 	gboolean success = TRUE;
 
 	if (i_cal_component_count_components (new_comp, I_CAL_VALARM_COMPONENT) > 1) {
-		g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 calendar cannot store more that one event reminder")));
+		g_propagate_error (error, ECC_ERROR_EX (E_CAL_CLIENT_ERROR_INVALID_OBJECT, _("Microsoft 365 calendar cannot store more than one event reminder")));
 		return FALSE;
 	}
 
