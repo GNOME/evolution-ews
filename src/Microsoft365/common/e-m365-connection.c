@@ -315,6 +315,7 @@ m365_connection_constructed (GObject *object)
 
 	cnc->priv->soup_session = g_object_new (E_TYPE_SOUP_SESSION,
 		"source", cnc->priv->source,
+		"handle-backoff-responses", FALSE,
 		"max-conns", cnc->priv->concurrent_connections,
 		"max-conns-per-host", cnc->priv->concurrent_connections,
 		NULL);
