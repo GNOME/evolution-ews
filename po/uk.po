@@ -2,13 +2,13 @@
 # Copyright (C) 2020 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 #
-# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021, 2022, 2023.
+# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021, 2022, 2023, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-11-10 10:41+0000\n"
-"PO-Revision-Date: 2023-11-10 22:23+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
+"POT-Creation-Date: 2024-03-18 10:25+0000\n"
+"PO-Revision-Date: 2024-03-20 12:08+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.12.0\n"
+"X-Generator: Lokalize 23.04.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:71
@@ -50,32 +50,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2035
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2038
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2623
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2897
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3194
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4173
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -83,12 +84,12 @@ msgstr ""
 "Неможливо створити зустрічі, які організовано іншими користувачами, у "
 "календарі вебслужб Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3231
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Нараду в інтернеті можна створювати лише у календарі основного користувача."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:4120
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4161
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
@@ -106,7 +107,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Не вдалося знайти допоміжне джерело Microsoft365 для календаря «%s»"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2209
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
 msgid "Invalid occurrence ID"
 msgstr "Некоректний ідентифікатор повторення"
 
@@ -125,14 +126,14 @@ msgstr "Не вдалося створити обробник на основі 
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Не вдалося обробити запит щодо зустрічі mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:466
-#: ../src/EWS/camel/camel-ews-folder.c:679
+#: ../src/EWS/camel/camel-ews-folder.c:495
+#: ../src/EWS/camel/camel-ews-folder.c:708
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Не вдалося створити файл кешу"
 
-#: ../src/EWS/camel/camel-ews-folder.c:796
-#: ../src/EWS/camel/camel-ews-folder.c:940
+#: ../src/EWS/camel/camel-ews-folder.c:825
+#: ../src/EWS/camel/camel-ews-folder.c:969
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Не вдалося створити шлях «%s»: %s"
@@ -140,32 +141,32 @@ msgstr "Не вдалося створити шлях «%s»: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:954
+#: ../src/EWS/camel/camel-ews-folder.c:983
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Не вдалося перемістити кеш-файл повідомлень з «%s» до «%s»: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1893
+#: ../src/EWS/camel/camel-ews-folder.c:1922
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не вдалося завантажити резюме щодо %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2370
+#: ../src/EWS/camel/camel-ews-folder.c:2399
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Оновлення теки «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2563
+#: ../src/EWS/camel/camel-ews-folder.c:2592
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3236
+#: ../src/EWS/camel/camel-ews-folder.c:3265
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1715
 msgid "Apply message _filters to this folder"
 msgstr "Застосувати _фільтри повідомлень до цієї теки"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3248
+#: ../src/EWS/camel/camel-ews-folder.c:3277
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1727
 msgid "Always check for _new mail in this folder"
 msgstr "Завжди перевіряти _нову пошту у цій теці"
@@ -598,55 +599,55 @@ msgstr[3] "Сервер Exchange зайнято, очікуємо на повт�
 msgid "Authentication failed"
 msgstr "Не вдалось пройти розпізнавання"
 
-#: ../src/EWS/common/e-ews-connection.c:2428
+#: ../src/EWS/common/e-ews-connection.c:2441
 msgid "Failed to parse autodiscover response XML"
 msgstr "Не вдалося обробити відповідь XML autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2434
+#: ../src/EWS/common/e-ews-connection.c:2447
 msgid "Failed to find <Autodiscover> element"
 msgstr "Не вдалося знайти елемент <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2444
+#: ../src/EWS/common/e-ews-connection.c:2457
 msgid "Failed to find <Response> element"
 msgstr "Не вдалося знайти елемент <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2454
+#: ../src/EWS/common/e-ews-connection.c:2467
 msgid "Failed to find <Account> element"
 msgstr "Не вдалося знайти елемент <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2499
+#: ../src/EWS/common/e-ews-connection.c:2512
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Не вдалося знайти <ASUrl> у відповіді на автовиявлення"
 
-#: ../src/EWS/common/e-ews-connection.c:2575
+#: ../src/EWS/common/e-ews-connection.c:2588
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бути порожньою"
 
-#: ../src/EWS/common/e-ews-connection.c:3000
+#: ../src/EWS/common/e-ews-connection.c:3013
 msgid "Email address is missing a domain part"
 msgstr "У адресі електронної пошти пропущено частину домену"
 
-#: ../src/EWS/common/e-ews-connection.c:3209
+#: ../src/EWS/common/e-ews-connection.c:3222
 msgid "Failed to parse oab XML"
 msgstr "Не вдалося обробити XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:3247
+#: ../src/EWS/common/e-ews-connection.c:3260
 msgid "Failed to find <OAB> element\n"
 msgstr "Не вдалося знайти елемент <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8803
+#: ../src/EWS/common/e-ews-connection.c:8816
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8904
+#: ../src/EWS/common/e-ews-connection.c:8917
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9057
+#: ../src/EWS/common/e-ews-connection.c:9070
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9197
+#: ../src/EWS/common/e-ews-connection.c:9210
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2007 SP1"
 
@@ -731,79 +732,79 @@ msgstr "Адреса OAB: %s"
 msgid "Requires password to continue."
 msgstr "Для продовження потрібен пароль."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-ews-config-utils.c:559
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Тека"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:572
+#: ../src/EWS/evolution/e-ews-config-utils.c:569
 msgid "Size"
 msgstr "Розмір"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:610
-#: ../src/EWS/evolution/e-ews-config-utils.c:615
+#: ../src/EWS/evolution/e-ews-config-utils.c:607
+#: ../src/EWS/evolution/e-ews-config-utils.c:612
 msgid "Unable to retrieve folder size information"
 msgstr "Не вдалося отримати інформацію про розмір теки"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:744
+#: ../src/EWS/evolution/e-ews-config-utils.c:741
 msgid "Folder Sizes"
 msgstr "Розміри тек"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:747
+#: ../src/EWS/evolution/e-ews-config-utils.c:744
 msgid "_Close"
 msgstr "З_акрити"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:761
+#: ../src/EWS/evolution/e-ews-config-utils.c:758
 msgid "Fetching folder list…"
 msgstr "Отримання списку тек…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:824
-#: ../src/EWS/evolution/e-ews-config-utils.c:833
-#: ../src/EWS/evolution/e-ews-config-utils.c:842
-#: ../src/EWS/evolution/e-ews-config-utils.c:851
-#: ../src/EWS/evolution/e-ews-config-utils.c:860
+#: ../src/EWS/evolution/e-ews-config-utils.c:821
+#: ../src/EWS/evolution/e-ews-config-utils.c:830
+#: ../src/EWS/evolution/e-ews-config-utils.c:839
+#: ../src/EWS/evolution/e-ews-config-utils.c:848
+#: ../src/EWS/evolution/e-ews-config-utils.c:857
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Підписатися на теку іншого користувача EWS…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1047
+#: ../src/EWS/evolution/e-ews-config-utils.c:1044
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Не можна редагувати права доступу до теки «%s». Виберіть іншу теку."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1128
+#: ../src/EWS/evolution/e-ews-config-utils.c:1125
 msgid "Folder Sizes…"
 msgstr "Розміри тек…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1135
+#: ../src/EWS/evolution/e-ews-config-utils.c:1132
 msgid "Subscribe to folder of other user…"
 msgstr "Підписатися на теку іншого користувача…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1144
-#: ../src/EWS/evolution/e-ews-config-utils.c:1502
-#: ../src/EWS/evolution/e-ews-config-utils.c:1540
-#: ../src/EWS/evolution/e-ews-config-utils.c:1578
-#: ../src/EWS/evolution/e-ews-config-utils.c:1616
+#: ../src/EWS/evolution/e-ews-config-utils.c:1141
+#: ../src/EWS/evolution/e-ews-config-utils.c:1499
+#: ../src/EWS/evolution/e-ews-config-utils.c:1537
+#: ../src/EWS/evolution/e-ews-config-utils.c:1575
+#: ../src/EWS/evolution/e-ews-config-utils.c:1613
 msgid "Permissions…"
 msgstr "Права доступу…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1146
+#: ../src/EWS/evolution/e-ews-config-utils.c:1143
 msgid "Edit EWS folder permissions"
 msgstr "Редагувати права доступу до теки EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1504
+#: ../src/EWS/evolution/e-ews-config-utils.c:1501
 msgid "Edit EWS calendar permissions"
 msgstr "Редагувати права доступу до календаря EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1542
+#: ../src/EWS/evolution/e-ews-config-utils.c:1539
 msgid "Edit EWS tasks permissions"
 msgstr "Редагувати права доступу до завдань EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1580
+#: ../src/EWS/evolution/e-ews-config-utils.c:1577
 msgid "Edit EWS memos permissions"
 msgstr "Редагувати права доступу до приміток EWS"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1618
+#: ../src/EWS/evolution/e-ews-config-utils.c:1615
 msgid "Edit EWS contacts permissions"
 msgstr "Редагувати права доступу до контактів EWS"
 
@@ -1221,28 +1222,32 @@ msgstr "По_шук…"
 msgid "Authentication"
 msgstr "Розпізнавання"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:338
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "П_ротокол версії 2.0 (для облікових записів шкіл та установ)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
 msgid "_Override Office365 OAuth2 settings"
 msgstr "П_еревизначити параметри OAuth2 Office365"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Довідка…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:356
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "_Ід. програми:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Не встановлено жодного ідентифікатора типової програми"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1252,59 +1257,59 @@ msgstr "Ідентифікатором типової програми є «%s»
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:384
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "Ідентифікатор _тенанта:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:409
 msgid "Default tenant ID is “common“"
 msgstr "Типовим ідентифікатором тенанта є «common»"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Типовим ідентифікатор тенанта є «%s»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:417
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Додаткові параметри"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "Вузол _кінцевої точки:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Типовим вузлом кінцевої точки є «%s»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
 msgid "Red_irect URI:"
 msgstr "Адреса переспр_ямовування:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:490
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Типовою адресою переспрямовування є «%s»"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:493
 msgid "Re_source URI:"
 msgstr "Адреса _ресурсу:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:516
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1313,28 +1318,24 @@ msgstr ""
 "Типова адреса ресурсу є похідною від адреси вузла. Кінцевим резервним "
 "варіантом адреси може бути «%s»."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
-msgid "Use _protocol version 2.0 (for school and organization accounts)"
-msgstr "П_ротокол версії 2.0 (для облікових записів шкіл та установ)"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:772
 msgid "Host URL is not valid"
 msgstr "Адреса вузла є некоректною"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
 msgid "Host URL cannot be empty"
 msgstr "Адреса вузла не може бути порожньою"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "OAB URL is not valid"
 msgstr "Адреса OAB є некоректною"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:797
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Обов'язково вкажіть користувача"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:811
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Ідентифікатор програми не може бути порожнім"
@@ -1708,7 +1709,8 @@ msgid "Unknown recurrence frequency (%d)"
 msgstr "Невідома частота повторення (%d)"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
-msgid "Microsoft 365 calendar cannot store more that one event reminder"
+#| msgid "Microsoft 365 calendar cannot store more that one event reminder"
+msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "У календарі Microsoft 365 не може бути збережено більше одного нагадування "
 "про подію"
@@ -1776,7 +1778,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Отримання пошти за допомогою Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1249
+#: ../src/Microsoft365/common/e-m365-connection.c:1276
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Помилкове форматування адреси: «%s»"
@@ -1833,7 +1835,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:893
+#: ../src/Microsoft365/common/e-m365-connection.c:920
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural ""
@@ -1847,7 +1849,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:899
+#: ../src/Microsoft365/common/e-m365-connection.c:926
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1860,16 +1862,16 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1024
 #: ../src/Microsoft365/common/e-m365-connection.c:1051
+#: ../src/Microsoft365/common/e-m365-connection.c:1078
 msgid "Invalid data"
 msgstr "Некоректні дані"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1049
+#: ../src/Microsoft365/common/e-m365-connection.c:1076
 msgid "Operation was cancelled"
 msgstr "Дію скасовано"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1740
+#: ../src/Microsoft365/common/e-m365-connection.c:1767
 msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
