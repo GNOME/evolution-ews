@@ -11,10 +11,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution ews master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2024-01-07 08:01+0000\n"
-"PO-Revision-Date: 2024-02-19 21:10+0300\n"
-"Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
+"POT-Creation-Date: 2024-03-18 10:25+0000\n"
+"PO-Revision-Date: 2024-03-18 15:51+0300\n"
+"Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -55,32 +55,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Kişi fotoğrafı ayarlanamadı:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2055
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Uygun"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2058
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Meşgul"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2060
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ofis Dışında"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2062
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Belirsiz"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2643
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2917
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
 msgid "Cannot determine EWS ItemId"
 msgstr "EWS ItemId belirlenemedi"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3214
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4173
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -88,11 +89,11 @@ msgstr ""
 "Exchange Web Hizmetleri takviminde diğer kullanıcılarca düzenlenen "
 "toplantılar oluşturulamaz."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3251
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Çevrim içi toplantı yalnızca ana kullanıcı Takviminde oluşturulabilir."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:4140
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4161
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "“%s” kullanıcısı, katılımcılar arasında bulunamıyor"
@@ -108,7 +109,7 @@ msgstr "Sunucuya bağlanamıyor, sunucuda oturum açtığınızda eylemi yineley
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "%s takvimi için Microsoft 365 yardımcı kaynağı bulunamadı"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2209
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
 msgid "Invalid occurrence ID"
 msgstr "Geçersiz eşleşme kimliği"
 
@@ -574,55 +575,55 @@ msgstr[0] "Exchange sunucusu meşgul, yeniden denemeyi bekliyor (%d saniye)"
 msgid "Authentication failed"
 msgstr "Kimlik doğrulanamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2428
+#: ../src/EWS/common/e-ews-connection.c:2441
 msgid "Failed to parse autodiscover response XML"
 msgstr "Kendiliğinden keşifin XML yanıtı ayrıştırılamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2434
+#: ../src/EWS/common/e-ews-connection.c:2447
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2444
+#: ../src/EWS/common/e-ews-connection.c:2457
 msgid "Failed to find <Response> element"
 msgstr "<Response> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2454
+#: ../src/EWS/common/e-ews-connection.c:2467
 msgid "Failed to find <Account> element"
 msgstr "<Account> ögesi bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2499
+#: ../src/EWS/common/e-ews-connection.c:2512
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "<ASUrl> ögesi kendiliğinden keşif yanıtında bulunamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:2575
+#: ../src/EWS/common/e-ews-connection.c:2588
 msgid "URL cannot be NULL"
 msgstr "Adres NULL olamaz"
 
-#: ../src/EWS/common/e-ews-connection.c:3000
+#: ../src/EWS/common/e-ews-connection.c:3013
 msgid "Email address is missing a domain part"
 msgstr "E-posta adresinde etki alanı bölümü eksik"
 
-#: ../src/EWS/common/e-ews-connection.c:3209
+#: ../src/EWS/common/e-ews-connection.c:3222
 msgid "Failed to parse oab XML"
 msgstr "OAB XML ayrıştırılamadı"
 
-#: ../src/EWS/common/e-ews-connection.c:3247
+#: ../src/EWS/common/e-ews-connection.c:3260
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> ögesi bulunamadı\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8803
+#: ../src/EWS/common/e-ews-connection.c:8816
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "En az Microsoft Exchange 2010 SP1 sunucusu gerektirir"
 
-#: ../src/EWS/common/e-ews-connection.c:8904
+#: ../src/EWS/common/e-ews-connection.c:8917
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "En az Microsoft Exchange 2013 sunucusu gerektirir"
 
-#: ../src/EWS/common/e-ews-connection.c:9057
+#: ../src/EWS/common/e-ews-connection.c:9070
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "En az Microsoft Exchange 2010 sunucusu gerektirir"
 
-#: ../src/EWS/common/e-ews-connection.c:9197
+#: ../src/EWS/common/e-ews-connection.c:9210
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "En az Microsoft Exchange 2007 SP1 sunucusu gerektirir"
 
@@ -707,79 +708,79 @@ msgstr "OAB URL: %s"
 msgid "Requires password to continue."
 msgstr "Sürdürmek için parola gerekir."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-ews-config-utils.c:559
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Klasör"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:572
+#: ../src/EWS/evolution/e-ews-config-utils.c:569
 msgid "Size"
 msgstr "Boyut"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:610
-#: ../src/EWS/evolution/e-ews-config-utils.c:615
+#: ../src/EWS/evolution/e-ews-config-utils.c:607
+#: ../src/EWS/evolution/e-ews-config-utils.c:612
 msgid "Unable to retrieve folder size information"
 msgstr "Klasör boyutu bilgisi alınamadı"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:744
+#: ../src/EWS/evolution/e-ews-config-utils.c:741
 msgid "Folder Sizes"
 msgstr "Klasör Boyutları"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:747
+#: ../src/EWS/evolution/e-ews-config-utils.c:744
 msgid "_Close"
 msgstr "_Kapat"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:761
+#: ../src/EWS/evolution/e-ews-config-utils.c:758
 msgid "Fetching folder list…"
 msgstr "Klasör listesi çekiliyor…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:824
-#: ../src/EWS/evolution/e-ews-config-utils.c:833
-#: ../src/EWS/evolution/e-ews-config-utils.c:842
-#: ../src/EWS/evolution/e-ews-config-utils.c:851
-#: ../src/EWS/evolution/e-ews-config-utils.c:860
+#: ../src/EWS/evolution/e-ews-config-utils.c:821
+#: ../src/EWS/evolution/e-ews-config-utils.c:830
+#: ../src/EWS/evolution/e-ews-config-utils.c:839
+#: ../src/EWS/evolution/e-ews-config-utils.c:848
+#: ../src/EWS/evolution/e-ews-config-utils.c:857
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Diğer EWS kullanıcısının klasörüne abone ol…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1047
+#: ../src/EWS/evolution/e-ews-config-utils.c:1044
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "“%s” klasörünün izinleri düzenlenemiyor, başka klasör seç."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1128
+#: ../src/EWS/evolution/e-ews-config-utils.c:1125
 msgid "Folder Sizes…"
 msgstr "Klasör Boyutları…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1135
+#: ../src/EWS/evolution/e-ews-config-utils.c:1132
 msgid "Subscribe to folder of other user…"
 msgstr "Diğer kullanıcının klasörüne abone ol…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1144
-#: ../src/EWS/evolution/e-ews-config-utils.c:1502
-#: ../src/EWS/evolution/e-ews-config-utils.c:1540
-#: ../src/EWS/evolution/e-ews-config-utils.c:1578
-#: ../src/EWS/evolution/e-ews-config-utils.c:1616
+#: ../src/EWS/evolution/e-ews-config-utils.c:1141
+#: ../src/EWS/evolution/e-ews-config-utils.c:1499
+#: ../src/EWS/evolution/e-ews-config-utils.c:1537
+#: ../src/EWS/evolution/e-ews-config-utils.c:1575
+#: ../src/EWS/evolution/e-ews-config-utils.c:1613
 msgid "Permissions…"
 msgstr "İzinler…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1146
+#: ../src/EWS/evolution/e-ews-config-utils.c:1143
 msgid "Edit EWS folder permissions"
 msgstr "EWS klasör izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1504
+#: ../src/EWS/evolution/e-ews-config-utils.c:1501
 msgid "Edit EWS calendar permissions"
 msgstr "EWS takvim izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1542
+#: ../src/EWS/evolution/e-ews-config-utils.c:1539
 msgid "Edit EWS tasks permissions"
 msgstr "EWS görevlerinin izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1580
+#: ../src/EWS/evolution/e-ews-config-utils.c:1577
 msgid "Edit EWS memos permissions"
 msgstr "EWS notlarının izinlerini düzenle"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1618
+#: ../src/EWS/evolution/e-ews-config-utils.c:1615
 msgid "Edit EWS contacts permissions"
 msgstr "EWS kişilerinin izinlerini düzenle"
 
@@ -1185,28 +1186,32 @@ msgstr "A_ra…"
 msgid "Authentication"
 msgstr "Kimlik Doğrulama"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:338
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "İletişim kuralı sürüm 2.0ʼı kullan (okul ve kurum hesapları için)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
 msgid "_Override Office365 OAuth2 settings"
 msgstr "Office365 OAuth2 ayarlarını _geçersiz kıl"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Yardım…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:356
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "Uygulama _kimliği:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "Öntanımlı uygulama kimliği ayarlanamadı"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1216,59 +1221,59 @@ msgstr "Öntanımlı uygulama kimliği “%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:384
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "_Kiracı kimliği:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:409
 msgid "Default tenant ID is “common“"
 msgstr "Öntanımlı kiracı kimliği: “common” (ortak)"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "Öntanımlı kiracı kimliği: “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:417
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "_Gelişmiş Ayarlar"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "_Uç nokta ana makinesi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "Öntanımlı uç nokta ana makinesi: “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
 msgid "Red_irect URI:"
 msgstr "_Yönlendirme URIʼsi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:490
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Öntanımlı yönlendirme URIsi “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:493
 msgid "Re_source URI:"
 msgstr "_Kaynak URIʼsi:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:516
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
@@ -1277,28 +1282,24 @@ msgstr ""
 "Öntanımlı kaynak URI’si Ana Makine URL’sinden türetilmiştir, “%s” olarak "
 "geri çekilebilir."
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
-msgid "Use _protocol version 2.0 (for school and organization accounts)"
-msgstr "İletişim kuralı sürüm 2.0ʼı kullan (okul ve kurum hesapları için)"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:772
 msgid "Host URL is not valid"
 msgstr "Ana makine URLʼsi geçersiz"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
 msgid "Host URL cannot be empty"
 msgstr "Ana bilgisayar URLʼsi boş olamaz"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "OAB URL is not valid"
 msgstr "OAB URLʼsi geçersiz"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:797
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "Kullanıcı adı boş olamaz"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:811
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Uygulama kimliği boş olamaz"
@@ -1662,7 +1663,7 @@ msgid "Unknown recurrence frequency (%d)"
 msgstr "Bilinmeyen yineleme sıklığı (%d)"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
-msgid "Microsoft 365 calendar cannot store more that one event reminder"
+msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr "Microsoft 365 takvimi birden çok olay anımsatıcı depolayamaz"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
@@ -1728,7 +1729,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Microsoft 365 aracılığıyla posta al"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1249
+#: ../src/Microsoft365/common/e-m365-connection.c:1276
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Bozuk URI: “%s”"
@@ -1784,30 +1785,30 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:893
+#: ../src/Microsoft365/common/e-m365-connection.c:920
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Microsoft 365 sunucusu meşgul, yeniden deneme bekleniyor (%d:%02d dakika)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:899
+#: ../src/Microsoft365/common/e-m365-connection.c:926
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Microsoft 365 sunucusu meşgul, yeniden deneme bekleniyor (%d saniye)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1024
 #: ../src/Microsoft365/common/e-m365-connection.c:1051
+#: ../src/Microsoft365/common/e-m365-connection.c:1078
 msgid "Invalid data"
 msgstr "Geçersiz veri"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1049
+#: ../src/Microsoft365/common/e-m365-connection.c:1076
 msgid "Operation was cancelled"
 msgstr "İşlem iptal edildi"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1740
+#: ../src/Microsoft365/common/e-m365-connection.c:1767
 msgid "Failed to parse own Json data"
 msgstr "Kendi Json verisi ayrıştırılamadı"
 
