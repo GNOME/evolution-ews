@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
 "POT-Creation-Date: 2024-03-18 10:25+0000\n"
-"PO-Revision-Date: 2024-03-24 13:28+0100\n"
+"PO-Revision-Date: 2024-03-24 13:39+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -1255,23 +1255,21 @@ msgstr "Privzet ID Programa je »%s«"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:384
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
-#, fuzzy
 msgid "_Tenant ID:"
-msgstr "ID najemni_ka:"
+msgstr "ID na_jemnika:"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:409
-#, fuzzy
 msgid "Default tenant ID is “common“"
-msgstr "Privzet ID najemnika je »splošen«"
+msgstr "Privzeti ID najemnika je »splošen«"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
-#, fuzzy, c-format
+#, c-format
 msgid "Default tenant ID is “%s”"
-msgstr "Privzet ID najemnika je »%s«"
+msgstr "Privzeti ID najemnika je »%s«"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:417
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
@@ -1729,7 +1727,6 @@ msgid "Failed to read attachment URI"
 msgstr "Branje URI priponke je spodletelo"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
-#, fuzzy
 msgid "Failed to get inline attachment data"
 msgstr "Podatkov o prilogah v vrstici ni bilo mogoče pridobiti"
 
@@ -1880,14 +1877,13 @@ msgstr "_Preglasi nastavitve Office365 OAuth2"
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
-#, fuzzy
 msgid "Default tenant is “common“"
 msgstr "Privzeti najemnik je »splošen«"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:277
-#, fuzzy, c-format
+#, c-format
 msgid "Default tenant is “%s”"
 msgstr "Privzeti najemnik je »%s«"
 
