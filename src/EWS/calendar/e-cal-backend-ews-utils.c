@@ -50,6 +50,7 @@ static guint tables_counter = 0;
 G_MODULE_EXPORT void
 e_cal_backend_ews_populate_windows_zones (void)
 {
+	const gchar *ews_test_windows_zones_xml_path;
 	const gchar *xpath_eval_exp;
 	gchar *filename = NULL;
 	xmlDocPtr doc;
@@ -68,8 +69,9 @@ e_cal_backend_ews_populate_windows_zones (void)
 		return;
 	}
 
-	if (g_strcmp0 (g_getenv ("EWS_INTERNAL_TEST"), "1") == 0)
-		filename = g_build_filename (EXCHANGE_EWS_SRCDIR, "windowsZones.xml", NULL);
+	ews_test_windows_zones_xml_path = g_getenv ("EWS_TEST_WINDOWS_ZONES_XML_PATH");
+	if (ews_test_windows_zones_xml_path != NULL)
+		filename = g_build_filename (ews_test_windows_zones_xml_path, "windowsZones.xml", NULL);
 	else
 		filename = g_build_filename (EXCHANGE_EWS_DATADIR, "windowsZones.xml", NULL);
 
