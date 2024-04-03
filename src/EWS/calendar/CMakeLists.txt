@@ -96,7 +96,6 @@ target_compile_definitions(ecalbackendews PRIVATE
 	-DG_LOG_DOMAIN=\"ecalbackendews\"
 	-DEXCHANGE_EWS_DATADIR=\"${ewsdatadir}\"
 	-DEXCHANGE_EWS_LOCALEDIR=\"${LOCALE_INSTALL_DIR}\"
-	-DEXCHANGE_EWS_SRCDIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"
 )
 
 target_compile_options(ecalbackendews PUBLIC
