@@ -50,6 +50,13 @@ typedef enum _EM365ApiVersion {
 	E_M365_API_BETA
 } EM365ApiVersion;
 
+typedef enum {
+	E_M365_ERROR_ID_MALFORMED
+} EM365Error;
+
+#define	E_M365_ERROR e_m365_error_quark ()
+GQuark		e_m365_error_quark		(void) G_GNUC_CONST;
+
 typedef struct _EM365Connection EM365Connection;
 typedef struct _EM365ConnectionClass EM365ConnectionClass;
 typedef struct _EM365ConnectionPrivate EM365ConnectionPrivate;
@@ -493,6 +500,7 @@ gboolean	e_m365_connection_list_events_sync
 						 const gchar *calendar_id,
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
+						 const gchar *filter, /* nullable - filter which events to list */
 						 GSList **out_events, /* EM365Event * - the returned event objects */
 						 GCancellable *cancellable,
 						 GError **error);
@@ -562,6 +570,15 @@ gboolean	e_m365_connection_response_event_sync
 						 EM365ResponseType response, /* uses only accepted/tentatively accepted/declined values */
 						 const gchar *comment, /* nullable */
 						 gboolean send_response,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_cancel_event_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 const gchar *comment,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_dismiss_reminder_sync
@@ -672,6 +689,7 @@ gboolean	e_m365_connection_list_tasks_sync
 						 const gchar *task_list_id,
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
+						 const gchar *filter, /* nullable - filter which tasks to list */
 						 GSList **out_tasks, /* EM365Task * - the returned task objects */
 						 GCancellable *cancellable,
 						 GError **error);
