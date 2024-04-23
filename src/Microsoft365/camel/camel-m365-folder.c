@@ -384,85 +384,6 @@ m365_folder_cmp_uids (CamelFolder *folder,
 	return strcmp (uid1, uid2);
 }
 
-static gboolean
-m365_folder_download_message_cb (EM365Connection *cnc,
-				 SoupMessage *message,
-				 GInputStream *raw_data_stream,
-				 gpointer user_data,
-				 GCancellable *cancellable,
-				 GError **error)
-{
-	CamelStream *cache_stream = user_data;
-	gssize expected_size = 0, wrote_size = 0, last_percent = -1;
-	gint last_progress_notify = 0;
-	gsize buffer_size = 65535;
-	gchar *buffer;
-	gboolean success;
-
-	g_return_val_if_fail (CAMEL_IS_STREAM (cache_stream), FALSE);
-	g_return_val_if_fail (G_IS_INPUT_STREAM (raw_data_stream), FALSE);
-
-	if (message && soup_message_get_response_headers (message)) {
-		const gchar *content_length_str;
-
-		content_length_str = soup_message_headers_get_one (soup_message_get_response_headers (message), "Content-Length");
-
-		if (content_length_str && *content_length_str)
-			expected_size = (gssize) g_ascii_strtoll (content_length_str, NULL, 10);
-	}
-
-	buffer = g_malloc (buffer_size);
-
-	do {
-		success = !g_cancellable_set_error_if_cancelled (cancellable, error);
-
-		if (success) {
-			gssize n_read, n_wrote;
-
-			n_read = g_input_stream_read (raw_data_stream, buffer, buffer_size, cancellable, error);
-
-			if (n_read == -1) {
-				success = FALSE;
-			} else if (!n_read) {
-				break;
-			} else {
-				n_wrote = camel_stream_write (cache_stream, buffer, n_read, cancellable, error);
-				success = n_read == n_wrote;
-
-				if (success && expected_size > 0) {
-					gssize percent;
-
-					wrote_size += n_wrote;
-
-					percent = wrote_size * 100.0 / expected_size;
-
-					if (percent > 100)
-						percent = 100;
-
-					if (percent != last_percent) {
-						gint64 now = g_get_monotonic_time ();
-
-						/* Notify only 10 times per second, not more */
-						if (percent == 100 || now - last_progress_notify > G_USEC_PER_SEC / 10) {
-							last_progress_notify = now;
-							last_percent = percent;
-
-							camel_operation_progress (cancellable, percent);
-						}
-					}
-				}
-			}
-		}
-	} while (success);
-
-	g_free (buffer);
-
-	if (success)
-		camel_stream_flush (cache_stream, cancellable, NULL);
-
-	return success;
-}
-
 static void
 m365_folder_get_message_cancelled_cb (GCancellable *cancellable,
 				      gpointer user_data)
@@ -546,7 +467,7 @@ m365_folder_get_message_sync (CamelFolder *folder,
 		success = cache_stream != NULL;
 
 		success = success && e_m365_connection_get_mail_message_sync (cnc, NULL, folder_id, uid,
-			m365_folder_download_message_cb, cache_stream, cancellable, &local_error);
+			e_m365_connection_util_read_raw_data_cb, cache_stream, cancellable, &local_error);
 
 		if (local_error) {
 			camel_m365_store_maybe_disconnect (m365_store, local_error);

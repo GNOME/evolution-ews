@@ -2079,6 +2079,38 @@ ecb_m365_add_online_meeting (EM365Connection *cnc,
 	return TRUE;
 }
 
+static gchar *
+ecb_m365_calc_hash (const gchar *value)
+{
+	gchar *hash;
+
+	if (!value)
+		return g_strdup ("empty");
+
+	/* the MD5 is fine here, the id-s are not that long to cause the collision;
+	   it's also short, which is for good */
+	hash = g_compute_checksum_for_string (G_CHECKSUM_MD5, value, -1);
+	if (!hash)
+		hash = g_compute_checksum_for_string (G_CHECKSUM_SHA1, value, -1);
+	if (!hash)
+		hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256, value, -1);
+
+	/* fallback when cannot compute the hash */
+	if (!hash) {
+		gchar *ptr;
+
+		hash = g_strdup (value);
+
+		/* remove forward- and back-slashes from the string */
+		for (ptr = hash; *ptr; ptr++) {
+			if (*ptr == '/' || *ptr == '\\')
+				*ptr = '_';
+		}
+	}
+
+	return hash;
+}
+
 static gboolean
 ecb_m365_get_attachments (EM365Connection *cnc,
 			  const gchar *group_id,
@@ -2093,6 +2125,7 @@ ecb_m365_get_attachments (EM365Connection *cnc,
 {
 	GSList *attachments = NULL, *link;
 	const gchar *id;
+	gchar *event_id_hash;
 	gboolean success = TRUE;
 
 	switch (i_cal_component_isa (inout_comp)) {
@@ -2103,7 +2136,7 @@ ecb_m365_get_attachments (EM365Connection *cnc,
 		id = e_m365_event_get_id (m365_object);
 
 		if (!e_m365_connection_list_event_attachments_sync (cnc, NULL,
-			group_id, folder_id, id, "id,name,contentType,contentBytes",
+			group_id, folder_id, id, "id,name,contentType",
 			&attachments, cancellable, error)) {
 			return FALSE;
 		}
@@ -2115,40 +2148,31 @@ ecb_m365_get_attachments (EM365Connection *cnc,
 		return FALSE;
 	}
 
+	event_id_hash = ecb_m365_calc_hash (id);
+
 	for (link = attachments; link && success; link = g_slist_next (link)) {
 		CamelStream *content_stream;
 		EM365Attachment *m365_attach = link->data;
-		gchar *filename;
+		gchar *filename, *attach_id_hash;
 
 		if (!m365_attach || e_m365_attachment_get_data_type (m365_attach) != E_M365_ATTACHMENT_DATA_TYPE_FILE ||
 		    !e_m365_attachment_get_name (m365_attach))
 			continue;
 
-		filename = g_build_filename (attachments_dir, id, e_m365_attachment_get_id (m365_attach), NULL);
+		attach_id_hash = ecb_m365_calc_hash (e_m365_attachment_get_id (m365_attach));
+
+		filename = g_build_filename (attachments_dir, event_id_hash, NULL);
+		g_mkdir_with_parents (filename, 0777);
+		g_free (filename);
+
+		filename = g_build_filename (attachments_dir, event_id_hash, attach_id_hash, NULL);
 
 		content_stream = camel_stream_fs_new_with_name (filename, O_CREAT | O_TRUNC | O_WRONLY, 0666, error);
 
 		if (content_stream) {
-			CamelMimeFilter *filter;
-			CamelStream *filter_stream;
-			const gchar *base64_data;
-
-			filter_stream = camel_stream_filter_new (content_stream);
-
-			filter = camel_mime_filter_basic_new (CAMEL_MIME_FILTER_BASIC_BASE64_DEC);
-			camel_stream_filter_add (CAMEL_STREAM_FILTER (filter_stream), filter);
-			g_object_unref (filter);
-
-			base64_data = e_m365_file_attachment_get_content_bytes (m365_attach);
-
-			if (base64_data && *base64_data)
-				success = camel_stream_write (filter_stream, base64_data, strlen (base64_data), cancellable, error) != -1;
-
-			camel_stream_flush (filter_stream, cancellable, NULL);
-			g_object_unref (filter_stream);
-
-			camel_stream_flush (content_stream, cancellable, NULL);
-			g_object_unref (content_stream);
+			success = e_m365_connection_get_event_attachment_sync (cnc, NULL, group_id, folder_id, id,
+				e_m365_attachment_get_id (m365_attach), e_m365_connection_util_read_raw_data_cb, content_stream,
+				cancellable, error);
 
 			if (success) {
 				gchar *uri;
@@ -2199,9 +2223,11 @@ ecb_m365_get_attachments (EM365Connection *cnc,
 		}
 
 		g_free (filename);
+		g_free (attach_id_hash);
 	}
 
 	g_slist_free_full (attachments, (GDestroyNotify) json_object_unref);
+	g_free (event_id_hash);
 
 	return success;
 }
