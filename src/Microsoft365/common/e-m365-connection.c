@@ -28,6 +28,8 @@
 			"id,imAddresses,jobTitle,mail,mailNickname,mobilePhone,mySite,officeLocation,otherMails,postalCode,proxyAddresses," \
 			"state,streetAddress,surname"
 
+G_DEFINE_QUARK (e-m365-error-quark, e_m365_error)
+
 typedef enum _CSMFlags {
 	CSM_DEFAULT		= 0,
 	CSM_DISABLE_RESPONSE	= 1 << 0
@@ -858,6 +860,9 @@ m365_connection_extract_error (JsonNode *node,
 		status_code = G_IO_ERROR_INVALID_DATA;
 	} else if (g_strcmp0 (code, "ErrorInvalidUser") == 0) {
 		status_code = SOUP_STATUS_UNAUTHORIZED;
+	} else if (g_strcmp0 (code, "ErrorInvalidIdMalformed") == 0) {
+		domain = E_M365_ERROR;
+		status_code = E_M365_ERROR_ID_MALFORMED;
 	}
 
 	if (code && message)
@@ -4390,6 +4395,7 @@ e_m365_connection_list_events_sync (EM365Connection *cnc,
 				    const gchar *calendar_id,
 				    const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 				    const gchar *select, /* nullable - properties to select */
+				    const gchar *filter, /* nullable - filter which events to list */
 				    GSList **out_events, /* EM365Event * - the returned event objects */
 				    GCancellable *cancellable,
 				    GError **error)
@@ -4410,6 +4416,7 @@ e_m365_connection_list_events_sync (EM365Connection *cnc,
 		"", calendar_id,
 		"", "events",
 		"$select", select,
+		"$filter", filter,
 		NULL);
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
@@ -4826,6 +4833,64 @@ e_m365_connection_response_event_sync (EM365Connection *cnc,
 	e_m365_json_begin_object_member (builder, NULL);
 	e_m365_json_add_nonempty_string_member (builder, "comment", comment);
 	e_m365_json_add_boolean_member (builder, "sendResponse", send_response);
+	e_m365_json_end_object_member (builder);
+
+	e_m365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/event-cancel?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_cancel_event_sync (EM365Connection *cnc,
+				     const gchar *user_override, /* for which user, NULL to use the account user */
+				     const gchar *group_id, /* nullable - then the default group is used */
+				     const gchar *calendar_id,
+				     const gchar *event_id,
+				     const gchar *comment, /* nullable */
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	JsonBuilder *builder;
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (event_id != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "events",
+		"", event_id,
+		"", "cancel",
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	e_m365_json_begin_object_member (builder, NULL);
+	e_m365_json_add_nonempty_string_member (builder, "comment", comment);
 	e_m365_json_end_object_member (builder);
 
 	e_m365_connection_set_json_body (message, builder);
@@ -5471,6 +5536,7 @@ e_m365_connection_list_tasks_sync (EM365Connection *cnc,
 				   const gchar *task_list_id,
 				   const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 				   const gchar *select, /* nullable - properties to select */
+				   const gchar *filter, /* nullable - filter which tasks to list */
 				   GSList **out_tasks, /* EM365Task * - the returned task objects */
 				   GCancellable *cancellable,
 				   GError **error)
@@ -5490,6 +5556,7 @@ e_m365_connection_list_tasks_sync (EM365Connection *cnc,
 		task_list_id,
 		"", "tasks",
 		"$select", select,
+		"$filter", filter,
 		NULL);
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
