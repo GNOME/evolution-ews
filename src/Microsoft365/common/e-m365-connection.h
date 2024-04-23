@@ -84,7 +84,13 @@ void		e_m365_connection_util_set_message_status_code
 						 gint status_code);
 gint		e_m365_connection_util_get_message_status_code
 						(SoupMessage *message);
-
+gboolean	e_m365_connection_util_read_raw_data_cb
+						(EM365Connection *cnc,
+						 SoupMessage *message,
+						 GInputStream *raw_data_stream,
+						 gpointer user_data, /* CamelStream * */
+						 GCancellable *cancellable,
+						 GError **error);
 GType		e_m365_connection_get_type	(void) G_GNUC_CONST;
 
 EM365Connection *

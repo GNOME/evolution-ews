@@ -539,6 +539,86 @@ e_m365_connection_util_get_message_status_code (SoupMessage *message)
 	return status_code;
 }
 
+/* An EM365ConnectionRawDataFunc function, which writes the received data into the provided CamelStream */
+gboolean
+e_m365_connection_util_read_raw_data_cb (EM365Connection *cnc,
+					 SoupMessage *message,
+					 GInputStream *raw_data_stream,
+					 gpointer user_data, /* CamelStream * */
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	CamelStream *cache_stream = user_data;
+	gssize expected_size = 0, wrote_size = 0, last_percent = -1;
+	gint last_progress_notify = 0;
+	gsize buffer_size = 65535;
+	gchar *buffer;
+	gboolean success;
+
+	g_return_val_if_fail (CAMEL_IS_STREAM (cache_stream), FALSE);
+	g_return_val_if_fail (G_IS_INPUT_STREAM (raw_data_stream), FALSE);
+
+	if (message && soup_message_get_response_headers (message)) {
+		const gchar *content_length_str;
+
+		content_length_str = soup_message_headers_get_one (soup_message_get_response_headers (message), "Content-Length");
+
+		if (content_length_str && *content_length_str)
+			expected_size = (gssize) g_ascii_strtoll (content_length_str, NULL, 10);
+	}
+
+	buffer = g_malloc (buffer_size);
+
+	do {
+		success = !g_cancellable_set_error_if_cancelled (cancellable, error);
+
+		if (success) {
+			gssize n_read, n_wrote;
+
+			n_read = g_input_stream_read (raw_data_stream, buffer, buffer_size, cancellable, error);
+
+			if (n_read == -1) {
+				success = FALSE;
+			} else if (!n_read) {
+				break;
+			} else {
+				n_wrote = camel_stream_write (cache_stream, buffer, n_read, cancellable, error);
+				success = n_read == n_wrote;
+
+				if (success && expected_size > 0) {
+					gssize percent;
+
+					wrote_size += n_wrote;
+
+					percent = wrote_size * 100.0 / expected_size;
+
+					if (percent > 100)
+						percent = 100;
+
+					if (percent != last_percent) {
+						gint64 now = g_get_monotonic_time ();
+
+						/* Notify only 10 times per second, not more */
+						if (percent == 100 || now - last_progress_notify > G_USEC_PER_SEC / 10) {
+							last_progress_notify = now;
+							last_percent = percent;
+
+							camel_operation_progress (cancellable, percent);
+						}
+					}
+				}
+			}
+		}
+	} while (success);
+
+	g_free (buffer);
+
+	if (success)
+		camel_stream_flush (cache_stream, cancellable, NULL);
+
+	return success;
+}
+
 EM365Connection *
 e_m365_connection_new (ESource *source,
 		       CamelM365Settings *settings)
