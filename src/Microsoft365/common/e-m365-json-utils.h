@@ -49,6 +49,8 @@ G_BEGIN_DECLS
 #define EM365TimeOfDay			gint64
 #define EM365WorkingHours		JsonObject
 
+#define E_M365_RECURRENCE_BLOB_NAME "Binary {00062002-0000-0000-c000-000000000046} Id 0x8216"
+
 typedef enum _EM365AttachmentDataType {
 	E_M365_ATTACHMENT_DATA_TYPE_NOT_SET,
 	E_M365_ATTACHMENT_DATA_TYPE_UNKNOWN,
@@ -298,6 +300,9 @@ void		e_m365_json_add_nonempty_or_null_string_member
 							(JsonBuilder *builder,
 							 const gchar *member_name,
 							 const gchar *value);
+const gchar *	e_m365_json_get_string_single_value_extended_property
+							(JsonObject *object,
+							 const gchar *property_name);
 
 EM365Date	e_m365_date_get				(JsonObject *object,
 							 const gchar *member_name);

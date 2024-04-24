@@ -21,6 +21,8 @@ add_library(ews-m365 STATIC
 	${CMAKE_SOURCE_DIR}/src/Microsoft365/common/e-m365-tz-utils.h
 	${CMAKE_SOURCE_DIR}/src/Microsoft365/calendar/e-cal-backend-m365-utils.c
 	${CMAKE_SOURCE_DIR}/src/Microsoft365/calendar/e-cal-backend-m365-utils.h
+	${CMAKE_SOURCE_DIR}/src/Microsoft365/calendar/e-cal-backend-m365-recur-blob.c
+	${CMAKE_SOURCE_DIR}/src/Microsoft365/calendar/e-cal-backend-m365-recur-blob.h
 )
 
 add_dependencies(ews-m365

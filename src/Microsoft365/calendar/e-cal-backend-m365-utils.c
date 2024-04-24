@@ -12,10 +12,72 @@
 
 #include "common/e-m365-connection.h"
 #include "common/e-m365-tz-utils.h"
+#include "e-cal-backend-m365-recur-blob.h"
 #include "e-cal-backend-m365-utils.h"
 
 #define EC_ERROR_EX(_code, _msg) e_client_error_create (_code, _msg)
 #define ECC_ERROR_EX(_code, _msg) e_cal_client_error_create (_code, _msg)
+
+static void
+ecb_m365_json_to_ical_recur_blob (JsonObject *m365_object,
+				  ETimezoneCache *timezone_cache,
+				  ICalComponent **inout_icomp)
+{
+	const gchar *base64_blob;
+	ICalTimezone *recur_zone = NULL;
+	ICalProperty *prop;
+	GSList *extra_detached = NULL;
+
+	g_return_if_fail (m365_object != NULL);
+	g_return_if_fail (inout_icomp != NULL);
+	g_return_if_fail (*inout_icomp != NULL);
+
+	if (!e_cal_util_component_has_recurrences (*inout_icomp))
+		return;
+
+	base64_blob = e_m365_json_get_string_single_value_extended_property (m365_object, E_M365_RECURRENCE_BLOB_NAME);
+	if (!base64_blob || !*base64_blob)
+		return;
+
+	prop = i_cal_component_get_first_property (*inout_icomp, I_CAL_DTSTART_PROPERTY);
+	if (prop) {
+		ICalParameter *param;
+
+		param = i_cal_property_get_first_parameter (prop, I_CAL_TZID_PARAMETER);
+		if (param) {
+			const gchar *tzid;
+
+			tzid = i_cal_parameter_get_tzid (param);
+
+			if (tzid && *tzid)
+				recur_zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+
+			g_clear_object (&param);
+		}
+
+		g_clear_object (&prop);
+	}
+
+	if (e_cal_backend_m365_decode_recur_blob (base64_blob, *inout_icomp, recur_zone, &extra_detached)) {
+		if (extra_detached) {
+			ICalComponent *vcalendar;
+			GSList *link;
+
+			vcalendar = i_cal_component_new_vcalendar ();
+			i_cal_component_take_component (vcalendar, *inout_icomp);
+
+			for (link = extra_detached; link; link = g_slist_next (link)) {
+				ICalComponent *icomp = link->data;
+
+				i_cal_component_take_component (vcalendar, icomp);
+			}
+
+			*inout_icomp = vcalendar;
+
+			g_slist_free (extra_detached);
+		}
+	}
+}
 
 static void
 ecb_m365_get_uid (EM365Connection *cnc,
@@ -2741,6 +2803,9 @@ e_cal_backend_m365_utils_json_to_ical (EM365Connection *cnc,
 				error);
 		}
 	}
+
+	if (success && kind == I_CAL_VEVENT_COMPONENT)
+		ecb_m365_json_to_ical_recur_blob (m365_object, timezone_cache, &icomp);
 
 	if (!success)
 		g_clear_object (&icomp);
