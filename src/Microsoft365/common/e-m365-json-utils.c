@@ -563,6 +563,35 @@ e_m365_json_add_nonempty_or_null_string_member (JsonBuilder *builder,
 		e_m365_json_add_null_member (builder, member_name);
 }
 
+const gchar *
+e_m365_json_get_string_single_value_extended_property (JsonObject *object,
+						       const gchar *property_name)
+{
+	JsonArray *array;
+	guint ii, len;
+
+	if (!object || !property_name)
+		return NULL;
+
+	array = e_m365_json_get_array_member (object, "singleValueExtendedProperties");
+	if (!array)
+		return NULL;
+
+	len = json_array_get_length (array);
+
+	for (ii = 0; ii < len; ii++) {
+		JsonObject *item = json_array_get_object_element (array, ii);
+
+		if (!item)
+			break;
+
+		if (g_strcmp0 (e_m365_json_get_string_member (item, "id", NULL), property_name) == 0)
+			return e_m365_json_get_string_member (item, "value", NULL);
+	}
+
+	return NULL;
+}
+
 EM365Date
 e_m365_date_get (JsonObject *object,
 		 const gchar *member_name)

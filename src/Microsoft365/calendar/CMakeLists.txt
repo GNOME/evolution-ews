@@ -6,6 +6,8 @@ set(SOURCES
 	e-cal-backend-m365.c
 	e-cal-backend-m365.h
 	e-cal-backend-m365-factory.c
+	e-cal-backend-m365-recur-blob.c
+	e-cal-backend-m365-recur-blob.h
 	e-cal-backend-m365-utils.c
 	e-cal-backend-m365-utils.h
 )
