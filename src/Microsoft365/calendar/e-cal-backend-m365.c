@@ -669,6 +669,286 @@ ecb_m365_load_component_sync (ECalMetaBackend *meta_backend,
 	return success;
 }
 
+static ICalComponent *
+ecb_m365_dup_main_comp (ICalComponent *icomp,
+			ICalComponentKind kind)
+{
+	ICalComponent *main_comp = NULL;
+
+	if (i_cal_component_isa (icomp) == I_CAL_VCALENDAR_COMPONENT) {
+		ICalComponent *subcomp;
+
+		for (subcomp = i_cal_component_get_first_component (icomp, kind);
+		     subcomp;
+		     g_object_unref (subcomp), subcomp = i_cal_component_get_next_component (icomp, kind)) {
+			if (!e_cal_util_component_has_property (subcomp, I_CAL_RECURRENCEID_PROPERTY)) {
+				main_comp = g_object_ref (subcomp);
+				break;
+			}
+		}
+
+		g_clear_object (&subcomp);
+	} else {
+		main_comp = g_object_ref (icomp);
+	}
+
+	return main_comp;
+}
+
+static gboolean
+ecb_m365_save_recurrence_changes_locked_sync (ECalBackendM365 *cbm365,
+					      const GSList *instances, /* ECalComponent * */
+					      const gchar *m365_uid,
+					      ICalComponent *comp_in_extra,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	gboolean (* get_instance_id_func) (EM365Connection *cnc,
+					   const gchar *user_override,
+					   const gchar *group_id,
+					   const gchar *calendar_id,
+					   const gchar *event_id,
+					   ICalTime *instance_time,
+					   gchar **out_instance_id,
+					   GCancellable *cancellable,
+					   GError **error);
+	gboolean (* get_item_func) (EM365Connection *cnc,
+				    const gchar *user_override,
+				    const gchar *group_id,
+				    const gchar *calendar_id,
+				    const gchar *event_id,
+				    const gchar *prefer_outlook_timezone,
+				    const gchar *select,
+				    JsonObject **out_item,
+				    GCancellable *cancellable,
+				    GError **error);
+	gboolean (* update_item_func) (EM365Connection *cnc,
+				       const gchar *user_override,
+				       const gchar *group_id,
+				       const gchar *folder_id,
+				       const gchar *item_id,
+				       JsonBuilder *item,
+				       GCancellable *cancellable,
+				       GError **error);
+	gboolean (* delete_item_func) (EM365Connection *cnc,
+				       const gchar *user_override,
+				       const gchar *group_id,
+				       const gchar *calendar_id,
+				       const gchar *event_id,
+				       GCancellable *cancellable,
+				       GError **error);
+	ICalComponentKind kind;
+	GHashTable *known_exdates = NULL;
+	GSList *link;
+	gboolean success = TRUE;
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbm365));
+
+	switch (kind) {
+	case I_CAL_VEVENT_COMPONENT:
+		get_instance_id_func = e_m365_connection_get_event_instance_id_sync;
+		get_item_func = e_m365_connection_get_event_sync;
+		update_item_func = e_m365_connection_update_event_sync;
+		delete_item_func = e_m365_connection_delete_event_sync;
+		break;
+	case I_CAL_VTODO_COMPONENT:
+		get_instance_id_func = NULL;
+		get_item_func = e_m365_connection_get_task_sync;
+		update_item_func = e_m365_connection_update_task_sync;
+		delete_item_func = e_m365_connection_delete_task_sync;
+		break;
+	default:
+		g_warn_if_reached ();
+		return FALSE;
+	}
+
+	if (comp_in_extra) {
+		ICalComponent *main_comp;
+		ICalProperty *prop;
+
+		main_comp = ecb_m365_dup_main_comp (comp_in_extra, kind);
+
+		for (prop = main_comp ? i_cal_component_get_first_property (main_comp, I_CAL_EXDATE_PROPERTY) : NULL;
+		     prop;
+		     g_object_unref (prop), prop = i_cal_component_get_next_property (main_comp, I_CAL_EXDATE_PROPERTY)) {
+			ICalTime *exdate = i_cal_property_get_exdate (prop);
+
+			if (!exdate)
+				continue;
+
+			if (!known_exdates)
+				known_exdates = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+			g_hash_table_add (known_exdates, i_cal_time_as_ical_string (exdate));
+
+			g_clear_object (&exdate);
+		}
+
+		g_clear_object (&prop);
+		g_clear_object (&main_comp);
+	}
+
+	for (link = (GSList *) instances; link && success; link = g_slist_next (link)) {
+		ICalComponent *icomp = e_cal_component_get_icalcomponent (link->data);
+		ICalProperty *prop;
+
+		if (!icomp)
+			continue;
+
+		prop = i_cal_component_get_first_property (icomp, I_CAL_RECURRENCEID_PROPERTY);
+		if (prop) {
+			ICalTime *recurid;
+
+			recurid = i_cal_property_get_recurrenceid (prop);
+			if (recurid) {
+				gchar *instance_id = NULL;
+				GError *local_error = NULL;
+
+				if (get_instance_id_func) {
+					success = get_instance_id_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+						cbm365->priv->folder_id, m365_uid, recurid, &instance_id, cancellable, &local_error);
+				} else {
+					g_propagate_error (&local_error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+						_("Cannot store detached instances, because not supported in Microsoft 365")));
+					success = FALSE;
+				}
+
+				if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_FOUND)) {
+					/* this should not happen, but ignore the error if it does */
+					g_clear_error (&local_error);
+					success = TRUE;
+				} else if (success && instance_id) {
+					JsonObject *item = NULL;
+
+					success = get_item_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+						cbm365->priv->folder_id, instance_id, NULL, NULL, &item, cancellable, &local_error);
+
+					if (success && item) {
+						ICalComponent *old_comp;
+
+						old_comp = ecb_m365_json_to_ical (cbm365, item, cancellable, &local_error);
+						if (old_comp) {
+							JsonBuilder *builder;
+
+							builder = ecb_m365_ical_to_json_locked (cbm365, icomp, old_comp, cancellable, &local_error);
+
+							if (builder) {
+								success = update_item_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+									cbm365->priv->folder_id, instance_id, builder, cancellable, &local_error);
+
+								if (success && !local_error) {
+									success = ecb_m365_ical_to_json_2nd_go_locked (cbm365, icomp, old_comp,
+										instance_id, cancellable, &local_error);
+								}
+
+								g_clear_object (&builder);
+							} else if (local_error) {
+								success = FALSE;
+							}
+
+							g_clear_object (&old_comp);
+						} else {
+							success = FALSE;
+						}
+					}
+
+					g_clear_pointer (&item, json_object_unref);
+				}
+
+				g_clear_object (&recurid);
+				g_free (instance_id);
+
+				if (local_error) {
+					g_propagate_error (error, local_error);
+					success = FALSE;
+				}
+			}
+
+			g_clear_object (&prop);
+		} else {
+			/* master object, handle EXDATE-s, which are for removed and detached instances */
+			for (prop = i_cal_component_get_first_property (icomp, I_CAL_EXDATE_PROPERTY);
+			     prop && success;
+			     g_object_unref (prop), prop = i_cal_component_get_next_property (icomp, I_CAL_EXDATE_PROPERTY)) {
+				ICalTime *exdate = i_cal_property_get_exdate (prop);
+				gchar *exdate_str;
+
+				if (!exdate)
+					continue;
+
+				exdate_str = i_cal_time_as_ical_string (exdate);
+				if (exdate_str && (!known_exdates || !g_hash_table_contains (known_exdates, exdate_str))) {
+					/* new EXDATE */
+					gboolean is_detached_instance = FALSE;
+					GSList *link2;
+
+					for (link2 = (GSList *) instances; link2 && !is_detached_instance; link2 = g_slist_next (link2)) {
+						ICalComponent *subcomp = e_cal_component_get_icalcomponent (link2->data);
+						ICalProperty *subprop;
+
+						if (!subcomp || subcomp == icomp)
+							continue;
+
+						subprop = i_cal_component_get_first_property (subcomp, I_CAL_RECURRENCEID_PROPERTY);
+						if (subprop) {
+							ICalTime *subrecurid = i_cal_property_get_recurrenceid (subprop);
+							is_detached_instance = subrecurid && i_cal_time_compare_date_only (exdate, subrecurid) == 0;
+							g_clear_object (&subrecurid);
+						}
+
+						g_clear_object (&subprop);
+					}
+
+					if (!is_detached_instance) {
+						gchar *instance_id = NULL;
+						GError *local_error = NULL;
+
+						if (get_instance_id_func) {
+							success = get_instance_id_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+								cbm365->priv->folder_id, m365_uid, exdate, &instance_id, cancellable, &local_error);
+						} else {
+							g_propagate_error (&local_error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
+								_("Cannot store detached instances, because not supported in Microsoft 365")));
+							success = FALSE;
+						}
+
+						if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_FOUND)) {
+							/* removing already removed component => success */
+							g_clear_error (&local_error);
+							success = TRUE;
+						} else if (success && instance_id) {
+							success = delete_item_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+								cbm365->priv->folder_id, instance_id, cancellable, &local_error);
+
+							if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_FOUND)) {
+								/* removing already removed component => success */
+								g_clear_error (&local_error);
+								success = TRUE;
+							}
+						}
+
+						g_free (instance_id);
+
+						if (local_error) {
+							g_propagate_error (error, local_error);
+							success = FALSE;
+						}
+					}
+				}
+
+				g_clear_object (&exdate);
+				g_free (exdate_str);
+			}
+
+			g_clear_object (&prop);
+		}
+	}
+
+	g_clear_pointer (&known_exdates, g_hash_table_destroy);
+
+	return success;
+}
+
 static gboolean
 ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 			      gboolean overwrite_existing,
@@ -682,9 +962,9 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 			      GError **error)
 {
 	ECalBackendM365 *cbm365;
-	ICalComponent *new_comp, *old_comp = NULL;
+	ICalComponent *new_comp, *old_comp = NULL, *comp_in_extra = NULL;
 	JsonBuilder *builder;
-	gboolean success = FALSE;
+	gboolean success = FALSE, bad_instances = FALSE;
 	gboolean (* create_item_func) (EM365Connection *cnc,
 				       const gchar *user_override,
 				       const gchar *group_id,
@@ -704,13 +984,39 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 	const gchar *(* get_id_func) (JsonObject *item);
 	const gchar *(* get_change_key_func) (JsonObject *item);
 
-
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (instances != NULL, FALSE);
 
+	new_comp = e_cal_component_get_icalcomponent (instances->data);
+
+	if (instances->next) {
+		gboolean has_master = FALSE;
+		const gchar *uid = NULL;
+		GSList *link;
+
+		for (link = (GSList *) instances; link; link = g_slist_next (link)) {
+			ECalComponent *comp = link->data;
+			ICalComponent *icomp = e_cal_component_get_icalcomponent (comp);
+
+			if (!uid)
+				uid = i_cal_component_get_uid (icomp);
+			else
+				bad_instances = g_strcmp0 (uid, i_cal_component_get_uid (icomp)) != 0;
+
+			if (bad_instances)
+				break;
+
+			if (!e_cal_util_component_has_property (icomp, I_CAL_RECURRENCEID_PROPERTY)) {
+				bad_instances = has_master;
+				has_master = TRUE;
+				new_comp = icomp;
+			}
+		}
+	}
+
 	switch (e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend))) {
 	case I_CAL_VEVENT_COMPONENT:
-		if (instances->next) {
+		if (bad_instances) {
 			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
 				_("Can store only simple events into Microsoft 365 calendar")));
 
@@ -723,7 +1029,7 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 		get_change_key_func = e_m365_event_get_change_key;
 		break;
 	case I_CAL_VTODO_COMPONENT:
-		if (instances->next) {
+		if (bad_instances) {
 			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
 				_("Can store only simple tasks into Microsoft 365 task folder")));
 
@@ -744,15 +1050,16 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 
 	LOCK (cbm365);
 
-	new_comp = e_cal_component_get_icalcomponent (instances->data);
-
 	if (extra && *extra) {
 		const gchar *comp_str;
 
 		comp_str = ecb_m365_get_component_from_extra (extra);
 
 		if (comp_str)
-			old_comp = i_cal_component_new_from_string (comp_str);
+			comp_in_extra = i_cal_component_new_from_string (comp_str);
+
+		if (comp_in_extra)
+			old_comp = ecb_m365_dup_main_comp (comp_in_extra, e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend)));
 	}
 
 	builder = ecb_m365_ical_to_json_locked (cbm365, new_comp, old_comp, cancellable, error);
@@ -811,12 +1118,16 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 		g_clear_object (&builder);
 	}
 
+	if (instances->next && *out_new_uid && success)
+		success = ecb_m365_save_recurrence_changes_locked_sync (cbm365, instances, *out_new_uid, comp_in_extra, cancellable, error);
+
 	UNLOCK (cbm365);
 
 	ecb_m365_convert_error_to_client_error (error);
 	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
 
 	g_clear_object (&old_comp);
+	g_clear_object (&comp_in_extra);
 
 	return success;
 }
@@ -853,6 +1164,7 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 	default:
 		g_warn_if_reached ();
 		success = FALSE;
+		break;
 	}
 
 	UNLOCK (cbm365);

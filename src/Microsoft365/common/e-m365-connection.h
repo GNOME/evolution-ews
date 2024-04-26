@@ -10,6 +10,7 @@
 #include <glib-object.h>
 
 #include <libebackend/libebackend.h>
+#include <libecal/libecal.h>
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 
@@ -542,6 +543,16 @@ gboolean	e_m365_connection_get_events_sync
 						 const gchar *prefer_outlook_timezone, /* nullable - then UTC, otherwise that zone for the returned times */
 						 const gchar *select, /* nullable - properties to select */
 						 GSList **out_events, /* EM365Event *, in the same order as event_ids; can return partial list */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_event_instance_id_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *event_id,
+						 ICalTime *instance_time,
+						 gchar **out_instance_id,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_update_event_sync

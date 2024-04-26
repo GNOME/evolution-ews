@@ -4692,6 +4692,122 @@ e_m365_connection_get_events_sync (EM365Connection *cnc,
 	return success;
 }
 
+/* https://learn.microsoft.com/en-us/graph/api/event-list-instances?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_event_instance_id_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *group_id, /* nullable, then the default group is used */
+					      const gchar *calendar_id,
+					      const gchar *event_id,
+					      ICalTime *instance_time,
+					      gchar **out_instance_id,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	EM365ResponseData rd;
+	GSList *items = NULL;
+	SoupMessage *message;
+	gchar *uri, *start_date_time, *end_date_time;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (event_id != NULL, FALSE);
+	g_return_val_if_fail (instance_time != NULL, FALSE);
+	g_return_val_if_fail (out_instance_id != NULL, FALSE);
+
+	start_date_time = g_strdup_printf ("%04d-%02d-%02dT00:00:00",
+		i_cal_time_get_year (instance_time),
+		i_cal_time_get_month (instance_time),
+		i_cal_time_get_day (instance_time));
+	end_date_time = g_strdup_printf ("%04d-%02d-%02dT23:59:59.999",
+		i_cal_time_get_year (instance_time),
+		i_cal_time_get_month (instance_time),
+		i_cal_time_get_day (instance_time));
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "events",
+		"", event_id,
+		"", "instances",
+		"$select", "id,start",
+		"startDateTime", start_date_time,
+		"endDateTime", end_date_time,
+		NULL);
+
+	g_free (start_date_time);
+	g_free (end_date_time);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	*out_instance_id = NULL;
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = &items;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	if (success && items) {
+		EM365Event *event;
+
+		/* more than one event returned; unlikely, but just in case */
+		if (items->next) {
+			time_t instance_tt = i_cal_time_as_timet (instance_time);
+			GSList *link;
+
+			for (link = items; link; link = g_slist_next (link)) {
+				EM365DateTimeWithZone *start_datetime;
+
+				event = link->data;
+				if (event)
+					continue;
+
+				start_datetime = e_m365_event_get_start (event);
+				if (!start_datetime)
+					continue;
+
+				/* this is going to fail with timezones */
+				if (instance_tt == e_m365_date_time_get_date_time (start_datetime)) {
+					*out_instance_id = g_strdup (e_m365_event_get_id (event));
+					break;
+				}
+			}
+		} else if (items->data) {
+			/* easy case, only one hit found */
+			event = items->data;
+			*out_instance_id = g_strdup (e_m365_event_get_id (event));
+		}
+	}
+
+	if (success && !*out_instance_id) {
+		gchar *str = i_cal_time_as_ical_string (instance_time);
+
+		/* Translators: the '%s' is replaced with the date/time, which the instance was looked up for */
+		g_set_error (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_NOT_FOUND, _("Cannot find instance at '%s'"), str);
+		success = FALSE;
+
+		g_free (str);
+	}
+
+	g_clear_object (&message);
+	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
+
+	return success;
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/event-update?view=graph-rest-1.0&tabs=http */
 
 gboolean

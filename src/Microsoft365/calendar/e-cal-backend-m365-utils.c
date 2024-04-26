@@ -1710,10 +1710,9 @@ ecb_m365_add_recurrence (EM365Connection *cnc,
 	}
 
 	if (i_cal_component_count_properties (new_comp, I_CAL_RDATE_PROPERTY) > 0 ||
-	    i_cal_component_count_properties (new_comp, I_CAL_EXDATE_PROPERTY) > 0 ||
 	    i_cal_component_count_properties (new_comp, I_CAL_EXRULE_PROPERTY) > 0) {
 		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
-			_("Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE properties")));
+			_("Microsoft 365 calendar cannot store component with RDATE or EXRULE properties")));
 
 		return FALSE;
 	}
