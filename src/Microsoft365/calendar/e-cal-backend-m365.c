@@ -661,6 +661,8 @@ ecb_m365_load_component_sync (ECalMetaBackend *meta_backend,
 		}
 	}
 
+	g_clear_pointer (&item, json_object_unref);
+
 	UNLOCK (cbm365);
 
 	ecb_m365_convert_error_to_client_error (error);
