@@ -2,78 +2,82 @@
 # Copyright (C) 2012 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 # olpc user <cjlhomeaddress@gmail.com>, 2012.
-# Bruce Cowan <bruce@bcowan.me.uk>, 2012-2019.
 # Zander Brown <zbrown@gnome.org>, 2019-2020.
+# Bruce Cowan <bruce@bcowan.me.uk>, 2012-2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-08-05 06:58+0000\n"
-"PO-Revision-Date: 2020-08-11 17:55+0100\n"
-"Last-Translator: Zander Brown <zbrown@gnome.org>\n"
-"Language-Team: English - United Kingdom <en_GB@li.org>\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
+"POT-Creation-Date: 2024-03-17 12:03+0000\n"
+"PO-Revision-Date: 2024-04-28 13:04+0100\n"
+"Last-Translator: Bruce Cowan <bruce@bcowan.me.uk>\n"
+"Language-Team: English - United Kingdom <en@li.org>\n"
 "Language: en_GB\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 3.36.0\n"
+"X-Generator: Gtranslator 46.0\n"
 "X-Project-Style: gnome\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:68
-#: ../src/EWS/evolution/e-ews-config-lookup.c:240
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:122
+#: ../src/EWS/camel/camel-ews-provider.c:71
+#: ../src/EWS/evolution/e-ews-config-lookup.c:222
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:119
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:73
 msgid "For accessing Exchange servers using Web Services"
 msgstr "For accessing Exchange servers using Web Services"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3510
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
+msgid "Fetching contact photos…"
+msgstr "Fetching contact photos…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
 msgid "Failed to update GAL:"
 msgstr "Failed to update GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3672
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:3765
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
 msgid "Failed to set contact photo:"
 msgstr "Failed to set contact photo:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1921
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Free"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1924
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Busy"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1926
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Out of Office"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:1928
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Tentative"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2504
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2683
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
 msgid "Cannot determine EWS ItemId"
 msgstr "Cannot determine EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2974
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4173
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -81,38 +85,54 @@ msgstr ""
 "Cannot create meetings organised by other users in an Exchange Web Services "
 "calendar."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3684
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
+msgid "Online meeting can be created only in the main user Calendar."
+msgstr "Online meeting can be created only in the main user Calendar."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4161
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Cannot find user “%s” between attendees"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2117
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:40
+msgid ""
+"Cannot connect to the server, repeat the action once you login to the server."
+msgstr ""
+"Cannot connect to the server, repeat the action once you login to the server."
+
+#. Translators: The '%s' is replaced with a UID of the collection source
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:148
+#, c-format
+msgid "Cannot find Microsoft365 helper source for calendar “%s”"
+msgstr "Cannot find Microsoft365 helper source for calendar “%s”"
+
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
 msgid "Invalid occurrence ID"
 msgstr "Invalid occurrence ID"
 
-#: ../src/EWS/camel/camel-ews-folder.c:356
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Unable to open mimecontent temporary file!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Unable to generate parser from mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:373
+#: ../src/EWS/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Unable to parse meeting request mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:442
-#: ../src/EWS/camel/camel-ews-folder.c:652
+#: ../src/EWS/camel/camel-ews-folder.c:495
+#: ../src/EWS/camel/camel-ews-folder.c:708
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Unable to create cache file"
 
-#: ../src/EWS/camel/camel-ews-folder.c:769
-#: ../src/EWS/camel/camel-ews-folder.c:890
+#: ../src/EWS/camel/camel-ews-folder.c:825
+#: ../src/EWS/camel/camel-ews-folder.c:969
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Unable to create cache path “%s”: %s"
@@ -120,96 +140,110 @@ msgstr "Unable to create cache path “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:904
+#: ../src/EWS/camel/camel-ews-folder.c:983
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Failed to move message cache file from “%s” to “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1843
+#: ../src/EWS/camel/camel-ews-folder.c:1922
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Could not load summary for %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2314
+#: ../src/EWS/camel/camel-ews-folder.c:2399
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Refreshing folder “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2498
+#: ../src/EWS/camel/camel-ews-folder.c:2592
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Cannot perform actions on the folder while in offline mode"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
+#: ../src/EWS/camel/camel-ews-folder.c:3265
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+msgid "Apply message _filters to this folder"
+msgstr "Apply message _filters to this folder"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3277
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+msgid "Always check for _new mail in this folder"
+msgstr "Always check for _new mail in this folder"
+
+#: ../src/EWS/camel/camel-ews-provider.c:31
 #: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Checking for new mail"
 msgstr "Checking for new mail"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
+#: ../src/EWS/camel/camel-ews-provider.c:33
 #: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "C_heck for new messages in all folders"
 msgstr "C_heck for new messages in all folders"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:35
 msgid "_Listen for server change notifications"
 msgstr "_Listen for server change notifications"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:38
 #: ../src/Microsoft365/camel/camel-m365-provider.c:30
 msgid "Options"
 msgstr "Options"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/EWS/camel/camel-ews-provider.c:40
 #: ../src/Microsoft365/camel/camel-m365-provider.c:32
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Apply filters to new messages in Inbox on this server"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:42
 #: ../src/Microsoft365/camel/camel-m365-provider.c:34
 msgid "Check new messages for _Junk contents"
 msgstr "Check new messages for _Junk contents"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
+#: ../src/EWS/camel/camel-ews-provider.c:44
 #: ../src/Microsoft365/camel/camel-m365-provider.c:36
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Only check for Junk messages in the IN_BOX folder"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:46
 #: ../src/Microsoft365/camel/camel-m365-provider.c:38
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Synchroni_se remote mail locally in all folders"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:49
 msgid "Show _Public Folders beside user folders"
 msgstr "Show _Public Folders beside user folders"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/EWS/camel/camel-ews-provider.c:52
 #: ../src/Microsoft365/camel/camel-m365-provider.c:42
 msgid "Connection"
 msgstr "Connection"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
+#: ../src/EWS/camel/camel-ews-provider.c:56
 #: ../src/Microsoft365/camel/camel-m365-provider.c:46
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Connection _timeout (in seconds) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
+#: ../src/EWS/camel/camel-ews-provider.c:58
 #: ../src/Microsoft365/camel/camel-m365-provider.c:48
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Numbe_r of concurrent connections to use"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:60
 msgid "Override _User-Agent header value"
 msgstr "Override _User-Agent header value"
 
-#: ../src/EWS/camel/camel-ews-provider.c:85
+#: ../src/EWS/camel/camel-ews-provider.c:63
+msgid "Al_ways connect with HTTP/1"
+msgstr "Al_ways connect with HTTP/1"
+
+#: ../src/EWS/camel/camel-ews-provider.c:88
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:90
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -217,11 +251,11 @@ msgstr ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:98
 msgid "Basic"
 msgstr "Basic"
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -229,11 +263,11 @@ msgstr ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 
-#: ../src/EWS/camel/camel-ews-provider.c:105
+#: ../src/EWS/camel/camel-ews-provider.c:108
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -241,8 +275,8 @@ msgstr ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 
-#: ../src/EWS/camel/camel-ews-store.c:323
-#: ../src/Microsoft365/camel/camel-m365-store.c:75
+#: ../src/EWS/camel/camel-ews-store.c:314
+#: ../src/Microsoft365/camel/camel-m365-store.c:73
 #, c-format
 msgid "Session has no storage path"
 msgstr "Session has no storage path"
@@ -251,7 +285,7 @@ msgstr "Session has no storage path"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:360
+#: ../src/EWS/camel/camel-ews-store.c:351
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -261,119 +295,129 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/EWS/camel/camel-ews-store.c:515
+#: ../src/EWS/camel/camel-ews-store.c:504
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/EWS/camel/camel-ews-store.c:661
-#: ../src/EWS/camel/camel-ews-store.c:1488
+#: ../src/EWS/camel/camel-ews-store.c:646
+#: ../src/EWS/camel/camel-ews-store.c:1470
 msgid "Checking “Out of Office” settings"
 msgstr "Checking “Out of Office” settings"
 
-#: ../src/EWS/camel/camel-ews-store.c:1494
+#: ../src/EWS/camel/camel-ews-store.c:1476
 msgid "Look up Exchange server categories"
 msgstr "Look up Exchange server categories"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1570
+#: ../src/EWS/camel/camel-ews-store.c:1552
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Password will expire in %d day. Open “%s” to change it."
 msgstr[1] "Password will expire in %d days. Open “%s” to change it."
 
-#: ../src/EWS/camel/camel-ews-store.c:1576
+#: ../src/EWS/camel/camel-ews-store.c:1558
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Password will expire in one day."
 msgstr[1] "Password will expire in %d days."
 
-#: ../src/EWS/camel/camel-ews-store.c:1802
+#: ../src/EWS/camel/camel-ews-store.c:1784
 msgid "Updating foreign folder structure"
 msgstr "Updating foreign folder structure"
 
-#: ../src/EWS/camel/camel-ews-store.c:1938
+#: ../src/EWS/camel/camel-ews-store.c:1922
 msgid "Updating foreign folders"
 msgstr "Updating foreign folders"
 
-#: ../src/EWS/camel/camel-ews-store.c:2354
-#: ../src/Microsoft365/camel/camel-m365-store.c:630
+#: ../src/EWS/camel/camel-ews-store.c:2338
+#: ../src/Microsoft365/camel/camel-m365-store.c:629
 #, c-format
 msgid "No such folder: %s"
 msgstr "No such folder: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2707
+#: ../src/EWS/camel/camel-ews-store.c:2684
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Cannot list EWS public folders in offline mode"
 
-#: ../src/EWS/camel/camel-ews-store.c:2780
+#: ../src/EWS/camel/camel-ews-store.c:2757
 msgid "Cannot find any EWS public folders"
 msgstr "Cannot find any EWS public folders"
 
-#: ../src/EWS/camel/camel-ews-store.c:2893
-#: ../src/Microsoft365/camel/camel-m365-store.c:693
+#: ../src/EWS/camel/camel-ews-store.c:2870
+#: ../src/Microsoft365/camel/camel-m365-store.c:692
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Cannot create folder “%s”, folder already exists"
 
-#: ../src/EWS/camel/camel-ews-store.c:2908
+#: ../src/EWS/camel/camel-ews-store.c:2885
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Parent folder %s does not exist"
 
-#: ../src/EWS/camel/camel-ews-store.c:2918
+#: ../src/EWS/camel/camel-ews-store.c:2895
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 
-#: ../src/EWS/camel/camel-ews-store.c:2928
+#: ../src/EWS/camel/camel-ews-store.c:2905
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Cannot create folder under “%s”, it is used for public folders only"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/EWS/camel/camel-ews-store.c:3012
+#: ../src/Microsoft365/camel/camel-m365-store.c:880
 #, c-format
 msgid "Folder does not exist"
 msgstr "Folder does not exist"
 
-#: ../src/EWS/camel/camel-ews-store.c:3042
+#: ../src/EWS/camel/camel-ews-store.c:3022
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr "Cannot remove folder “%s”, it is used for folders of other users only"
 
-#: ../src/EWS/camel/camel-ews-store.c:3053
+#: ../src/EWS/camel/camel-ews-store.c:3033
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Cannot remove folder “%s”, it is used for public folders only"
 
-#: ../src/EWS/camel/camel-ews-store.c:3212
+#: ../src/EWS/camel/camel-ews-store.c:3192
+#: ../src/EWS/camel/camel-ews-store.c:3288
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Folder %s does not exist"
 
-#: ../src/EWS/camel/camel-ews-store.c:3221
+#: ../src/EWS/camel/camel-ews-store.c:3201
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "No change key record for folder %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3264
+#: ../src/EWS/camel/camel-ews-store.c:3244
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Cannot both rename and move a folder at the same time"
 
-#: ../src/EWS/camel/camel-ews-store.c:3295
+#: ../src/EWS/camel/camel-ews-store.c:3275
+#: ../src/EWS/camel/camel-ews-store.c:3298
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Cannot find folder ID for parent folder %s"
 
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3288
+#: ../src/EWS/camel/camel-ews-store.c:3298
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:475
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
+msgid "Inbox"
+msgstr "Inbox"
+
 #: ../src/EWS/camel/camel-ews-store.c:3347
-#: ../src/EWS/camel/camel-ews-transport.c:302
+#: ../src/EWS/camel/camel-ews-transport.c:447
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange server %s"
@@ -384,44 +428,55 @@ msgid "Exchange service for %s on %s"
 msgstr "Exchange service for %s on %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3394
-#: ../src/Microsoft365/camel/camel-m365-store.c:1455
+#: ../src/Microsoft365/camel/camel-m365-store.c:1454
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Could not locate Wastebasket folder"
 
 #: ../src/EWS/camel/camel-ews-store.c:3454
-#: ../src/Microsoft365/camel/camel-m365-store.c:1513
+#: ../src/Microsoft365/camel/camel-m365-store.c:1512
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Could not locate Junk folder"
 
-#: ../src/EWS/camel/camel-ews-store.c:3645
+#: ../src/EWS/camel/camel-ews-store.c:3659
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:61
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Cannot subscribe EWS folders in offline mode"
 
-#: ../src/EWS/camel/camel-ews-store.c:3668
+#: ../src/EWS/camel/camel-ews-store.c:3682
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Cannot subscribe folder “%s”, no public folder available"
 
-#: ../src/EWS/camel/camel-ews-store.c:3678
+#: ../src/EWS/camel/camel-ews-store.c:3692
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Cannot subscribe folder “%s”, folder not found"
 
-#: ../src/EWS/camel/camel-ews-store.c:3769
+#: ../src/EWS/camel/camel-ews-store.c:3701
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Cannot subscribe folder “%s”, folder ID not found"
+
+#: ../src/EWS/camel/camel-ews-store.c:3712
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "Cannot subscribe folder “%s”, public folder root not found"
+
+#: ../src/EWS/camel/camel-ews-store.c:3788
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Cannot unsubscribe EWS folders in offline mode"
 
-#: ../src/EWS/camel/camel-ews-store.c:3886
-#: ../src/Microsoft365/camel/camel-m365-store.c:1773
-#: ../src/Microsoft365/camel/camel-m365-store.c:1786
+#: ../src/EWS/camel/camel-ews-store.c:3899
+#: ../src/Microsoft365/camel/camel-m365-store.c:1787
+#: ../src/Microsoft365/camel/camel-m365-store.c:1800
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "You must be working online to complete this operation"
 
-#: ../src/EWS/camel/camel-ews-store.c:3930
-#: ../src/EWS/camel/camel-ews-store.c:3967
+#: ../src/EWS/camel/camel-ews-store.c:3971
+#: ../src/EWS/camel/camel-ews-store.c:4008
 msgid "Unsetting the “Out of Office” status"
 msgstr "Unsetting the “Out of Office” status"
 
@@ -433,27 +488,33 @@ msgstr "Foreign Folders"
 msgid "Public Folders"
 msgstr "Public Folders"
 
-#: ../src/EWS/camel/camel-ews-transport.c:305
+#: ../src/EWS/camel/camel-ews-transport.c:173
+#: ../src/Microsoft365/camel/camel-m365-transport.c:172
+#, c-format
+msgid "Invalid folder URI “%s”"
+msgstr "Invalid folder URI “%s”"
+
+#: ../src/EWS/camel/camel-ews-transport.c:450
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Exchange mail delivery via %s"
 
-#: ../src/EWS/camel/camel-ews-transport.c:354
-#: ../src/Microsoft365/camel/camel-m365-transport.c:291
+#: ../src/EWS/camel/camel-ews-transport.c:499
+#: ../src/Microsoft365/camel/camel-m365-transport.c:438
 msgid "Cannot send message with no From address"
 msgstr "Cannot send message with no From address"
 
-#: ../src/EWS/camel/camel-ews-transport.c:360
+#: ../src/EWS/camel/camel-ews-transport.c:505
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Exchange server cannot send message with multiple From addresses"
 
-#: ../src/EWS/camel/camel-ews-transport.c:370
-#: ../src/Microsoft365/camel/camel-m365-transport.c:306
+#: ../src/EWS/camel/camel-ews-transport.c:515
+#: ../src/Microsoft365/camel/camel-m365-transport.c:453
 msgid "Failed to read From address"
 msgstr "Failed to read From address"
 
-#: ../src/EWS/camel/camel-ews-transport.c:380
-#: ../src/Microsoft365/camel/camel-m365-transport.c:316
+#: ../src/EWS/camel/camel-ews-transport.c:525
+#: ../src/Microsoft365/camel/camel-m365-transport.c:463
 #, c-format
 msgid "Service not connected"
 msgstr "Service not connected"
@@ -470,7 +531,7 @@ msgstr ""
 "This option will use an OAuth 2.0 access token to connect to the Office365."
 "com server"
 
-#: ../src/EWS/common/e-ews-calendar-utils.c:1207
+#: ../src/EWS/common/e-ews-calendar-utils.c:1226
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
@@ -479,118 +540,111 @@ msgstr ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
 "monthly or yearly recurrence without exceptions and with start date."
 
-#: ../src/EWS/common/e-ews-camel-common.c:380
+#: ../src/EWS/common/e-ews-camel-common.c:387
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem call failed to return ID for new message"
 
-#: ../src/EWS/common/e-ews-connection.c:815
-msgid "Operation Cancelled"
-msgstr "Operation Cancelled"
-
-#: ../src/EWS/common/e-ews-connection.c:985
-msgid "Authentication failed"
-msgstr "Authentication failed"
-
-#: ../src/EWS/common/e-ews-connection.c:1007
+#: ../src/EWS/common/e-ews-connection.c:349
 #, c-format
 msgid "No response: %s"
 msgstr "No response: %s"
 
-#: ../src/EWS/common/e-ews-connection.c:1070
+#: ../src/EWS/common/e-ews-connection.c:516
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgstr[1] "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 
-#: ../src/EWS/common/e-ews-connection.c:1076
+#: ../src/EWS/common/e-ews-connection.c:522
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Exchange server is busy, waiting to retry (%d second)"
 msgstr[1] "Exchange server is busy, waiting to retry (%d seconds)"
 
-#: ../src/EWS/common/e-ews-connection.c:3223
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:651
+msgid "Authentication failed"
+msgstr "Authentication failed"
+
+#: ../src/EWS/common/e-ews-connection.c:2441
 msgid "Failed to parse autodiscover response XML"
 msgstr "Failed to parse autodiscover response XML"
 
-#: ../src/EWS/common/e-ews-connection.c:3230
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2447
 msgid "Failed to find <Autodiscover> element"
 msgstr "Failed to find <Autodiscover> element"
 
-#: ../src/EWS/common/e-ews-connection.c:3241
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2457
 msgid "Failed to find <Response> element"
 msgstr "Failed to find <Response> element"
 
-#: ../src/EWS/common/e-ews-connection.c:3252
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2467
 msgid "Failed to find <Account> element"
 msgstr "Failed to find <Account> element"
 
-#: ../src/EWS/common/e-ews-connection.c:3298
-#, c-format
+#: ../src/EWS/common/e-ews-connection.c:2512
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Failed to find <ASUrl> in autodiscover response"
 
-#: ../src/EWS/common/e-ews-connection.c:3484
+#: ../src/EWS/common/e-ews-connection.c:2588
 msgid "URL cannot be NULL"
 msgstr "URL cannot be NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3492
-#, c-format
-msgid "URL “%s” is not valid"
-msgstr "URL “%s” is not valid"
-
-#: ../src/EWS/common/e-ews-connection.c:3789
+#: ../src/EWS/common/e-ews-connection.c:3013
 msgid "Email address is missing a domain part"
 msgstr "E-mail address is missing a domain part "
 
-#: ../src/EWS/common/e-ews-connection.c:4098
+#: ../src/EWS/common/e-ews-connection.c:3222
 msgid "Failed to parse oab XML"
 msgstr "Failed to parse oab XML"
 
-#: ../src/EWS/common/e-ews-connection.c:4106
+#: ../src/EWS/common/e-ews-connection.c:3260
 msgid "Failed to find <OAB> element\n"
 msgstr "Failed to find <OAB> element\n"
 
-#: ../src/EWS/common/e-ews-connection.c:5395
-msgid "No items found"
-msgstr "No items found"
+#: ../src/EWS/common/e-ews-connection.c:8816
+msgid "Requires at least Microsoft Exchange 2010 SP1 server"
+msgstr "Requires at least Microsoft Exchange 2010 SP1 server"
 
-#: ../src/EWS/common/e-ews-connection-utils.c:185
+#: ../src/EWS/common/e-ews-connection.c:8917
+msgid "Requires at least Microsoft Exchange 2013 server"
+msgstr "Requires at least Microsoft Exchange 2013 server"
+
+#: ../src/EWS/common/e-ews-connection.c:9070
+msgid "Requires at least Microsoft Exchange 2010 server"
+msgstr "Requires at least Microsoft Exchange 2010 server"
+
+#: ../src/EWS/common/e-ews-connection.c:9210
+msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgstr "Requires at least Microsoft Exchange 2007 SP1 server"
+
+#: ../src/EWS/common/e-ews-connection-utils.c:206
 #, c-format
 msgid "Password expired. Change password at “%s”."
 msgstr "Password expired. Change password at “%s”."
 
-#: ../src/EWS/common/e-ews-connection-utils.c:188
+#: ../src/EWS/common/e-ews-connection-utils.c:209
 msgid "Password expired."
 msgstr "Password expired."
 
-#: ../src/EWS/common/e-ews-connection-utils.c:422
-#: ../src/Microsoft365/common/e-m365-connection.c:236
-msgid "Unknown error"
-msgstr "Unknown error"
-
-#: ../src/EWS/common/e-ews-folder.c:782
+#: ../src/EWS/common/e-ews-folder.c:781
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Cannot add folder, unsupported folder type"
 
-#: ../src/EWS/common/e-ews-folder.c:787
+#: ../src/EWS/common/e-ews-folder.c:786
 msgid "Cannot add folder, master source not found"
 msgstr "Cannot add folder, master source not found"
 
-#: ../src/EWS/common/e-ews-folder.c:827
+#: ../src/EWS/common/e-ews-folder.c:826
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:86
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Cannot add folder, folder already exists as “%s”"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:99
+#: ../src/EWS/common/e-oauth2-service-office365.c:155
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
@@ -615,103 +669,116 @@ msgstr "_Fetch contact photos"
 msgid "Tries to look up for user photo"
 msgstr "Tries to look up for user photo"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:181
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
+msgid "Online Meeting"
+msgstr "Online Meeting"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
+msgid "Create the meeting as an online meeting in the main user calendar"
+msgstr "Create the meeting as an online meeting in the main user calendar"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:182
 msgid "Exchange Web Services autodiscovery"
 msgstr "Exchange Web Services autodiscovery"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:224
+#: ../src/EWS/evolution/e-ews-config-lookup.c:207
 #, c-format
 msgid "User: %s"
 msgstr "User: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:229
+#: ../src/EWS/evolution/e-ews-config-lookup.c:212
 #, c-format
 msgid "Host URL: %s"
 msgstr "Host URL: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:234
+#: ../src/EWS/evolution/e-ews-config-lookup.c:216
 #, c-format
 msgid "OAB URL: %s"
 msgstr "OAB URL: %s"
 
-#: ../src/EWS/evolution/e-ews-config-lookup.c:311
+#: ../src/EWS/evolution/e-ews-config-lookup.c:313
 #, c-format
-msgid "Requires user password to continue"
-msgstr "Requires user password to continue"
+msgid "Requires password to continue."
+msgstr "Requires password to continue."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-ews-config-utils.c:559
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "Folder"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:572
+#: ../src/EWS/evolution/e-ews-config-utils.c:569
 msgid "Size"
 msgstr "Size"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:610
-#: ../src/EWS/evolution/e-ews-config-utils.c:615
+#: ../src/EWS/evolution/e-ews-config-utils.c:607
+#: ../src/EWS/evolution/e-ews-config-utils.c:612
 msgid "Unable to retrieve folder size information"
 msgstr "Unable to retrieve folder size information"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:742
+#: ../src/EWS/evolution/e-ews-config-utils.c:741
 msgid "Folder Sizes"
 msgstr "Folder Sizes"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:745
+#: ../src/EWS/evolution/e-ews-config-utils.c:744
 msgid "_Close"
 msgstr "_Close"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:759
+#: ../src/EWS/evolution/e-ews-config-utils.c:758
 msgid "Fetching folder list…"
 msgstr "Fetching folder list…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:822
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:743
+#: ../src/EWS/evolution/e-ews-config-utils.c:821
+#: ../src/EWS/evolution/e-ews-config-utils.c:830
+#: ../src/EWS/evolution/e-ews-config-utils.c:839
+#: ../src/EWS/evolution/e-ews-config-utils.c:848
+#: ../src/EWS/evolution/e-ews-config-utils.c:857
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Subscribe to folder of other EWS user…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1009
+#: ../src/EWS/evolution/e-ews-config-utils.c:1044
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Cannot edit permissions of folder “%s”, choose other folder."
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1088
+#: ../src/EWS/evolution/e-ews-config-utils.c:1125
 msgid "Folder Sizes…"
 msgstr "Folder Sizes…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1095
+#: ../src/EWS/evolution/e-ews-config-utils.c:1132
 msgid "Subscribe to folder of other user…"
 msgstr "Subscribe to folder of other user…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1104
-#: ../src/EWS/evolution/e-ews-config-utils.c:1440
-#: ../src/EWS/evolution/e-ews-config-utils.c:1478
-#: ../src/EWS/evolution/e-ews-config-utils.c:1516
-#: ../src/EWS/evolution/e-ews-config-utils.c:1554
+#: ../src/EWS/evolution/e-ews-config-utils.c:1141
+#: ../src/EWS/evolution/e-ews-config-utils.c:1499
+#: ../src/EWS/evolution/e-ews-config-utils.c:1537
+#: ../src/EWS/evolution/e-ews-config-utils.c:1575
+#: ../src/EWS/evolution/e-ews-config-utils.c:1613
 msgid "Permissions…"
 msgstr "Permissions…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1106
+#: ../src/EWS/evolution/e-ews-config-utils.c:1143
 msgid "Edit EWS folder permissions"
 msgstr "Edit EWS folder permissions"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1442
+#: ../src/EWS/evolution/e-ews-config-utils.c:1501
 msgid "Edit EWS calendar permissions"
 msgstr "Edit EWS calendar permissions"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1480
+#: ../src/EWS/evolution/e-ews-config-utils.c:1539
 msgid "Edit EWS tasks permissions"
 msgstr "Edit EWS tasks permissions"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1518
+#: ../src/EWS/evolution/e-ews-config-utils.c:1577
 msgid "Edit EWS memos permissions"
 msgstr "Edit EWS memos permissions"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1556
+#: ../src/EWS/evolution/e-ews-config-utils.c:1615
 msgid "Edit EWS contacts permissions"
 msgstr "Edit EWS contacts permissions"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:68
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:404
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:389
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "None"
@@ -767,7 +834,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "Free/Busy time, subject, location"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:124
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:427
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:412
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Custom"
@@ -792,8 +859,8 @@ msgid "Unknown"
 msgstr "Unknown"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:854
-#: ../src/EWS/evolution/e-ews-search-user.c:414
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:983
+#: ../src/EWS/evolution/e-ews-search-user.c:425
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:968
 msgid "Name"
 msgstr "Name"
 
@@ -806,7 +873,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "Edit EWS folder permissions…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:937
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:679
 msgid "Account:"
 msgstr "Account:"
 
@@ -916,57 +983,57 @@ msgstr "Folder visible"
 msgid "Reading folder permissions, please wait…"
 msgstr "Reading folder permissions, please wait…"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:170
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:151
 msgid "Unset on Server"
 msgstr "Unset on Server"
 
-#: ../src/EWS/evolution/e-ews-ooo-notificator.c:171
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:152
 msgid "Unset the “Out of Office” status"
 msgstr "Unset the “Out of Office” status"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:189
+#: ../src/EWS/evolution/e-ews-search-user.c:198
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
 msgstr[0] "No users found, only one contact"
 msgstr[1] "No users found, only %d contacts"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:194
+#: ../src/EWS/evolution/e-ews-search-user.c:203
 msgid "No users found"
 msgstr "No users found"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:198
+#: ../src/EWS/evolution/e-ews-search-user.c:207
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "Found one user"
 msgstr[1] "Found %d users"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:204
+#: ../src/EWS/evolution/e-ews-search-user.c:213
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] "Found more than 100 users, but showing only first %d"
 msgstr[1] "Found more than 100 users, but showing only first %d"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:338
-#: ../src/EWS/evolution/e-ews-search-user.c:523
+#: ../src/EWS/evolution/e-ews-search-user.c:347
+#: ../src/EWS/evolution/e-ews-search-user.c:534
 msgid "Search for a user"
 msgstr "Search for a user"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:356
 msgid "Searching…"
 msgstr "Searching…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:420
+#: ../src/EWS/evolution/e-ews-search-user.c:431
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:457
+#: ../src/EWS/evolution/e-ews-search-user.c:468
 msgid "Choose EWS user…"
 msgstr "Choose EWS user…"
 
-#: ../src/EWS/evolution/e-ews-search-user.c:480
+#: ../src/EWS/evolution/e-ews-search-user.c:491
 msgid "_Search:"
 msgstr "_Search:"
 
@@ -983,17 +1050,13 @@ msgstr "Mailbox — %s"
 msgid "Cannot test foreign folder availability when the account is offline"
 msgstr "Cannot test foreign folder availability when the account is offline"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
-#, c-format
-msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr "User name “%s” is ambiguous, specify it more precisely, please"
-
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:365
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:326
 msgid "Availability"
 msgstr "Availability"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:383
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:344
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:96
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -1002,277 +1065,305 @@ msgstr ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:402
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:363
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:80
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Cannot add folder, cannot determine folder’s type"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:477
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:760
+msgid "Contacts"
+msgstr "Contacts"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:479
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
+msgid "Calendar"
+msgstr "Calendar"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:481
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:762
+msgid "Free/Busy as Calendar"
+msgstr "Free/Busy as Calendar"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:483
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:763
+msgid "Memos"
+msgstr "Memos"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:485
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:764
+msgid "Tasks"
+msgstr "Tasks"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:502
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr "Testing availability of folder “%s” of user “%s”, please wait…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:541
+msgid "Cannot search for user when the account is offline"
+msgstr "Cannot search for user when the account is offline"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:704
+msgid "User"
+msgstr "User"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:711
+msgid "_User:"
+msgstr "_User:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:726
+msgid "C_hoose…"
+msgstr "C_hoose…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:742
+msgid "_Folder name:"
+msgstr "_Folder name:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:773
+msgid "Include _subfolders"
+msgstr "Include _subfolders"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:855
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "User name “%s” is ambiguous, specify it more precisely, please"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:447
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:891
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#. convert well-known names to their non-localized form
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:560
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:844
-msgid "Inbox"
-msgstr "Inbox"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:562
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:845
-msgid "Contacts"
-msgstr "Contacts"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:564
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:846
-msgid "Calendar"
-msgstr "Calendar"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:566
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:847
-msgid "Free/Busy as Calendar"
-msgstr "Free/Busy as Calendar"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:568
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:848
-msgid "Memos"
-msgstr "Memos"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:570
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:849
-msgid "Tasks"
-msgstr "Tasks"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:587
-#, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait…"
-msgstr "Testing availability of folder “%s” of user “%s”, please wait…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:626
-msgid "Cannot search for user when the account is offline"
-msgstr "Cannot search for user when the account is offline"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:789
-msgid "User"
-msgstr "User"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:796
-msgid "_User:"
-msgstr "_User:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:811
-msgid "C_hoose…"
-msgstr "C_hoose…"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:827
-msgid "_Folder name:"
-msgstr "_Folder name:"
-
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:858
-msgid "Include _subfolders"
-msgstr "Include _subfolders"
-
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:270
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:261
 msgid "Querying Autodiscover service"
 msgstr "Querying Autodiscover service"
 
-#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:369
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:354
 msgid "Fetch _URL"
 msgstr "Fetch _URL"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:166
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:107
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:194
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:113
 msgid "Configuration"
 msgstr "Configuration"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:184
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:125
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:212
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:131
 msgid "User_name:"
 msgstr "User_name:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:226
 msgid "_Host URL:"
 msgstr "_Host URL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:245
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:231
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:139
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:259
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:145
 msgid "Open _Mailbox of other user"
 msgstr "Open _Mailbox of other user"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:265
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
 msgid "S_earch…"
 msgstr "S_earch…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:276
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:173
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:314
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:189
 msgid "Authentication"
 msgstr "Authentication"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:303
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:338
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "Use _protocol version 2.0 (for school and organisation accounts)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
 msgid "_Override Office365 OAuth2 settings"
 msgstr "_Override Office365 OAuth2 settings"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:307
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:198
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "Help…"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:316
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:207
-msgid "_Tenant:"
-msgstr "_Tenant:"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:232
-msgid "Default tenant is “common“"
-msgstr "Default tenant is “common“"
-
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:235
-#, c-format
-msgid "Default tenant is “%s”"
-msgstr "Default tenant is “%s”"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:346
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:237
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:356
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "Application I_D:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:369
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:260
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "There is not set any default application ID"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:370
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:261
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Default application ID is “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:372
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:263
-msgid "_Redirect URI:"
-msgstr "_Redirect URI:"
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
+msgid "_Tenant ID:"
+msgstr "_Tenant ID:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:394
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:397
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:285
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:288
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:409
+msgid "Default tenant ID is “common“"
+msgstr "Default tenant ID is “common“"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
+#, c-format
+msgid "Default tenant ID is “%s”"
+msgstr "Default tenant ID is “%s”"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:417
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
+msgid "_Advanced Settings"
+msgstr "_Advanced Settings"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
+msgid "_Endpoint host:"
+msgstr "_Endpoint host:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
+#, c-format
+msgid "Default endpoint host is “%s”"
+msgstr "Default endpoint host is “%s”"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
+msgid "Red_irect URI:"
+msgstr "Red_irect URI:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:490
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Default redirect URI is “%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:580
-#| msgid "URL “%s” is not valid"
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:493
+msgid "Re_source URI:"
+msgstr "Re_source URI:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:516
+#, c-format
+msgid ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+msgstr ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:772
 msgid "Host URL is not valid"
 msgstr "Host URL is not valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:584
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
 msgid "Host URL cannot be empty"
 msgstr "Host URL cannot be empty"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:595
-#| msgid "URL “%s” is not valid"
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "OAB URL is not valid"
 msgstr "OAB URL is not valid"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:605
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:409
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:797
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "User name cannot be empty"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:619
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:811
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "Application ID cannot be empty"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:405
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:390
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Reviewer (can read items)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:406
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:391
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Author (can read and create items)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:407
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:392
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Editor (can read, create and modify items)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:512
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:497
 msgid "Delegate permissions"
 msgstr "Delegate permissions"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:530
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:515
 msgid "C_alendar"
 msgstr "C_alendar"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:533
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:518
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr "_Delegate receives copies of meeting-related messages sent to me"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:538
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:523
 msgid "_Tasks"
 msgstr "_Tasks"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:541
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:526
 msgid "_Inbox"
 msgstr "_Inbox"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:544
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:529
 msgid "C_ontacts"
 msgstr "C_ontacts"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:547
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:532
 msgid "_Notes"
 msgstr "_Notes"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:550
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:535
 msgid "_Journal"
 msgstr "_Journal"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:553
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:538
 #, c-format
 msgid "Delegate “%s” has the following permissions"
 msgstr "Delegate “%s” has the following permissions"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:571
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:556
 msgid "Delegate can see my _private items"
 msgstr "Delegate can see my _private items"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:893
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:878
 msgid "Retrieving current user permissions, please wait…"
 msgstr "Retrieving current user permissions, please wait…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1016
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1641
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1001
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1548
 msgid "Delegates"
 msgstr "Delegates"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1040
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1025
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -1284,7 +1375,7 @@ msgstr ""
 "send-on-behalf-of permissions, close this dialogue box, right-click the "
 "folder, click Permissions and change the options there."
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1091
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1076
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -1293,7 +1384,7 @@ msgstr ""
 "where I am the organiser to:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1102
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1087
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -1301,58 +1392,76 @@ msgstr ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1109
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1094
 msgid "My d_elegates only"
 msgstr "My d_elegates only"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1116
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1101
 msgid "My delegates a_nd me"
 msgstr "My delegates a_nd me"
 
-#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1713
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1620
 msgid "Retrieving “Delegates” settings"
 msgstr "Retrieving “Delegates” settings"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:181
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:245
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:217
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:331
 msgid "EWS Settings"
 msgstr "EWS Settings"
 
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:188
-msgid "View the size of all Exchange folders"
-msgstr "View the size of all Exchange folders"
-
-#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:192
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:224
 msgid "Folder _Sizes"
 msgstr "Folder _Sizes"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:210
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:235
+msgid "View the size of all Exchange folders"
+msgstr "View the size of all Exchange folders"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:246
+msgid "_Reset Synchronization Tags"
+msgstr "_Reset Synchronisation Tags"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:257
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr ""
+"Folders can sometimes get out of synchronisation, for example after a long "
+"time not being connected to the server. By resetting the synchronisation "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:204
 msgid "Locating offline address books"
 msgstr "Locating offline address books"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:262
-#: ../src/EWS/registry/e-ews-backend.c:493
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:256
+#: ../src/EWS/registry/e-ews-backend.c:505
 msgid "Global Address List"
 msgstr "Global Address List"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:289
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:283
 msgid "Cache o_ffline address book"
 msgstr "Cache o_ffline address book"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:315
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:309
 msgid "Select ad_dress list:"
 msgstr "Select ad_dress list:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-gal.c:339
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:333
 msgid "Fetch List"
 msgstr "Fetch List"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:922
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:369
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:904
 msgid "Out of Office"
 msgstr "Out of Office"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:400
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:385
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1360,57 +1469,94 @@ msgstr ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:395
 msgid "Do _not send Out of Office replies"
 msgstr "Do _not send Out of Office replies"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:418
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:403
 msgid "_Send Out of Office replies"
 msgstr "_Send Out of Office replies"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:426
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:411
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Send Out of Office replies only _during this time period:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:446
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:431
 msgid "_From:"
 msgstr "_From:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:471
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:456
 msgid "_To:"
 msgstr "_To:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:496
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:481
 msgid "I_nternal:"
 msgstr "I_nternal:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:505
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:490
 msgid "Message to be sent within the organization"
 msgstr "Message to be sent within the organisation"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:533
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:518
 msgid "E_xternal:"
 msgstr "E_xternal:"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:526
 msgid "Message to be sent outside the organization"
 msgstr "Message to be sent outside the organisation"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:551
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:536
 msgid "Do not reply to senders outside the organization"
 msgstr "Do not reply to senders outside the organisation"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:554
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:539
 msgid "Reply only to known senders outside the organization"
 msgstr "Reply only to known senders outside the organisation"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:557
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:542
 msgid "Reply to any sender outside the organization"
 msgstr "Reply to any sender outside the organisation"
 
-#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:994
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:976
 msgid "Retrieving “Out of Office” settings"
 msgstr "Retrieving “Out of Office” settings"
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgstr ""
+"%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:113
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
+msgstr "%s (%s) has invited you to view his or her Microsoft Exchange folder."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:123
+msgid "Click the Subscribe button to add it to Evolution."
+msgstr "Click the Subscribe button to add it to Evolution."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:125
+msgid "Subscribe"
+msgstr "Subscribe"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:134
+msgid "Failed to extract sharing information from provided data."
+msgstr "Failed to extract sharing information from provided data."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:203
+msgid "EWS Sharing Metadata"
+msgstr "EWS Sharing Metadata"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:204
+msgid "Display part as EWS sharing metadata"
+msgstr "Display part as EWS sharing metadata"
+
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:160
+msgid "Subscribing EWS folder…"
+msgstr "Subscribing EWS folder…"
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
@@ -1436,33 +1582,68 @@ msgstr "Failed to retrieve “Delegates” settings."
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Your Exchange account “{0}” has the status set as “Out of Office”."
 
-#: ../src/EWS/registry/e-ews-backend.c:947
-#: ../src/Microsoft365/registry/e-m365-backend.c:679
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
+msgid "Failed to subscribe user folder."
+msgstr "Failed to subscribe user folder."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
+msgid "Folder had been subscribed."
+msgstr "Folder had been subscribed."
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:9
+msgid "Folder of user “{0}” had been subscribed successfully."
+msgstr "Folder of user “{0}” had been subscribed successfully."
+
+#: ../src/EWS/registry/e-ews-backend.c:1045
+#: ../src/Microsoft365/registry/e-m365-backend.c:686
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Could not determine a suitable folder class for a new folder named “%s”"
 
-#: ../src/EWS/registry/e-ews-backend.c:1035
+#: ../src/EWS/registry/e-ews-backend.c:1133
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Data source “%s” does not represent an Exchange Web Services folder"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1426
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2941
-#| msgid "Folder does not exist"
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1711
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
 msgid "Folder ID is not set"
 msgstr "Folder ID is not set"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:1667
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2004
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Cannot save contact list into a Microsoft 365 address book"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1663
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2016
+msgid "Cannot modify organizational contact"
+msgstr "Cannot modify organisational contact"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2018
+msgid "Cannot modify user contact"
+msgstr "Cannot modify user contact"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+msgid "Cannot remove organizational contact"
+msgstr "Cannot remove organisational contact"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+msgid "Cannot remove user contact"
+msgstr "Cannot remove user contact"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr "Can store only simple events into Microsoft 365 calendar"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr "Can store only simple tasks into Microsoft 365 task folder"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 calendar cannot store more than one recurrence"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1672
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1470,72 +1651,56 @@ msgstr ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1782
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Unknown recurrence frequency (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1927
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr "Microsoft 365 calendar cannot store more that one event reminder"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr "Microsoft 365 event can have only a reminder before event start"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1973
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 task can have only a reminder with absolute time"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2378
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
+#, c-format
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Microsoft 365 task cannot have attachments."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Cannot store attachment with URI “%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2380
-#| msgid "Failed to read From address"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
 msgid "Failed to read attachment URI"
 msgstr "Failed to read attachment URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:2394
-#| msgid "Failed to set contact photo:"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
 msgid "Failed to get inline attachment data"
 msgstr "Failed to get inline attachment data"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3213
-msgid "Can store only simple events into Microsoft 365 calendar"
-msgstr "Can store only simple events into Microsoft 365 calendar"
-
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:3226
-msgid "Can store only simple tasks into Microsoft 365 task folder"
-msgstr "Can store only simple tasks into Microsoft 365 task folder"
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:491
-#: ../src/Microsoft365/camel/camel-m365-folder.c:610
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1017
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1378
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1516
+#: ../src/Microsoft365/camel/camel-m365-folder.c:502
+#: ../src/Microsoft365/camel/camel-m365-folder.c:598
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
 msgid "Invalid folder state (missing parent store)"
 msgstr "Invalid folder state (missing parent store)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:633
-msgid ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-msgstr ""
-"Cannot add messages into an Microsoft 365 account from another account. Only "
-"messages from the same account can be moved/copied between the Microsoft 365 "
-"folders."
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Folder “%s” doesn't correspond to any known folder"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1765
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
 #, c-format
-#| msgid "Could not load summary for %s"
 msgid "Could not load summary for “%s”"
 msgstr "Could not load summary for “%s”"
 
@@ -1547,70 +1712,58 @@ msgstr "Microsoft 365"
 msgid "For accessing Microsoft 365 server"
 msgstr "For accessing Microsoft 365 server"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
-#: ../src/Microsoft365/camel/camel-m365-transport.c:257
+#: ../src/Microsoft365/camel/camel-m365-store.c:141
+#: ../src/Microsoft365/camel/camel-m365-transport.c:404
 msgid "Microsoft 365 server"
 msgstr "Microsoft 365 server"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:145
+#: ../src/Microsoft365/camel/camel-m365-store.c:143
 msgid "Mail receive via Microsoft 365"
 msgstr "Mail receive via Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:200
-#: ../src/Microsoft365/common/e-m365-connection.c:1521
+#: ../src/Microsoft365/camel/camel-m365-store.c:198
+#: ../src/Microsoft365/common/e-m365-connection.c:1276
 #, c-format
-#| msgid "Default redirect URI is “%s”"
 msgid "Malformed URI: “%s”"
 msgstr "Malformed URI: “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:533
-#| msgid "Look up Exchange server categories"
+#: ../src/Microsoft365/camel/camel-m365-store.c:532
 msgid "Look up Microsoft 365 categories"
 msgstr "Look up Microsoft 365 categories"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:542
-#: ../src/Microsoft365/camel/camel-m365-transport.c:183
-#| msgid "Failed to set contact photo:"
+#: ../src/Microsoft365/camel/camel-m365-store.c:541
+#: ../src/Microsoft365/camel/camel-m365-transport.c:330
 msgid "Failed to create connection"
 msgstr "Failed to create connection"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:707
+#: ../src/Microsoft365/camel/camel-m365-store.c:706
 #, c-format
-#| msgid "Parent folder %s does not exist"
 msgid "Parent folder “%s” does not exist"
 msgstr "Parent folder “%s” does not exist"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:894
-#| msgid "Cannot find folder ID for parent folder %s"
+#: ../src/Microsoft365/camel/camel-m365-store.c:893
 msgid "Cannot find “Deleted Items” folder"
 msgstr "Cannot find “Deleted Items” folder"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:985
-#: ../src/Microsoft365/camel/camel-m365-store.c:1023
+#: ../src/Microsoft365/camel/camel-m365-store.c:984
+#: ../src/Microsoft365/camel/camel-m365-store.c:1022
 #, c-format
-#| msgid "Folder %s does not exist"
 msgid "Folder “%s” does not exist"
 msgstr "Folder “%s” does not exist"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:259
-#| msgid "Exchange mail delivery via %s"
+#: ../src/Microsoft365/camel/camel-m365-transport.c:406
 msgid "Mail delivery via Microsoft 365"
 msgstr "Mail delivery via Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:297
-#| msgid "Exchange server cannot send message with multiple From addresses"
+#: ../src/Microsoft365/camel/camel-m365-transport.c:444
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Microsoft 365 server cannot send message with multiple From addresses"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
-#| msgid "OAuth2 (Office365)"
 msgid "OAuth2 (Microsoft 365)"
 msgstr "OAuth2 (Microsoft 365)"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:15
-#| msgid ""
-#| "This option will use an OAuth 2.0 access token to connect to the "
-#| "Office365.com server"
 msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Microsoft "
 "365 server"
@@ -1619,44 +1772,90 @@ msgstr ""
 "365 server"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:114
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1179
+#: ../src/Microsoft365/common/e-m365-connection.c:920
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgstr[1] "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1185
+#: ../src/Microsoft365/common/e-m365-connection.c:926
 #, c-format
-#| msgid "Exchange server is busy, waiting to retry (%d second)"
-#| msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgstr[1] "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:2037
-#| msgid "Failed to parse oab XML"
+#: ../src/Microsoft365/common/e-m365-connection.c:1051
+#: ../src/Microsoft365/common/e-m365-connection.c:1078
+msgid "Invalid data"
+msgstr "Invalid data"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1076
+msgid "Operation was cancelled"
+msgstr "Operation was cancelled"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1767
 msgid "Failed to parse own Json data"
 msgstr "Failed to parse own JSON data"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:194
-#| msgid "_Override Office365 OAuth2 settings"
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Override Microsoft 365 OAuth2 settings"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:770
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:274
+msgid "Default tenant is “common“"
+msgstr "Default tenant is “common“"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:277
 #, c-format
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
+msgid "Default tenant is “%s”"
+msgstr "Default tenant is “%s”"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:329
+msgid "_Redirect URI:"
+msgstr "_Redirect URI:"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:381
+msgid "Organizational Contacts"
+msgstr "Organisational Contacts"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:388
+msgid "Organizational Users"
+msgstr "Organisational Users"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:777
+#, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Data source “%s” does not represent a Microsoft 365 folder"
+
+#, c-format
+#~ msgid "URL “%s” is not valid"
+#~ msgstr "URL “%s” is not valid"
+
+#~ msgid "No items found"
+#~ msgstr "No items found"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid ""
+#~ "Cannot add messages into an Microsoft 365 account from another account. "
+#~ "Only messages from the same account can be moved/copied between the "
+#~ "Microsoft 365 folders."
+#~ msgstr ""
+#~ "Cannot add messages into an Microsoft 365 account from another account. "
+#~ "Only messages from the same account can be moved/copied between the "
+#~ "Microsoft 365 folders."
 
 #~ msgid "User “%s” was not found on the server"
 #~ msgstr "User “%s” was not found on the server"
