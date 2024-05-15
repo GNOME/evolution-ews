@@ -1145,6 +1145,7 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 				GError **error)
 {
 	ECalBackendM365 *cbm365;
+	GError *local_error = NULL;
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
@@ -1157,11 +1158,11 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 	switch (e_cal_backend_get_kind (E_CAL_BACKEND (cbm365))) {
 	case I_CAL_VEVENT_COMPONENT:
 		success = e_m365_connection_delete_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-			cbm365->priv->folder_id, uid, cancellable, error);
+			cbm365->priv->folder_id, uid, cancellable, &local_error);
 		break;
 	case I_CAL_VTODO_COMPONENT:
 		success = e_m365_connection_delete_task_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-			cbm365->priv->folder_id, uid, cancellable, error);
+			cbm365->priv->folder_id, uid, cancellable, &local_error);
 		break;
 	default:
 		g_warn_if_reached ();
@@ -1170,6 +1171,13 @@ ecb_m365_remove_component_sync (ECalMetaBackend *meta_backend,
 	}
 
 	UNLOCK (cbm365);
+
+	if (g_error_matches (local_error, E_M365_ERROR, E_M365_ERROR_ITEM_NOT_FOUND)) {
+		g_clear_error (&local_error);
+		success = TRUE;
+	} else if (local_error) {
+		g_propagate_error (error, local_error);
+	}
 
 	ecb_m365_convert_error_to_client_error (error);
 	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
@@ -1832,6 +1840,12 @@ ecb_m365_send_objects_sync (ECalBackendSync *sync_backend,
 		return;
 	}
 
+	if (i_cal_component_get_method (icomp) != I_CAL_METHOD_CANCEL) {
+		g_object_unref (icomp);
+		g_propagate_error (error, EC_ERROR (E_CLIENT_ERROR_NOT_SUPPORTED));
+		return;
+	}
+
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbm365));
 
 	if (i_cal_component_isa (icomp) == I_CAL_VCALENDAR_COMPONENT) {
@@ -2020,6 +2034,7 @@ ecb_m365_get_backend_property (ECalBackend *cal_backend,
 			E_CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
 			E_CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT,
 			E_CAL_STATIC_CAPABILITY_SAVE_SCHEDULES,
+			E_CAL_STATIC_CAPABILITY_CREATE_MESSAGES,
 			E_CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START,
 			E_CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			E_CAL_STATIC_CAPABILITY_ALL_DAY_EVENT_AS_TIME,
@@ -2027,6 +2042,7 @@ ecb_m365_get_backend_property (ECalBackend *cal_backend,
 			E_CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
 			E_CAL_STATIC_CAPABILITY_TASK_CAN_RECUR,
 			E_CAL_STATIC_CAPABILITY_TASK_HANDLE_RECUR,
+			E_CAL_STATIC_CAPABILITY_RETRACT_SUPPORTED,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbm365)),
 			NULL);
 	} else if (g_str_equal (prop_name, E_CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {

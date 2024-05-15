@@ -52,7 +52,8 @@ typedef enum _EM365ApiVersion {
 } EM365ApiVersion;
 
 typedef enum {
-	E_M365_ERROR_ID_MALFORMED
+	E_M365_ERROR_ID_MALFORMED,
+	E_M365_ERROR_ITEM_NOT_FOUND
 } EM365Error;
 
 #define	E_M365_ERROR e_m365_error_quark ()

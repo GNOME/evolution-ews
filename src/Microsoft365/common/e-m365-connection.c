@@ -861,6 +861,9 @@ m365_connection_extract_error (JsonNode *node,
 		status_code = G_IO_ERROR_INVALID_DATA;
 	} else if (g_strcmp0 (code, "ErrorInvalidUser") == 0) {
 		status_code = SOUP_STATUS_UNAUTHORIZED;
+	} else if (g_strcmp0 (code, "ErrorItemNotFound") == 0) {
+		domain = E_M365_ERROR;
+		status_code = E_M365_ERROR_ITEM_NOT_FOUND;
 	} else if (g_strcmp0 (code, "ErrorInvalidIdMalformed") == 0) {
 		domain = E_M365_ERROR;
 		status_code = E_M365_ERROR_ID_MALFORMED;

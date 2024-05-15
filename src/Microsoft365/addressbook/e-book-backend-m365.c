@@ -2111,8 +2111,17 @@ ebb_m365_remove_contact_sync (EBookMetaBackend *meta_backend,
 	LOCK (bbm365);
 
 	if (bbm365->priv->folder_id) {
+		GError *local_error = NULL;
+
 		success = e_m365_connection_delete_contact_sync (bbm365->priv->cnc, NULL,
-			bbm365->priv->folder_id, uid, cancellable, error);
+			bbm365->priv->folder_id, uid, cancellable, &local_error);
+
+		if (g_error_matches (local_error, E_M365_ERROR, E_M365_ERROR_ITEM_NOT_FOUND)) {
+			g_clear_error (&local_error);
+			success = TRUE;
+		} else if (local_error) {
+			g_propagate_error (error, local_error);
+		}
 	} else {
 		const gchar *text = "Cannot remove contact"; /* this should not happen, thus not localized */
 

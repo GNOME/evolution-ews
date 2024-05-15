@@ -4590,6 +4590,12 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 		return;
 	}
 
+	if (i_cal_component_get_method (icomp) != I_CAL_METHOD_CANCEL) {
+		g_object_unref (icomp);
+		g_propagate_error (error, EC_ERROR (E_CLIENT_ERROR_NOT_SUPPORTED));
+		return;
+	}
+
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbews));
 
 	if (i_cal_component_isa (icomp) == I_CAL_VCALENDAR_COMPONENT) {
@@ -4602,12 +4608,16 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 	while (subcomp && success) {
 		const gchar *subject = NULL, *org_email = NULL;
 		const gchar *org = NULL, *attendee = NULL;
-		gchar *new_body_content, *org_cn;
+		const gchar *comment;
+		gchar *org_cn;
 		ICalProperty *prop, *org_prop;
 		CamelInternetAddress *org_addr = camel_internet_address_new ();
 		CamelInternetAddress *attendees_addr = camel_internet_address_new ();
 
-		new_body_content = e_cal_util_component_dup_x_property (subcomp, "X-EVOLUTION-RETRACT-COMMENT");
+		comment = i_cal_component_get_comment (subcomp);
+		if (comment && !*comment)
+			comment = NULL;
+
 		prop = i_cal_component_get_first_property (subcomp, I_CAL_SUMMARY_PROPERTY);
 		if (prop) {
 			subject = i_cal_property_get_summary (prop);
@@ -4644,13 +4654,12 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 			subcalobj = i_cal_component_as_ical_string (subcomp);
 
 			success = ecb_ews_send_cancellation_email_sync (cbews, CAMEL_ADDRESS (org_addr), attendees_addr,
-				subject, new_body_content, subcalobj, cancellable, error);
+				subject, comment, subcalobj, cancellable, error);
 
 			g_free (subcalobj);
 		}
 
 		g_free (org_cn);
-		g_free (new_body_content);
 		g_clear_object (&org_prop);
 		g_object_unref (attendees_addr);
 		g_object_unref (org_addr);
@@ -4755,6 +4764,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			E_CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
 			E_CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT,
 			E_CAL_STATIC_CAPABILITY_SAVE_SCHEDULES,
+			E_CAL_STATIC_CAPABILITY_CREATE_MESSAGES,
 			E_CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START,
 			E_CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			E_CAL_STATIC_CAPABILITY_ALL_DAY_EVENT_AS_TIME,
@@ -4762,6 +4772,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			E_CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
 			E_CAL_STATIC_CAPABILITY_TASK_CAN_RECUR,
 			E_CAL_STATIC_CAPABILITY_TASK_HANDLE_RECUR,
+			E_CAL_STATIC_CAPABILITY_RETRACT_SUPPORTED,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbews)),
 			NULL);
 	} else if (g_str_equal (prop_name, E_CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
