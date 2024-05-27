@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-03-17 12:03+0000\n"
-"PO-Revision-Date: 2024-05-27 22:31+0300\n"
+"POT-Creation-Date: 2024-05-27 19:33+0000\n"
+"PO-Revision-Date: 2024-05-27 22:48+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -107,7 +107,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Nepavyko rasti Microsoft365 pagalbos šaltinio kalendoriui „%s“"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2268
 msgid "Invalid occurrence ID"
 msgstr "Netinkamas pasikartojimo ID"
 
@@ -162,12 +162,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Negalima atlikti veiksmų aplanke esant atsijungus"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3265
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1636
 msgid "Apply message _filters to this folder"
 msgstr "Pritaikyti laiškų _filtrus šiam aplankui"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3277
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1648
 msgid "Always check for _new mail in this folder"
 msgstr "Visada tikrinti tik _naujus laiškus šiame aplanke"
 
@@ -1650,89 +1650,93 @@ msgstr "Negalima keisti organizacijos kontakto"
 msgid "Cannot modify user contact"
 msgstr "Negalima keisti naudotojo kontakto"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2129
 msgid "Cannot remove organizational contact"
 msgstr "Negalima pašalinti organizacijos kontakto"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2131
 msgid "Cannot remove user contact"
 msgstr "Negalima pašalinti naudotojo kontakto"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:814
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:913
+msgid "Cannot store detached instances, because not supported in Microsoft 365"
+msgstr "Negalima įrašyti atkabintų vienetų, to nepalaiko Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1023
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Į Microsoft 365 kalendorių galima įrašyti tik paprastus įvykius"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1036
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Į Microsoft 365  užduočių aplanką galima įrašyti tik paprastas užduotis"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr ""
 "Microsoft 365 kalendorius negali įrašyti daugiau nei vieno pasikartojimo"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1715
 msgid ""
-"Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
-"properties"
+"Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
-"Microsoft 365 kalendorius negali įrašyti komponentų su RDATE, EXDATE arba "
-"RRULE savybėmis"
+"Microsoft 365 kalendorius negali įrašyti komponentų su RDATE arba EXRULE "
+"savybėmis"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1825
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Nežinomas pasikartojimo dažnis (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
-msgid "Microsoft 365 calendar cannot store more that one event reminder"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1979
+msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Microsoft 365 kalendorius negali įrašyti daugiau nei vieno priminimo apie "
 "įvykį"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2012
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 įvykis gali turėti tik vieną priminimą prie įvykio pradžią"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2025
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Microsoft 365 užduotis gali turėti tik vieną priminimą su absoliučiu laiku"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2377
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 užduotis negali turėti priedų."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2480
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nepavyko įrašyti priedo su URI „%s“"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2482
 msgid "Failed to read attachment URI"
 msgstr "Nepavyko perskaityti priedo URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2496
 msgid "Failed to get inline attachment data"
 msgstr "Nepavyko gauti įterptinio priedo duomenų"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:502
-#: ../src/Microsoft365/camel/camel-m365-folder.c:598
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
+#: ../src/Microsoft365/camel/camel-m365-folder.c:423
+#: ../src/Microsoft365/camel/camel-m365-folder.c:519
+#: ../src/Microsoft365/camel/camel-m365-folder.c:921
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1282
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1420
 msgid "Invalid folder state (missing parent store)"
 msgstr "Netinkama aplanko būsena (trūksta tėvinės saugyklos)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1724
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Aplankas „%s“ neatitinka jokio žinomo aplanko"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1743
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nepavyksta įkelti „%s“ santraukos"
@@ -1755,7 +1759,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Laiškų galimas per Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1276
+#: ../src/Microsoft365/common/e-m365-connection.c:1365
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Blogai suformuotas URI: „%s“"
@@ -1811,7 +1815,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:920
+#: ../src/Microsoft365/common/e-m365-connection.c:1009
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1825,7 +1829,7 @@ msgstr[2] ""
 "Microsoft 365 serveris yra užsiėmęs, laukiama pakartotiniam bandymui (%d:"
 "%02d minučių)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:926
+#: ../src/Microsoft365/common/e-m365-connection.c:1015
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1839,18 +1843,24 @@ msgstr[2] ""
 "Microsoft 365 serveris yra užsiėmęs, laukiama pakartotiniam bandymui (%d "
 "sekundžių)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1051
-#: ../src/Microsoft365/common/e-m365-connection.c:1078
+#: ../src/Microsoft365/common/e-m365-connection.c:1140
+#: ../src/Microsoft365/common/e-m365-connection.c:1167
 msgid "Invalid data"
 msgstr "Netinkami duomenys"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1076
+#: ../src/Microsoft365/common/e-m365-connection.c:1165
 msgid "Operation was cancelled"
 msgstr "Veiksmo atsisakyta"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1767
+#: ../src/Microsoft365/common/e-m365-connection.c:1856
 msgid "Failed to parse own Json data"
 msgstr "Nepavyko perskaityti savų JSON duomenų"
+
+#. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
+#: ../src/Microsoft365/common/e-m365-connection.c:4802
+#, c-format
+msgid "Cannot find instance at '%s'"
+msgstr "Nepavyko rasti vieneto adresu „%s“"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "_Override Microsoft 365 OAuth2 settings"
