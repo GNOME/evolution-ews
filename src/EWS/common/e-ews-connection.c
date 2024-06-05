@@ -1171,6 +1171,18 @@ ews_connection_constructed (GObject *object)
 
 		g_free (auth_method_source);
 	}
+
+	if (cnc->priv->source && cnc->priv->settings) {
+		ESourceExtension *extension;
+
+		/* the ESoupSession can read timeout from the WebDAV Backend extension,
+		   thus make sure the options are in sync */
+		extension = e_source_get_extension (cnc->priv->source, E_SOURCE_EXTENSION_WEBDAV_BACKEND);
+		e_binding_bind_property (
+			cnc->priv->settings, "timeout",
+			extension, "timeout",
+			G_BINDING_SYNC_CREATE);
+	}
 }
 
 static void

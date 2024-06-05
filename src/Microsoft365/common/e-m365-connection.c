@@ -311,6 +311,7 @@ static void
 m365_connection_constructed (GObject *object)
 {
 	EM365Connection *cnc = E_M365_CONNECTION (object);
+	ESourceExtension *extension;
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_m365_connection_parent_class)->constructed (object);
@@ -347,6 +348,14 @@ m365_connection_constructed (GObject *object)
 	e_binding_bind_property (
 		cnc, "proxy-resolver",
 		cnc->priv->soup_session, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
+	/* the ESoupSession can read timeout from the WebDAV Backend extension,
+	   thus make sure the options are in sync */
+	extension = e_source_get_extension (cnc->priv->source, E_SOURCE_EXTENSION_WEBDAV_BACKEND);
+	e_binding_bind_property (
+		cnc->priv->settings, "timeout",
+		extension, "timeout",
 		G_BINDING_SYNC_CREATE);
 
 	e_binding_bind_property (
