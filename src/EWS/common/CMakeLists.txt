@@ -1,5 +1,9 @@
 glib_mkenums(e-ews-enumtypes e-ews-enums.h E_EWS_ENUMTYPES_H)
 
+set(DEPENDENCIES
+	evolution-ews-common
+)
+
 set(SOURCES
 	camel-ews-settings.c
 	camel-ews-settings.h
@@ -46,6 +50,10 @@ add_library(evolution-ews SHARED
 	${SOURCES}
 )
 
+add_dependencies(evolution-ews
+	${DEPENDENCIES}
+)
+
 target_compile_definitions(evolution-ews PRIVATE
 	-DG_LOG_DOMAIN=\"evolution-ews\"
 )
@@ -64,6 +72,7 @@ target_include_directories(evolution-ews PUBLIC
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_BINARY_DIR}/src/EWS
 	${CMAKE_SOURCE_DIR}/src/EWS
+	${CMAKE_SOURCE_DIR}/src/common
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CAMEL_INCLUDE_DIRS}
@@ -81,6 +90,7 @@ target_link_libraries(evolution-ews
 	${LIBEDATACAL_LDFLAGS}
 	${LIBEDATASERVER_LDFLAGS}
 	${SOUP_LDFLAGS}
+	${DEPENDENCIES}
 )
 
 install(TARGETS evolution-ews

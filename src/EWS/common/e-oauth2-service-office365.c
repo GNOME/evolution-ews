@@ -1,6 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * SPDX-FileCopyrightText: (C) 2018 Red Hat, Inc. (www.redhat.com)
+ * SPDX-FileCopyrightText: (C) 2024 Siemens AG
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
@@ -10,6 +11,8 @@
 #include <libedataserver/libedataserver.h>
 
 #include "camel-ews-settings.h"
+#include "e-ews-debug.h"
+#include "e-ms-oapxbc-util.h"
 
 #include "e-oauth2-service-office365.h"
 
@@ -455,6 +458,67 @@ eos_office365_finalize (GObject *object)
 	G_OBJECT_CLASS (e_oauth2_service_office365_parent_class)->finalize (object);
 }
 
+static SoupCookie *
+eos_office365_get_prt_sso_cookie_sync (EOAuth2Service *service,
+				       ESource *source,
+				       GCancellable *cancellable)
+{
+	SoupCookie *prtsso_cookie = NULL;
+	const gchar *sso_uri = eos_office365_get_authentication_uri (service, source);
+	const gchar *client_id = eos_office365_get_client_id (service, source);
+	const gchar *redirect_uri = eos_office365_get_redirect_uri (service, source);
+	CamelEwsSettings *ews_settings = NULL;
+	gchar *auth_user = NULL;
+	GError *local_error = NULL;
+
+	ews_settings = eos_office365_get_camel_settings (source);
+	auth_user = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (ews_settings));
+
+	prtsso_cookie = e_ms_oapxbc_util_get_prt_sso_cookie_sync (service, source, client_id, sso_uri,
+								  redirect_uri, auth_user, cancellable, &local_error);
+	g_free (auth_user);
+	if (!prtsso_cookie) {
+		e_ews_debug_print (_("Failed to acquire PRT SSO cookie: %s"), local_error ? local_error->message : "Unknown error");
+		g_clear_error (&local_error);
+	}
+
+	return prtsso_cookie;
+}
+
+static GSList *
+eos_office365_dup_credentials_prompter_cookies_sync (EOAuth2Service *service,
+						     ESource *source,
+						     GCancellable *cancellable)
+{
+	SoupCookie *prtsso_cookie;
+	GSList *cookies = NULL;
+	prtsso_cookie = eos_office365_get_prt_sso_cookie_sync (service, source, cancellable);
+	if (!prtsso_cookie) {
+		return NULL;
+	}
+	cookies = g_slist_append (cookies, prtsso_cookie);
+	return cookies;
+}
+
+static void
+eos_office365_prepare_refresh_token_message (EOAuth2Service *service,
+					     ESource *source,
+					     SoupMessage *message)
+{
+	SoupMessageHeaders *request_headers;
+	SoupCookie *cookie;
+
+	cookie = eos_office365_get_prt_sso_cookie_sync (service, source, NULL);
+	if (!cookie) {
+		return;
+	}
+	request_headers = soup_message_get_request_headers (message);
+	soup_message_headers_append (request_headers,
+				     soup_cookie_get_name (cookie),
+				     soup_cookie_get_value (cookie));
+	soup_cookie_free (cookie);
+}
+
 static void
 e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface)
 {
@@ -468,6 +532,8 @@ e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface)
 	iface->get_redirect_uri = eos_office365_get_redirect_uri;
 	iface->prepare_authentication_uri_query = eos_office365_prepare_authentication_uri_query;
 	iface->prepare_refresh_token_form = eos_office365_prepare_refresh_token_form;
+	iface->prepare_refresh_token_message = eos_office365_prepare_refresh_token_message;
+	iface->dup_credentials_prompter_cookies_sync = eos_office365_dup_credentials_prompter_cookies_sync;
 }
 
 static void

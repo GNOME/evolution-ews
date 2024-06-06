@@ -1,5 +1,9 @@
 glib_mkenums(e-m365-enumtypes e-m365-enums.h E_M365_ENUMTYPES_H)
 
+set(DEPENDENCIES
+	evolution-ews-common
+)
+
 set(SOURCES
 	camel-sasl-xoauth2-microsoft365.c
 	camel-sasl-xoauth2-microsoft365.h
@@ -24,6 +28,10 @@ add_library(evolution-microsoft365 SHARED
 	${SOURCES}
 )
 
+add_dependencies(evolution-microsoft365
+	${DEPENDENCIES}
+)
+
 target_compile_definitions(evolution-microsoft365 PRIVATE
 	-DG_LOG_DOMAIN=\"evolution-microsoft365\"
 	-DM365_DATADIR=\"${ewsdatadir}\"
@@ -44,6 +52,7 @@ target_include_directories(evolution-microsoft365 PUBLIC
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_BINARY_DIR}/src/Microsoft365
 	${CMAKE_SOURCE_DIR}/src/Microsoft365
+	${CMAKE_SOURCE_DIR}/src/common
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CAMEL_INCLUDE_DIRS}
@@ -63,6 +72,7 @@ target_link_libraries(evolution-microsoft365
 	${LIBEDATACAL_LDFLAGS}
 	${LIBEDATASERVER_LDFLAGS}
 	${SOUP_LDFLAGS}
+	${DEPENDENCIES}
 )
 
 install(TARGETS evolution-microsoft365
