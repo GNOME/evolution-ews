@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-04-26 07:13+0000\n"
-"PO-Revision-Date: 2024-04-26 22:39+0300\n"
+"POT-Creation-Date: 2024-06-10 15:04+0000\n"
+"PO-Revision-Date: 2024-06-10 21:43+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian\n"
 "Language: uk\n"
@@ -90,6 +90,7 @@ msgstr ""
 "Нараду в інтернеті можна створювати лише у календарі основного користувача."
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:4161
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1878
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
@@ -599,55 +600,55 @@ msgstr[3] "Сервер Exchange зайнято, очікуємо на повт�
 msgid "Authentication failed"
 msgstr "Не вдалось пройти розпізнавання"
 
-#: ../src/EWS/common/e-ews-connection.c:2441
+#: ../src/EWS/common/e-ews-connection.c:2453
 msgid "Failed to parse autodiscover response XML"
 msgstr "Не вдалося обробити відповідь XML autodiscover"
 
-#: ../src/EWS/common/e-ews-connection.c:2447
+#: ../src/EWS/common/e-ews-connection.c:2459
 msgid "Failed to find <Autodiscover> element"
 msgstr "Не вдалося знайти елемент <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2457
+#: ../src/EWS/common/e-ews-connection.c:2469
 msgid "Failed to find <Response> element"
 msgstr "Не вдалося знайти елемент <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2467
+#: ../src/EWS/common/e-ews-connection.c:2479
 msgid "Failed to find <Account> element"
 msgstr "Не вдалося знайти елемент <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2512
+#: ../src/EWS/common/e-ews-connection.c:2524
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Не вдалося знайти <ASUrl> у відповіді на автовиявлення"
 
-#: ../src/EWS/common/e-ews-connection.c:2588
+#: ../src/EWS/common/e-ews-connection.c:2600
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бути порожньою"
 
-#: ../src/EWS/common/e-ews-connection.c:3013
+#: ../src/EWS/common/e-ews-connection.c:3025
 msgid "Email address is missing a domain part"
 msgstr "У адресі електронної пошти пропущено частину домену"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3234
 msgid "Failed to parse oab XML"
 msgstr "Не вдалося обробити XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:3260
+#: ../src/EWS/common/e-ews-connection.c:3272
 msgid "Failed to find <OAB> element\n"
 msgstr "Не вдалося знайти елемент <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8816
+#: ../src/EWS/common/e-ews-connection.c:8828
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8917
+#: ../src/EWS/common/e-ews-connection.c:8929
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9070
+#: ../src/EWS/common/e-ews-connection.c:9082
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9210
+#: ../src/EWS/common/e-ews-connection.c:9222
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Потребує принаймні сервера Microsoft Exchange 2007 SP1"
 
@@ -1674,29 +1675,40 @@ msgstr "Не можна змінювати організаційний конт
 msgid "Cannot modify user contact"
 msgstr "Не можна змінювати контакт користувача"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2129
 msgid "Cannot remove organizational contact"
 msgstr "Не можна вилучати організаційний контакт"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2131
 msgid "Cannot remove user contact"
 msgstr "Не можна вилучати контакт користувача"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:812
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:814
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:913
 msgid ""
 "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
-"Зберігання для від'єднаних екземплярів неможливе, оскільки його підтримки у"
-" Microsoft 365 не передбачено"
+"Зберігання для від'єднаних екземплярів неможливе, оскільки його підтримки у "
+"Microsoft 365 не передбачено"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1021
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1106
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "У календарі Microsoft 365 можна зберігати лише прості події"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1034
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1119
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "У теці завдань Microsoft 365 можна зберігати лише прості завдання"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1170
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1891
+#| msgid ""
+#| "Cannot create meetings organized by other users in an Exchange Web "
+#| "Services calendar."
+msgid ""
+"Cannot create meetings organized by other users in a Microsoft 365 calendar."
+msgstr ""
+"Неможливо створити зустрічі, які організовано іншими користувачами календарі"
+" Microsoft 365."
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
@@ -1704,9 +1716,6 @@ msgstr ""
 "У календарі Microsoft 365 не може бути збережено більше одного повторення"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1715
-#| msgid ""
-#| "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
-#| "properties"
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
@@ -1787,7 +1796,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Отримання пошти за допомогою Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1362
+#: ../src/Microsoft365/common/e-m365-connection.c:1374
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Помилкове форматування адреси: «%s»"
@@ -1844,7 +1853,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1006
+#: ../src/Microsoft365/common/e-m365-connection.c:1018
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural ""
@@ -1858,7 +1867,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1012
+#: ../src/Microsoft365/common/e-m365-connection.c:1024
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1871,21 +1880,21 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1137
-#: ../src/Microsoft365/common/e-m365-connection.c:1164
+#: ../src/Microsoft365/common/e-m365-connection.c:1149
+#: ../src/Microsoft365/common/e-m365-connection.c:1176
 msgid "Invalid data"
 msgstr "Некоректні дані"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1162
+#: ../src/Microsoft365/common/e-m365-connection.c:1174
 msgid "Operation was cancelled"
 msgstr "Дію скасовано"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1853
+#: ../src/Microsoft365/common/e-m365-connection.c:1865
 msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:4799
+#: ../src/Microsoft365/common/e-m365-connection.c:4811
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Не вдалося зберегти екземпляр у «%s»"
