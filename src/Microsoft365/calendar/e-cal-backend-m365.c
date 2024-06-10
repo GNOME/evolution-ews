@@ -951,6 +951,89 @@ ecb_m365_save_recurrence_changes_locked_sync (ECalBackendM365 *cbm365,
 	return success;
 }
 
+static GHashTable *
+ecb_m365_get_mail_aliases (ECalBackendM365 *cbm365)
+{
+	ESource *source;
+	ESourceRegistry *registry;
+	GHashTable *aliases = NULL;
+	GList *identities, *link;
+	const gchar *parent_uid;
+
+	source = e_backend_get_source (E_BACKEND (cbm365));
+	parent_uid = e_source_get_parent (source);
+
+	if (!parent_uid || !*parent_uid)
+		return NULL;
+
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbm365));
+	identities = e_source_registry_list_enabled (registry, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+
+	for (link = identities; link; link = g_list_next (link)) {
+		ESource *mail_identity = link->data;
+
+		if (g_strcmp0 (parent_uid, e_source_get_parent (mail_identity)) == 0) {
+			ESourceMailIdentity *extension;
+
+			extension = e_source_get_extension (mail_identity, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+			aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
+			break;
+		}
+	}
+
+	g_list_free_full (identities, g_object_unref);
+
+	return aliases;
+}
+
+static gboolean
+ecb_m365_organizer_is_user (ECalBackendM365 *cbm365,
+			    ICalComponent *icomp)
+{
+	ICalProperty *prop;
+	const gchar *email;
+	gboolean is_organizer = FALSE;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (cbm365), FALSE);
+	g_return_val_if_fail (I_CAL_IS_COMPONENT (icomp), FALSE);
+
+	prop = i_cal_component_get_first_property (icomp, I_CAL_ORGANIZER_PROPERTY);
+	if (!prop)
+		return FALSE;
+
+	email = i_cal_property_get_organizer (prop);
+	if (email && *email) {
+		CamelM365Settings *m365_settings;
+		gchar *user_email;
+
+		m365_settings = camel_m365_settings_get_from_backend (E_BACKEND (cbm365), e_cal_backend_get_registry (E_CAL_BACKEND (cbm365)));
+
+		user_email = camel_m365_settings_dup_email (m365_settings);
+
+		email = e_cal_util_strip_mailto (email);
+
+		is_organizer = user_email && g_ascii_strcasecmp (email, user_email) == 0;
+
+		g_free (user_email);
+
+		if (!is_organizer) {
+			GHashTable *aliases;
+
+			aliases = ecb_m365_get_mail_aliases (cbm365);
+
+			if (aliases) {
+				is_organizer = g_hash_table_contains (aliases, email);
+
+				g_hash_table_unref (aliases);
+			}
+		}
+	}
+
+	g_object_unref (prop);
+
+	return is_organizer;
+}
+
 static gboolean
 ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 			      gboolean overwrite_existing,
@@ -1080,6 +1163,11 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 				/* To re-read it from the server */
 				*out_new_uid = g_strdup (uid);
 			}
+		} else if (e_cal_util_component_has_organizer (new_comp) &&
+			   e_cal_util_component_has_attendee (new_comp) &&
+			   !ecb_m365_organizer_is_user (cbm365, new_comp)) {
+			success = FALSE;
+			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, _("Cannot create meetings organized by other users in a Microsoft 365 calendar.")));
 		} else {
 			JsonObject *created_item = NULL;
 
@@ -1219,41 +1307,6 @@ ecb_m365_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 
 	ecb_m365_convert_error_to_client_error (error);
 	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
-}
-
-static GHashTable *
-ecb_m365_get_mail_aliases (ECalBackendM365 *cbm365)
-{
-	ESource *source;
-	ESourceRegistry *registry;
-	GHashTable *aliases = NULL;
-	GList *identities, *link;
-	const gchar *parent_uid;
-
-	source = e_backend_get_source (E_BACKEND (cbm365));
-	parent_uid = e_source_get_parent (source);
-
-	if (!parent_uid || !*parent_uid)
-		return NULL;
-
-	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbm365));
-	identities = e_source_registry_list_enabled (registry, E_SOURCE_EXTENSION_MAIL_IDENTITY);
-
-	for (link = identities; link; link = g_list_next (link)) {
-		ESource *mail_identity = link->data;
-
-		if (g_strcmp0 (parent_uid, e_source_get_parent (mail_identity)) == 0) {
-			ESourceMailIdentity *extension;
-
-			extension = e_source_get_extension (mail_identity, E_SOURCE_EXTENSION_MAIL_IDENTITY);
-			aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
-			break;
-		}
-	}
-
-	g_list_free_full (identities, g_object_unref);
-
-	return aliases;
 }
 
 static ICalProperty *
@@ -1630,6 +1683,68 @@ ecb_m365_get_current_user_meeting_reponse (ECalBackendM365 *cbm365,
 	return response;
 }
 
+static gboolean
+ecb_m365_comp_exists (ECalBackendM365 *cbm365,
+		      ICalComponent *subcomp,
+		      gchar **out_real_id,
+		      GCancellable *cancellable)
+{
+	const gchar *uid = i_cal_component_get_uid (subcomp);
+	gboolean exists = FALSE;
+	ECalCache *cal_cache;
+
+	if (!uid)
+		return FALSE;
+
+	cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbm365));
+	if (cal_cache) {
+		exists = e_cal_cache_contains (cal_cache, uid, NULL, E_CACHE_EXCLUDE_DELETED);
+		g_clear_object (&cal_cache);
+	}
+
+	if (!exists) {
+		EM365Event *event = NULL;
+
+		LOCK (cbm365);
+		exists = e_m365_connection_get_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			cbm365->priv->folder_id, uid, NULL, "id", &event, cancellable, NULL);
+		UNLOCK (cbm365);
+
+		g_clear_pointer (&event, json_object_unref);
+	}
+
+	if (!exists) {
+		/* search for the event by the iCalUid property */
+		gchar *filter = g_strdup_printf ("iCalUid eq '%s'", uid);
+		GSList *events = NULL;
+
+		LOCK (cbm365);
+
+		if (e_m365_connection_list_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+			cbm365->priv->folder_id, NULL, "id", filter, &events, cancellable, NULL)) {
+			if (events && !events->next) {
+				EM365Event *event = events->data;
+				const gchar *tmp_id = e_m365_event_get_id (event);
+
+				if (tmp_id && *tmp_id) {
+					exists = TRUE;
+
+					if (out_real_id)
+						*out_real_id = g_strdup (tmp_id);
+				}
+			}
+
+			g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+		}
+
+		UNLOCK (cbm365);
+
+		g_free (filter);
+	}
+
+	return exists;
+}
+
 static void
 ecb_m365_receive_objects_sync (ECalBackendSync *sync_backend,
 			       EDataCal *cal,
@@ -1678,69 +1793,134 @@ ecb_m365_receive_objects_sync (ECalBackendSync *sync_backend,
 	switch (i_cal_component_get_method (icomp)) {
 	case I_CAL_METHOD_REQUEST:
 	case I_CAL_METHOD_PUBLISH:
-	case I_CAL_METHOD_REPLY:
+	case I_CAL_METHOD_REPLY: {
+		GHashTable *split_by_uid = g_hash_table_new (g_str_hash, g_str_equal);
+		GHashTableIter iter;
+		gpointer value;
+
 		for (subcomp = i_cal_component_get_first_component (icomp, kind);
-		     subcomp && success;
+		     subcomp;
 		     g_object_unref (subcomp), subcomp = i_cal_component_get_next_component (icomp, kind)) {
-			EM365ResponseType response_type;
-			gboolean rsvp_requested = FALSE;
+			const gchar *uid = i_cal_component_get_uid (subcomp);
+			if (uid && *uid) {
+				GSList *comps;
+				comps = g_hash_table_lookup (split_by_uid, uid);
+				comps = g_slist_prepend (comps, g_object_ref (subcomp));
 
-			/* getting a data for meeting request response */
-			response_type = ecb_m365_get_current_user_meeting_reponse (cbm365, subcomp, user_email, aliases, &rsvp_requested);
-			rsvp_requested = rsvp_requested && !(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE);
+				g_hash_table_insert (split_by_uid, (gpointer) uid, comps);
+			}
+		}
 
-			if (response_type == E_M365_RESPONSE_ACCEPTED ||
-			    response_type == E_M365_RESPONSE_DECLINED ||
-			    response_type == E_M365_RESPONSE_TENTATIVELY_ACCEPTED) {
-				const gchar *uid = i_cal_component_get_uid (subcomp);
-				const gchar *comment = i_cal_component_get_comment (subcomp);
+		g_hash_table_iter_init (&iter, split_by_uid);
+		while (success && g_hash_table_iter_next (&iter, NULL, &value)) {
+			GSList *comps = value;
+			gchar *real_id = NULL;
+
+			subcomp = comps->data;
+
+			if (ecb_m365_comp_exists (cbm365, subcomp, &real_id, cancellable)) {
+				EM365ResponseType response_type;
+				gboolean rsvp_requested = FALSE;
+
+				/* getting a data for meeting request response */
+				response_type = ecb_m365_get_current_user_meeting_reponse (cbm365, subcomp, user_email, aliases, &rsvp_requested);
+				rsvp_requested = rsvp_requested && !(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE);
+
+				if (response_type == E_M365_RESPONSE_ACCEPTED ||
+				    response_type == E_M365_RESPONSE_DECLINED ||
+				    response_type == E_M365_RESPONSE_TENTATIVELY_ACCEPTED) {
+					const gchar *comment = i_cal_component_get_comment (subcomp);
+					const gchar *uid = i_cal_component_get_uid (subcomp);
+					GError *local_error = NULL;
+
+					if (comment && !*comment)
+						comment = NULL;
+
+					LOCK (cbm365);
+
+					success = e_m365_connection_response_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+						cbm365->priv->folder_id, real_id ? real_id : uid, response_type, comment, rsvp_requested, cancellable, &local_error);
+
+					if (!success && g_error_matches (local_error, E_M365_ERROR, E_M365_ERROR_ID_MALFORMED)) {
+						/* search for the event by the iCalUid property */
+						gchar *filter = g_strdup_printf ("iCalUid eq '%s'", uid);
+						GSList *events = NULL;
+
+						g_clear_error (&local_error);
+
+						if (e_m365_connection_list_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+							cbm365->priv->folder_id, NULL, "id", filter, &events, cancellable, NULL)) {
+							if (events && !events->next) {
+								EM365Event *event = events->data;
+								const gchar *tmp_id = e_m365_event_get_id (event);
+								if (tmp_id && *tmp_id) {
+									g_clear_error (&local_error);
+									success = e_m365_connection_response_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+										cbm365->priv->folder_id, tmp_id, response_type, comment, rsvp_requested, cancellable, &local_error);
+								}
+							}
+							g_slist_free_full (events, (GDestroyNotify) json_object_unref);
+						}
+						g_free (filter);
+
+						if (!success && !local_error)
+							local_error = ECC_ERROR (E_CAL_CLIENT_ERROR_OBJECT_NOT_FOUND);
+					}
+
+					if (local_error)
+						g_propagate_error (error, local_error);
+
+					UNLOCK (cbm365);
+
+					do_refresh = TRUE;
+				} else if (e_cal_util_component_has_organizer (subcomp) &&
+					   e_cal_util_component_has_attendee (subcomp)) {
+					g_set_error (error, E_CAL_CLIENT_ERROR, E_CAL_CLIENT_ERROR_UNKNOWN_USER, _("Cannot find user “%s” between attendees"), user_email ? user_email : "NULL");
+					success = FALSE;
+				}
+
+				g_free (real_id);
+			} else {
+				EDataCal *data_cal;
+				GSList *calobjs = NULL, *link, *new_uids = NULL, *new_components = NULL;
 				GError *local_error = NULL;
 
-				if (comment && !*comment)
-					comment = NULL;
-
-				LOCK (cbm365);
-
-				success = e_m365_connection_response_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-					cbm365->priv->folder_id, uid, response_type, comment, rsvp_requested, cancellable, &local_error);
-
-				if (!success && g_error_matches (local_error, E_M365_ERROR, E_M365_ERROR_ID_MALFORMED)) {
-					/* search for the event by the iCalUid property */
-					gchar *filter = g_strdup_printf ("iCalUid eq '%s'", uid);
-					GSList *events = NULL;
-
-					g_clear_error (&local_error);
-
-					if (e_m365_connection_list_events_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-						cbm365->priv->folder_id, NULL, "id", filter, &events, cancellable, NULL)) {
-						if (events && !events->next) {
-							EM365Event *event = events->data;
-							const gchar *tmp_uid = e_m365_event_get_id (event);
-							if (tmp_uid && *tmp_uid) {
-								g_clear_error (&local_error);
-								success = e_m365_connection_response_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-									cbm365->priv->folder_id, tmp_uid, response_type, comment, rsvp_requested, cancellable, &local_error);
-							}
-						}
-						g_slist_free_full (events, (GDestroyNotify) json_object_unref);
-					}
-					g_free (filter);
-
-					if (!success && !local_error)
-						local_error = ECC_ERROR (E_CAL_CLIENT_ERROR_OBJECT_NOT_FOUND);
+				if (e_cal_util_component_has_organizer (subcomp) &&
+				    e_cal_util_component_has_attendee (subcomp) &&
+				    !ecb_m365_organizer_is_user (cbm365, subcomp)) {
+					g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, _("Cannot create meetings organized by other users in a Microsoft 365 calendar.")));
+					success = FALSE;
+					break;
 				}
+
+				for (link = comps; link; link = g_slist_next (link)) {
+					subcomp = link->data;
+					calobjs = g_slist_prepend (calobjs, i_cal_component_as_ical_string (subcomp));
+				}
+
+				data_cal = e_cal_backend_ref_data_cal (E_CAL_BACKEND (cbm365));
+
+				e_cal_backend_sync_create_objects (E_CAL_BACKEND_SYNC (cbm365), data_cal, cancellable, calobjs,
+					opflags | E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE, &new_uids, &new_components, &local_error);
+
+				success = local_error != NULL;
 
 				if (local_error)
 					g_propagate_error (error, local_error);
 
-				UNLOCK (cbm365);
-
-				do_refresh = TRUE;
-				break;
+				g_slist_free_full (calobjs, g_free);
+				g_slist_free_full (new_uids, g_free);
+				g_slist_free_full (new_components, g_object_unref);
+				g_clear_object (&data_cal);
 			}
 		}
-		g_clear_object (&subcomp);
-		break;
+		g_hash_table_iter_init (&iter, split_by_uid);
+		while (g_hash_table_iter_next (&iter, NULL, &value)) {
+			GSList *comps = value;
+			g_slist_free_full (comps, g_object_unref);
+		}
+		g_hash_table_destroy (split_by_uid);
+		} break;
 	case I_CAL_METHOD_COUNTER:
 		/*
 		 * this is a new time proposal mail from one of the attendees
