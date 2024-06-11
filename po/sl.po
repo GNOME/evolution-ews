@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-04-26 19:40+0000\n"
-"PO-Revision-Date: 2024-04-26 23:33+0200\n"
+"POT-Creation-Date: 2024-06-10 15:04+0000\n"
+"PO-Revision-Date: 2024-06-11 17:15+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -91,6 +91,7 @@ msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Spletno srečanje lahko ustvarite le v glavnem uporabniškem koledarju."
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:4161
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1878
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Med prisotnimi ni mogoče najti uporabnika »%s«"
@@ -596,56 +597,56 @@ msgstr[3] ""
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/EWS/common/e-ews-connection.c:2441
+#: ../src/EWS/common/e-ews-connection.c:2453
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/EWS/common/e-ews-connection.c:2447
+#: ../src/EWS/common/e-ews-connection.c:2459
 msgid "Failed to find <Autodiscover> element"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2457
+#: ../src/EWS/common/e-ews-connection.c:2469
 msgid "Failed to find <Response> element"
 msgstr "Iskanje predmeta <odziva> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2467
+#: ../src/EWS/common/e-ews-connection.c:2479
 msgid "Failed to find <Account> element"
 msgstr "Iskanje predmeta <računa> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2512
+#: ../src/EWS/common/e-ews-connection.c:2524
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Samodejno odkrivanje predmetov odgovora <ASUrl> je spodletelo"
 
-#: ../src/EWS/common/e-ews-connection.c:2588
+#: ../src/EWS/common/e-ews-connection.c:2600
 msgid "URL cannot be NULL"
 msgstr "URL ne sme biti NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3013
+#: ../src/EWS/common/e-ews-connection.c:3025
 msgid "Email address is missing a domain part"
 msgstr "V elektronskem naslovu manjka del z domeno"
 
-#: ../src/EWS/common/e-ews-connection.c:3222
+#: ../src/EWS/common/e-ews-connection.c:3234
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke imenika OAB XML je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:3260
+#: ../src/EWS/common/e-ews-connection.c:3272
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje imenika <OAB> je spodletelo.\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8816
+#: ../src/EWS/common/e-ews-connection.c:8828
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr ""
 "Potrebujete vsaj strežnik Microsoft Exchange 2010 s servisnim paketom SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8917
+#: ../src/EWS/common/e-ews-connection.c:8929
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Potrebujete vsaj strežnik Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9070
+#: ../src/EWS/common/e-ews-connection.c:9082
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Potrebujete vsaj strežnik Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9210
+#: ../src/EWS/common/e-ews-connection.c:9222
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr ""
 "Potrebujete vsaj strežnik Microsoft Exchange 2007 s servisnim paketom SP1"
@@ -1663,11 +1664,11 @@ msgstr "Stika organizacije ni mogoče spremeniti"
 msgid "Cannot modify user contact"
 msgstr "Stika uporabnika ni mogoče spremeniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2129
 msgid "Cannot remove organizational contact"
 msgstr "Stika organizacije ni mogoče odstraniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2131
 msgid "Cannot remove user contact"
 msgstr "Stika uporabnika ni mogoče odstraniti"
 
@@ -1677,13 +1678,21 @@ msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Ločenih primerkov ni mogoče shraniti, ker niso podprti v okolju Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1023
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1106
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "V koledar okolja Microsoft 365 lahko shranite le preproste dogodke"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1036
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1119
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "V mapo Microsoft 365 z opravili lahko shranite le preprosta opravila"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1170
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1891
+msgid ""
+"Cannot create meetings organized by other users in a Microsoft 365 calendar."
+msgstr ""
+"Srečanj, ki jih organizirajo drugi uporabniki v koledarju Microsoft 365, ni "
+"mogoče ustvariti."
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
@@ -1771,7 +1780,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Prejemanje pošte prek okolja Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1362
+#: ../src/Microsoft365/common/e-m365-connection.c:1374
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Nepravilno oblikovan naslov URI: »%s«"
@@ -1828,7 +1837,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1006
+#: ../src/Microsoft365/common/e-m365-connection.c:1018
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1845,7 +1854,7 @@ msgstr[3] ""
 "Strežnik Microsoft 365 je zaseden, poskus povezovanja bo ponovljen čez %d:"
 "%02d minute."
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1012
+#: ../src/Microsoft365/common/e-m365-connection.c:1024
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1862,21 +1871,21 @@ msgstr[3] ""
 "Strežnik Microsoft 365 je zaseden, poskus povezovanja bo ponovljen čez %d "
 "sekunde."
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1137
-#: ../src/Microsoft365/common/e-m365-connection.c:1164
+#: ../src/Microsoft365/common/e-m365-connection.c:1149
+#: ../src/Microsoft365/common/e-m365-connection.c:1176
 msgid "Invalid data"
 msgstr "Neveljavni podatki"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1162
+#: ../src/Microsoft365/common/e-m365-connection.c:1174
 msgid "Operation was cancelled"
 msgstr "Opravilo je bilo preklicano"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1853
+#: ../src/Microsoft365/common/e-m365-connection.c:1865
 msgid "Failed to parse own Json data"
 msgstr "Razčlenjevanje lastnih podatkov Json je spodletelo"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:4799
+#: ../src/Microsoft365/common/e-m365-connection.c:4811
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Primerka ni mogoče najti pri »%s«"
