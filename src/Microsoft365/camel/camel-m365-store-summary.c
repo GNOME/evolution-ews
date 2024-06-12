@@ -7,6 +7,7 @@
 #include "evolution-ews-config.h"
 
 #include <string.h>
+#include <libedataserver/libedataserver.h>
 
 #include "camel-m365-store-summary.h"
 
@@ -23,6 +24,7 @@ struct _CamelM365StoreSummaryPrivate {
 	GKeyFile *key_file;
 	GFileMonitor *monitor_delete;
 	gboolean dirty;
+	guint scheduled_save_id;
 
 	/* Note: We use the *same* strings in both of these hash tables, and
 	 * only id_full_name_hash has g_free() hooked up as the destructor func.
@@ -122,6 +124,11 @@ m365_store_summary_dispose (GObject *object)
 	CamelM365StoreSummary *store_summary = CAMEL_M365_STORE_SUMMARY (object);
 
 	LOCK (store_summary);
+
+	if (store_summary->priv->scheduled_save_id) {
+		g_source_remove (store_summary->priv->scheduled_save_id);
+		store_summary->priv->scheduled_save_id = 0;
+	}
 
 	if (store_summary->priv->monitor_delete) {
 		g_signal_handlers_disconnect_by_func (store_summary->priv->monitor_delete,
@@ -1232,6 +1239,40 @@ camel_m365_store_summary_build_folder_info (CamelM365StoreSummary *store_summary
 	return info;
 }
 
+static gboolean
+m365_store_summary_save_timeout_cb (gpointer user_data)
+{
+	GWeakRef *weakref = user_data;
+	CamelM365StoreSummary *store_summary = g_weak_ref_get (weakref);
+
+	if (store_summary) {
+		LOCK (store_summary);
+		store_summary->priv->scheduled_save_id = 0;
+		UNLOCK (store_summary);
+
+		camel_m365_store_summary_save (store_summary, NULL);
+
+		g_object_unref (store_summary);
+	}
+
+	return G_SOURCE_REMOVE;
+}
+
+static void
+m365_store_summary_maybe_schedule_save (CamelM365StoreSummary *store_summary)
+{
+	LOCK (store_summary);
+
+	if (store_summary->priv->dirty && !store_summary->priv->scheduled_save_id) {
+		store_summary->priv->scheduled_save_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 5,
+			m365_store_summary_save_timeout_cb, e_weak_ref_new (store_summary),
+			(GDestroyNotify) e_weak_ref_free);
+	}
+
+	UNLOCK (store_summary);
+}
+
+
 static void
 m365_store_summary_folder_count_notify_cb (CamelFolderSummary *folder_summary,
 					   GParamSpec *param,
@@ -1267,6 +1308,8 @@ m365_store_summary_folder_count_notify_cb (CamelFolderSummary *folder_summary,
 	}
 
 	g_free (folder_id);
+
+	m365_store_summary_maybe_schedule_save (store_summary);
 }
 
 void
