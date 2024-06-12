@@ -419,9 +419,11 @@ m365_send_to_sync (CamelTransport *transport,
 {
 	CamelInternetAddress *use_from;
 	CamelService *service;
+	CamelStream *mem_stream;
+	CamelStream *filtered_stream;
+	CamelMimeFilter *filter;
+	GByteArray *base64_mime;
 	EM365Connection *cnc;
-	JsonBuilder *builder;
-	gchar *appended_id = NULL;
 	gboolean is_server_side_sent;
 	gboolean success = FALSE;
 
@@ -469,23 +471,23 @@ m365_send_to_sync (CamelTransport *transport,
 	if (is_server_side_sent && out_sent_message_saved)
 		*out_sent_message_saved = TRUE;
 
-	builder = json_builder_new_immutable ();
-	e_m365_json_begin_object_member (builder, NULL);
-	e_m365_json_begin_object_member (builder, "message");
+	mem_stream = camel_stream_mem_new ();
+	filtered_stream = camel_stream_filter_new (mem_stream);
 
-	success = camel_m365_utils_fill_message_object_sync (builder, message, NULL, from, recipients, TRUE, NULL, cancellable, error);
+	filter = camel_mime_filter_basic_new (CAMEL_MIME_FILTER_BASIC_BASE64_ENC);
+	camel_stream_filter_add (CAMEL_STREAM_FILTER (filtered_stream), filter);
+	g_object_unref (filter);
 
-	e_m365_json_end_object_member (builder); /* message */
+	success = camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (message), filtered_stream, cancellable, error) >= 0 &&
+		camel_stream_flush (filtered_stream, cancellable, error) != -1;
 
-	if (!is_server_side_sent)
-		e_m365_json_add_boolean_member (builder, "saveToSentItems", FALSE);
+	base64_mime = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem_stream));
 
-	e_m365_json_end_object_member (builder);
+	success = success && e_m365_connection_send_mail_mime_sync (cnc, NULL, (const gchar *) base64_mime->data, (gssize) base64_mime->len, cancellable, error);
 
-	success = success && e_m365_connection_send_mail_sync (cnc, NULL, builder, cancellable, error);
-
+	g_clear_object (&filtered_stream);
+	g_clear_object (&mem_stream);
 	g_object_unref (cnc);
-	g_free (appended_id);
 
 	return success;
 }

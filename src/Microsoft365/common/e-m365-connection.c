@@ -3199,6 +3199,47 @@ e_m365_connection_send_mail_sync (EM365Connection *cnc,
 	return success;
 }
 
+gboolean
+e_m365_connection_send_mail_mime_sync (EM365Connection *cnc,
+				       const gchar *user_override, /* for which user, NULL to use the account user */
+				       const gchar *base64_mime,
+				       gssize base64_mime_length,
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (base64_mime != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"sendMail", NULL, NULL, NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	if (base64_mime_length < 0)
+		base64_mime_length = strlen (base64_mime);
+
+	soup_message_headers_set_content_type (soup_message_get_request_headers (message), "text/plain", NULL);
+	e_soup_session_util_set_message_request_body_from_data (message, FALSE, "text/plain", base64_mime, base64_mime_length, NULL);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/contactfolder-get?view=graph-rest-1.0&tabs=http */
 
 gboolean

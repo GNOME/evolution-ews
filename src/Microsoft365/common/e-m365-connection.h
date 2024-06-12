@@ -321,6 +321,13 @@ gboolean	e_m365_connection_send_mail_sync
 						 JsonBuilder *request, /* filled sendMail object */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_send_mail_mime_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *base64_mime,
+						 gssize base64_mime_length,
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_m365_connection_get_contacts_folder_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
