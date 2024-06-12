@@ -612,6 +612,7 @@ m365_folder_merge_server_user_flags (CamelMessageInfo *mi,
 	camel_message_info_property_unlock (mi);
 	if (summary)
 		camel_folder_summary_unlock (summary);
+	g_hash_table_destroy (current_labels);
 	g_clear_object (&summary);
 
 	return changed;
