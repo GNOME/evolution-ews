@@ -412,6 +412,25 @@ ecb_m365_disconnect_sync (ECalMetaBackend *meta_backend,
 }
 
 static gboolean
+ecb_m365_gather_ids_cb (ECalCache *cal_cache,
+			const gchar *uid,
+			const gchar *rid,
+			const gchar *revision,
+			const gchar *object,
+			const gchar *extra,
+			guint32 custom_flags,
+			EOfflineState offline_state,
+			gpointer user_data)
+{
+	GHashTable *left_known_uids = user_data;
+
+	if (uid && !g_hash_table_contains (left_known_uids, uid))
+		g_hash_table_insert (left_known_uids, g_strdup (uid), NULL);
+
+	return TRUE;
+}
+
+static gboolean
 ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 			   const gchar *last_sync_tag,
 			   gboolean is_repeat,
@@ -426,6 +445,9 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	ECalBackendM365 *cbm365;
 	ECalCache *cal_cache;
 	GSList *items = NULL, *link;
+	GHashTable *left_known_ids;
+	GHashTableIter iter;
+	gpointer key;
 	gboolean full_read;
 	gboolean success = TRUE;
 	gboolean (* list_items_func) (EM365Connection *cnc,
@@ -475,6 +497,9 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
 	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
 
+	left_known_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	e_cal_cache_search_with_callback (cal_cache, "#t", ecb_m365_gather_ids_cb, left_known_ids, cancellable, NULL);
+
 	LOCK (cbm365);
 
 	full_read = !select_props || !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
@@ -496,6 +521,9 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 			id = get_id_func (item);
 			change_key = get_change_key_func (item);
+
+			if (id)
+				g_hash_table_remove (left_known_ids, id);
 
 			if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
 				const gchar *saved_change_key = NULL;
@@ -545,11 +573,21 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 
 	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
 
+	g_hash_table_iter_init (&iter, left_known_ids);
+	while (g_hash_table_iter_next (&iter, &key, NULL)) {
+		ECalMetaBackendInfo *nfo;
+		const gchar *uid = key;
+
+		nfo = e_cal_meta_backend_info_new (uid, NULL, NULL, NULL);
+		*out_removed_objects = g_slist_prepend (*out_removed_objects, nfo);
+	}
+
 	UNLOCK (cbm365);
 
 	ecb_m365_convert_error_to_client_error (error);
 	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
 
+	g_hash_table_destroy (left_known_ids);
 	g_clear_object (&cal_cache);
 
 	return success;
