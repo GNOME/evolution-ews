@@ -203,7 +203,7 @@ m365_utils_add_address_array (JsonBuilder *builder,
 	for (ii = 0; ii < len; ii++) {
 		const gchar *name = NULL, *address = NULL;
 
-		if (camel_internet_address_get (addr, 0, &name, &address)) {
+		if (camel_internet_address_get (addr, ii, &name, &address)) {
 			if (!did_add) {
 				did_add = TRUE;
 				begin_func (builder);
@@ -224,7 +224,7 @@ m365_utils_add_address_array (JsonBuilder *builder,
 		for (ii = 0; ii < len; ii++) {
 			const gchar *name = NULL, *address = NULL;
 
-			if (camel_internet_address_get (iaddr, 0, &name, &address) && address && *address &&
+			if (camel_internet_address_get (iaddr, ii, &name, &address) && address && *address &&
 			    !g_hash_table_contains (known_recipients, address)) {
 				if (!did_add) {
 					did_add = TRUE;
