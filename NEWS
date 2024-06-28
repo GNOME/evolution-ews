@@ -1,3 +1,38 @@
+Evolution-EWS 3.53.1 2024-06-28
+-------------------------------
+
+Bug Fixes:
+	I#263 - Misspelling of "than" in translatable string
+	I#267 - m365: Accepting event sends mail to each recipient
+	I#273 - m365: Cannot import ICS calendar file
+	I#274 - m365: A removed task in the web app is not removed in Evolution
+	I#275 - Mails sent only to the first recipient in the list
+	eds-I#518 - WebDAV: Handle `Retry-After` header on 503 error
+	evo-I#2230 - Configurable timeout for WebDAV sources
+	evo-I#2687 - Calendar: Allow entering cancellation reason on meeting deletion
+
+Miscellaneous:
+	Do not include buildir in libecalbackendews.so
+	m365: Calendar: Correct read of file attachments
+	m365: Calendar: Read detached and deleted instances of event series
+	m365: Calendar: Write detached and deleted instances of event series
+	m365: Calendar: Fix a memory leak when loading event/task
+	m365 Camel: Auto-save store summary on folder count changes
+	m365 Camel: Send messages as MIME data
+	m365: Fix a memory leak in m365_folder_merge_server_user_flags()
+	CI: Workaround broken git clone for libcanberra
+
+Translations:
+	Andika Triwidada (id)
+	Aurimas Černius (lt)
+	Bruce Cowan (en_GB)
+	Daniel Rusek (cs)
+	Ekaterine Papava (ka)
+	Jürgen Benvenuti (de)
+	Martin (sl)
+	Sabri Ünal (tr)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.52.0 2024-03-15
 -------------------------------
 
