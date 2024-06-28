@@ -1,3 +1,19 @@
+Evolution-EWS 3.52.3 2024-06-28
+-------------------------------
+
+Bug Fixes:
+	I#274 - m365: A removed task in the web app is not removed in Evolution
+	I#275 - Mails sent only to the first recipient in the list
+
+Miscellaneous:
+	m365 Camel: Auto-save store summary on folder count changes
+	m365 Camel: Send messages as MIME data
+	m365: Fix a memory leak in m365_folder_merge_server_user_flags()
+	CI: Workaround broken git clone for libcanberra
+
+Translations:
+	Aurimas Černius (lt)
+
 Evolution-EWS 3.52.2 2024-05-24
 -------------------------------
 
