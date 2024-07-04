@@ -108,6 +108,8 @@ struct _EBookBackendEwsPrivate {
 
 	/* used for storing attachments */
 	gchar *attachments_dir;
+
+	GHashTable *view_cancellables; /* gpointer view ~> GCancellable; shares cnc_lock */
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_META_BACKEND)
@@ -4528,6 +4530,100 @@ ebb_ews_get_backend_property (EBookBackend *book_backend,
 	return E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->impl_get_backend_property (book_backend, prop_name);
 }
 
+static void
+ebb_ews_start_view_gal_search_thread_func (EBookBackend *book_backend,
+					   gpointer user_data,
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	EDataBookView *view = user_data;
+	EBookBackendEws *bbews;
+
+	g_return_if_fail (E_IS_BOOK_BACKEND_EWS (book_backend));
+	g_return_if_fail (E_IS_DATA_BOOK_VIEW (view));
+
+	bbews = E_BOOK_BACKEND_EWS (book_backend);
+
+	if (!g_cancellable_set_error_if_cancelled (cancellable, error)) {
+		EBookBackendSExp *sexp;
+		GSList *contacts = NULL;
+		const gchar *expr = NULL;
+
+		sexp = e_data_book_view_get_sexp (view);
+		if (sexp)
+			expr = e_book_backend_sexp_text (sexp);
+
+		/* this is called only for offline GAL and it's enough to search for the contacts,
+		   the rest is done by the notifications when added/discovered a new contact */
+		if (e_book_meta_backend_search_sync (E_BOOK_META_BACKEND (book_backend), expr, TRUE, &contacts, cancellable, NULL))
+			g_slist_free_full (contacts, g_object_unref);
+	}
+
+	g_rec_mutex_lock (&bbews->priv->cnc_lock);
+	g_hash_table_remove (bbews->priv->view_cancellables, view);
+	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+}
+
+static void
+ebb_ews_start_view (EBookBackend *book_backend,
+		    EDataBookView *view)
+{
+	if ((e_data_book_view_get_flags (view) & E_BOOK_CLIENT_VIEW_FLAGS_MANUAL_QUERY) != 0) {
+		EBookBackendEws *bbews = E_BOOK_BACKEND_EWS (book_backend);
+
+		/* Resolve names in GAL only for GAL */
+		if (bbews->priv->is_gal) {
+			CamelEwsSettings *ews_settings;
+
+			ews_settings = ebb_ews_get_collection_settings (bbews);
+
+			if (bbews->priv->gal_oab_broken || !camel_ews_settings_get_oab_offline (ews_settings)) {
+				GCancellable *cancellable;
+
+				cancellable = g_cancellable_new ();
+
+				g_rec_mutex_lock (&bbews->priv->cnc_lock);
+				g_hash_table_insert (bbews->priv->view_cancellables, view, g_object_ref (cancellable));
+				g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+
+				e_book_backend_schedule_custom_operation (book_backend, cancellable,
+					ebb_ews_start_view_gal_search_thread_func, g_object_ref (view), g_object_unref);
+
+				g_clear_object (&cancellable);
+			}
+		}
+	}
+
+	/* Chain up to parent's method. */
+	E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->impl_start_view (book_backend, view);
+}
+
+static void
+ebb_ews_stop_view (EBookBackend *book_backend,
+		   EDataBookView *view)
+{
+	if ((e_data_book_view_get_flags (view) & E_BOOK_CLIENT_VIEW_FLAGS_MANUAL_QUERY) != 0) {
+		EBookBackendEws *bbews = E_BOOK_BACKEND_EWS (book_backend);
+		GCancellable *cancellable;
+		gpointer value = NULL;
+
+		g_rec_mutex_lock (&bbews->priv->cnc_lock);
+		if (!g_hash_table_steal_extended (bbews->priv->view_cancellables, view, NULL, &value))
+			value = NULL;
+		g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+
+		cancellable = value;
+
+		if (cancellable) {
+			g_cancellable_cancel (cancellable);
+			g_clear_object (&cancellable);
+		}
+	}
+
+	/* Chain up to parent's method. */
+	E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->impl_stop_view (book_backend, view);
+}
+
 static gboolean
 ebb_ews_get_destination_address (EBackend *backend,
 				 gchar **host,
@@ -4612,6 +4708,7 @@ e_book_backend_ews_finalize (GObject *object)
 	g_free (bbews->priv->folder_id);
 	g_free (bbews->priv->attachments_dir);
 	g_free (bbews->priv->last_subscription_id);
+	g_hash_table_destroy (bbews->priv->view_cancellables);
 
 	g_rec_mutex_clear (&bbews->priv->cnc_lock);
 
@@ -4623,6 +4720,8 @@ static void
 e_book_backend_ews_init (EBookBackendEws *bbews)
 {
 	bbews->priv = e_book_backend_ews_get_instance_private (bbews);
+
+	bbews->priv->view_cancellables = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
 	g_rec_mutex_init (&bbews->priv->cnc_lock);
 }
@@ -4650,6 +4749,8 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 
 	book_backend_class = E_BOOK_BACKEND_CLASS (klass);
 	book_backend_class->impl_get_backend_property = ebb_ews_get_backend_property;
+	book_backend_class->impl_start_view = ebb_ews_start_view;
+	book_backend_class->impl_stop_view = ebb_ews_stop_view;
 
 	backend_class = E_BACKEND_CLASS (klass);
 	backend_class->get_destination_address = ebb_ews_get_destination_address;
