@@ -9,6 +9,8 @@ set(DEPENDENCIES
 set(SOURCES
 	camel-m365-folder.c
 	camel-m365-folder.h
+	camel-m365-folder-search.c
+	camel-m365-folder-search.h
 	camel-m365-folder-summary.c
 	camel-m365-folder-summary.h
 	camel-m365-message-info.c

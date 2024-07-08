@@ -2472,6 +2472,54 @@ e_m365_connection_rename_mail_folder_sync (EM365Connection *cnc,
 	return success;
 }
 
+gboolean
+e_m365_connection_list_messages_sync (EM365Connection *cnc,
+				      const gchar *user_override, /* for which user, NULL to use the account user */
+				      const gchar *folder_id,
+				      const gchar *select, /* nullable - properties to select */
+				      const gchar *filter, /* nullable - filter which events to list */
+				      GSList **out_messages, /* EM365MailMessage * - the returned objects */
+				      GCancellable *cancellable,
+				      GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (out_messages != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"mailFolders",
+		folder_id,
+		"messages",
+		"$select", select,
+		"$filter", filter,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = out_messages;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/message-delta?view=graph-rest-1.0&tabs=http
    https://docs.microsoft.com/en-us/graph/api/contact-delta?view=graph-rest-1.0&tabs=http
    https://learn.microsoft.com/en-us/graph/api/orgcontact-delta?view=graph-rest-1.0&tabs=http

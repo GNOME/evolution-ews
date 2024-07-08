@@ -13,6 +13,7 @@
 #include "common/camel-m365-settings.h"
 #include "common/e-m365-connection.h"
 
+#include "camel-m365-folder-search.h"
 #include "camel-m365-folder-summary.h"
 #include "camel-m365-store.h"
 #include "camel-m365-store-summary.h"
@@ -292,6 +293,7 @@ m365_folder_exec_search (CamelFolder *folder,
 			 GError **error)
 {
 	CamelM365Folder *m365_folder;
+	CamelM365FolderSearch *m365_folder_search;
 
 	g_return_if_fail (CAMEL_IS_M365_FOLDER (folder));
 
@@ -299,13 +301,20 @@ m365_folder_exec_search (CamelFolder *folder,
 
 	LOCK_SEARCH (m365_folder);
 
+	m365_folder_search = CAMEL_M365_FOLDER_SEARCH (m365_folder->priv->search);
+
 	camel_folder_search_set_folder (m365_folder->priv->search, folder);
+	camel_m365_folder_search_clear_cached_results (m365_folder_search);
+	camel_m365_folder_search_set_cancellable_and_error (m365_folder_search, cancellable, error);
 
 	if (out_matches)
 		*out_matches = camel_folder_search_search (m365_folder->priv->search, expression, uids, cancellable, error);
 
 	if (out_count)
 		*out_count = camel_folder_search_count (m365_folder->priv->search, expression, cancellable, error);
+
+	camel_m365_folder_search_set_cancellable_and_error (m365_folder_search, NULL, NULL);
+	camel_m365_folder_search_clear_cached_results (m365_folder_search);
 
 	UNLOCK_SEARCH (m365_folder);
 }
@@ -1704,6 +1713,7 @@ camel_m365_folder_new (CamelStore *store,
 	CamelFolder *folder;
 	CamelFolderSummary *folder_summary;
 	CamelM365Folder *m365_folder;
+	CamelM365Store *m365_store;
 	CamelM365StoreSummary *m365_store_summary;
 	CamelSettings *settings;
 	gboolean filter_inbox = FALSE;
@@ -1716,7 +1726,8 @@ camel_m365_folder_new (CamelStore *store,
 	gchar *state_file;
 	gchar *folder_id;
 
-	m365_store_summary = camel_m365_store_ref_store_summary (CAMEL_M365_STORE (store));
+	m365_store = CAMEL_M365_STORE (store);
+	m365_store_summary = camel_m365_store_ref_store_summary (m365_store);
 	folder_id = camel_m365_store_summary_dup_folder_id_for_full_name (m365_store_summary, full_name);
 	g_clear_object (&m365_store_summary);
 
@@ -1796,7 +1807,7 @@ camel_m365_folder_new (CamelStore *store,
 		m365_folder->priv->cache, "expire-enabled",
 		G_BINDING_SYNC_CREATE);
 
-	if (m365_folder_has_inbox_type (CAMEL_M365_STORE (store), full_name)) {
+	if (m365_folder_has_inbox_type (m365_store, full_name)) {
 		if (filter_inbox)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 
@@ -1813,9 +1824,9 @@ camel_m365_folder_new (CamelStore *store,
 	if (add_folder_flags)
 		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
 
-	camel_m365_store_connect_folder_summary (CAMEL_M365_STORE (store), folder_summary);
+	camel_m365_store_connect_folder_summary (m365_store, folder_summary);
 
-	m365_folder->priv->search = camel_folder_search_new ();
+	m365_folder->priv->search = camel_m365_folder_search_new (m365_store);
 
 	return folder;
 }

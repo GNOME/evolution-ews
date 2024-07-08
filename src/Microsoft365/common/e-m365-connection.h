@@ -235,6 +235,15 @@ gboolean	e_m365_connection_rename_mail_folder_sync
 						 EM365MailFolder **out_mail_folder,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_list_messages_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *select, /* nullable - properties to select */
+						 const gchar *filter, /* nullable - filter which events to list */
+						 GSList **out_messages, /* EM365MailMessage * - the returned objects */
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_m365_connection_get_objects_delta_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
