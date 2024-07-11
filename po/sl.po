@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-06-10 15:04+0000\n"
-"PO-Revision-Date: 2024-06-11 17:15+0200\n"
+"POT-Creation-Date: 2024-07-11 15:17+0000\n"
+"PO-Revision-Date: 2024-07-12 00:11+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -33,22 +33,22 @@ msgstr "Spletna storitev Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2884
 msgid "Fetching contact photos…"
 msgstr "Pridobivanje fotografij stikov ..."
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4069
 msgid "Failed to update GAL:"
 msgstr "Posodabljanje GAL je spodletelo:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4236
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Ni mogoče shraniti seznama stikov. Podprt je le v okolju strežnika EWS 2010 "
 "ali novejše različice."
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4334
 msgid "Failed to set contact photo:"
 msgstr "Nastavljanje slike stika je spodletelo:"
 
@@ -91,7 +91,7 @@ msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Spletno srečanje lahko ustvarite le v glavnem uporabniškem koledarju."
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:4161
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1878
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1916
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Med prisotnimi ni mogoče najti uporabnika »%s«"
@@ -164,12 +164,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanja na mapi v načinu brez povezave"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3265
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1636
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1646
 msgid "Apply message _filters to this folder"
 msgstr "Uve_ljavi filtre sporočil v tej mapi"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3277
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1648
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1658
 msgid "Always check for _new mail in this folder"
 msgstr "Vedno preveri, ali je v tej mapi _nova pošta"
 
@@ -510,7 +510,7 @@ msgid "Exchange mail delivery via %s"
 msgstr "Dostava pošte Exchange preko %s"
 
 #: ../src/EWS/camel/camel-ews-transport.c:499
-#: ../src/Microsoft365/camel/camel-m365-transport.c:438
+#: ../src/Microsoft365/camel/camel-m365-transport.c:525
 msgid "Cannot send message with no From address"
 msgstr "Ni mogoče poslati sporočila brez naslova pošiljatelja"
 
@@ -520,12 +520,12 @@ msgstr ""
 "Strežnik Exchange ne podpira pošiljanja sporočil z več naslovi pošiljateljev"
 
 #: ../src/EWS/camel/camel-ews-transport.c:515
-#: ../src/Microsoft365/camel/camel-m365-transport.c:453
+#: ../src/Microsoft365/camel/camel-m365-transport.c:540
 msgid "Failed to read From address"
 msgstr "Branje iz naslova je spodletelo"
 
 #: ../src/EWS/camel/camel-ews-transport.c:525
-#: ../src/Microsoft365/camel/camel-m365-transport.c:463
+#: ../src/Microsoft365/camel/camel-m365-transport.c:550
 #, c-format
 msgid "Service not connected"
 msgstr "Storitev ni povezana"
@@ -1672,22 +1672,22 @@ msgstr "Stika organizacije ni mogoče odstraniti"
 msgid "Cannot remove user contact"
 msgstr "Stika uporabnika ni mogoče odstraniti"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:814
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:913
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
 msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Ločenih primerkov ni mogoče shraniti, ker niso podprti v okolju Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1106
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1144
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "V koledar okolja Microsoft 365 lahko shranite le preproste dogodke"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1119
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1157
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "V mapo Microsoft 365 z opravili lahko shranite le preprosta opravila"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1170
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1891
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1208
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1929
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
@@ -1744,20 +1744,20 @@ msgstr "Branje URI priponke je spodletelo"
 msgid "Failed to get inline attachment data"
 msgstr "Podatkov o prilogah v vrstici ni bilo mogoče pridobiti"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:423
-#: ../src/Microsoft365/camel/camel-m365-folder.c:519
-#: ../src/Microsoft365/camel/camel-m365-folder.c:921
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1282
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1420
+#: ../src/Microsoft365/camel/camel-m365-folder.c:432
+#: ../src/Microsoft365/camel/camel-m365-folder.c:528
+#: ../src/Microsoft365/camel/camel-m365-folder.c:931
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1292
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1430
 msgid "Invalid folder state (missing parent store)"
 msgstr "Neveljavno stanje mape (manjkajoča nadrejena shramba)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1724
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1736
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mapa »%s« ne ustreza nobeni znani mapi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1743
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1755
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ni mogoče naložiti povzetka za »%s«"
@@ -1813,11 +1813,15 @@ msgstr "Mapa »%s« ne obstaja."
 msgid "Mail delivery via Microsoft 365"
 msgstr "Dostava pošte preko Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:444
+#: ../src/Microsoft365/camel/camel-m365-transport.c:531
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr ""
 "Strežnik Microsoft 365 ne podpira pošiljanja sporočil z več naslovi "
 "pošiljateljev"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:558
+msgid "Failed to re-encode parts to base64: "
+msgstr "Delov ni bilo mogoče znova kodirati v base64: "
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
 msgid "OAuth2 (Microsoft 365)"
@@ -1885,7 +1889,7 @@ msgid "Failed to parse own Json data"
 msgstr "Razčlenjevanje lastnih podatkov Json je spodletelo"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:4811
+#: ../src/Microsoft365/common/e-m365-connection.c:4900
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Primerka ni mogoče najti pri »%s«"
