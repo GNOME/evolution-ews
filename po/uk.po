@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-06-10 15:04+0000\n"
-"PO-Revision-Date: 2024-06-10 21:43+0300\n"
+"POT-Creation-Date: 2024-07-11 15:17+0000\n"
+"PO-Revision-Date: 2024-07-11 21:33+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian\n"
 "Language: uk\n"
@@ -31,22 +31,22 @@ msgstr "Вебслужби Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2884
 msgid "Fetching contact photos…"
 msgstr "Отримуємо фотографії контактів…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4069
 msgid "Failed to update GAL:"
 msgstr "Не вдалося оновити GAL:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4236
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Не вдалося зберегти список контактів, підтримку передбачено лише у EWS "
 "Server 2010 та новіших версіях"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4334
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
@@ -90,7 +90,7 @@ msgstr ""
 "Нараду в інтернеті можна створювати лише у календарі основного користувача."
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:4161
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1878
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1916
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
@@ -163,12 +163,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3265
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1636
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1646
 msgid "Apply message _filters to this folder"
 msgstr "Застосувати _фільтри повідомлень до цієї теки"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3277
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1648
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1658
 msgid "Always check for _new mail in this folder"
 msgstr "Завжди перевіряти _нову пошту у цій теці"
 
@@ -523,7 +523,7 @@ msgid "Exchange mail delivery via %s"
 msgstr "Доставлення пошти Exchange за допомогою %s"
 
 #: ../src/EWS/camel/camel-ews-transport.c:499
-#: ../src/Microsoft365/camel/camel-m365-transport.c:438
+#: ../src/Microsoft365/camel/camel-m365-transport.c:525
 msgid "Cannot send message with no From address"
 msgstr "Неможливо надіслати повідомлення без адреси «Від»"
 
@@ -533,12 +533,12 @@ msgstr ""
 "Сервер Exchange не може надсилати повідомлення із декількома адресами «Від»"
 
 #: ../src/EWS/camel/camel-ews-transport.c:515
-#: ../src/Microsoft365/camel/camel-m365-transport.c:453
+#: ../src/Microsoft365/camel/camel-m365-transport.c:540
 msgid "Failed to read From address"
 msgstr "Не вдалося прочитати адресу «Від»"
 
 #: ../src/EWS/camel/camel-ews-transport.c:525
-#: ../src/Microsoft365/camel/camel-m365-transport.c:463
+#: ../src/Microsoft365/camel/camel-m365-transport.c:550
 #, c-format
 msgid "Service not connected"
 msgstr "Службу не з'єднано"
@@ -1683,32 +1683,29 @@ msgstr "Не можна вилучати організаційний конта
 msgid "Cannot remove user contact"
 msgstr "Не можна вилучати контакт користувача"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:814
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:913
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
 msgid ""
 "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Зберігання для від'єднаних екземплярів неможливе, оскільки його підтримки у "
 "Microsoft 365 не передбачено"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1106
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1144
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "У календарі Microsoft 365 можна зберігати лише прості події"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1119
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1157
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "У теці завдань Microsoft 365 можна зберігати лише прості завдання"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1170
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1891
-#| msgid ""
-#| "Cannot create meetings organized by other users in an Exchange Web "
-#| "Services calendar."
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1208
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1929
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
-"Неможливо створити зустрічі, які організовано іншими користувачами календарі"
-" Microsoft 365."
+"Неможливо створити зустрічі, які організовано іншими користувачами календарі "
+"Microsoft 365."
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
@@ -1760,20 +1757,20 @@ msgstr "Не вдалося прочитати адресу долучення"
 msgid "Failed to get inline attachment data"
 msgstr "Не вдалося отримати дані вбудованого долучення"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:423
-#: ../src/Microsoft365/camel/camel-m365-folder.c:519
-#: ../src/Microsoft365/camel/camel-m365-folder.c:921
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1282
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1420
+#: ../src/Microsoft365/camel/camel-m365-folder.c:432
+#: ../src/Microsoft365/camel/camel-m365-folder.c:528
+#: ../src/Microsoft365/camel/camel-m365-folder.c:931
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1292
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1430
 msgid "Invalid folder state (missing parent store)"
 msgstr "Некоректний стан теки (пропущено батьківське сховище)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1724
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1736
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Тека «%s» не відповідає жодній відомій теці"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1743
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1755
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Не вдалося завантажити резюме щодо «%s»"
@@ -1829,11 +1826,16 @@ msgstr "Теки «%s» не існує"
 msgid "Mail delivery via Microsoft 365"
 msgstr "Доставлення пошти за допомогою Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:444
+#: ../src/Microsoft365/camel/camel-m365-transport.c:531
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr ""
 "Сервер Microsoft 365 не може надсилати повідомлення із декількома адресами "
 "«Від»"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:558
+#| msgid "Failed to read attachment URI"
+msgid "Failed to re-encode parts to base64: "
+msgstr "Не вдалося перекодувати частини до base64: "
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
 msgid "OAuth2 (Microsoft 365)"
@@ -1894,7 +1896,7 @@ msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:4811
+#: ../src/Microsoft365/common/e-m365-connection.c:4900
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Не вдалося зберегти екземпляр у «%s»"
