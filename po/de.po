@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-03-18 10:25+0000\n"
-"PO-Revision-Date: 2024-03-20 21:08+0100\n"
+"POT-Creation-Date: 2024-05-27 19:33+0000\n"
+"PO-Revision-Date: 2024-06-04 12:12+0200\n"
 "Last-Translator: Jürgen Benvenuti <gastornis@posteo.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:71
@@ -113,7 +113,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Microsoft365-Hilfsquelle für Kalender »%s« kann nicht gefunden werden"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2268
 msgid "Invalid occurrence ID"
 msgstr "Ungültige Vorgangskennung"
 
@@ -170,12 +170,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ordner-Aktionen können im Offline-Modus nicht ausgeführt werden"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3265
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1636
 msgid "Apply message _filters to this folder"
 msgstr "Nachrichten_filter auf diesen Ordner anwenden"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3277
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1648
 msgid "Always check for _new mail in this folder"
 msgstr "Diesen Ordner immer auf neue Nachrichten prüfen"
 
@@ -1691,88 +1691,94 @@ msgstr "Organisationskontakt kann nicht geändert werden"
 msgid "Cannot modify user contact"
 msgstr "Benutzerkontakt kann nicht geändert werden"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2129
 msgid "Cannot remove organizational contact"
 msgstr "Organisationskontakt kann nicht entfernt werden"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2131
 msgid "Cannot remove user contact"
 msgstr "Benutzerkontakt kann nicht entfernt werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:814
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:913
+msgid "Cannot store detached instances, because not supported in Microsoft 365"
+msgstr ""
+"Abgekoppelte Instanzen können nicht gespeichert werden, da dies in Microsoft "
+"365 nicht unterstützt wird"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1023
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr ""
 "Nur einfache Ereignisse können im Microsoft 365-Kalender gespeichert werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1036
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Nur einfache Aufgaben können im Microsoft 365-Aufgabenordner gespeichert "
 "werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365-Kalender kann nicht mehr als eine Wiederholung speichern"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1715
 msgid ""
-"Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
-"properties"
+"Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
-"Microsoft 365-Kalender kann keine Komponente mit RDATE-, EXDATE- oder RRULE-"
+"Microsoft 365-Kalender kann keine Komponente mit RDATE- oder EXRULE-"
 "Eigenschaften speichern"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1825
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Unbekannte Wiederholungshäufigkeit (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1979
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Microsoft 365-Kalender kann nicht mehr als eine Ereigniserinnerung speichern"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2012
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365-Ereignis darf nur eine Erinnerung vor dem Ereignisstart haben"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2025
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365-Task darf nur eine Erinnerung mit absoluter Zeit haben"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2377
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365-Task darf keine Anlagen haben."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2480
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Anlage mit Adresse »%s« kann nicht gespeichert werden"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2482
 msgid "Failed to read attachment URI"
 msgstr "Fehler beim Lesen der Anlagen-Adresse"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2496
 msgid "Failed to get inline attachment data"
 msgstr "Fehler beim Abrufen von Inline-Anlagendaten"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:502
-#: ../src/Microsoft365/camel/camel-m365-folder.c:598
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
+#: ../src/Microsoft365/camel/camel-m365-folder.c:423
+#: ../src/Microsoft365/camel/camel-m365-folder.c:519
+#: ../src/Microsoft365/camel/camel-m365-folder.c:921
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1282
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1420
 msgid "Invalid folder state (missing parent store)"
 msgstr "Ungültiger Ordnerstatus (fehlender übergeordneter Speicher)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1724
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Ordner »%s« entspricht keinem bekannten Ordner"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1743
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Zusammenfassung für »%s« konnte nicht geladen werden"
@@ -1795,7 +1801,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "E-Mail-Empfang über Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1276
+#: ../src/Microsoft365/common/e-m365-connection.c:1365
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Fehlerhafte Adresse: »%s«"
@@ -1853,7 +1859,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:920
+#: ../src/Microsoft365/common/e-m365-connection.c:1009
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1864,7 +1870,7 @@ msgstr[1] ""
 "Der Exchange-Server ist ausgelastet. Warten auf einen erneuten Versuch (%d:"
 "%02d Minuten)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:926
+#: ../src/Microsoft365/common/e-m365-connection.c:1015
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1875,18 +1881,24 @@ msgstr[1] ""
 "Microsoft 365-Server ist ausgelastet und wartet auf einen erneuten Versuch "
 "(%d Sekunden)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1051
-#: ../src/Microsoft365/common/e-m365-connection.c:1078
+#: ../src/Microsoft365/common/e-m365-connection.c:1140
+#: ../src/Microsoft365/common/e-m365-connection.c:1167
 msgid "Invalid data"
 msgstr "Ungültige Daten"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1076
+#: ../src/Microsoft365/common/e-m365-connection.c:1165
 msgid "Operation was cancelled"
 msgstr "Die Operation wurde abgebrochen"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1767
+#: ../src/Microsoft365/common/e-m365-connection.c:1856
 msgid "Failed to parse own Json data"
 msgstr "Fehler beim Verarbeiten eigener JSON-Daten"
+
+#. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
+#: ../src/Microsoft365/common/e-m365-connection.c:4802
+#, c-format
+msgid "Cannot find instance at '%s'"
+msgstr "Instanz bei »%s« kann nicht gefunden werden"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "_Override Microsoft 365 OAuth2 settings"
