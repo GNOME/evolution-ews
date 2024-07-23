@@ -3,6 +3,8 @@ set(sources
 	e-cal-config-m365.h
 	e-book-config-m365.c
 	e-book-config-m365.h
+	e-m365-comp-editor-extension.c
+	e-m365-comp-editor-extension.h
 	e-mail-config-m365-backend.c
 	e-mail-config-m365-backend.h
 	module-m365-configuration.c
@@ -10,18 +12,21 @@ set(sources
 set(extra_deps)
 set(extra_defines)
 set(extra_cflags
+	${EVOLUTION_CALENDAR_CFLAGS}
 	${EVOLUTION_MAIL_CFLAGS}
 	${EVOLUTION_SHELL_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBEBOOK_CFLAGS}
 )
 set(extra_incdirs
+	${EVOLUTION_CALENDAR_INCLUDE_DIRS}
 	${EVOLUTION_MAIL_INCLUDE_DIRS}
 	${EVOLUTION_SHELL_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBEBOOK_INCLUDE_DIRS}
 )
 set(extra_ldflags
+	${EVOLUTION_CALENDAR_LDFLAGS}
 	${EVOLUTION_MAIL_LDFLAGS}
 	${EVOLUTION_SHELL_LDFLAGS}
 	${LIBECAL_LDFLAGS}
