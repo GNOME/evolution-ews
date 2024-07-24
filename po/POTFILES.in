@@ -2,6 +2,7 @@
 # Please keep this list in alphabetic order.
 [encoding: UTF-8]
 org.gnome.Evolution-ews.metainfo.xml.in
+src/common/e-ms-oapxbc-util.c
 src/EWS/addressbook/e-book-backend-ews.c
 src/EWS/calendar/e-cal-backend-ews.c
 src/EWS/calendar/e-cal-backend-ews-m365.c
