@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-07-11 15:17+0000\n"
-"PO-Revision-Date: 2024-07-12 00:11+0200\n"
+"POT-Creation-Date: 2024-07-26 07:35+0000\n"
+"PO-Revision-Date: 2024-07-26 11:33+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -32,6 +32,19 @@ msgstr "Spletna storitev Exchange"
 #: ../src/EWS/camel/camel-ews-provider.c:73
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
+
+#: ../src/common/e-ms-oapxbc-util.c:44
+msgid "Failed to create MS OAPXBC app: "
+msgstr "Ni uspelo ustvariti aplikacije MS OAPXBC: "
+
+#: ../src/common/e-ms-oapxbc-util.c:52
+msgid "Failed to get accounts: "
+msgstr "Pridobivanje računov je spodletelo: "
+
+#: ../src/common/e-ms-oapxbc-util.c:79
+#, c-format
+msgid "No account found for user '%s'"
+msgstr "Za uporabnika »%s« ni bilo mogoče najti računa"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:2884
 msgid "Fetching contact photos…"
@@ -675,10 +688,15 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Mape ni mogoče dodati, ker že obstaja kot »%s«"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:155
+#: ../src/EWS/common/e-oauth2-service-office365.c:158
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#: ../src/EWS/common/e-oauth2-service-office365.c:481
+#, c-format
+msgid "Failed to acquire PRT SSO cookie: %s"
+msgstr "Ni bilo mogoče pridobiti piškotka PRT SSO: %s"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:88
 msgid "Use only _primary contact email address"
@@ -701,10 +719,12 @@ msgid "Tries to look up for user photo"
 msgstr "Poskuša poiskati fotografijo uporabnika"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:205
 msgid "Online Meeting"
 msgstr "Spletni sestanek"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:207
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr ""
 "Ustvarjanje srečanja kot spletnega srečanja v glavnem uporabniškem koledarju"
@@ -1836,7 +1856,7 @@ msgstr ""
 "dostop OAuth 2.0"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:168
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
