@@ -9,6 +9,7 @@ install(FILES libcamelews.urls
 glib_mkenums(camel-ews-enumtypes camel-ews-enums.h CAMEL_EWS_ENUMTYPES_H)
 
 set(DEPENDENCIES
+	evolution-ews-common
 	evolution-ews
 )
 
@@ -60,6 +61,7 @@ target_include_directories(camelews-priv PUBLIC
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_BINARY_DIR}/src/EWS
 	${CMAKE_SOURCE_DIR}/src/EWS
+	${CMAKE_SOURCE_DIR}/src/common
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CAMEL_INCLUDE_DIRS}

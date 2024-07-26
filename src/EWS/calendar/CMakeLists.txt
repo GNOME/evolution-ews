@@ -5,6 +5,7 @@ install(FILES windowsZones.xml
 # helper static library
 
 set(DEPENDENCIES
+	evolution-ews-common
 	evolution-ews
 )
 
@@ -49,6 +50,7 @@ target_include_directories(ews-m365 PUBLIC
 	${CMAKE_SOURCE_DIR}/src/EWS
 	${CMAKE_BINARY_DIR}/src/Microsoft365
 	${CMAKE_SOURCE_DIR}/src/Microsoft365
+	${CMAKE_SOURCE_DIR}/src/common
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
 	${LIBEBACKEND_INCLUDE_DIRS}
@@ -69,6 +71,7 @@ target_link_libraries(ews-m365
 # the main module
 
 set(DEPENDENCIES
+	evolution-ews-common
 	evolution-ews
 	ews-m365
 )
@@ -113,6 +116,7 @@ target_include_directories(ecalbackendews PUBLIC
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_BINARY_DIR}/src/EWS
 	${CMAKE_SOURCE_DIR}/src/EWS
+	${CMAKE_SOURCE_DIR}/src/common
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
 	${LIBEBACKEND_INCLUDE_DIRS}

@@ -68,8 +68,6 @@ ICalTime *	e_cal_backend_ews_get_datetime_with_zone	(ETimezoneCache *timezone_ca
 								 ICalComponent *comp,
 								 ICalPropertyKind prop_kind,
 								 ICalTime * (* get_func) (ICalProperty *prop));
-ICalTimezone *	e_cal_backend_ews_get_configured_evolution_icaltimezone
-								(void);
 
 G_END_DECLS
 

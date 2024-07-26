@@ -21,6 +21,7 @@
 #include <libedata-cal/libedata-cal.h>
 #include <libecal/libecal.h>
 
+#include "e-ews-common-utils.h"
 #include "common/e-source-ews-folder.h"
 #include "common/e-ews-calendar-utils.h"
 #include "common/e-ews-connection-utils.h"
@@ -549,7 +550,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		}
 
 		if (item_type == E_EWS_ITEM_TYPE_TASK) {
-			ICalTimezone *user_timezone = e_cal_backend_ews_get_configured_evolution_icaltimezone ();
+			ICalTimezone *user_timezone = e_ews_common_utils_get_configured_icaltimezone ();
 			const gchar *percent_complete;
 
 			/*start date*/
@@ -3069,7 +3070,7 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		convert_data.old_comp = oldcomp;
 		convert_data.item_id = itemid;
 		convert_data.change_key = changekey;
-		convert_data.default_zone = e_cal_backend_ews_get_configured_evolution_icaltimezone ();
+		convert_data.default_zone = e_ews_common_utils_get_configured_icaltimezone ();
 
 		if (!(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) &&
 		    e_cal_component_has_attendees (comp) &&
@@ -3313,7 +3314,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		convert_data.connection = cbews->priv->cnc;
 		convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 		convert_data.icomp = icomp;
-		convert_data.default_zone = e_cal_backend_ews_get_configured_evolution_icaltimezone ();
+		convert_data.default_zone = e_ews_common_utils_get_configured_icaltimezone ();
 
 		success = e_ews_connection_create_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, "SaveOnly", send_meeting_invitations,
 			fid, e_cal_backend_ews_convert_calcomp_to_xml, &convert_data,
@@ -3703,7 +3704,7 @@ ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 	convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 	convert_data.icomp = subcomp;
 	convert_data.vcalendar = vcalendar;
-	convert_data.default_zone = e_cal_backend_ews_get_configured_evolution_icaltimezone ();
+	convert_data.default_zone = e_ews_common_utils_get_configured_icaltimezone ();
 
 	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
 
@@ -3720,261 +3721,6 @@ ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 		error);
 
 	e_ews_folder_id_free (fid);
-}
-
-static ECalComponentAttendee *
-get_attendee (GSList *attendees,
-	      const gchar *address,
-	      GHashTable *aliases)
-{
-	GSList *l;
-
-	if (!address)
-		return NULL;
-
-	for (l = attendees; l; l = l->next) {
-		ECalComponentAttendee *attendee = l->data;
-		const gchar *nomailto;
-
-		nomailto = e_cal_util_get_attendee_email (attendee);
-
-		if (!nomailto || !*nomailto)
-			continue;
-
-		if ((address && e_cal_util_email_addresses_equal (nomailto, address)) ||
-		    (aliases && g_hash_table_contains (aliases, nomailto))) {
-			return attendee;
-		}
-	}
-
-	return NULL;
-}
-
-static ECalComponentAttendee *
-get_attendee_if_attendee_sentby_is_user (GSList *attendees,
-					 const gchar *address,
-					 GHashTable *aliases)
-{
-	GSList *l;
-
-	for (l = attendees; l; l = l->next) {
-		ECalComponentAttendee *attendee = l->data;
-		const gchar *nomailto;
-
-		nomailto = e_cal_util_strip_mailto (e_cal_component_attendee_get_sentby (attendee));
-		if (!nomailto || !*nomailto)
-			continue;
-
-		if ((address && e_cal_util_email_addresses_equal (nomailto, address)) ||
-		    (aliases && g_hash_table_contains (aliases, nomailto))) {
-			return attendee;
-		}
-	}
-
-	return NULL;
-}
-
-/* This is adapted copy of itip_get_comp_attendee(), to avoid dependency
-   on the evolution code in the backend. */
-static gchar *
-ecb_ews_get_comp_attendee (ESourceRegistry *registry,
-			   ECalComponent *comp,
-			   ECalClient *cal_client)
-{
-	ESource *source;
-	GSList *attendees;
-	ECalComponentAttendee *attendee = NULL;
-	GList *list, *link;
-	const gchar *extension_name;
-	gchar *address = NULL;
-
-	attendees = e_cal_component_get_attendees (comp);
-
-	if (cal_client)
-		e_client_get_backend_property_sync (
-			E_CLIENT (cal_client),
-			E_CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS,
-			&address, NULL, NULL);
-
-	if (address != NULL && *address != '\0') {
-		attendee = get_attendee (attendees, address, NULL);
-
-		if (attendee) {
-			gchar *user_email;
-
-			user_email = g_strdup (e_cal_util_get_attendee_email (attendee));
-			g_slist_free_full (attendees, e_cal_component_attendee_free);
-			g_free (address);
-
-			return user_email;
-		}
-
-		attendee = get_attendee_if_attendee_sentby_is_user (attendees, address, NULL);
-
-		if (attendee != NULL) {
-			gchar *user_email;
-
-			user_email = g_strdup (e_cal_util_strip_mailto (e_cal_component_attendee_get_sentby (attendee)));
-			g_slist_free_full (attendees, e_cal_component_attendee_free);
-			g_free (address);
-
-			return user_email;
-		}
-	}
-
-	g_free (address);
-	address = NULL;
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_IDENTITY;
-	list = e_source_registry_list_enabled (registry, extension_name);
-
-	for (link = list; link != NULL; link = g_list_next (link)) {
-		ESourceMailIdentity *extension;
-		GHashTable *aliases;
-
-		source = E_SOURCE (link->data);
-
-		extension_name = E_SOURCE_EXTENSION_MAIL_IDENTITY;
-		extension = e_source_get_extension (source, extension_name);
-
-		address = e_source_mail_identity_dup_address (extension);
-
-		aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
-
-		attendee = get_attendee (attendees, address, aliases);
-		if (attendee != NULL) {
-			gchar *user_email;
-
-			user_email = g_strdup (e_cal_util_get_attendee_email (attendee));
-			g_slist_free_full (attendees, e_cal_component_attendee_free);
-
-			if (aliases)
-				g_hash_table_destroy (aliases);
-			g_free (address);
-
-			g_list_free_full (list, g_object_unref);
-
-			return user_email;
-		}
-
-		/* If the account was not found in the attendees list, then
-		 * let's check the 'sentby' fields of the attendees if we can
-		 * find the account. */
-		attendee = get_attendee_if_attendee_sentby_is_user (attendees, address, aliases);
-		if (attendee) {
-			gchar *user_email;
-
-			user_email = g_strdup (e_cal_util_strip_mailto (e_cal_component_attendee_get_sentby (attendee)));
-			g_slist_free_full (attendees, e_cal_component_attendee_free);
-
-			if (aliases)
-				g_hash_table_destroy (aliases);
-			g_free (address);
-
-			g_list_free_full (list, g_object_unref);
-
-			return user_email;
-		}
-
-		if (aliases)
-			g_hash_table_destroy (aliases);
-		g_free (address);
-	}
-
-	g_list_free_full (list, g_object_unref);
-
-	/* We could not find the attendee in the component, so just give
-	 * the default account address if the email address is not set in
-	 * the backend. */
-	/* FIXME do we have a better way ? */
-	e_cal_util_get_default_name_and_address (registry, NULL, &address);
-
-	g_slist_free_full (attendees, e_cal_component_attendee_free);
-
-	if (address == NULL)
-		address = g_strdup ("");
-
-	return address;
-}
-
-static ICalProperty *
-find_attendee (ICalComponent *icomp,
-	       const gchar *address,
-	       GHashTable *aliases)
-{
-	ICalProperty *prop;
-
-	if (address == NULL)
-		return NULL;
-
-	for (prop = i_cal_component_get_first_property (icomp, I_CAL_ATTENDEE_PROPERTY);
-	     prop != NULL;
-	     g_object_unref (prop), prop = i_cal_component_get_next_property (icomp, I_CAL_ATTENDEE_PROPERTY)) {
-		gchar *attendee;
-		gchar *text;
-
-		attendee = i_cal_property_get_value_as_string (prop);
-
-		 if (!attendee)
-			continue;
-
-		text = g_strdup (e_cal_util_strip_mailto (attendee));
-		text = g_strstrip (text);
-		if (text && ((!g_ascii_strcasecmp (address, text)) ||
-		    (aliases && g_hash_table_contains (aliases, text)))) {
-			g_free (text);
-			g_free (attendee);
-			break;
-		}
-		g_free (text);
-		g_free (attendee);
-	}
-
-	return prop;
-}
-
-static ICalProperty *
-find_attendee_if_sentby (ICalComponent *icomp,
-			 const gchar *address,
-			 GHashTable *aliases)
-{
-	ICalProperty *prop;
-
-	if (address == NULL)
-		return NULL;
-
-	for (prop = i_cal_component_get_first_property (icomp, I_CAL_ATTENDEE_PROPERTY);
-	     prop != NULL;
-	     g_object_unref (prop), prop = i_cal_component_get_next_property (icomp, I_CAL_ATTENDEE_PROPERTY)) {
-		ICalParameter *param;
-		const gchar *attendee_sentby;
-		gchar *text;
-
-		param = i_cal_property_get_first_parameter (prop, I_CAL_SENTBY_PARAMETER);
-		if (!param)
-			continue;
-
-		attendee_sentby = i_cal_parameter_get_sentby (param);
-
-		if (!attendee_sentby) {
-			g_object_unref (param);
-			continue;
-		}
-
-		text = g_strdup (e_cal_util_strip_mailto (attendee_sentby));
-		text = g_strstrip (text);
-
-		g_object_unref (param);
-
-		if (text && ((!g_ascii_strcasecmp (address, text)) ||
-		    (aliases && g_hash_table_contains (aliases, text)))) {
-			g_free (text);
-			break;
-		}
-		g_free (text);
-	}
-
-	return prop;
 }
 
 static void
@@ -4060,31 +3806,13 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		found = TRUE;
 		g_clear_object (&attendee);
 	} else if (!found) {
-		ESourceRegistry *registry;
-		ECalComponent *comp;
-
-		registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbews));
-		comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
-		if (comp) {
-			gchar *my_address;
-
-			my_address = ecb_ews_get_comp_attendee (registry, comp, NULL);
-
-			attendee = find_attendee (icomp, my_address, aliases);
-			if (!attendee)
-				attendee = find_attendee_if_sentby (icomp, my_address, aliases);
-
-			if (attendee) {
-				response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
-				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
-				found = TRUE;
-				g_clear_object (&attendee);
-			}
-
-			g_free (my_address);
+		attendee = e_ews_common_utils_find_attendee (E_CAL_BACKEND (cbews), icomp, aliases);
+		if (attendee) {
+			response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
+			ecb_ews_get_rsvp (attendee, out_rsvp_requested);
+			found = TRUE;
+			g_clear_object (&attendee);
 		}
-
-		g_clear_object (&comp);
 	}
 
 	if (found && !response) {
@@ -4199,7 +3927,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 				sub_convert_data.old_comp = comp; /* no change, just detach the instance */
 				sub_convert_data.item_id = item_id;
 				sub_convert_data.change_key = change_key;
-				sub_convert_data.default_zone = e_cal_backend_ews_get_configured_evolution_icaltimezone ();
+				sub_convert_data.default_zone = e_ews_common_utils_get_configured_icaltimezone ();
 
 				e_ews_connection_update_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
 					"AlwaysOverwrite", "SaveOnly", "SendToNone", cbews->priv->folder_id,

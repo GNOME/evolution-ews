@@ -10,6 +10,7 @@
 #include <camel/camel.h>
 #include <camel/camel-search-private.h>
 
+#include "e-ews-common-utils.h"
 #include "camel-m365-folder.h"
 #include "camel-m365-folder-search.h"
 
@@ -181,38 +182,6 @@ m365_folder_search_describe_criteria (const GPtrArray *words)
 	return g_string_free (desc, FALSE);
 }
 
-/* This is copy of e_str_replace_string(), to not depend on the evolution code
-   in the library code (and to not bring gtk+ into random processes). */
-static GString *
-m365_str_replace_string (const gchar *text,
-			 const gchar *before,
-			 const gchar *after)
-{
-	const gchar *p, *next;
-	GString *str;
-	gint find_len;
-
-	g_return_val_if_fail (text != NULL, NULL);
-	g_return_val_if_fail (before != NULL, NULL);
-	g_return_val_if_fail (*before, NULL);
-
-	find_len = strlen (before);
-	str = g_string_new ("");
-
-	p = text;
-	while (next = strstr (p, before), next) {
-		if (p < next)
-			g_string_append_len (str, p, next - p);
-
-		if (after && *after)
-			g_string_append (str, after);
-
-		p = next + find_len;
-	}
-
-	return g_string_append (str, p);
-}
-
 static CamelSExpResult *
 m365_folder_search_process_criteria (CamelSExp *sexp,
 				     CamelFolderSearch *search,
@@ -266,7 +235,7 @@ m365_folder_search_process_criteria (CamelSExp *sexp,
 					if (ii > 0)
 						g_string_append (expression, " and ");
 
-					word = m365_str_replace_string (g_ptr_array_index (words, ii), "'", "''");
+					word = e_ews_common_utils_str_replace_string (g_ptr_array_index (words, ii), "'", "''");
 
 					g_string_append (expression, "contains(body/content, '");
 					g_string_append (expression, word->str);

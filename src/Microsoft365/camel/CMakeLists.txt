@@ -3,6 +3,7 @@ install(FILES libcamelmicrosoft365.urls
 )
 
 set(DEPENDENCIES
+	evolution-ews-common
 	evolution-microsoft365
 )
 
@@ -51,6 +52,7 @@ target_include_directories(camelmicrosoft365 PUBLIC
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_BINARY_DIR}/src/Microsoft365
 	${CMAKE_SOURCE_DIR}/src/Microsoft365
+	${CMAKE_SOURCE_DIR}/src/common
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
 	${LIBEDATASERVER_INCLUDE_DIRS}
