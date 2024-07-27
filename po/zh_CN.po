@@ -6,9 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2023-11-10 10:41+0000\n"
-"PO-Revision-Date: 2023-12-01 10:44-0500\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
+"POT-Creation-Date: 2024-07-26 07:35+0000\n"
+"PO-Revision-Date: 2024-07-27 16:05-0400\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -30,59 +30,74 @@ msgstr "Exchange Web 服务"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "用于使用 Web 服务来访问 Exchange 服务器"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
+#: ../src/common/e-ms-oapxbc-util.c:44
+msgid "Failed to create MS OAPXBC app: "
+msgstr "创建 MS OAPXBC 应用失败："
+
+#: ../src/common/e-ms-oapxbc-util.c:52
+msgid "Failed to get accounts: "
+msgstr "获取账户失败："
+
+#: ../src/common/e-ms-oapxbc-util.c:79
+#, c-format
+msgid "No account found for user '%s'"
+msgstr "未找到用户“%s”对应的账户"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2884
 msgid "Fetching contact photos…"
 msgstr "正在获取联系人照片……"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4069
 msgid "Failed to update GAL:"
 msgstr "更新 GAL 失败："
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4236
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr "无法保存联系人列表，只支持 EWS Server 2010 或更高版本"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4334
 msgid "Failed to set contact photo:"
 msgstr "设置联系人照片失败："
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2035
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "空闲"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2038
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "忙碌"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2040
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "不在办公室"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "不确定"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2623
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2897
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
 msgid "Cannot determine EWS ItemId"
 msgstr "无法确定 EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3194
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4173
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr "无法在 Exchange Web 服务的日历上创建由其他用户组织的会议。"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3231
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "在线会议只能在主用户的日历中创建。"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:4120
+#: ../src/EWS/calendar/e-cal-backend-ews.c:4161
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1916
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "在与会者中无法找到用户“%s”"
@@ -98,7 +113,7 @@ msgstr "无法连接到服务器，请在您登入服务器后重复进行操作
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "无法找到日历“%s”的 Microsoft365 帮助来源。"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2209
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2268
 msgid "Invalid occurrence ID"
 msgstr "事件 ID 无效"
 
@@ -117,14 +132,14 @@ msgstr "无法由 mimecontent 生成解析器！"
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "无法解析会议请求的 mimecontent！"
 
-#: ../src/EWS/camel/camel-ews-folder.c:466
-#: ../src/EWS/camel/camel-ews-folder.c:679
+#: ../src/EWS/camel/camel-ews-folder.c:495
+#: ../src/EWS/camel/camel-ews-folder.c:708
 #, c-format
 msgid "Unable to create cache file"
 msgstr "无法创建缓存文件"
 
-#: ../src/EWS/camel/camel-ews-folder.c:796
-#: ../src/EWS/camel/camel-ews-folder.c:940
+#: ../src/EWS/camel/camel-ews-folder.c:825
+#: ../src/EWS/camel/camel-ews-folder.c:969
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "无法创建缓存路径“%s”：%s"
@@ -132,33 +147,33 @@ msgstr "无法创建缓存路径“%s”：%s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:954
+#: ../src/EWS/camel/camel-ews-folder.c:983
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "无法将消息缓存文件从“%s”移动到“%s”：%s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1893
+#: ../src/EWS/camel/camel-ews-folder.c:1922
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "无法加载 %s 汇总"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2370
+#: ../src/EWS/camel/camel-ews-folder.c:2399
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "正在刷新文件夹“%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2563
+#: ../src/EWS/camel/camel-ews-folder.c:2592
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "在离线模式时无法对该文件夹执行操作"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3236
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+#: ../src/EWS/camel/camel-ews-folder.c:3265
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1646
 msgid "Apply message _filters to this folder"
 msgstr "在该文件夹中应用消息过滤器(_F)"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3248
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+#: ../src/EWS/camel/camel-ews-folder.c:3277
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1658
 msgid "Always check for _new mail in this folder"
 msgstr "总是在该文件夹中检查新邮件(_N)"
 
@@ -483,7 +498,7 @@ msgid "Exchange mail delivery via %s"
 msgstr "通过 %s 投递 Exchange 邮件"
 
 #: ../src/EWS/camel/camel-ews-transport.c:499
-#: ../src/Microsoft365/camel/camel-m365-transport.c:438
+#: ../src/Microsoft365/camel/camel-m365-transport.c:525
 msgid "Cannot send message with no From address"
 msgstr "无法发送没有发件人地址的消息"
 
@@ -492,12 +507,12 @@ msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Exchange 服务器无法发送具有多个发件人地址的消息"
 
 #: ../src/EWS/camel/camel-ews-transport.c:515
-#: ../src/Microsoft365/camel/camel-m365-transport.c:453
+#: ../src/Microsoft365/camel/camel-m365-transport.c:540
 msgid "Failed to read From address"
 msgstr "读取发件人地址失败"
 
 #: ../src/EWS/camel/camel-ews-transport.c:525
-#: ../src/Microsoft365/camel/camel-m365-transport.c:463
+#: ../src/Microsoft365/camel/camel-m365-transport.c:550
 #, c-format
 msgid "Service not connected"
 msgstr "服务未连接"
@@ -547,55 +562,55 @@ msgstr[0] "Exchange 服务器正忙，正在等待重试（%d 秒）"
 msgid "Authentication failed"
 msgstr "认证失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2428
+#: ../src/EWS/common/e-ews-connection.c:2453
 msgid "Failed to parse autodiscover response XML"
 msgstr "解析自动发现响应 XML 失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2434
+#: ../src/EWS/common/e-ews-connection.c:2459
 msgid "Failed to find <Autodiscover> element"
 msgstr "查找 <Autodiscover> 元素失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2444
+#: ../src/EWS/common/e-ews-connection.c:2469
 msgid "Failed to find <Response> element"
 msgstr "查找 <Response> 元素失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2454
+#: ../src/EWS/common/e-ews-connection.c:2479
 msgid "Failed to find <Account> element"
 msgstr "查找 <Account> 元素失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2499
+#: ../src/EWS/common/e-ews-connection.c:2524
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "在自动发现响应中查找 <ASUrl> 失败"
 
-#: ../src/EWS/common/e-ews-connection.c:2575
+#: ../src/EWS/common/e-ews-connection.c:2600
 msgid "URL cannot be NULL"
 msgstr "URL 不能为空值"
 
-#: ../src/EWS/common/e-ews-connection.c:3000
+#: ../src/EWS/common/e-ews-connection.c:3025
 msgid "Email address is missing a domain part"
 msgstr "电子邮件地址缺少域部分"
 
-#: ../src/EWS/common/e-ews-connection.c:3209
+#: ../src/EWS/common/e-ews-connection.c:3234
 msgid "Failed to parse oab XML"
 msgstr "解析 oab XML 失败"
 
-#: ../src/EWS/common/e-ews-connection.c:3247
+#: ../src/EWS/common/e-ews-connection.c:3272
 msgid "Failed to find <OAB> element\n"
 msgstr "查找 <OAB> 元素失败\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8803
+#: ../src/EWS/common/e-ews-connection.c:8828
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "至少需要 Microsoft Exchange 2010 SP1 服务器"
 
-#: ../src/EWS/common/e-ews-connection.c:8904
+#: ../src/EWS/common/e-ews-connection.c:8929
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "至少需要 Microsoft Exchange 2013 服务器"
 
-#: ../src/EWS/common/e-ews-connection.c:9057
+#: ../src/EWS/common/e-ews-connection.c:9082
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "至少需要 Microsoft Exchange 2010 服务器"
 
-#: ../src/EWS/common/e-ews-connection.c:9197
+#: ../src/EWS/common/e-ews-connection.c:9222
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "至少需要 Microsoft Exchange 2007 SP1 服务器"
 
@@ -623,10 +638,15 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "无法添加文件夹，文件夹“%s”已存在"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:155
+#: ../src/EWS/common/e-oauth2-service-office365.c:158
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#: ../src/EWS/common/e-oauth2-service-office365.c:481
+#, c-format
+msgid "Failed to acquire PRT SSO cookie: %s"
+msgstr "获取 PRT 单点登录 cookie 失败：%s"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:88
 msgid "Use only _primary contact email address"
@@ -647,10 +667,12 @@ msgid "Tries to look up for user photo"
 msgstr "尝试查找用户照片"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:205
 msgid "Online Meeting"
 msgstr "在线会议"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:207
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr "在主用户日历中将会议创建为在线会议"
 
@@ -678,79 +700,79 @@ msgstr "OAB URL：%s"
 msgid "Requires password to continue."
 msgstr "需要密码才能继续。"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:562
+#: ../src/EWS/evolution/e-ews-config-utils.c:559
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:88
 msgid "Folder"
 msgstr "文件夹"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:572
+#: ../src/EWS/evolution/e-ews-config-utils.c:569
 msgid "Size"
 msgstr "大小"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:610
-#: ../src/EWS/evolution/e-ews-config-utils.c:615
+#: ../src/EWS/evolution/e-ews-config-utils.c:607
+#: ../src/EWS/evolution/e-ews-config-utils.c:612
 msgid "Unable to retrieve folder size information"
 msgstr "无法检索文件夹大小信息"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:744
+#: ../src/EWS/evolution/e-ews-config-utils.c:741
 msgid "Folder Sizes"
 msgstr "文件夹大小"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:747
+#: ../src/EWS/evolution/e-ews-config-utils.c:744
 msgid "_Close"
 msgstr "关闭(_C)"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:761
+#: ../src/EWS/evolution/e-ews-config-utils.c:758
 msgid "Fetching folder list…"
 msgstr "正在获取文件夹列表…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:824
-#: ../src/EWS/evolution/e-ews-config-utils.c:833
-#: ../src/EWS/evolution/e-ews-config-utils.c:842
-#: ../src/EWS/evolution/e-ews-config-utils.c:851
-#: ../src/EWS/evolution/e-ews-config-utils.c:860
+#: ../src/EWS/evolution/e-ews-config-utils.c:821
+#: ../src/EWS/evolution/e-ews-config-utils.c:830
+#: ../src/EWS/evolution/e-ews-config-utils.c:839
+#: ../src/EWS/evolution/e-ews-config-utils.c:848
+#: ../src/EWS/evolution/e-ews-config-utils.c:857
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:658
 msgid "Subscribe to folder of other EWS user…"
 msgstr "订阅其他 EWS 用户的文件夹…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1047
+#: ../src/EWS/evolution/e-ews-config-utils.c:1044
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "无法编辑文件夹“%s”的权限，选择其他文件夹。"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1128
+#: ../src/EWS/evolution/e-ews-config-utils.c:1125
 msgid "Folder Sizes…"
 msgstr "文件夹大小…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1135
+#: ../src/EWS/evolution/e-ews-config-utils.c:1132
 msgid "Subscribe to folder of other user…"
 msgstr "订阅其他用户的文件夹…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1144
-#: ../src/EWS/evolution/e-ews-config-utils.c:1502
-#: ../src/EWS/evolution/e-ews-config-utils.c:1540
-#: ../src/EWS/evolution/e-ews-config-utils.c:1578
-#: ../src/EWS/evolution/e-ews-config-utils.c:1616
+#: ../src/EWS/evolution/e-ews-config-utils.c:1141
+#: ../src/EWS/evolution/e-ews-config-utils.c:1499
+#: ../src/EWS/evolution/e-ews-config-utils.c:1537
+#: ../src/EWS/evolution/e-ews-config-utils.c:1575
+#: ../src/EWS/evolution/e-ews-config-utils.c:1613
 msgid "Permissions…"
 msgstr "权限…"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1146
+#: ../src/EWS/evolution/e-ews-config-utils.c:1143
 msgid "Edit EWS folder permissions"
 msgstr "编辑 EWS 文件夹权限"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1504
+#: ../src/EWS/evolution/e-ews-config-utils.c:1501
 msgid "Edit EWS calendar permissions"
 msgstr "编辑 EWS 日历权限"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1542
+#: ../src/EWS/evolution/e-ews-config-utils.c:1539
 msgid "Edit EWS tasks permissions"
 msgstr "编辑 EWS 任务权限"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1580
+#: ../src/EWS/evolution/e-ews-config-utils.c:1577
 msgid "Edit EWS memos permissions"
 msgstr "编辑 EWS 备忘录权限"
 
-#: ../src/EWS/evolution/e-ews-config-utils.c:1618
+#: ../src/EWS/evolution/e-ews-config-utils.c:1615
 msgid "Edit EWS contacts permissions"
 msgstr "编辑 EWS 联系人权限"
 
@@ -1152,28 +1174,32 @@ msgstr "搜索(_E)…"
 msgid "Authentication"
 msgstr "认证"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:341
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:338
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "使用协议版本 2.0（用于学校和组织账号）(_P)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
 msgid "_Override Office365 OAuth2 settings"
 msgstr "覆盖 Office365 OAuth2 设置(_O)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:345
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:423
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:349
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:427
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:214
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:292
 msgid "Help…"
 msgstr "帮助…"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:352
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:356
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:221
 msgid "Application I_D:"
 msgstr "应用程序 ID(_D)："
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:375
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
 msgid "There is not set any default application ID"
 msgstr "没有设置任何默认应用程序 ID"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:376
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:245
 #, c-format
 msgid "Default application ID is “%s”"
@@ -1183,87 +1209,83 @@ msgstr "默认应用程序 ID 为“%s”"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:380
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:384
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:249
 msgid "_Tenant ID:"
 msgstr "Tenant ID(_T)："
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:405
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:409
 msgid "Default tenant ID is “common“"
 msgstr "默认 tenant ID 为“common”"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:412
 #, c-format
 msgid "Default tenant ID is “%s”"
 msgstr "默认 tenant ID 为“%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:413
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:417
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:282
 msgid "_Advanced Settings"
 msgstr "高级设置(_A)"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:431
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:435
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:300
 msgid "_Endpoint host:"
 msgstr "端点主机(_E)："
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:454
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:458
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:461
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:323
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:326
 #, c-format
 msgid "Default endpoint host is “%s”"
 msgstr "默认端点主机为“%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:464
 msgid "Red_irect URI:"
 msgstr "重定向 URI(_I)："
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:483
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:487
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:490
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:352
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:355
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "默认重定向 URI 为“%s”"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:493
 msgid "Re_source URI:"
 msgstr "资源 URI(_S)："
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:512
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:516
 #, c-format
 msgid ""
 "Default resource URI is derived from the Host URL, or it can eventually fall "
 "back to “%s”."
 msgstr "默认资源 URI 派生自主机 URL，或者最终可以回退到“%s”。"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:518
-msgid "Use _protocol version 2.0 (for school and organization accounts)"
-msgstr "使用协议版本 2.0（用于学校和组织账号）(_P)"
-
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:783
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:772
 msgid "Host URL is not valid"
 msgstr "主机 URL 无效"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:776
 msgid "Host URL cannot be empty"
 msgstr "主机 URL 不能为空"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:798
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:787
 msgid "OAB URL is not valid"
 msgstr "OAB URL 无效"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:808
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:797
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:517
 msgid "User name cannot be empty"
 msgstr "用户名不能为空"
 
-#: ../src/EWS/evolution/e-mail-config-ews-backend.c:822
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:811
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:536
 msgid "Application ID cannot be empty"
 msgstr "应用程序 ID 不能为空"
@@ -1584,81 +1606,91 @@ msgstr "无法修改组织联系人"
 msgid "Cannot modify user contact"
 msgstr "无法修改用户联系人"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2120
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2129
 msgid "Cannot remove organizational contact"
 msgstr "无法移除组织联系人"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2122
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2131
 msgid "Cannot remove user contact"
 msgstr "无法移除用户联系人"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
+msgid "Cannot store detached instances, because not supported in Microsoft 365"
+msgstr "无法存储分离的实例，Microsoft 365 对此不支持"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1144
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "只能将简单事件存储到 Microsoft 365 日历中"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1157
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "只能将简单任务存储到 Microsoft 365 任务文件夹中"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1208
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1929
+msgid ""
+"Cannot create meetings organized by other users in a Microsoft 365 calendar."
+msgstr "无法在 Microsoft 365 日历上创建由其他用户组织的会议。"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 日历无法存储一个以上的重复"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1715
 msgid ""
-"Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
-"properties"
-msgstr "Microsoft 365 日历无法存储具有 RDATE、EXDATE 或 RRULE 属性的组件"
+"Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
+msgstr "Microsoft 365 日历无法存储具有 RDATE 或 EXRULE 属性的组件"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1825
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "未知重复频率（%d）"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
-msgid "Microsoft 365 calendar cannot store more that one event reminder"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1979
+msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr "Microsoft 365 日历无法存储一个以上的事件提醒"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2012
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr "Microsoft 365 事件在事件开始之前只能有一个提醒"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2025
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 任务只能有一个使用绝对时间的提醒"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2377
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 任务不能带有附件。"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2480
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "无法存储 URI 为“%s”的附件"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2482
 msgid "Failed to read attachment URI"
 msgstr "读取附件 URI 失败"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2496
 msgid "Failed to get inline attachment data"
 msgstr "获取内联附件数据失败"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:502
-#: ../src/Microsoft365/camel/camel-m365-folder.c:598
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
+#: ../src/Microsoft365/camel/camel-m365-folder.c:432
+#: ../src/Microsoft365/camel/camel-m365-folder.c:528
+#: ../src/Microsoft365/camel/camel-m365-folder.c:931
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1292
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1430
 msgid "Invalid folder state (missing parent store)"
 msgstr "文件夹状态无效（父存储丢失）"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1736
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "文件夹“%s”不对应于任何已知文件夹"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1755
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "无法加载“%s”的概要"
@@ -1681,7 +1713,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "通过 Microsoft 365 接收邮件"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1249
+#: ../src/Microsoft365/common/e-m365-connection.c:1374
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "格式错误的 URI：“%s”"
@@ -1714,9 +1746,13 @@ msgstr "文件夹“%s”不存在"
 msgid "Mail delivery via Microsoft 365"
 msgstr "通过 Microsoft 365 投递邮件"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:444
+#: ../src/Microsoft365/camel/camel-m365-transport.c:531
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Microsoft 365 服务器无法发送具有多个发件人地址的消息"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:558
+msgid "Failed to re-encode parts to base64: "
+msgstr "将部分使用 base64 重编码失败："
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
 msgid "OAuth2 (Microsoft 365)"
@@ -1729,35 +1765,41 @@ msgid ""
 msgstr "此选项会使用 OAuth 2.0 访问令牌来连接到 Microsoft 365 服务器"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:168
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:893
+#: ../src/Microsoft365/common/e-m365-connection.c:1018
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Microsoft 365 服务器正忙，正在等待重试（%d:%02d 分钟）"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:899
+#: ../src/Microsoft365/common/e-m365-connection.c:1024
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Microsoft 365 服务器正忙，正在等待重试（%d 秒）"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1024
-#: ../src/Microsoft365/common/e-m365-connection.c:1051
+#: ../src/Microsoft365/common/e-m365-connection.c:1149
+#: ../src/Microsoft365/common/e-m365-connection.c:1176
 msgid "Invalid data"
 msgstr "无效数据"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1049
+#: ../src/Microsoft365/common/e-m365-connection.c:1174
 msgid "Operation was cancelled"
 msgstr "操作已取消"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1740
+#: ../src/Microsoft365/common/e-m365-connection.c:1865
 msgid "Failed to parse own Json data"
 msgstr "解析自己的 Json 数据失败"
+
+#. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
+#: ../src/Microsoft365/common/e-m365-connection.c:4900
+#, c-format
+msgid "Cannot find instance at '%s'"
+msgstr "无法在“%s”找到实例"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:210
 msgid "_Override Microsoft 365 OAuth2 settings"
