@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-07-11 15:17+0000\n"
-"PO-Revision-Date: 2024-07-11 21:33+0300\n"
+"POT-Creation-Date: 2024-07-26 07:35+0000\n"
+"PO-Revision-Date: 2024-07-27 16:06+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
-"Language-Team: Ukrainian\n"
+"Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,6 +30,21 @@ msgstr "Вебслужби Exchange"
 #: ../src/EWS/camel/camel-ews-provider.c:73
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Для доступу до серверів Exchange за допомогою вебслужб"
+
+#: ../src/common/e-ms-oapxbc-util.c:44
+#| msgid "Failed to update GAL:"
+msgid "Failed to create MS OAPXBC app: "
+msgstr "Не вдалося створити програму MS OAPXBC: "
+
+#: ../src/common/e-ms-oapxbc-util.c:52
+#| msgid "Failed to set contact photo:"
+msgid "Failed to get accounts: "
+msgstr "Не вдалося отримати облікові записи: "
+
+#: ../src/common/e-ms-oapxbc-util.c:79
+#, c-format
+msgid "No account found for user '%s'"
+msgstr "Не знайдено облікового запису для користувача «%s»"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:2884
 msgid "Fetching contact photos…"
@@ -676,10 +691,15 @@ msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Не вдалося додати теку — тека вже існує як «%s»"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/EWS/common/e-oauth2-service-office365.c:155
+#: ../src/EWS/common/e-oauth2-service-office365.c:158
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#: ../src/EWS/common/e-oauth2-service-office365.c:481
+#, c-format
+msgid "Failed to acquire PRT SSO cookie: %s"
+msgstr "Не вдалося опитати щодо куки SSO PRT: %s"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:88
 msgid "Use only _primary contact email address"
@@ -702,10 +722,12 @@ msgid "Tries to look up for user photo"
 msgstr "Намагатися отримати фотографії користувачів"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:242
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:205
 msgid "Online Meeting"
 msgstr "Інтернет-нарада"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:244
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:207
 msgid "Create the meeting as an online meeting in the main user calendar"
 msgstr "Створити зустріч як інтернет-нараду у календарі основного користувача"
 
@@ -1570,8 +1592,7 @@ msgstr "Параметри отримання «За межами офісу»"
 #. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:110
 #, c-format
-msgid ""
-"%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
 msgstr ""
 "Надійшло запрошення від %s (%s) щодо перегляду його або її календаря "
 "Microsoft Exchange."
@@ -1649,8 +1670,7 @@ msgstr "Успішно оформлено підписку на теку кор�
 #: ../src/EWS/registry/e-ews-backend.c:1045
 #: ../src/Microsoft365/registry/e-m365-backend.c:686
 #, c-format
-msgid ""
-"Could not determine a suitable folder class for a new folder named “%s”"
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Не вдалося визначити належний клас тек для нової теки із назвою «%s»"
 
 #: ../src/EWS/registry/e-ews-backend.c:1133
@@ -1685,8 +1705,7 @@ msgstr "Не можна вилучати контакт користувача"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
-msgid ""
-"Cannot store detached instances, because not supported in Microsoft 365"
+msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Зберігання для від'єднаних екземплярів неможливе, оскільки його підтримки у "
 "Microsoft 365 не передбачено"
@@ -1833,7 +1852,6 @@ msgstr ""
 "«Від»"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:558
-#| msgid "Failed to read attachment URI"
 msgid "Failed to re-encode parts to base64: "
 msgstr "Не вдалося перекодувати частини до base64: "
 
@@ -1850,7 +1868,7 @@ msgstr ""
 "сервером Microsoft 365"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:168
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
@@ -1858,8 +1876,7 @@ msgstr "Microsoft365"
 #: ../src/Microsoft365/common/e-m365-connection.c:1018
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
-msgid_plural ""
-"Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
+msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 msgstr[1] ""
