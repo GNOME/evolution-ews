@@ -1,3 +1,23 @@
+Evolution-EWS 3.53.2 2024-08-02
+-------------------------------
+
+Bug Fixes:
+	I#276 - m365: Slow search with "Message contains"
+	I#277 - Contacts: Offline GAL not searched with "manual query" views
+	I#278 - m365: Workaround MIME send server's reencode with forced base64
+	M!11 - OAuth2: Implement prompter cookie interface for Intune support (Felix Moessbauer)
+
+Miscellaneous:
+	CI: Update dependencies in the Flatpak manifest
+	m365: Calendar: Ability to create Online meeting
+	Misc: Extract common code into a new shared library
+
+Translations:
+	Boyuan Yang (zh_CN)
+	Jürgen Benvenuti (de)
+	Martin (sl)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.53.1 2024-06-28
 -------------------------------
 
