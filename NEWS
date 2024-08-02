@@ -1,3 +1,10 @@
+Evolution-EWS 3.52.4 2024-08-02
+-------------------------------
+
+Bug Fixes:
+	I#277 - Contacts: Offline GAL not searched with "manual query" views
+	I#278 - m365: Workaround MIME send server's reencode with forced base64
+
 Evolution-EWS 3.52.3 2024-06-28
 -------------------------------
 
