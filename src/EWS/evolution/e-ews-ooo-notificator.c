@@ -128,7 +128,7 @@ e_ews_ooo_notificator_show_notification (EEwsOooNotificator *extension,
 	EShellView *view;
 	EShellContent *shell_content;
 	EEwsOooNotificatorDispatcherData *data;
-	GtkAction *action;
+	EUIAction *action;
 	const gchar *account_name;
 
 	data = g_slice_new0 (EEwsOooNotificatorDispatcherData);
@@ -146,12 +146,11 @@ e_ews_ooo_notificator_show_notification (EEwsOooNotificator *extension,
 			"response",
 			G_CALLBACK (e_ews_ooo_notificator_dismiss_cb), data);
 
-	action = gtk_action_new (
-			"ooo-unset-on-server",
-			_("Unset on Server"),
-			_("Unset the “Out of Office” status"),
-			GTK_STOCK_OK);
+	action = e_ui_action_new ("ews-ooo-notificator", "ooo-unset-on-server", NULL);
+	e_ui_action_set_label (action, _("Unset on Server"));
+	e_ui_action_set_tooltip (action, _("Unset the “Out of Office” status"));
 	e_alert_add_action (alert, action, GTK_RESPONSE_ACCEPT, FALSE);
+	g_object_unref (action);
 
 	g_hash_table_insert (extension->priv->alerts, g_object_ref (ews_store), g_object_ref_sink (alert));
 	e_alert_sink_submit_alert (E_ALERT_SINK (shell_content), alert);

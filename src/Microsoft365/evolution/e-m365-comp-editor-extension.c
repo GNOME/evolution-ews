@@ -70,7 +70,7 @@ e_m365_comp_editor_extension_target_client_changed_cb (ECompEditor *comp_editor)
 static void
 e_m365_comp_editor_extension_update_actions (ECompEditor *comp_editor)
 {
-	GtkAction *action;
+	EUIAction *action;
 	gboolean can_use = FALSE;
 
 	action = e_comp_editor_get_action (comp_editor, "m365-online-meeting");
@@ -109,19 +109,19 @@ e_m365_comp_editor_extension_update_actions (ECompEditor *comp_editor)
 		}
 	}
 
-	gtk_action_set_visible (action, can_use);
+	e_ui_action_set_visible (action, can_use);
 }
 
 static void
 e_m365_comp_editor_extension_fill_widgets_cb (ECompEditor *comp_editor,
 					      ICalComponent *component)
 {
-	GtkAction *action;
+	EUIAction *action;
 
 	action = e_comp_editor_get_action (comp_editor, "m365-online-meeting");
 
 	if (action)
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), FALSE);
+		e_ui_action_set_active (action, FALSE);
 
 	e_m365_comp_editor_extension_update_actions (comp_editor);
 }
@@ -130,12 +130,12 @@ static gboolean
 e_m365_comp_editor_extension_fill_component_cb (ECompEditor *comp_editor,
 						ICalComponent *component)
 {
-	GtkAction *action;
+	EUIAction *action;
 
 	action = e_comp_editor_get_action (comp_editor, "m365-online-meeting");
 
-	if (action && gtk_action_get_visible (action) &&
-	    gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
+	if (action && e_ui_action_get_visible (action) &&
+	    e_ui_action_get_active (action)) {
 		e_cal_util_component_set_x_property (component, "X-M365-ONLINE-MEETING", "1");
 	} else {
 		e_cal_util_component_remove_x_property (component, "X-M365-ONLINE-MEETING");
@@ -183,30 +183,34 @@ e_m365_comp_editor_extension_unmap_cb (ECompEditor *comp_editor,
 static void
 e_m365_comp_editor_extension_constructed (GObject *object)
 {
-	const gchar *ui =
-		"<ui>"
-		"  <menubar action='main-menu'>"
-		"    <menu action='options-menu'>"
-		"      <placeholder name='toggles'>"
-		"        <menuitem action='m365-online-meeting'/>"
-		"      </placeholder>"
-		"    </menu>"
-		"  </menubar>"
-		"  <toolbar name='main-toolbar'>"
-		"    <placeholder name='content'>\n"
-		"      <toolitem action='m365-online-meeting'/>\n"
-		"    </placeholder>"
-		"  </toolbar>"
-		"</ui>";
+	static const gchar *eui =
+		"<eui>"
+		  "<menu id='main-menu'>"
+		    "<submenu action='options-menu'>"
+		      "<placeholder id='toggles'>"
+			"<item action='m365-online-meeting'/>"
+		      "</placeholder>"
+		    "</submenu>"
+		  "</menu>"
+		  "<toolbar id='toolbar-with-headerbar'>"
+		    "<placeholder id='content'>"
+		      "<item action='m365-online-meeting'/>"
+		    "</placeholder>"
+		  "</toolbar>"
+		  "<toolbar id='toolbar-without-headerbar'>"
+		    "<placeholder id='content'>"
+		      "<item action='m365-online-meeting'/>"
+		    "</placeholder>"
+		  "</toolbar>"
+		"</eui>";
 
-	GtkToggleActionEntry entries[] = {
+	static const EUIActionEntry entries[] = {
 		{ "m365-online-meeting",
 		  "stock_people",
 		  N_("Online Meeting"),
 		  NULL,
 		  N_("Create the meeting as an online meeting in the main user calendar"),
-		  NULL,
-		  FALSE }
+		  NULL, NULL, "false", (EUIActionFunc) e_ui_action_set_state }
 	};
 	EExtensible *extensible;
 
@@ -217,21 +221,20 @@ e_m365_comp_editor_extension_constructed (GObject *object)
 
 	if (E_IS_COMP_EDITOR_EVENT (extensible)) {
 		ECompEditor *comp_editor = E_COMP_EDITOR (extensible);
-		GtkUIManager *ui_manager;
-		GtkActionGroup *action_group;
-		GError *error = NULL;
+		EUIManager *ui_manager;
+		EUIParser *ui_parser;
+		GError *local_error = NULL;
 
 		ui_manager = e_comp_editor_get_ui_manager (comp_editor);
-		action_group = e_comp_editor_get_action_group (comp_editor, "individual");
+		ui_parser = e_ui_manager_get_parser (ui_manager);
 
-		gtk_action_group_add_toggle_actions (action_group, entries, G_N_ELEMENTS (entries), comp_editor);
+		e_ui_manager_add_actions (ui_manager, "individual", GETTEXT_PACKAGE,
+			entries, G_N_ELEMENTS (entries), comp_editor);
 
-		gtk_ui_manager_add_ui_from_string (ui_manager, ui, -1, &error);
+		if (!e_ui_parser_merge_data (ui_parser, eui, -1, &local_error))
+			g_critical ("%s: Failed to merge .eui data: %s", G_STRFUNC, local_error ? local_error->message : "Unknown error");
 
-		if (error) {
-			g_critical ("%s: %s", G_STRFUNC, error->message);
-			g_error_free (error);
-		}
+		g_clear_error (&local_error);
 
 		g_signal_connect (comp_editor, "map",
 			G_CALLBACK (e_m365_comp_editor_extension_map_cb), NULL);

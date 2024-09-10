@@ -58,8 +58,7 @@ EEwsConnection	*	e_ews_config_utils_open_connection_for			(ESource *source,
 										 GError **perror);
 
 void			e_ews_config_utils_init_ui				(EShellView *shell_view,
-										 const gchar *ui_manager_id,
-										 gchar **ui_definition);
+										 const gchar *ui_manager_id);
 
 gboolean		e_ews_config_utils_is_online				(void);
 

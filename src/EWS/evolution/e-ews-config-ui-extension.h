@@ -17,9 +17,6 @@ typedef struct _EEwsConfigUIExtensionClass EEwsConfigUIExtensionClass;
 struct _EEwsConfigUIExtension
 {
 	EExtension parent;
-
-	guint current_ui_id;
-	GHashTable *ui_definitions;
 };
 
 struct _EEwsConfigUIExtensionClass
