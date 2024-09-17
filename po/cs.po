@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2024-03-17 12:03+0000\n"
-"PO-Revision-Date: 2024-04-24 11:34+0200\n"
+"POT-Creation-Date: 2024-08-20 21:50+0000\n"
+"PO-Revision-Date: 2024-09-17 18:10+0200\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.5\n"
 "X-DL-Team: cs\n"
 "X-DL-Module: evolution-ews\n"
 "X-DL-Branch: master\n"
@@ -37,22 +37,22 @@ msgstr "Webové služby Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Přístup k serverům Exchange pomocí webových služeb"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:2882
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2884
 msgid "Fetching contact photos…"
 msgstr "Získávají se fotky kontaktu…"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4067
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4069
 msgid "Failed to update GAL:"
 msgstr "Selhala aktualizace globálního seznamu adres:"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4234
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4236
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nelze uložit seznam kontaktů, je to podporováno jen na EWS Server 2010 nebo "
 "novějším"
 
-#: ../src/EWS/addressbook/e-book-backend-ews.c:4332
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4334
 msgid "Failed to set contact photo:"
 msgstr "Selhalo nastavení fotografie kontaktu:"
 
@@ -87,8 +87,8 @@ msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr ""
-"Nezdařilo se vytvořit v kalenáři Exchange Web Services schůzku organizovanou "
-"jiným uživatelem."
+"Nezdařilo se vytvořit v kalendáři Exchange Web Services schůzku "
+"organizovanou jiným uživatelem."
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3272
 msgid "Online meeting can be created only in the main user Calendar."
@@ -111,7 +111,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Nelze najít zdroj pomocníka Microsoft365 pro kalendář „%s“"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2266
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2268
 msgid "Invalid occurrence ID"
 msgstr "Neplatné ID výskytu"
 
@@ -166,12 +166,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu odpojení"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3265
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1715
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1637
 msgid "Apply message _filters to this folder"
 msgstr "Použít _filtr zpráv na tuto složku"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3277
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1727
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1649
 msgid "Always check for _new mail in this folder"
 msgstr "Vždy kontrolovat _novou poštu v této složce"
 
@@ -514,7 +514,7 @@ msgid "Exchange mail delivery via %s"
 msgstr "Doručování pošty Exchange přes server %s"
 
 #: ../src/EWS/camel/camel-ews-transport.c:499
-#: ../src/Microsoft365/camel/camel-m365-transport.c:438
+#: ../src/Microsoft365/camel/camel-m365-transport.c:525
 msgid "Cannot send message with no From address"
 msgstr "Nelze odeslat zprávu, která nemá uvedenu adresu „Od“"
 
@@ -523,12 +523,12 @@ msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Server Exchange nemůže odeslat zprávu s více adresami „Od“"
 
 #: ../src/EWS/camel/camel-ews-transport.c:515
-#: ../src/Microsoft365/camel/camel-m365-transport.c:453
+#: ../src/Microsoft365/camel/camel-m365-transport.c:540
 msgid "Failed to read From address"
 msgstr "Selhalo čtení adresy „Od“"
 
 #: ../src/EWS/camel/camel-ews-transport.c:525
-#: ../src/Microsoft365/camel/camel-m365-transport.c:463
+#: ../src/Microsoft365/camel/camel-m365-transport.c:550
 #, c-format
 msgid "Service not connected"
 msgstr "Služba není připojena"
@@ -1656,19 +1656,19 @@ msgstr "Nelze odstranit organizační kontakt"
 msgid "Cannot remove user contact"
 msgstr "Nelze odstranit kontakt uživatele"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:663
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1059
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Do kalendáře Microsoft 365 lze uložit pouze jednoduché události"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:676
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1072
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "Do složky s úkoly v Microsoft 365 lze uložit pouze jednoduché úkoly"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1645
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1707
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Kalendář Microsoft 365 si neumí pamatovat více než jedno opakování"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1654
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1715
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE, EXDATE or RRULE "
 "properties"
@@ -1676,57 +1676,57 @@ msgstr ""
 "Kalendář Microsoft 365 si neumí pamatovat komponenty s vlastnostmi RDATE, "
 "EXDATE a RRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1764
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1825
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Neznámá četnost opakování (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1918
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1979
 msgid "Microsoft 365 calendar cannot store more that one event reminder"
 msgstr ""
 "Kalendář Microsoft 365 si neumí pamatovat připomenutí více než jedné události"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2012
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Událost v Microsoft 365 může mít připomenutí pouze před začátkem události"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1964
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2025
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Úkol v Microsoft 365 může mít připomenutí pouze s absolutním časem"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2290
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2377
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Úkol v Microsoft 365 nemůže mít přílohy."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2393
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2480
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nezdařilo se uložit přílohu s adresou URI „%s“"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2395
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2482
 msgid "Failed to read attachment URI"
 msgstr "Selhalo čtení adresy URI přílohy"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2409
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2496
 msgid "Failed to get inline attachment data"
 msgstr "Selhalo získání dat vložené přílohy"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:502
-#: ../src/Microsoft365/camel/camel-m365-folder.c:598
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1000
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1361
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1499
+#: ../src/Microsoft365/camel/camel-m365-folder.c:423
+#: ../src/Microsoft365/camel/camel-m365-folder.c:519
+#: ../src/Microsoft365/camel/camel-m365-folder.c:922
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1283
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
 msgid "Invalid folder state (missing parent store)"
 msgstr "Neplatný stav složky (schází rodičovské úložiště)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1803
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1725
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Složka „%s“ neodpovídá žádné známé složce"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1822
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1744
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nezdařilo se načíst přehled pro složku „%s“"
@@ -1749,7 +1749,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Pošta přijatá přes Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1276
+#: ../src/Microsoft365/common/e-m365-connection.c:1361
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Poškozená adresa URI: „%s“"
@@ -1782,7 +1782,7 @@ msgstr "Složka „%s“ neexistuje"
 msgid "Mail delivery via Microsoft 365"
 msgstr "Doručování pošty přes Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-transport.c:444
+#: ../src/Microsoft365/camel/camel-m365-transport.c:531
 msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Server Microsoft 365 neumí odeslat zprávu s více adresami „Od“"
 
@@ -1804,7 +1804,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:920
+#: ../src/Microsoft365/common/e-m365-connection.c:1005
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1815,7 +1815,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Server Microsoft 365 je zaneprázdněný, čeká se na opakování (%d:%02d minut)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:926
+#: ../src/Microsoft365/common/e-m365-connection.c:1011
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1826,16 +1826,16 @@ msgstr[1] ""
 msgstr[2] ""
 "Server Microsoft 365 je zaneprázdněný, čeká se na opakování (%d sekund)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1051
-#: ../src/Microsoft365/common/e-m365-connection.c:1078
+#: ../src/Microsoft365/common/e-m365-connection.c:1136
+#: ../src/Microsoft365/common/e-m365-connection.c:1163
 msgid "Invalid data"
 msgstr "Neplatná data"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1076
+#: ../src/Microsoft365/common/e-m365-connection.c:1161
 msgid "Operation was cancelled"
 msgstr "Operace byla zrušena"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1767
+#: ../src/Microsoft365/common/e-m365-connection.c:1852
 msgid "Failed to parse own Json data"
 msgstr "Selhalo zpracování vlastních dat Json"
 
