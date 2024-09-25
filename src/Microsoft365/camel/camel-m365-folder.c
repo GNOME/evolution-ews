@@ -24,7 +24,9 @@
 #define M365_LOCAL_CACHE_PATH "cur"
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0 */
-#define M365_FETCH_SUMMARY_PROPERTIES	"categories," \
+#define M365_FETCH_SUMMARY_PROPERTIES	"|size|" /* special prefix */ \
+					"singleValueExtendedProperties," \
+					"categories," \
 					"ccRecipients," \
 					"changeKey," \
 					"flag," \
@@ -668,6 +670,16 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 
 	changed = m365_folder_merge_server_user_flags (mi, mail) || changed;
 
+	if (!camel_message_info_get_size (mi)) {
+		gint64 i64;
+
+		i64 = e_m365_json_get_integer_single_value_extended_property (mail, E_M365_PT_MESSAGE_SIZE_NAME, 0);
+		if (i64 > 0) {
+			camel_message_info_set_size (mi, (guint32) i64);
+			changed = TRUE;
+		}
+	}
+
 	return changed;
 }
 
@@ -717,6 +729,7 @@ m365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 	const gchar *ctmp;
 	time_t tt;
 	gchar *tmp;
+	gint64 i64;
 
 	g_return_val_if_fail (CAMEL_IS_FOLDER (folder), NULL);
 	g_return_val_if_fail (mail != NULL, NULL);
@@ -821,6 +834,10 @@ m365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 		camel_message_info_set_message_id (mi, message_id.id.id);
 	}
 
+	i64 = e_m365_json_get_integer_single_value_extended_property (mail, E_M365_PT_MESSAGE_SIZE_NAME, 0);
+	if (i64 > 0)
+		camel_message_info_set_size (mi, (guint32) i64);
+
 	camel_message_info_set_uid (mi, e_m365_mail_message_get_id (mail));
 
 	if (headers)
@@ -856,6 +873,8 @@ m365_folder_got_summary_messages_cb (EM365Connection *cnc,
 
 	if (!summary)
 		return FALSE;
+
+	camel_folder_freeze (sdd->folder);
 
 	for (link = (GSList *) results; link; link = g_slist_next (link)) {
 		EM365MailMessage *mail = link->data;
@@ -901,6 +920,8 @@ m365_folder_got_summary_messages_cb (EM365Connection *cnc,
 			}
 		}
 	}
+
+	camel_folder_thaw (sdd->folder);
 
 	return TRUE;
 }

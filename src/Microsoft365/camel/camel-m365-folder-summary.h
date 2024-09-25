@@ -11,7 +11,7 @@
 
 #include "camel-m365-message-info.h"
 
-#define CAMEL_M365_FOLDER_SUMMARY_VERSION (1)
+#define CAMEL_M365_FOLDER_SUMMARY_VERSION (2)
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_M365_FOLDER_SUMMARY \

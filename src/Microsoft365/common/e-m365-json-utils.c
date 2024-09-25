@@ -563,9 +563,9 @@ e_m365_json_add_nonempty_or_null_string_member (JsonBuilder *builder,
 		e_m365_json_add_null_member (builder, member_name);
 }
 
-const gchar *
-e_m365_json_get_string_single_value_extended_property (JsonObject *object,
-						       const gchar *property_name)
+static JsonObject * /* (transfer none) (nullable) */
+e_m365_json_get_single_value_extended_property (JsonObject *object,
+						const gchar *property_name)
 {
 	JsonArray *array;
 	guint ii, len;
@@ -581,15 +581,64 @@ e_m365_json_get_string_single_value_extended_property (JsonObject *object,
 
 	for (ii = 0; ii < len; ii++) {
 		JsonObject *item = json_array_get_object_element (array, ii);
+		const gchar *id;
 
 		if (!item)
 			break;
 
-		if (g_strcmp0 (e_m365_json_get_string_member (item, "id", NULL), property_name) == 0)
-			return e_m365_json_get_string_member (item, "value", NULL);
+		id = e_m365_json_get_string_member (item, "id", NULL);
+		if (!id)
+			continue;
+
+		if (g_ascii_strcasecmp (id, property_name) == 0)
+			return item;
 	}
 
 	return NULL;
+}
+
+const gchar *
+e_m365_json_get_string_single_value_extended_property (JsonObject *object,
+						       const gchar *property_name)
+{
+	JsonObject *item;
+
+	item = e_m365_json_get_single_value_extended_property (object, property_name);
+	if (item)
+		return e_m365_json_get_string_member (item, "value", NULL);
+
+	return NULL;
+}
+
+gint64
+e_m365_json_get_integer_single_value_extended_property (JsonObject *object,
+							const gchar *property_name,
+							gint64 default_value)
+{
+	JsonObject *item;
+
+	item = e_m365_json_get_single_value_extended_property (object, property_name);
+	if (item) {
+		gint64 value;
+
+		value = e_m365_json_get_int_member (item, "value", default_value);
+
+		if (!value || value == default_value) {
+			const gchar *str_value = e_m365_json_get_string_member (item, "value", NULL);
+
+			if (str_value) {
+				gchar *endptr = NULL;
+
+				value = g_ascii_strtoll (str_value, &endptr, 10);
+				if (!value && endptr == str_value)
+					value = default_value;
+			}
+		}
+
+		return value;
+	}
+
+	return default_value;
 }
 
 EM365Date

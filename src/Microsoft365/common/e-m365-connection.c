@@ -2555,6 +2555,7 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 		const gchar *kind_str = NULL;
 		const gchar *kind_path_str = NULL;
 		gchar *uri;
+		gboolean with_size;
 
 		switch (kind) {
 		case E_M365_FOLDER_KIND_CONTACTS:
@@ -2578,12 +2579,18 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 			break;
 		}
 
+		with_size = select && g_str_has_prefix (select, "|size|");
+		if (with_size)
+			select += 6;
+
 		uri = e_m365_connection_construct_uri (cnc, api_part == NULL, user_override, E_M365_API_V1_0, api_part,
 			kind_str,
 			folder_id,
 			kind_path_str,
 			"", "delta",
 			"$select", select,
+			with_size ? "expand" : NULL,
+			with_size ? "singleValueExtendedProperties($filter=id eq '" E_M365_PT_MESSAGE_SIZE_NAME "')" : NULL,
 			NULL);
 
 		message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
