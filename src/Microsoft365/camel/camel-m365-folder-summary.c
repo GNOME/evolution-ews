@@ -44,11 +44,15 @@ m365_folder_summary_header_load (CamelFolderSummary *summary,
 	if (part && *part && part[1])
 		delta_link = part + 1;
 
-	/* Do not call camel_m365_folder_summary_set_sync_state() here,
+	/* Do not call camel_m365_folder_summary_set_delta_link() here,
 	   to not mark the summary dirty after load. */
 	LOCK (m365_summary);
 
-	if (g_strcmp0 (m365_summary->priv->delta_link, delta_link) != 0) {
+	if (m365_summary->priv->version < 2) {
+		/* the list of summary items to fetch changed for version 2,
+		   thus use a new delta link, to reflect it */
+		g_clear_pointer (&m365_summary->priv->delta_link, g_free);
+	} else if (g_strcmp0 (m365_summary->priv->delta_link, delta_link) != 0) {
 		g_free (m365_summary->priv->delta_link);
 		m365_summary->priv->delta_link = g_strdup (delta_link);
 	}
