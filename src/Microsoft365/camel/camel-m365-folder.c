@@ -814,25 +814,8 @@ m365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 		camel_message_info_set_date_received (mi, (gint64) tt);
 
 	ctmp = e_m365_mail_message_get_internet_message_id (mail);
-
-	if (ctmp && *ctmp) {
-		GChecksum *checksum;
-		CamelSummaryMessageID message_id;
-		guint8 *digest;
-		gsize length;
-
-		length = g_checksum_type_get_length (G_CHECKSUM_MD5);
-		digest = g_alloca (length);
-
-		checksum = g_checksum_new (G_CHECKSUM_MD5);
-		g_checksum_update (checksum, (const guchar *) ctmp, -1);
-		g_checksum_get_digest (checksum, digest, &length);
-		g_checksum_free (checksum);
-
-		memcpy (message_id.id.hash, digest, sizeof (message_id.id.hash));
-
-		camel_message_info_set_message_id (mi, message_id.id.id);
-	}
+	if (ctmp && *ctmp)
+		camel_message_info_set_message_id (mi, camel_folder_search_util_hash_message_id (ctmp, TRUE));
 
 	i64 = e_m365_json_get_integer_single_value_extended_property (mail, E_M365_PT_MESSAGE_SIZE_NAME, 0);
 	if (i64 > 0)
