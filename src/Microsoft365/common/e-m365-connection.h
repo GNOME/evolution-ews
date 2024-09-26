@@ -100,6 +100,10 @@ gboolean	e_m365_connection_util_read_raw_data_cb
 						 gpointer user_data, /* CamelStream * */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_util_reencode_parts_to_base64_sync
+						(CamelMimePart *part, /* it can be a CamelMimeMessage */
+						 GCancellable *cancellable,
+						 GError **error);
 GType		e_m365_connection_get_type	(void) G_GNUC_CONST;
 
 EM365Connection *

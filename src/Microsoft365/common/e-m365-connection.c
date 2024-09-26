@@ -630,6 +630,97 @@ e_m365_connection_util_read_raw_data_cb (EM365Connection *cnc,
 	return success;
 }
 
+static gboolean
+m365_connection_util_reencode_one_part_to_base64_sync (CamelMimePart *part,
+						       CamelDataWrapper *containee,
+						       GCancellable *cancellable,
+						       GError **error)
+{
+	CamelStream *stream;
+	gboolean success;
+
+	if (!CAMEL_IS_MIME_MESSAGE (containee)) {
+		switch (camel_mime_part_get_encoding (part)) {
+		case CAMEL_TRANSFER_ENCODING_DEFAULT:
+		case CAMEL_TRANSFER_ENCODING_BASE64:
+			/* no need to re-encode */
+			return TRUE;
+		default:
+			break;
+		}
+	}
+
+	stream = camel_stream_mem_new ();
+	success = camel_data_wrapper_decode_to_stream_sync (containee, stream, cancellable, error) != -1;
+
+	if (success) {
+		GByteArray *byte_array;
+		CamelContentType *ct;
+		gchar *mime_type;
+
+		ct = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (part));
+		mime_type = camel_content_type_format (ct);
+		byte_array = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (stream));
+
+		camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+		camel_mime_part_set_content (part, (const gchar *) byte_array->data, (gint) byte_array->len, mime_type);
+
+		g_free (mime_type);
+	}
+
+	g_object_unref (stream);
+
+	return success;
+}
+
+/* The server re-encodes the HTML messages into base64, but as of 2024-07-11 they do not
+   decode quoted-printable encoding properly, thus re-encode to base64 instead.
+   The multipart/signed messages are not affected, luckily (it would break the signature anyway). */
+gboolean
+e_m365_connection_util_reencode_parts_to_base64_sync (CamelMimePart *part, /* it can be a CamelMimeMessage */
+						      GCancellable *cancellable,
+						      GError **error)
+{
+	CamelDataWrapper *containee;
+
+	if (CAMEL_IS_MULTIPART_SIGNED (part)) {
+		/* Microsoft does not re-encode these */
+		return TRUE;
+	}
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, error))
+		return FALSE;
+
+	containee = camel_medium_get_content (CAMEL_MEDIUM (part));
+
+	if (containee == NULL)
+		return TRUE;
+
+	/* using the object types is more accurate than using the mime/types */
+	if (CAMEL_IS_MULTIPART_SIGNED (containee)) {
+		/* Microsoft does not re-encode these */
+		return TRUE;
+	} else if (CAMEL_IS_MULTIPART (containee)) {
+		gint ii, parts;
+
+		parts = camel_multipart_get_number (CAMEL_MULTIPART (containee));
+		for (ii = 0; ii < parts; ii++) {
+			CamelMimePart *mpart = camel_multipart_get_part (CAMEL_MULTIPART (containee), ii);
+
+			if (!e_m365_connection_util_reencode_parts_to_base64_sync (mpart, cancellable, error))
+				return FALSE;
+		}
+	} else if (CAMEL_IS_MIME_MESSAGE (containee)) {
+		if (!e_m365_connection_util_reencode_parts_to_base64_sync (CAMEL_MIME_PART (containee), cancellable, error))
+			return FALSE;
+	} else {
+		if (!m365_connection_util_reencode_one_part_to_base64_sync (part, containee, cancellable, error))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 EM365Connection *
 e_m365_connection_new (ESource *source,
 		       CamelM365Settings *settings)
@@ -2725,10 +2816,7 @@ e_m365_connection_upload_mail_message_sync (EM365Connection *cnc,
 					    GError **error)
 {
 	SoupMessage *message;
-	GInputStream *input_stream;
-	CamelStream *mem_stream, *filter_stream;
-	CamelMimeFilter *base64_filter;
-	GByteArray *byte_array;
+	CamelStream *mem_stream;
 	gboolean success;
 	gchar *uri;
 
@@ -2753,29 +2841,29 @@ e_m365_connection_upload_mail_message_sync (EM365Connection *cnc,
 	g_free (uri);
 
 	mem_stream = camel_stream_mem_new ();
-	filter_stream = camel_stream_filter_new (mem_stream);
-	base64_filter = camel_mime_filter_basic_new (CAMEL_MIME_FILTER_BASIC_BASE64_ENC);
-	camel_stream_filter_add (CAMEL_STREAM_FILTER (filter_stream), base64_filter);
-	g_clear_object (&base64_filter);
 
-	if (camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (mime_message), filter_stream, cancellable, error) == -1) {
-		g_clear_object (&filter_stream);
-		g_clear_object (&mem_stream);
-		g_clear_object (&message);
+	success = camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (mime_message), mem_stream, cancellable, error) >= 0 &&
+		  camel_stream_flush (mem_stream, cancellable, error) != -1;
 
-		return FALSE;
+	if (success) {
+		GInputStream *input_stream;
+		GByteArray *mime_data;
+		gchar *base64_data;
+		gssize base64_data_len;
+
+		mime_data = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem_stream));
+		base64_data = g_base64_encode (mime_data->data, mime_data->len);
+		base64_data_len = strlen (base64_data);
+
+		input_stream = g_memory_input_stream_new_from_data (g_steal_pointer (&base64_data), base64_data_len, g_free);
+
+		e_soup_session_util_set_message_request_body (message, "text/plain", input_stream, base64_data_len);
+
+		success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_message, cancellable, error);
+
+		g_clear_object (&input_stream);
 	}
 
-	byte_array = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem_stream));
-
-	input_stream = g_memory_input_stream_new_from_data (byte_array->data, byte_array->len, NULL);
-
-	e_soup_session_util_set_message_request_body (message, "text/plain", input_stream, byte_array->len);
-
-	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_message, cancellable, error);
-
-	g_clear_object (&input_stream);
-	g_clear_object (&filter_stream);
 	g_clear_object (&mem_stream);
 	g_clear_object (&message);
 
