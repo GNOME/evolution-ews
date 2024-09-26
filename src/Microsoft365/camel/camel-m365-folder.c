@@ -26,6 +26,7 @@
 /* https://docs.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0 */
 #define M365_FETCH_SUMMARY_PROPERTIES	"|size|" /* special prefix */ \
 					"singleValueExtendedProperties," \
+					"bodyPreview," \
 					"categories," \
 					"ccRecipients," \
 					"changeKey," \
@@ -680,6 +681,16 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 		}
 	}
 
+	if (!camel_message_info_get_preview (mi)) {
+		const gchar *ctmp;
+
+		ctmp = e_m365_mail_message_get_body_preview (mail);
+		if (ctmp && *ctmp) {
+			camel_message_info_set_preview (mi, ctmp);
+			changed = TRUE;
+		}
+	}
+
 	return changed;
 }
 
@@ -825,6 +836,10 @@ m365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 
 	if (headers)
 		camel_message_info_take_headers (mi, headers);
+
+	ctmp = e_m365_mail_message_get_body_preview (mail);
+	if (ctmp && *ctmp)
+		camel_message_info_set_preview (mi, ctmp);
 
 	camel_message_info_set_abort_notifications (mi, FALSE);
 
