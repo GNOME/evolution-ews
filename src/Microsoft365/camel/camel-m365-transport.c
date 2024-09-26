@@ -255,94 +255,6 @@ m365_transport_get_name (CamelService *service,
 }
 
 static gboolean
-m365_transport_reencode_one_part_to_base64_sync (CamelMimePart *part,
-						 CamelDataWrapper *containee,
-						 GCancellable *cancellable,
-						 GError **error)
-{
-	CamelStream *stream;
-	gboolean success;
-
-	if (!CAMEL_IS_MIME_MESSAGE (containee)) {
-		switch (camel_mime_part_get_encoding (part)) {
-		case CAMEL_TRANSFER_ENCODING_DEFAULT:
-		case CAMEL_TRANSFER_ENCODING_BASE64:
-			/* no need to re-encode */
-			return TRUE;
-		default:
-			break;
-		}
-	}
-
-	stream = camel_stream_mem_new ();
-	success = camel_data_wrapper_decode_to_stream_sync (containee, stream, cancellable, error) != -1;
-
-	if (success) {
-		GByteArray *byte_array;
-		CamelContentType *ct;
-		gchar *mime_type;
-
-		ct = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (part));
-		mime_type = camel_content_type_format (ct);
-		byte_array = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (stream));
-
-		camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
-		camel_mime_part_set_content (part, (const gchar *) byte_array->data, (gint) byte_array->len, mime_type);
-
-		g_free (mime_type);
-	}
-
-	g_object_unref (stream);
-
-	return success;
-}
-
-static gboolean
-m365_transport_reencode_parts_to_base64_sync (CamelMimePart *part,
-					      GCancellable *cancellable,
-					      GError **error)
-{
-	CamelDataWrapper *containee;
-
-	if (CAMEL_IS_MULTIPART_SIGNED (part)) {
-		/* Microsoft does not re-encode these */
-		return TRUE;
-	}
-
-	if (g_cancellable_set_error_if_cancelled (cancellable, error))
-		return FALSE;
-
-	containee = camel_medium_get_content (CAMEL_MEDIUM (part));
-
-	if (containee == NULL)
-		return TRUE;
-
-	/* using the object types is more accurate than using the mime/types */
-	if (CAMEL_IS_MULTIPART_SIGNED (containee)) {
-		/* Microsoft does not re-encode these */
-		return TRUE;
-	} else if (CAMEL_IS_MULTIPART (containee)) {
-		gint ii, parts;
-
-		parts = camel_multipart_get_number (CAMEL_MULTIPART (containee));
-		for (ii = 0; ii < parts; ii++) {
-			CamelMimePart *mpart = camel_multipart_get_part (CAMEL_MULTIPART (containee), ii);
-
-			if (!m365_transport_reencode_parts_to_base64_sync (mpart, cancellable, error))
-				return FALSE;
-		}
-	} else if (CAMEL_IS_MIME_MESSAGE (containee)) {
-		if (!m365_transport_reencode_parts_to_base64_sync (CAMEL_MIME_PART (containee), cancellable, error))
-			return FALSE;
-	} else {
-		if (!m365_transport_reencode_one_part_to_base64_sync (part, containee, cancellable, error))
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-static gboolean
 m365_send_to_sync (CamelTransport *transport,
 		   CamelMimeMessage *message,
 		   CamelAddress *from,
@@ -400,7 +312,7 @@ m365_send_to_sync (CamelTransport *transport,
 	/* The server re-encodes the HTML messages into base64, but as of 2024-07-11 they do not
 	   decode quoted-printable encoding properly, thus re-encode to base64 instead.
 	   The multipart/signed messages are not affected, luckily (it would break the signature anyway). */
-	if (!m365_transport_reencode_parts_to_base64_sync (CAMEL_MIME_PART (message), cancellable, error)) {
+	if (!e_m365_connection_util_reencode_parts_to_base64_sync (CAMEL_MIME_PART (message), cancellable, error)) {
 		g_prefix_error (error, "%s", _("Failed to re-encode parts to base64: "));
 		g_object_unref (cnc);
 		return FALSE;

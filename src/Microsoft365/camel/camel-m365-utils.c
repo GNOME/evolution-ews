@@ -6,6 +6,8 @@
 
 #include "evolution-ews-config.h"
 
+#include <glib/gi18n-lib.h>
+
 #include "camel-m365-utils.h"
 
 /* Unref with g_object_unref() when done with it */
@@ -939,7 +941,12 @@ camel_m365_utils_create_message_sync (EM365Connection *cnc,
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (CAMEL_IS_MIME_MESSAGE (message), FALSE);
 
-	/* Cannot upload message directly to the folder_id, because the server returns:
+	if (!e_m365_connection_util_reencode_parts_to_base64_sync (CAMEL_MIME_PART (message), cancellable, error)) {
+		g_prefix_error (error, "%s", _("Failed to re-encode parts to base64: "));
+		return FALSE;
+	}
+
+	/* As of 2024-09-26, cannot upload message directly to the folder_id, because the server returns:
 	   {"error":{"code":"UnableToDeserializePostBody","message":"were unable to deserialize "}}
 	   thus upload to the Drafts folder and then move the message to the right place. */
 	success = e_m365_connection_upload_mail_message_sync (cnc, NULL, NULL, message, &appended_message, cancellable, error);
