@@ -1247,8 +1247,11 @@ ecb_m365_save_component_sync (ECalMetaBackend *meta_backend,
 		g_clear_object (&builder);
 	}
 
-	if (instances->next && *out_new_uid && success)
+	if (*out_new_uid && success && (
+	    e_cal_util_component_has_recurrences (new_comp) ||
+	    e_cal_util_component_is_instance (new_comp))) {
 		success = ecb_m365_save_recurrence_changes_locked_sync (cbm365, instances, *out_new_uid, comp_in_extra, cancellable, error);
+	}
 
 	UNLOCK (cbm365);
 
