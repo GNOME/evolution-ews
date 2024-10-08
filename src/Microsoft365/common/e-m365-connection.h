@@ -53,6 +53,7 @@ typedef enum _EM365ApiVersion {
 
 typedef enum {
 	E_M365_ERROR_ID_MALFORMED,
+	E_M365_ERROR_SYNC_STATE_NOT_FOUND,
 	E_M365_ERROR_ITEM_NOT_FOUND
 } EM365Error;
 
