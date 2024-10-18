@@ -1,3 +1,20 @@
+Evolution-EWS 3.54.1 2024-10-18
+-------------------------------
+
+Bug Fixes:
+	I#281 - m365: Mails do not have set size in summary
+	I#282 - m365: Fails to save a message in the Drafts folder
+	I#284 - m365: Cannot delete instance of a recurring event
+
+Miscellaneous:
+	m365: Camel: Correct message ID calculation for folder summary
+	m365: Read 'bodyPreview' for mail messages
+	m365: Handle SyncStateNotFound error
+
+Translations:
+	Jürgen Benvenuti (de)
+	Juliano de Souza Camargo (pt_BR)
+
 Evolution-EWS 3.54.0 2024-09-13
 -------------------------------
 
