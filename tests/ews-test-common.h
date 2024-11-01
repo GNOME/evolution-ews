@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * SPDX-FileCopyrightText: (C) 2013 Red Hat, Inc. (www.redhat.com)
  * SPDX-FileContributor: Fabiano Fidêncio <fidencio@redhat.com>

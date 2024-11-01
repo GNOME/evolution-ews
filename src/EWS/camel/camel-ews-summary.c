@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * SPDX-FileCopyrightText: (C) 1999-2008 Novell, Inc. (www.novell.com)
  * SPDX-FileContributor: parthasrathi susarla <sparthasrathi@novell.com>

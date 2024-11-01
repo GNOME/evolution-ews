@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * SPDX-FileCopyrightText: (C) 2011 Intel Corporation
  * SPDX-FileContributor: David Woodhouse <dwmw2@infradead.org>
