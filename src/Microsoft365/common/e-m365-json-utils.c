@@ -112,15 +112,15 @@ static struct _color_map {
 	EM365CalendarColorType value;
 } color_map[] = {
 	{ "auto",	NULL,		E_M365_CALENDAR_COLOR_AUTO },
-	{ "lightBlue",	"#0078d4",	E_M365_CALENDAR_COLOR_LIGHT_BLUE },
-	{ "lightGreen",	"#b67dfa",	E_M365_CALENDAR_COLOR_LIGHT_GREEN },
-	{ "lightOrange","#25c4fe",	E_M365_CALENDAR_COLOR_LIGHT_ORANGE },
-	{ "lightGray",	"#968681",	E_M365_CALENDAR_COLOR_LIGHT_GRAY },
-	{ "lightYellow","#ffc699",	E_M365_CALENDAR_COLOR_LIGHT_YELLOW }, /* Navy in web UI */
-	{ "lightTeal",	"#fc7c78",	E_M365_CALENDAR_COLOR_LIGHT_TEAL },
-	{ "lightPink",	"#1cff73",	E_M365_CALENDAR_COLOR_LIGHT_PINK },
-	{ "lightBrown",	"#8bb256",	E_M365_CALENDAR_COLOR_LIGHT_BROWN }, /* Purple in web UI */
-	{ "lightRed",	"#3af0e0",	E_M365_CALENDAR_COLOR_LIGHT_RED },
+	{ "lightBlue",	"#0099bc",	E_M365_CALENDAR_COLOR_LIGHT_BLUE },
+	{ "lightGreen",	"#00cc6a",	E_M365_CALENDAR_COLOR_LIGHT_GREEN },
+	{ "lightOrange","#f7630c",	E_M365_CALENDAR_COLOR_LIGHT_ORANGE },
+	{ "lightGray",	"#69797e",	E_M365_CALENDAR_COLOR_LIGHT_GRAY },
+	{ "lightYellow","#fde300",	E_M365_CALENDAR_COLOR_LIGHT_YELLOW },
+	{ "lightTeal",	"#038387",	E_M365_CALENDAR_COLOR_LIGHT_TEAL },
+	{ "lightPink",	"#bf0077",	E_M365_CALENDAR_COLOR_LIGHT_PINK },
+	{ "lightBrown",	"#8e562e",	E_M365_CALENDAR_COLOR_LIGHT_BROWN },
+	{ "lightRed",	"#a4262c",	E_M365_CALENDAR_COLOR_LIGHT_RED },
 	{ "maxColor",	NULL,		E_M365_CALENDAR_COLOR_MAX_COLOR }
 };
 
@@ -2636,6 +2636,12 @@ e_m365_calendar_add_color (JsonBuilder *builder,
 
 	if (name && g_ascii_strcasecmp (name, "maxColor") != 0)
 		e_m365_json_add_string_member (builder, "color", name);
+}
+
+const gchar *
+e_m365_calendar_get_hex_color (EM365Calendar *calendar)
+{
+	return e_m365_json_get_string_member (calendar, "hexColor", NULL);
 }
 
 EM365OnlineMeetingProviderType

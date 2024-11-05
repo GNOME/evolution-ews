@@ -729,6 +729,7 @@ EM365CalendarColorType
 		e_m365_calendar_get_color		(EM365Calendar *calendar);
 void		e_m365_calendar_add_color		(JsonBuilder *builder,
 							 EM365CalendarColorType color);
+const gchar *	e_m365_calendar_get_hex_color		(EM365Calendar *calendar);
 EM365OnlineMeetingProviderType
 		e_m365_calendar_get_default_online_meeting_provider
 							(EM365Calendar *calendar);

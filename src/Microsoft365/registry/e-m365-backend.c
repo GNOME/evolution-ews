@@ -126,7 +126,15 @@ m365_backend_update_resource (EM365Backend *m365_backend,
 		source = e_collection_backend_new_child (E_COLLECTION_BACKEND (m365_backend), id);
 
 	if (source) {
-		e_source_set_display_name (source, display_name);
+		ESourceM365Folder *folder_ext;
+
+		folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_M365_FOLDER);
+
+		if (is_new || !e_source_m365_folder_get_display_name (folder_ext) ||
+		    g_strcmp0 (e_source_m365_folder_get_display_name (folder_ext), e_source_get_display_name (source)) == 0)
+			e_source_set_display_name (source, display_name);
+
+		e_source_m365_folder_set_display_name (folder_ext, display_name);
 
 		if (calendar_color && g_ascii_strcasecmp (calendar_color, "auto") != 0 && (
 		    g_strcmp0 (extension_name, E_SOURCE_EXTENSION_CALENDAR) == 0 ||
@@ -135,7 +143,13 @@ m365_backend_update_resource (EM365Backend *m365_backend,
 			ESourceSelectable *selectable;
 
 			selectable = e_source_get_extension (source, extension_name);
-			e_source_selectable_set_color (selectable, calendar_color);
+
+			if (is_new || !e_source_m365_folder_get_color (folder_ext) ||
+			    g_strcmp0 (e_source_m365_folder_get_color (folder_ext), e_source_selectable_get_color (selectable)) == 0) {
+				e_source_selectable_set_color (selectable, calendar_color);
+			}
+
+			e_source_m365_folder_set_color (folder_ext, calendar_color);
 		}
 
 		if (is_new) {
@@ -166,10 +180,9 @@ m365_backend_update_resource (EM365Backend *m365_backend,
 				g_free (today);
 			}
 
-			extension = e_source_get_extension (source, E_SOURCE_EXTENSION_M365_FOLDER);
-			e_source_m365_folder_set_id (extension, id);
-			e_source_m365_folder_set_group_id (extension, group_id);
-			e_source_m365_folder_set_is_default (extension, is_default);
+			e_source_m365_folder_set_id (folder_ext, id);
+			e_source_m365_folder_set_group_id (folder_ext, group_id);
+			e_source_m365_folder_set_is_default (folder_ext, is_default);
 
 			server = e_collection_backend_ref_server (E_COLLECTION_BACKEND (m365_backend));
 
@@ -418,16 +431,21 @@ m365_backend_sync_calendar_folders_sync (EM365Backend *m365_backend,
 
 				for (clink = calendars; clink; clink = g_slist_next (clink)) {
 					EM365Calendar *calendar = clink->data;
+					const gchar *color;
 
 					if (!calendar || !e_m365_calendar_get_id (calendar))
 						continue;
+
+					color = e_m365_calendar_get_hex_color (calendar);
+					if (!color || !*color)
+						color = e_m365_calendar_color_to_rgb (e_m365_calendar_get_color (calendar));
 
 					m365_backend_update_resource (m365_backend, extension_name,
 						e_m365_calendar_get_id (calendar),
 						e_m365_calendar_group_get_id (group),
 						e_m365_calendar_get_name (calendar),
 						FALSE,
-						e_m365_calendar_color_to_rgb (e_m365_calendar_get_color (calendar)));
+						color);
 
 					g_hash_table_remove (known_ids, e_m365_calendar_get_id (calendar));
 				}
