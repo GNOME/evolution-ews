@@ -11,6 +11,8 @@
 struct _ESourceM365FolderPrivate {
 	gchar *id;
 	gchar *group_id;
+	gchar *display_name;
+	gchar *color;
 	gboolean is_default;
 };
 
@@ -18,7 +20,9 @@ enum {
 	PROP_0,
 	PROP_ID,
 	PROP_IS_DEFAULT,
-	PROP_GROUP_ID
+	PROP_GROUP_ID,
+	PROP_DISPLAY_NAME,
+	PROP_COLOR
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ESourceM365Folder, e_source_m365_folder, E_TYPE_SOURCE_EXTENSION)
@@ -44,6 +48,18 @@ source_m365_folder_set_property (GObject *object,
 
 		case PROP_GROUP_ID:
 			e_source_m365_folder_set_group_id (
+				E_SOURCE_M365_FOLDER (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_DISPLAY_NAME:
+			e_source_m365_folder_set_display_name (
+				E_SOURCE_M365_FOLDER (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_COLOR:
+			e_source_m365_folder_set_color (
 				E_SOURCE_M365_FOLDER (object),
 				g_value_get_string (value));
 			return;
@@ -79,6 +95,20 @@ source_m365_folder_get_property (GObject *object,
 				e_source_m365_folder_dup_group_id (
 				E_SOURCE_M365_FOLDER (object)));
 			return;
+
+		case PROP_DISPLAY_NAME:
+			g_value_take_string (
+				value,
+				e_source_m365_folder_dup_display_name (
+				E_SOURCE_M365_FOLDER (object)));
+			return;
+
+		case PROP_COLOR:
+			g_value_take_string (
+				value,
+				e_source_m365_folder_dup_color (
+				E_SOURCE_M365_FOLDER (object)));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -91,6 +121,8 @@ source_m365_folder_finalize (GObject *object)
 
 	g_free (m365_folder->priv->id);
 	g_free (m365_folder->priv->group_id);
+	g_free (m365_folder->priv->display_name);
+	g_free (m365_folder->priv->color);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_source_m365_folder_parent_class)->finalize (object);
@@ -143,6 +175,32 @@ e_source_m365_folder_class_init (ESourceM365FolderClass *class)
 			"group-id",
 			"Group ID",
 			"Optional group ID, into which the folder ID belongs",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_DISPLAY_NAME,
+		g_param_spec_string (
+			"display-name",
+			"Display Name",
+			NULL,
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_COLOR,
+		g_param_spec_string (
+			"color",
+			"Color",
+			NULL,
 			NULL,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -284,4 +342,98 @@ e_source_m365_folder_set_group_id (ESourceM365Folder *extension,
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
 	g_object_notify (G_OBJECT (extension), "group-id");
+}
+
+const gchar *
+e_source_m365_folder_get_display_name (ESourceM365Folder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_M365_FOLDER (extension), NULL);
+
+	return extension->priv->display_name;
+}
+
+gchar *
+e_source_m365_folder_dup_display_name (ESourceM365Folder *extension)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (E_IS_SOURCE_M365_FOLDER (extension), NULL);
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	protected = e_source_m365_folder_get_display_name (extension);
+	duplicate = g_strdup (protected);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	return duplicate;
+}
+
+void
+e_source_m365_folder_set_display_name (ESourceM365Folder *extension,
+				       const gchar *display_name)
+{
+	g_return_if_fail (E_IS_SOURCE_M365_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if (g_strcmp0 (extension->priv->display_name, display_name) == 0) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	g_free (extension->priv->display_name);
+	extension->priv->display_name = e_util_strdup_strip (display_name);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "display-name");
+}
+
+const gchar *
+e_source_m365_folder_get_color (ESourceM365Folder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_M365_FOLDER (extension), NULL);
+
+	return extension->priv->color;
+}
+
+gchar *
+e_source_m365_folder_dup_color (ESourceM365Folder *extension)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (E_IS_SOURCE_M365_FOLDER (extension), NULL);
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	protected = e_source_m365_folder_get_color (extension);
+	duplicate = g_strdup (protected);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	return duplicate;
+}
+
+void
+e_source_m365_folder_set_color (ESourceM365Folder *extension,
+				const gchar *color)
+{
+	g_return_if_fail (E_IS_SOURCE_M365_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if (g_strcmp0 (extension->priv->color, color) == 0) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	g_free (extension->priv->color);
+	extension->priv->color = e_util_strdup_strip (color);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "color");
 }

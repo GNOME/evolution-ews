@@ -64,6 +64,17 @@ gchar *		e_source_m365_folder_dup_group_id
 void		e_source_m365_folder_set_group_id
 						(ESourceM365Folder *extension,
 						 const gchar *group_id);
+const gchar *	e_source_m365_folder_get_display_name
+						(ESourceM365Folder *extension);
+gchar *		e_source_m365_folder_dup_display_name
+						(ESourceM365Folder *extension);
+void		e_source_m365_folder_set_display_name
+						(ESourceM365Folder *extension,
+						 const gchar *display_name);
+const gchar *	e_source_m365_folder_get_color	(ESourceM365Folder *extension);
+gchar *		e_source_m365_folder_dup_color	(ESourceM365Folder *extension);
+void		e_source_m365_folder_set_color	(ESourceM365Folder *extension,
+						 const gchar *color);
 
 G_END_DECLS
 
