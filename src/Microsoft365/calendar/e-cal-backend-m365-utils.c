@@ -1447,8 +1447,15 @@ ecb_m365_set_index_to_ical (ICalRecurrence *recr,
 		break;
 	}
 
-	if (by_pos != -2)
+	if (by_pos != -2) {
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		i_cal_recurrence_resize_by_array (recr, I_CAL_BY_SET_POS, 1);
+		i_cal_recurrence_set_by (recr, I_CAL_BY_SET_POS, 0, by_pos);
+		#else
 		i_cal_recurrence_set_by_set_pos (recr, 0, by_pos);
+		i_cal_recurrence_set_by_set_pos (recr, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		#endif
+	}
 }
 
 static void
@@ -1490,30 +1497,47 @@ ecb_m365_set_days_of_week_to_ical (ICalRecurrence *recr,
 		week_day = ecb_m365_day_of_week_to_ical (e_m365_array_get_day_of_week_element (days_of_week, jj));
 
 		if (week_day != I_CAL_SUNDAY_WEEKDAY) {
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			i_cal_recurrence_resize_by_array (recr, I_CAL_BY_DAY, ii + 1);
+			i_cal_recurrence_set_by (recr, I_CAL_BY_DAY, ii, week_day);
+			#else
 			i_cal_recurrence_set_by_day (recr, ii, week_day);
+			#endif
+
 			ii++;
 		}
 	}
 
+	#ifndef HAVE_I_CAL_RECURRENCE_GET_BY
 	i_cal_recurrence_set_by_day (recr, ii, I_CAL_RECURRENCE_ARRAY_MAX);
+	#endif
 }
 
 static void
 ecb_m365_add_days_of_week_from_ical (JsonBuilder *builder,
 				     ICalRecurrence *recr)
 {
-	gint ii;
+	gint ii, sz;
+
+	#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+	sz = i_cal_recurrence_get_by_array_size (recr, I_CAL_BY_DAY);
+	#else
+	for (sz = 0; i_cal_recurrence_get_by_day (recr, sz) != I_CAL_RECURRENCE_ARRAY_MAX; sz++) {
+		/* only count them */
+	}
+	#endif
 
 	e_m365_recurrence_pattern_begin_days_of_week (builder);
 
-	for (ii = 0; ii < I_CAL_BY_DAY_SIZE; ii++) {
+	for (ii = 0; ii < sz; ii++) {
 		ICalRecurrenceWeekday week_day;
 		EM365DayOfWeekType m365_week_day;
 
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		week_day = i_cal_recurrence_get_by (recr, I_CAL_BY_DAY, ii);
+		#else
 		week_day = i_cal_recurrence_get_by_day (recr, ii);
-
-		if (((gint) week_day) == I_CAL_RECURRENCE_ARRAY_MAX)
-			break;
+		#endif
 
 		m365_week_day = ecb_m365_day_of_week_from_ical (week_day);
 
@@ -1542,6 +1566,7 @@ ecb_m365_get_recurrence (EM365Connection *cnc,
 	ICalRecurrence *ical_recr;
 	ICalRecurrenceWeekday week_day;
 	gint month;
+	gshort value;
 
 	switch (i_cal_component_isa (inout_comp)) {
 	case I_CAL_VEVENT_COMPONENT:
@@ -1581,9 +1606,17 @@ ecb_m365_get_recurrence (EM365Connection *cnc,
 		ecb_m365_set_days_of_week_to_ical (ical_recr, e_m365_recurrence_pattern_get_days_of_week (m365_pattern));
 		break;
 	case E_M365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY:
+		value = e_m365_recurrence_pattern_get_day_of_month (m365_pattern);
+
 		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
 		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_m365_recurrence_pattern_get_day_of_month (m365_pattern));
+
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		i_cal_recurrence_resize_by_array (ical_recr, I_CAL_BY_MONTH_DAY, 1);
+		i_cal_recurrence_set_by (ical_recr, I_CAL_BY_MONTH_DAY, 0, value);
+		#else
+		i_cal_recurrence_set_by_month_day (ical_recr, 0, value);
+		#endif
 		break;
 	case E_M365_RECURRENCE_PATTERN_RELATIVE_MONTHLY:
 		i_cal_recurrence_set_freq (ical_recr, I_CAL_MONTHLY_RECURRENCE);
@@ -1599,12 +1632,26 @@ ecb_m365_get_recurrence (EM365Connection *cnc,
 	case E_M365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY:
 		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
 		i_cal_recurrence_set_interval (ical_recr, e_m365_recurrence_pattern_get_interval (m365_pattern));
-		i_cal_recurrence_set_by_month_day (ical_recr, 0, e_m365_recurrence_pattern_get_day_of_month (m365_pattern));
+
+		value = e_m365_recurrence_pattern_get_day_of_month (m365_pattern);
+
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		i_cal_recurrence_resize_by_array (ical_recr, I_CAL_BY_MONTH_DAY, 1);
+		i_cal_recurrence_set_by (ical_recr, I_CAL_BY_MONTH_DAY, 0, value);
+		#else
+		i_cal_recurrence_set_by_month_day (ical_recr, 0, value);
+		#endif
 
 		month = e_m365_recurrence_pattern_get_month (m365_pattern);
 
-		if (month >= 1 && month <= 12)
+		if (month >= 1 && month <= 12) {
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			i_cal_recurrence_resize_by_array (ical_recr, I_CAL_BY_MONTH, 1);
+			i_cal_recurrence_set_by (ical_recr, I_CAL_BY_MONTH, 0, month);
+			#else
 			i_cal_recurrence_set_by_month (ical_recr, 0, month);
+			#endif
+		}
 		break;
 	case E_M365_RECURRENCE_PATTERN_RELATIVE_YEARLY:
 		i_cal_recurrence_set_freq (ical_recr, I_CAL_YEARLY_RECURRENCE);
@@ -1619,8 +1666,14 @@ ecb_m365_get_recurrence (EM365Connection *cnc,
 
 		month = e_m365_recurrence_pattern_get_month (m365_pattern);
 
-		if (month >= 1 && month <= 12)
+		if (month >= 1 && month <= 12) {
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			i_cal_recurrence_resize_by_array (ical_recr, I_CAL_BY_MONTH, 1);
+			i_cal_recurrence_set_by (ical_recr, I_CAL_BY_MONTH, 0, month);
+			#else
 			i_cal_recurrence_set_by_month (ical_recr, 0, month);
+			#endif
+		}
 		break;
 	default:
 		g_object_unref (ical_recr);
@@ -1752,6 +1805,7 @@ ecb_m365_add_recurrence (EM365Connection *cnc,
 			EM365DayOfWeekType week_day;
 			ICalTime *dtstart;
 			gint by_pos, month, yy = 0, mm = 0, dd = 0;
+			gboolean has_by_pos;
 
 			begin_recurrence_func (builder);
 			e_m365_patterned_recurrence_begin_pattern (builder);
@@ -1774,13 +1828,27 @@ ecb_m365_add_recurrence (EM365Connection *cnc,
 				ecb_m365_add_days_of_week_from_ical (builder, new_rrule);
 				break;
 			case I_CAL_MONTHLY_RECURRENCE:
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				has_by_pos = i_cal_recurrence_get_by_array_size (new_rrule, I_CAL_BY_SET_POS) > 0;
+				by_pos = has_by_pos ? i_cal_recurrence_get_by (new_rrule, I_CAL_BY_SET_POS, 0) : 0;
+				#else
 				by_pos = i_cal_recurrence_get_by_set_pos (new_rrule, 0);
+				has_by_pos = by_pos != I_CAL_RECURRENCE_ARRAY_MAX;
+				#endif
 
 				e_m365_recurrence_pattern_add_interval (builder, i_cal_recurrence_get_interval (new_rrule));
 
-				if (by_pos == I_CAL_RECURRENCE_ARRAY_MAX) {
+				if (!has_by_pos) {
+					gshort bymonthday;
+
+					#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+					bymonthday = i_cal_recurrence_get_by (new_rrule, I_CAL_BY_MONTH_DAY, 0);
+					#else
+					bymonthday = i_cal_recurrence_get_by_month_day (new_rrule, 0);
+					#endif
+
 					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_ABSOLUTE_MONTHLY);
-					e_m365_recurrence_pattern_add_day_of_month (builder, i_cal_recurrence_get_by_month_day (new_rrule, 0));
+					e_m365_recurrence_pattern_add_day_of_month (builder, bymonthday);
 				} else {
 					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_RELATIVE_MONTHLY);
 
@@ -1794,18 +1862,33 @@ ecb_m365_add_recurrence (EM365Connection *cnc,
 				}
 				break;
 			case I_CAL_YEARLY_RECURRENCE:
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				has_by_pos = i_cal_recurrence_get_by_array_size (new_rrule, I_CAL_BY_SET_POS) > 0;
+				by_pos = has_by_pos ? i_cal_recurrence_get_by (new_rrule, I_CAL_BY_SET_POS, 0) : 0;
+				month = i_cal_recurrence_get_by_array_size (new_rrule, I_CAL_BY_MONTH) > 0 ?
+					i_cal_recurrence_get_by (new_rrule, I_CAL_BY_MONTH, 0) : -1;
+				#else
 				by_pos = i_cal_recurrence_get_by_set_pos (new_rrule, 0);
+				has_by_pos = by_pos != I_CAL_RECURRENCE_ARRAY_MAX;
+				month = i_cal_recurrence_get_by_month (new_rrule, 0);
+				#endif
 
 				e_m365_recurrence_pattern_add_interval (builder, i_cal_recurrence_get_interval (new_rrule));
-
-				month = i_cal_recurrence_get_by_month (new_rrule, 0);
 
 				if (month >= 1 && month <= 12)
 					e_m365_recurrence_pattern_add_month (builder, month);
 
-				if (by_pos == I_CAL_RECURRENCE_ARRAY_MAX) {
+				if (!has_by_pos) {
+					gshort bymonthday;
+
+					#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+					bymonthday = i_cal_recurrence_get_by (new_rrule, I_CAL_BY_MONTH_DAY, 0);
+					#else
+					bymonthday = i_cal_recurrence_get_by_month_day (new_rrule, 0);
+					#endif
+
 					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_ABSOLUTE_YEARLY);
-					e_m365_recurrence_pattern_add_day_of_month (builder, i_cal_recurrence_get_by_month_day (new_rrule, 0));
+					e_m365_recurrence_pattern_add_day_of_month (builder, bymonthday);
 				} else {
 					e_m365_recurrence_pattern_add_type (builder, E_M365_RECURRENCE_PATTERN_RELATIVE_YEARLY);
 

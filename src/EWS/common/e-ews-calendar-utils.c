@@ -204,9 +204,18 @@ ewscal_add_availability_rrule (ESoapRequest *request,
 {
 	ICalRecurrence *recur = i_cal_property_get_rrule (prop);
 	gchar buffer[16];
+	gshort byday, bymonth;
 	gint dayorder;
 
-	dayorder = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (recur, 0));
+	#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+	byday = i_cal_recurrence_get_by (recur, I_CAL_BY_DAY, 0);
+	bymonth = i_cal_recurrence_get_by (recur, I_CAL_BY_MONTH, 0);
+	#else
+	byday = i_cal_recurrence_get_by_day (recur, 0);
+	bymonth = i_cal_recurrence_get_by_month (recur, 0);
+	#endif
+
+	dayorder = i_cal_recurrence_day_position (byday);
 	dayorder = dayorder % 5;
 	if (dayorder < 0)
 		dayorder += 5;
@@ -216,10 +225,10 @@ ewscal_add_availability_rrule (ESoapRequest *request,
 	snprintf (buffer, 16, "%d", dayorder);
 	e_ews_request_write_string_parameter (request, "DayOrder", NULL, buffer);
 
-	snprintf (buffer, 16, "%d", i_cal_recurrence_get_by_month (recur, 0));
+	snprintf (buffer, 16, "%d", bymonth);
 	e_ews_request_write_string_parameter (request, "Month", NULL, buffer);
 
-	e_ews_request_write_string_parameter (request, "DayOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
+	e_ews_request_write_string_parameter (request, "DayOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (byday)));
 
 	g_clear_object (&recur);
 }
@@ -465,6 +474,7 @@ e_ews_cal_utils_set_time (ESoapRequest *request,
 	g_free (str);
 }
 
+#ifndef HAVE_I_CAL_RECURRENCE_GET_BY
 static gint
 e_ews_cal_util_recurrence_count_by_xxx_and_free (GArray *array)
 {
@@ -482,6 +492,7 @@ e_ews_cal_util_recurrence_count_by_xxx_and_free (GArray *array)
 
 	return ii;
 }
+#endif
 
 static EEwsRecurrenceDaysOfWeek
 e_ews_cal_util_month_index_to_days_of_week (gint month_index)
@@ -604,6 +615,17 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 		goto custom;
 	}
 
+	#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+	n_by_second = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_SECOND);
+	n_by_minute = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_MINUTE);
+	n_by_hour = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_HOUR);
+	n_by_day = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_DAY);
+	n_by_month_day = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_MONTH_DAY);
+	n_by_year_day = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_YEAR_DAY);
+	n_by_week_no = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_WEEK_NO);
+	n_by_month = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_MONTH);
+	n_by_set_pos = i_cal_recurrence_get_by_array_size (rrule, I_CAL_BY_SET_POS);
+	#else
 	n_by_second = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_second_array (rrule));
 	n_by_minute = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_minute_array (rrule));
 	n_by_hour = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_hour_array (rrule));
@@ -613,6 +635,7 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 	n_by_week_no = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_week_no_array (rrule));
 	n_by_month = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_month_array (rrule));
 	n_by_set_pos = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_set_pos_array (rrule));
+	#endif
 
 	if (n_by_second != 0 ||
 	    n_by_minute != 0 ||
@@ -648,12 +671,19 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 
 		day_mask = 0;
 
-		for (ii = 0; ii < 8 && i_cal_recurrence_get_by_day (rrule, ii) != I_CAL_RECURRENCE_ARRAY_MAX; ii++) {
+		for (ii = 0; ii < 8 && ii < n_by_day; ii++) {
 			ICalRecurrenceWeekday weekday;
+			gshort byday;
 			gint pos;
 
-			weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, ii));
-			pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, ii));
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			byday = i_cal_recurrence_get_by (rrule, I_CAL_BY_DAY, ii);
+			#else
+			byday = i_cal_recurrence_get_by_day (rrule, ii);
+			#endif
+
+			weekday = i_cal_recurrence_day_day_of_week (byday);
+			pos = i_cal_recurrence_day_position (byday);
 
 			if (pos != 0)
 				goto custom;
@@ -765,7 +795,12 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 			if (n_by_set_pos != 0)
 				goto custom;
 
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			nth = i_cal_recurrence_get_by (rrule, I_CAL_BY_MONTH_DAY, 0);
+			#else
 			nth = i_cal_recurrence_get_by_month_day (rrule, 0);
+			#endif
+
 			if (nth < 1 && nth != -1)
 				goto custom;
 
@@ -786,15 +821,26 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 
 		} else if (n_by_day == 1) {
 			ICalRecurrenceWeekday weekday;
+			gshort byday;
 			gint pos;
 
-			weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, 0));
-			pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, 0));
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			byday = i_cal_recurrence_get_by (rrule, I_CAL_BY_DAY, 0);
+			#else
+			byday = i_cal_recurrence_get_by_day (rrule, 0);
+			#endif
+
+			weekday = i_cal_recurrence_day_day_of_week (byday);
+			pos = i_cal_recurrence_day_position (byday);
 
 			if (pos == 0) {
 				if (n_by_set_pos != 1)
 					goto custom;
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				pos = i_cal_recurrence_get_by (rrule, I_CAL_BY_SET_POS, 0);
+				#else
 				pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
+				#endif
 			} else if (pos < 0) {
 				goto custom;
 			}
@@ -839,7 +885,12 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 		} else if (n_by_day > 1 && n_by_set_pos == 1 && n_by_month_day == 0) {
 			gint ii, pos;
 
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			pos = i_cal_recurrence_get_by (rrule, I_CAL_BY_SET_POS, 0);
+			#else
 			pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
+			#endif
+
 			if (pos == -1)
 				month_num = MONTH_NUM_LAST;
 			else
@@ -850,11 +901,18 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 			out_recur->recur.relative_monthly.days_of_week = 0;
 			out_recur->recur.relative_monthly.day_of_week_index = e_ews_cal_util_month_num_to_day_of_week_index (month_num);
 
-			for (ii = 0; i_cal_recurrence_get_by_day (rrule, ii) != I_CAL_RECURRENCE_ARRAY_MAX; ii++) {
+			for (ii = 0; ii < n_by_day; ii++) {
 				ICalRecurrenceWeekday weekday;
+				gshort byday;
 
-				weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, ii));
-				pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, ii));
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				byday = i_cal_recurrence_get_by (rrule, I_CAL_BY_DAY, ii);
+				#else
+				byday = i_cal_recurrence_get_by_day (rrule, ii);
+				#endif
+
+				weekday = i_cal_recurrence_day_day_of_week (byday);
+				pos = i_cal_recurrence_day_position (byday);
 
 				if (pos != 0)
 					goto custom;
@@ -941,6 +999,7 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 	}
 
 	case I_CAL_YEARLY_RECURRENCE: {
+		gshort bymonth;
 		gint month_index = 1;
 		enum month_day_options month_day = MONTH_DAY_NTH;
 		enum month_num_options month_num = MONTH_NUM_DAY;
@@ -957,7 +1016,12 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 			if (n_by_set_pos != 0)
 				goto custom;
 
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			nth = i_cal_recurrence_get_by (rrule, I_CAL_BY_MONTH_DAY, 0);
+			#else
 			nth = i_cal_recurrence_get_by_month_day (rrule, 0);
+			#endif
+
 			if (nth < 1 && nth != -1)
 				goto custom;
 
@@ -979,15 +1043,26 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 
 		if (n_by_day == 1) {
 			ICalRecurrenceWeekday weekday;
+			gshort byday;
 			gint pos;
 
-			weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, 0));
-			pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, 0));
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			byday = i_cal_recurrence_get_by (rrule, I_CAL_BY_DAY, 0);
+			#else
+			byday = i_cal_recurrence_get_by_day (rrule, 0);
+			#endif
+
+			weekday = i_cal_recurrence_day_day_of_week (byday);
+			pos = i_cal_recurrence_day_position (byday);
 
 			if (pos == 0) {
 				if (n_by_set_pos != 1)
 					goto custom;
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				pos = i_cal_recurrence_get_by (rrule, I_CAL_BY_SET_POS, 0);
+				#else
 				pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
+				#endif
 			} else if (pos < 0) {
 				goto custom;
 			}
@@ -1031,10 +1106,16 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 				month_num = pos - 1;
 		}
 
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		bymonth = n_by_month > 0 ? i_cal_recurrence_get_by (rrule, I_CAL_BY_MONTH, 0) : 0;
+		#else
+		bymonth = n_by_month > 0 ? i_cal_recurrence_get_by_month (rrule, 0) : 0;
+		#endif
+
 		out_recur->type = E_EWS_RECURRENCE_RELATIVE_YEARLY;
 		out_recur->recur.relative_yearly.days_of_week = E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
 		out_recur->recur.relative_yearly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
-		out_recur->recur.relative_yearly.month = i_cal_recurrence_get_by_month (rrule, 0);
+		out_recur->recur.relative_yearly.month = bymonth;
 
 		if (n_by_day > 1 &&
 		    n_by_month == 1 &&
@@ -1042,7 +1123,12 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 		    n_by_month_day == 0) {
 			gint ii, pos;
 
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			pos = i_cal_recurrence_get_by (rrule, I_CAL_BY_SET_POS, 0);
+			#else
 			pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
+			#endif
+
 			if (pos == -1)
 				month_num = MONTH_NUM_LAST;
 			else
@@ -1050,11 +1136,18 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 
 			out_recur->recur.relative_yearly.day_of_week_index = e_ews_cal_util_month_num_to_day_of_week_index (month_num);
 
-			for (ii = 0; i_cal_recurrence_get_by_day (rrule, ii) != I_CAL_RECURRENCE_ARRAY_MAX; ii++) {
+			for (ii = 0; ii < n_by_day; ii++) {
 				ICalRecurrenceWeekday weekday;
+				gshort byday;
 
-				weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, ii));
-				pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, ii));
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				byday = i_cal_recurrence_get_by (rrule, I_CAL_BY_DAY, ii);
+				#else
+				byday = i_cal_recurrence_get_by_day (rrule, ii);
+				#endif
+
+				weekday = i_cal_recurrence_day_day_of_week (byday);
+				pos = i_cal_recurrence_day_position (byday);
 
 				if (pos != 0)
 					goto custom;
@@ -1094,9 +1187,15 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 					out_recur->recur.relative_yearly.days_of_week = e_ews_cal_util_month_index_to_days_of_week (month_index);
 					out_recur->recur.relative_yearly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST;
 				} else { /* month_num = MONTH_NUM_DAY; */
+					#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+					bymonth = i_cal_recurrence_get_by (rrule, I_CAL_BY_MONTH, 0);
+					#else
+					bymonth = i_cal_recurrence_get_by_month (rrule, 0);
+					#endif
+
 					out_recur->type = E_EWS_RECURRENCE_ABSOLUTE_YEARLY;
 					out_recur->recur.absolute_yearly.day_of_month = month_index;
-					out_recur->recur.absolute_yearly.month = i_cal_recurrence_get_by_month (rrule, 0);
+					out_recur->recur.absolute_yearly.month = bymonth;
 				}
 				break;
 			case MONTH_DAY_MON:
@@ -1135,9 +1234,15 @@ e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 				out_recur->recur.relative_yearly.days_of_week = e_ews_cal_util_month_index_to_days_of_week (month_index);
 				out_recur->recur.relative_yearly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST;
 			} else { /* month_num = MONTH_NUM_DAY; */
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				bymonth = i_cal_recurrence_get_by (rrule, I_CAL_BY_MONTH, 0);
+				#else
+				bymonth = i_cal_recurrence_get_by_month (rrule, 0);
+				#endif
+
 				out_recur->type = E_EWS_RECURRENCE_ABSOLUTE_YEARLY;
 				out_recur->recur.absolute_yearly.day_of_month = month_index;
-				out_recur->recur.absolute_yearly.month = i_cal_recurrence_get_by_month (rrule, 0);
+				out_recur->recur.absolute_yearly.month = bymonth;
 			}
 		} else if (n_by_day == 0 &&
 			   n_by_month_day == 0 &&
@@ -1604,43 +1709,58 @@ e_ews_cal_utils_days_of_week_to_rrule (ICalRecurrence *rrule,
 
 	for (ii = 0; ii < G_N_ELEMENTS (bits); ii++) {
 		if ((days_of_week & bits[ii].bit) != 0) {
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			i_cal_recurrence_resize_by_array (rrule, I_CAL_BY_DAY, idx + 1);
+			i_cal_recurrence_set_by (rrule, I_CAL_BY_DAY, idx, bits[ii].week_day);
+			#else
 			i_cal_recurrence_set_by_day (rrule, idx, bits[ii].week_day);
+			#endif
+
 			idx++;
 		}
 	}
 
+	#ifndef HAVE_I_CAL_RECURRENCE_GET_BY
 	i_cal_recurrence_set_by_day (rrule, idx, I_CAL_RECURRENCE_ARRAY_MAX);
+	#endif
 }
 
 static void
 e_ews_cal_utils_day_of_week_index_to_rrule (ICalRecurrence *rrule,
 					    EEwsRecurrenceDayOfWeekIndex day_of_week_index)
 {
+	gshort value = -2;
+
 	g_return_if_fail (rrule != NULL);
 
 	switch (day_of_week_index) {
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN:
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FIRST:
-		i_cal_recurrence_set_by_set_pos (rrule, 0, 1);
-		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		value = 1;
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_SECOND:
-		i_cal_recurrence_set_by_set_pos (rrule, 0, 2);
-		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		value = 2;
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_THIRD:
-		i_cal_recurrence_set_by_set_pos (rrule, 0, 3);
-		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		value = 3;
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FOURTH:
-		i_cal_recurrence_set_by_set_pos (rrule, 0, 4);
-		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		value = 4;
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST:
-		i_cal_recurrence_set_by_set_pos (rrule, 0, -1);
-		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		value = -1;
 		break;
+	}
+
+	if (value != -2) {
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		i_cal_recurrence_resize_by_array (rrule, I_CAL_BY_SET_POS, 1);
+		i_cal_recurrence_set_by (rrule, I_CAL_BY_SET_POS, 0, value);
+		#else
+		i_cal_recurrence_set_by_set_pos (rrule, 0, value);
+		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		#endif
 	}
 }
 
@@ -1651,8 +1771,13 @@ e_ews_cal_utils_month_to_rrule (ICalRecurrence *rrule,
 	g_return_if_fail (rrule != NULL);
 
 	if (month >= G_DATE_JANUARY && month <= G_DATE_DECEMBER) {
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		i_cal_recurrence_resize_by_array (rrule, I_CAL_BY_MONTH, 1);
+		i_cal_recurrence_set_by (rrule, I_CAL_BY_MONTH, 0, month);
+		#else
 		i_cal_recurrence_set_by_month (rrule, 0, month);
 		i_cal_recurrence_set_by_month (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		#endif
 	}
 }
 
@@ -1665,6 +1790,7 @@ e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
 	ICalRecurrence *rrule;
 	ICalTime *recur_start, *itt;
 	gboolean usable = FALSE;
+	gshort value;
 
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 	g_return_if_fail (comp != NULL);
@@ -1736,8 +1862,16 @@ e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
 		    i_cal_time_get_day (recur_start) == recur.recur.absolute_yearly.day_of_month) {
 			/* This is how evolution uses it, derive date from the DTSTART */
 		} else {
-			i_cal_recurrence_set_by_month_day (rrule, 0, recur.recur.absolute_yearly.day_of_month);
+			value = recur.recur.absolute_yearly.day_of_month;
+
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			i_cal_recurrence_resize_by_array (rrule, I_CAL_BY_MONTH_DAY, 1);
+			i_cal_recurrence_set_by (rrule, I_CAL_BY_MONTH_DAY, 0, value);
+			#else
+			i_cal_recurrence_set_by_month_day (rrule, 0, value);
 			i_cal_recurrence_set_by_month_day (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+			#endif
+
 			e_ews_cal_utils_month_to_rrule (rrule, recur.recur.absolute_yearly.month);
 		}
 		break;
@@ -1750,10 +1884,18 @@ e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
 		break;
 	case E_EWS_RECURRENCE_ABSOLUTE_MONTHLY:
 		usable = TRUE;
+		value = recur.recur.absolute_monthly.day_of_month;
+
 		i_cal_recurrence_set_freq (rrule, I_CAL_MONTHLY_RECURRENCE);
 		i_cal_recurrence_set_interval (rrule, recur.recur.absolute_monthly.interval);
-		i_cal_recurrence_set_by_month_day (rrule, 0, recur.recur.absolute_monthly.day_of_month);
+
+		#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+		i_cal_recurrence_resize_by_array (rrule, I_CAL_BY_MONTH_DAY, 1);
+		i_cal_recurrence_set_by (rrule, I_CAL_BY_MONTH_DAY, 0, value);
+		#else
+		i_cal_recurrence_set_by_month_day (rrule, 0, value);
 		i_cal_recurrence_set_by_month_day (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+		#endif
 		break;
 	case E_EWS_RECURRENCE_WEEKLY:
 		usable = TRUE;

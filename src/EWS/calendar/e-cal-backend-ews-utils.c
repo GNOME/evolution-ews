@@ -436,12 +436,21 @@ ewscal_add_rrule (ESoapRequest *request,
 		  ICalProperty *prop)
 {
 	ICalRecurrence *recur = i_cal_property_get_rrule (prop);
+	gshort byday, bymonth;
+
+	#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+	byday = i_cal_recurrence_get_by (recur, I_CAL_BY_DAY, 0);
+	bymonth = i_cal_recurrence_get_by (recur, I_CAL_BY_MONTH, 0);
+	#else
+	byday = i_cal_recurrence_get_by_day (recur, 0);
+	bymonth = i_cal_recurrence_get_by_month (recur, 0);
+	#endif
 
 	e_soap_request_start_element (request, "RelativeYearlyRecurrence", NULL, NULL);
 
-	e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
-	e_ews_request_write_string_parameter (request, "DayOfWeekIndex", NULL, weekindex_to_ical (i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (recur, 0))));
-	e_ews_request_write_string_parameter (request, "Month", NULL, number_to_month (i_cal_recurrence_get_by_month (recur, 0)));
+	e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (byday)));
+	e_ews_request_write_string_parameter (request, "DayOfWeekIndex", NULL, weekindex_to_ical (i_cal_recurrence_day_position (byday)));
+	e_ews_request_write_string_parameter (request, "Month", NULL, number_to_month (bymonth));
 
 	e_soap_request_end_element (request); /* "RelativeYearlyRecurrence" */
 	g_clear_object (&recur);
@@ -736,7 +745,8 @@ ewscal_set_reccurence (ESoapRequest *request,
 		       ICalTime *dtstart)
 {
 	gchar buffer[256];
-	gint i, len;
+	gint i, len, sz;
+	gshort value;
 
 	/* MSDN reference: http://msdn.microsoft.com/en-us/library/aa580471%28v=EXCHG.80%29.aspx
 	 */
@@ -761,13 +771,27 @@ ewscal_set_reccurence (ESoapRequest *request,
 			snprintf (buffer, 32, "%d", i_cal_recurrence_get_interval (recur));
 			e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
 
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			sz = i_cal_recurrence_get_by_array_size (recur, I_CAL_BY_DAY);
+			value = sz > 0 ? i_cal_recurrence_get_by (recur, I_CAL_BY_DAY, 0) : 0;
+			#else
+			for (sz = 0; i_cal_recurrence_get_by_day (recur, sz) != I_CAL_RECURRENCE_ARRAY_MAX; sz++) {
+				/* count valid items */
+			}
+			value = i_cal_recurrence_get_by_day (recur, 0);
+			#endif
 			len = snprintf (
 				buffer, 256, "%s",
-				number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
-			for (i = 1; i_cal_recurrence_get_by_day (recur, i) != I_CAL_RECURRENCE_ARRAY_MAX; i++) {
+				number_to_weekday (i_cal_recurrence_day_day_of_week (value)));
+			for (i = 1; i < sz; i++) {
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				value = i_cal_recurrence_get_by (recur, I_CAL_BY_DAY, i);
+				#else
+				value = i_cal_recurrence_get_by_day (recur, i);
+				#endif
 				len += snprintf (
 					buffer + len, 256 - len, " %s",
-					number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, i))));
+					number_to_weekday (i_cal_recurrence_day_day_of_week (value)));
 			}
 			e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL, buffer);
 
@@ -775,7 +799,13 @@ ewscal_set_reccurence (ESoapRequest *request,
 			break;
 
 		case I_CAL_MONTHLY_RECURRENCE:
-			if (i_cal_recurrence_get_by_month_day (recur, 0) == I_CAL_RECURRENCE_ARRAY_MAX) {
+			#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+			sz = i_cal_recurrence_get_by_array_size (recur, I_CAL_BY_MONTH_DAY);
+			#else
+			sz = i_cal_recurrence_get_by_month_day (recur, 0) == I_CAL_RECURRENCE_ARRAY_MAX ? 0 : 1;
+			#endif
+
+			if (!sz) {
 				e_soap_request_start_element (request, "RelativeMonthlyRecurrence", NULL, NULL);
 
 				/* For now this is what got implemented since this is the only
@@ -784,11 +814,23 @@ ewscal_set_reccurence (ESoapRequest *request,
 				snprintf (buffer, 32, "%d", i_cal_recurrence_get_interval (recur));
 				e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
 
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				value = i_cal_recurrence_get_by (recur, I_CAL_BY_DAY, 0);
+				#else
+				value = i_cal_recurrence_get_by_day (recur, 0);
+				#endif
+
 				e_ews_request_write_string_parameter (request, "DaysOfWeek", NULL,
-					number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
+					number_to_weekday (i_cal_recurrence_day_day_of_week (value)));
+
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				value = i_cal_recurrence_get_by (recur, I_CAL_BY_SET_POS, 0);
+				#else
+				value = i_cal_recurrence_get_by_set_pos (recur, 0);
+				#endif
 
 				e_ews_request_write_string_parameter (request, "DayOfWeekIndex", NULL, weekindex_to_ical (
-					i_cal_recurrence_get_by_set_pos (recur, 0) == 5 ? -1 : i_cal_recurrence_get_by_set_pos (recur, 0)));
+					value == 5 ? -1 : value));
 
 				e_soap_request_end_element (request); /* "RelativeMonthlyRecurrence" */
 			} else {
@@ -797,7 +839,13 @@ ewscal_set_reccurence (ESoapRequest *request,
 				snprintf (buffer, 256, "%d", i_cal_recurrence_get_interval (recur));
 				e_ews_request_write_string_parameter (request, "Interval", NULL, buffer);
 
-				snprintf (buffer, 256, "%d", i_cal_recurrence_get_by_month_day (recur, 0) == -1 ? 31 : i_cal_recurrence_get_by_month_day (recur, 0));
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				value = i_cal_recurrence_get_by (recur, I_CAL_BY_MONTH_DAY, 0);
+				#else
+				value = i_cal_recurrence_get_by_month_day (recur, 0);
+				#endif
+
+				snprintf (buffer, 256, "%d", value == -1 ? 31 : value);
 				e_ews_request_write_string_parameter (request, "DayOfMonth", NULL, buffer);
 
 				e_soap_request_end_element (request); /* "AbsoluteMonthlyRecurrence" */
@@ -814,20 +862,35 @@ ewscal_set_reccurence (ESoapRequest *request,
 			{
 				e_soap_request_start_element (request, "AbsoluteYearlyRecurrence", NULL, NULL);
 
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				sz = i_cal_recurrence_get_by_array_size (recur, I_CAL_BY_MONTH_DAY);
+				value = sz ? i_cal_recurrence_get_by (recur, I_CAL_BY_MONTH_DAY, 0) : 0;
+				#else
+				sz = i_cal_recurrence_get_by_month_day (recur, 0) == I_CAL_RECURRENCE_ARRAY_MAX ? 0 : 1;
+				value = sz ? i_cal_recurrence_get_by_month_day (recur, 0) : 0;
+				#endif
+
 				/* work according to RFC5545 §3.3.10
 				 * dtstart is the default, give preference to by_month & by_month_day if they are set
 				 */
-				if (i_cal_recurrence_get_by_month_day (recur, 0) != I_CAL_RECURRENCE_ARRAY_MAX) {
-					snprintf (buffer, 256, "%d", i_cal_recurrence_get_by_month_day (recur, 0) == -1 ? 31 : i_cal_recurrence_get_by_month_day (recur, 0));
+				if (sz) {
+					snprintf (buffer, 256, "%d", value == -1 ? 31 : value);
 				} else {
 					snprintf (buffer, 256, "%d", i_cal_time_get_day (dtstart));
 				}
 				e_ews_request_write_string_parameter (request, "DayOfMonth", NULL, buffer);
 
-				if (i_cal_recurrence_get_by_month (recur, 0) != I_CAL_RECURRENCE_ARRAY_MAX) {
-					snprintf (buffer, 256, "%d", i_cal_recurrence_get_by_month_day (recur, 0));
+				#ifdef HAVE_I_CAL_RECURRENCE_GET_BY
+				sz = i_cal_recurrence_get_by_array_size (recur, I_CAL_BY_MONTH);
+				value = sz ? i_cal_recurrence_get_by (recur, I_CAL_BY_MONTH, 0) : 0;
+				#else
+				sz = i_cal_recurrence_get_by_month (recur, 0) == I_CAL_RECURRENCE_ARRAY_MAX ? 0 : 1;
+				value = sz ? i_cal_recurrence_get_by_month (recur, 0) : 0;
+				#endif
+
+				if (sz) {
 					e_ews_request_write_string_parameter (request, "Month", NULL,
-						number_to_month (i_cal_recurrence_get_by_month (recur, 0)));
+						number_to_month (value));
 				} else {
 					e_ews_request_write_string_parameter (request, "Month", NULL,
 						number_to_month (i_cal_time_get_month (dtstart)));

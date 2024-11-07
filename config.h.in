@@ -47,3 +47,6 @@
 
 /* Define Microsoft 365 OAuth 2.0 default Endpoint Host to use */
 #define MICROSOFT365_ENDPOINT_HOST "@WITH_MICROSOFT365_ENDPOINT_HOST@"
+
+/* Define if libical-glib has i_cal_recurrence_get_by() */
+#cmakedefine HAVE_I_CAL_RECURRENCE_GET_BY 1
