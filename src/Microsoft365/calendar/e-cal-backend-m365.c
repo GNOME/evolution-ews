@@ -1809,15 +1809,39 @@ ecb_m365_send_objects_sync (ECalBackendSync *sync_backend,
 	}
 
 	if (subcomp) {
+		ICalProperty *prop;
 		const gchar *uid = i_cal_component_get_uid (subcomp);
 		const gchar *comment = i_cal_component_get_comment (subcomp);
+		gchar *instance_id = NULL;
+		gboolean success = TRUE;
 
 		LOCK (cbm365);
 
-		e_m365_connection_cancel_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
-			cbm365->priv->folder_id, uid, comment, cancellable, error);
+		prop = i_cal_component_get_first_property (subcomp, I_CAL_RECURRENCEID_PROPERTY);
+		if (prop) {
+			ICalTime *recurid;
+
+			recurid = i_cal_property_get_recurrenceid (prop);
+			if (recurid) {
+				success = e_m365_connection_get_event_instance_id_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+					cbm365->priv->folder_id, uid, recurid, &instance_id, cancellable, error);
+
+				if (success && instance_id)
+					uid = instance_id;
+
+				g_clear_object (&recurid);
+			}
+		}
+
+		if (success) {
+			e_m365_connection_cancel_event_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id,
+				cbm365->priv->folder_id, uid, comment, cancellable, error);
+		}
 
 		UNLOCK (cbm365);
+
+		g_clear_object (&prop);
+		g_free (instance_id);
 	}
 
 	g_clear_object (&subcomp);
