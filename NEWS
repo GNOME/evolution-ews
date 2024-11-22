@@ -1,3 +1,17 @@
+Evolution-EWS 3.54.2 2024-11-22
+-------------------------------
+
+Bug Fixes:
+	I#287 - m365: Calendar color reset on calendar list refresh
+
+Miscellaneous:
+	m365: Fix cancel of an instance of a recurring meeting
+
+Translations:
+	Daniel Rusek (cs)
+	Милош Поповић (sr)
+	Милош Поповић (sr@latin)
+
 Evolution-EWS 3.54.1 2024-10-18
 -------------------------------
 
