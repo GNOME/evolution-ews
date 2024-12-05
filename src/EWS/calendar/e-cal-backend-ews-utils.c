@@ -575,12 +575,24 @@ ewscal_set_recurring_date_transitions (ESoapRequest *request,
 void
 ewscal_set_timezone (ESoapRequest *request,
 		     const gchar *name,
-		     EEwsCalendarTimeZoneDefinition *tzd)
+		     EEwsCalendarTimeZoneDefinition *tzd,
+		     const gchar *msdn_location)
 {
 	GSList *l;
 
-	if (name == NULL || tzd == NULL)
+	if (name == NULL)
 		return;
+
+	if (!tzd) {
+		if (g_strcmp0 (msdn_location, "tzone://Microsoft/Utc") == 0) {
+			e_soap_request_start_element (request, name, NULL, NULL);
+			e_soap_request_add_attribute (request, "Id", msdn_location, NULL, NULL);
+			e_soap_request_add_attribute (request, "Name", "UTC", NULL, NULL);
+			e_soap_request_end_element (request);
+		}
+
+		return;
+	}
 
 	e_soap_request_start_element (request, name, NULL, NULL);
 	e_soap_request_add_attribute (request, "Id", tzd->id, NULL, NULL);
@@ -1369,14 +1381,20 @@ convert_vevent_calcomp_to_xml (ESoapRequest *request,
 				msdn_locations,
 				&tzds,
 				NULL,
-				NULL)) {
-			EEwsCalendarTimeZoneDefinition *tzdef = tzds->data;
+				NULL) && tzds) {
+			EEwsCalendarTimeZoneDefinition *tzdef1 = tzds->data;
+			EEwsCalendarTimeZoneDefinition *tzdef2 = tzds->next ? tzds->next->data : tzdef1;
 
-			ewscal_set_timezone (request, "StartTimeZone", tzdef);
-			ewscal_set_timezone (request, "EndTimeZone", tzdef);
+			if (g_strcmp0 (msdn_location_start, "tzone://Microsoft/Utc") == 0)
+				tzdef1 = NULL;
+			if (g_strcmp0 (msdn_location_end, "tzone://Microsoft/Utc") == 0)
+				tzdef2 = NULL;
 
-			if (tzdef && tzdef->id)
-				ewscal_set_timezone_in_request_header (request, tzdef->id, tzdef->name);
+			ewscal_set_timezone (request, "StartTimeZone", tzdef1, msdn_location_start);
+			ewscal_set_timezone (request, "EndTimeZone", tzdef2, msdn_location_end);
+
+			if (tzdef1 && tzdef1->id)
+				ewscal_set_timezone_in_request_header (request, tzdef1->id, tzdef1->name);
 		}
 
 		g_slist_free (msdn_locations);
@@ -1903,7 +1921,7 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 					EEwsCalendarTimeZoneDefinition *tzdef = tmp->data;
 
 					e_ews_request_start_set_item_field (request, "StartTimeZone", "calendar", "CalendarItem");
-					ewscal_set_timezone (request, "StartTimeZone", tzdef);
+					ewscal_set_timezone (request, "StartTimeZone", tzdef, msdn_location_start);
 					e_ews_request_end_set_item_field (request);
 
 					if (tzdef && tzdef->id)
@@ -1919,7 +1937,7 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 
 				if (tzid_end != NULL) {
 					e_ews_request_start_set_item_field (request, "EndTimeZone", "calendar", "CalendarItem");
-					ewscal_set_timezone (request, "EndTimeZone", tmp->data);
+					ewscal_set_timezone (request, "EndTimeZone", tmp->data, msdn_location_end);
 					e_ews_request_end_set_item_field (request);
 				}
 			}
@@ -2391,10 +2409,20 @@ e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
 	g_return_val_if_fail (get_func != NULL, dt);
 
 	prop = i_cal_component_get_first_property (comp, prop_kind);
-	if (!prop)
-		return dt;
+	if (!prop && prop_kind == I_CAL_DTEND_PROPERTY &&
+	    e_cal_util_component_has_property (comp, I_CAL_DURATION_PROPERTY)) {
+		/* the DTEND is derived from DTSTART+DURATION by the libical, thus use the TZID of the DTSTART */
+		prop = i_cal_component_get_first_property (comp, I_CAL_DTSTART_PROPERTY);
+		if (!prop)
+			return dt;
 
-	dt = get_func (prop);
+		dt = i_cal_component_get_dtend (comp);
+	} else {
+		if (!prop)
+			return dt;
+
+		dt = get_func (prop);
+	}
 
 	if (!dt || !i_cal_time_is_valid_time (dt) ||
 	    i_cal_time_is_null_time (dt)) {

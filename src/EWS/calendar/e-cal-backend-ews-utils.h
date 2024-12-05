@@ -41,7 +41,7 @@ typedef struct {
 const gchar *e_ews_collect_organizer (ICalComponent *comp);
 void e_ews_collect_attendees (ICalComponent *comp, GSList **required, GSList **optional, GSList **resource, gboolean *out_rsvp_requested);
 
-void ewscal_set_timezone (ESoapRequest *request, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd);
+void ewscal_set_timezone (ESoapRequest *request, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd, const gchar *msdn_location);
 void ewscal_set_meeting_timezone (ESoapRequest *request, ICalTimezone *icaltz, ICalComponent *icomp);
 void ewscal_set_reccurence (ESoapRequest *request, ICalProperty *rrule, ICalTime *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapRequest *request, ICalComponent *comp);
