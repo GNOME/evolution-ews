@@ -1677,7 +1677,7 @@ ecb_m365_receive_objects_sync (ECalBackendSync *sync_backend,
 				e_cal_backend_sync_create_objects (E_CAL_BACKEND_SYNC (cbm365), data_cal, cancellable, calobjs,
 					opflags | E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE, &new_uids, &new_components, &local_error);
 
-				success = local_error != NULL;
+				success = !local_error;
 
 				if (local_error)
 					g_propagate_error (error, local_error);
