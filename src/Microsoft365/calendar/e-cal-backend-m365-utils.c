@@ -12,6 +12,8 @@
 #include "common/e-m365-connection.h"
 #include "common/e-m365-tz-utils.h"
 #include "e-cal-backend-m365-recur-blob.h"
+#include "e-ews-common-utils.h"
+
 #include "e-cal-backend-m365-utils.h"
 
 #define EC_ERROR_EX(_code, _msg) e_client_error_create (_code, _msg)
@@ -354,12 +356,14 @@ ecb_m365_add_date_time_zone (EM365Connection *cnc,
 		const gchar *wzone = NULL;
 		time_t tt;
 
-		if (new_tzid) {
+		if (new_tzid)
 			izone = e_timezone_cache_get_timezone (timezone_cache, new_tzid);
 
-			if (izone)
-				wzone = e_m365_tz_utils_get_msdn_equivalent (i_cal_timezone_get_location (izone));
-		}
+		if (!new_tzid || !*new_tzid || !izone)
+			izone = e_ews_common_utils_get_configured_icaltimezone ();
+
+		if (izone)
+			wzone = e_m365_tz_utils_get_msdn_equivalent (i_cal_timezone_get_location (izone));
 
 		tt = i_cal_time_as_timet_with_zone (new_value, wzone ? NULL : izone);
 
