@@ -1,3 +1,31 @@
+Evolution-EWS 3.55.1 2025-01-03
+-------------------------------
+
+Bug Fixes:
+	I#281 - m365: Mails do not have set size in summary
+	I#282 - m365: Fails to save a message in the Drafts folder
+	I#284 - m365: Cannot delete instance of a recurring event
+	I#287 - m365: Calendar color reset on calendar list refresh
+	I#289 - m365: Calendar: Incomplete importing and floating time zone issue
+	I#292 - Calendar: Import of event with DURATION incorrect
+	M!13 - Set project-wide emacs formatting rules (Дилян Палаузов)
+	eds-I#570 - Adapt to libical icalrecurrencetype changes
+
+Miscellaneous:
+	m365: Camel: Correct message ID calculation for folder summary
+	m365: Read 'bodyPreview' for mail messages
+	m365: Handle SyncStateNotFound error
+	m365: Fix cancel of an instance of a recurring meeting
+	build: Update CMake uninstall file
+	Adapt to GtkUIManager removal from Evolution
+
+Translations:
+	Daniel Rusek (cs)
+	Милош Поповић (sr)
+	Милош Поповић (sr@latin)
+	Juliano de Souza Camargo (pt_BR)
+	Jürgen Benvenuti (de)
+
 Evolution-EWS 3.54.0 2024-09-13
 -------------------------------
 
