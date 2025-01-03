@@ -1,3 +1,10 @@
+Evolution-EWS 3.54.3 2025-01-03
+-------------------------------
+
+Bug Fixes:
+	I#289 - m365: Calendar: Incomplete importing and floating time zone issue
+	I#292 - Calendar: Import of event with DURATION incorrect
+
 Evolution-EWS 3.54.2 2024-11-22
 -------------------------------
 
