@@ -6,8 +6,8 @@
 	"command": "evolution",
 	"rename-icon": "evolution",
 	"copy-icon": true,
-	"branch": "master",
-	"desktop-file-name-suffix": " (Nightly)",
+	"branch": "gnome-47",
+	"desktop-file-name-suffix": " (gnome-47)",
 	"tags": [ "devel" ],
 	"cleanup": [
 		"*.la",
@@ -326,7 +326,7 @@
 				{
 					"type": "git",
 					"url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
-					"branch": "master"
+					"branch": "gnome-47"
 				}
 			]
 		},
@@ -470,7 +470,7 @@
 				{
 					"type": "git",
 					"url": "https://gitlab.gnome.org/GNOME/evolution.git",
-					"branch": "master"
+					"branch": "gnome-47"
 				},
 				{
 					"type": "shell",
@@ -571,7 +571,7 @@
 				{
 					"type": "git",
 					"url": "https://gitlab.gnome.org/GNOME/evolution-ews.git",
-					"branch": "master"
+					"branch": "gnome-47"
 				}
 			]
 		}
