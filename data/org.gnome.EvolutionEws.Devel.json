@@ -6,7 +6,7 @@
 	"command": "evolution",
 	"rename-icon": "evolution",
 	"copy-icon": true,
-	"branch": "gnome-47",
+	"branch": "master",
 	"desktop-file-name-suffix": " (gnome-47)",
 	"tags": [ "devel" ],
 	"cleanup": [
