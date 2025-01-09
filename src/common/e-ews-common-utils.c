@@ -205,28 +205,20 @@ e_ews_common_utils_str_replace_string (const gchar *text,
 ICalTimezone *
 e_ews_common_utils_get_configured_icaltimezone (void)
 {
-	GSettingsSchemaSource *schema_source;
 	ICalTimezone *zone = NULL;
 	gchar *location = NULL;
 
-	schema_source = g_settings_schema_source_get_default ();
-	if (schema_source) {
-		GSettingsSchema *schema;
+	if (e_ews_common_utils_gsettings_schema_exists ("org.gnome.evolution.calendar")) {
+		GSettings *settings;
 
-		schema = g_settings_schema_source_lookup (schema_source, "org.gnome.evolution.calendar", TRUE);
-		if (schema) {
-			GSettings *settings;
+		settings = g_settings_new ("org.gnome.evolution.calendar");
 
-			settings = g_settings_new ("org.gnome.evolution.calendar");
+		if (g_settings_get_boolean (settings, "use-system-timezone"))
+			location = e_cal_util_get_system_timezone_location ();
+		else
+			location = g_settings_get_string (settings, "timezone");
 
-			if (g_settings_get_boolean (settings, "use-system-timezone"))
-				location = e_cal_util_get_system_timezone_location ();
-			else
-				location = g_settings_get_string (settings, "timezone");
-
-			g_clear_object (&settings);
-			g_settings_schema_unref (schema);
-		}
+		g_clear_object (&settings);
 	}
 
 	if (!location)
@@ -516,4 +508,19 @@ e_ews_common_utils_find_attendee (ECalBackend *cal_backend,
 	}
 
 	return attendee;
+}
+
+gboolean
+e_ews_common_utils_gsettings_schema_exists (const gchar *schema_id)
+{
+	GSettingsSchema *schema;
+
+	schema = g_settings_schema_source_lookup (g_settings_schema_source_get_default (), schema_id, TRUE);
+
+	if (!schema)
+		return FALSE;
+
+	g_settings_schema_unref (schema);
+
+	return TRUE;
 }

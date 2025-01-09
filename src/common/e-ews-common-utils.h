@@ -24,6 +24,7 @@ ICalTimezone *	e_ews_common_utils_get_configured_icaltimezone	(void);
 ICalProperty *	e_ews_common_utils_find_attendee		(ECalBackend *cal_backend,
 								 ICalComponent *icomp,
 								 GHashTable *aliases);
+gboolean	e_ews_common_utils_gsettings_schema_exists	(const gchar *schema_id);
 
 G_END_DECLS
 

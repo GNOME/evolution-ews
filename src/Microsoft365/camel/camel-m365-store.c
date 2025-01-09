@@ -13,6 +13,7 @@
 #include "camel-m365-folder.h"
 #include "camel-m365-store-summary.h"
 #include "camel-m365-utils.h"
+#include "e-ews-common-utils.h"
 
 #include "camel-m365-store.h"
 
@@ -302,6 +303,10 @@ m365_store_save_category_changes (GHashTable *old_categories, /* gchar *id ~> Ca
 	gint ii;
 	gpointer value;
 	gboolean changed = FALSE;
+
+	/* cannot save, when evolution is not installed */
+	if (!e_ews_common_utils_gsettings_schema_exists ("org.gnome.evolution.mail"))
+		return FALSE;
 
 	if (!old_categories || !new_categories)
 		return new_categories != NULL;

@@ -17,6 +17,7 @@
 #include "common/e-ews-camel-common.h"
 #include "common/e-ews-item-change.h"
 #include "common/e-ews-request.h"
+#include "e-ews-common-utils.h"
 
 #include "camel-ews-utils.h"
 
@@ -1547,6 +1548,10 @@ ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> C
 	gint ii;
 	gpointer value;
 	gboolean changed = FALSE;
+
+	/* cannot save, when evolution is not installed */
+	if (!e_ews_common_utils_gsettings_schema_exists ("org.gnome.evolution.mail"))
+		return FALSE;
 
 	if (!old_categories || !new_categories)
 		return new_categories != NULL;

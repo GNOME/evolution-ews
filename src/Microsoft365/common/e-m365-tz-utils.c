@@ -12,6 +12,8 @@
 
 #include <gio/gio.h>
 
+#include "e-ews-common-utils.h"
+
 #include "e-m365-tz-utils.h"
 
 /*
@@ -187,18 +189,24 @@ e_m365_tz_utils_get_ical_equivalent (const gchar *msdn_tz_location)
 ICalTimezone *
 e_m365_tz_utils_get_user_timezone (void)
 {
-	GSettings *settings;
-	gchar *location;
+	gchar *location = NULL;
 	ICalTimezone *zone = NULL;
 
-	settings = g_settings_new ("org.gnome.evolution.calendar");
+	if (e_ews_common_utils_gsettings_schema_exists ("org.gnome.evolution.calendar")) {
+		GSettings *settings;
 
-	if (g_settings_get_boolean (settings, "use-system-timezone"))
+		settings = g_settings_new ("org.gnome.evolution.calendar");
+
+		if (g_settings_get_boolean (settings, "use-system-timezone"))
+			location = e_cal_util_get_system_timezone_location ();
+		else
+			location = g_settings_get_string (settings, "timezone");
+
+		g_object_unref (settings);
+	}
+
+	if (!location)
 		location = e_cal_util_get_system_timezone_location ();
-	else
-		location = g_settings_get_string (settings, "timezone");
-
-	g_object_unref (settings);
 
 	if (location)
 		zone = i_cal_timezone_get_builtin_timezone (location);
