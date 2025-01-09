@@ -817,22 +817,8 @@ ebb_m365_contact_get_emails (EBookBackendM365 *bbm365,
 					attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
 					e_vcard_attribute_add_param_with_value (attr, e_vcard_attribute_param_new (EVC_TYPE), "OTHER");
 
-					if (g_strcmp0 (e_m365_email_address_get_name (address), e_m365_email_address_get_address (address)) == 0) {
-						e_vcard_add_attribute_with_value (vcard, attr, e_m365_email_address_get_address (address));
-					} else {
-						gchar *formatted;
-
-						formatted = camel_internet_address_format_address (
-							e_m365_email_address_get_name (address),
-							e_m365_email_address_get_address (address));
-
-						if (formatted && *formatted)
-							e_vcard_add_attribute_with_value (vcard, attr, formatted);
-						else
-							e_vcard_attribute_free (attr);
-
-						g_free (formatted);
-					}
+					/* ignore the address name, it's not meant to be there, but the server sometimes sets it and sends it back */
+					e_vcard_add_attribute_with_value (vcard, attr, e_m365_email_address_get_address (address));
 				}
 			}
 		}
@@ -905,7 +891,6 @@ ebb_m365_contact_get_emails (EBookBackendM365 *bbm365,
 
 static gboolean
 ebb_m365_parse_qp_email (const gchar *string,
-			 gchar **name,
 			 gchar **email)
 {
 	struct _camel_header_address *address;
@@ -916,7 +901,6 @@ ebb_m365_parse_qp_email (const gchar *string,
 	if (address) {
 		/* report success only when we have filled both name and email address */
 		if (address->type == CAMEL_HEADER_ADDRESS_NAME && address->name && *address->name && address->v.addr && *address->v.addr) {
-			*name = g_strdup (address->name);
 			*email = g_strdup (address->v.addr);
 			res = TRUE;
 		}
@@ -931,7 +915,6 @@ ebb_m365_parse_qp_email (const gchar *string,
 		if (camel_address_unformat (CAMEL_ADDRESS (addr), string) == 1 &&
 		    camel_internet_address_get (addr, 0, &const_name, &const_email) &&
 		    const_name && *const_name && const_email && *const_email) {
-			*name = g_strdup (const_name);
 			*email = g_strdup (const_email);
 			res = TRUE;
 		}
@@ -964,14 +947,13 @@ ebb_m365_contact_add_emails (EBookBackendM365 *bbm365,
 
 		for (link = new_values; link; link = g_list_next (link)) {
 			const gchar *value = link->data;
-			gchar *name = NULL, *address = NULL;
+			gchar *address = NULL;
 
-			if (ebb_m365_parse_qp_email (value, &name, &address))
-				e_m365_add_email_address (builder, NULL, name, address);
+			if (ebb_m365_parse_qp_email (value, &address))
+				e_m365_add_email_address (builder, NULL, NULL, address);
 			else
 				e_m365_add_email_address (builder, NULL, NULL, value);
 
-			g_free (name);
 			g_free (address);
 		}
 
