@@ -180,6 +180,15 @@ m365_backend_update_resource (EM365Backend *m365_backend,
 				g_free (today);
 			}
 
+			if (g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS) == 0 ||
+			    g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_USERS) == 0) {
+				ESourceOffline *offline_ext;
+
+				offline_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
+				/* look up by default, these can be very large */
+				e_source_offline_set_stay_synchronized (offline_ext, FALSE);
+			}
+
 			e_source_m365_folder_set_id (folder_ext, id);
 			e_source_m365_folder_set_group_id (folder_ext, group_id);
 			e_source_m365_folder_set_is_default (folder_ext, is_default);
@@ -189,6 +198,14 @@ m365_backend_update_resource (EM365Backend *m365_backend,
 			e_source_registry_server_add_source (server, source);
 
 			g_clear_object (&server);
+		} else if (!e_source_has_extension (source, E_SOURCE_EXTENSION_OFFLINE) && (
+			   g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS) == 0 ||
+			   g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_USERS) == 0)) {
+			ESourceOffline *offline_ext;
+
+			offline_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
+			/* existing books without the extension mean they had been synchronized for offline use */
+			e_source_offline_set_stay_synchronized (offline_ext, TRUE);
 		}
 	}
 

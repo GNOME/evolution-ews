@@ -38,10 +38,14 @@ struct _EBookBackendM365Private {
 	GRecMutex property_lock;
 	EM365Connection *cnc;
 	gchar *folder_id;
+	GHashTable *view_cancellables; /* gpointer view ~> GCancellable; shares property_lock */
 	EM365FolderKind folder_kind;
+	gboolean cached_for_offline;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (EBookBackendM365, e_book_backend_m365, E_TYPE_BOOK_META_BACKEND)
+
+static void ebb_m365_check_source_properties (EBookBackendM365 *bbm365);
 
 static void
 ebb_m365_contact_get_string_attribute (EM365Contact *m365_contact,
@@ -1531,6 +1535,229 @@ ebb_m365_contact_to_json_2nd_go_locked (EBookBackendM365 *bbm365,
 	return success;
 }
 
+typedef struct {
+	gboolean is_autocompletion;
+	gchar *auto_comp_str;
+} EM365SExpData;
+
+static ESExpResult *
+ebb_m365_func_not (ESExp *f,
+		   gint argc,
+		   ESExpResult **argv,
+		   gpointer data)
+{
+	ESExpResult *r;
+
+	if (argc != 1 || argv[0]->type != ESEXP_RES_UNDEFINED) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
+ebb_m365_func_and_or (ESExp *f,
+		      gint argc,
+		      ESExpResult **argv,
+		      gpointer data)
+{
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
+ebb_m365_func_is (struct _ESExp *f,
+		  gint argc,
+		  struct _ESExpResult **argv,
+		  gpointer data)
+{
+	ESExpResult *r;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
+ebb_m365_func_endswith (struct _ESExp *f,
+			gint argc,
+			struct _ESExpResult **argv,
+			gpointer data)
+{
+	ESExpResult *r;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+
+}
+
+static ESExpResult *
+ebb_m365_func_contains (struct _ESExp *f,
+			gint argc,
+			struct _ESExpResult **argv,
+			gpointer data)
+{
+	ESExpResult *r;
+	EM365SExpData *sdata = data;
+	const gchar *propname, *str;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	propname = argv[0]->value.string;
+	str = argv[1]->value.string;
+
+	if (!g_ascii_strcasecmp (propname, "full_name") || !g_ascii_strcasecmp (propname, "email") ||
+	    (str && *str && !g_ascii_strcasecmp (propname, "x-evolution-any-field"))) {
+		if (!sdata->auto_comp_str) {
+			sdata->auto_comp_str = g_strdup (str);
+			sdata->is_autocompletion = TRUE;
+		}
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+
+}
+
+/* We are just handling for autocompletion now. */
+static ESExpResult *
+ebb_m365_func_beginswith (struct _ESExp *f,
+			  gint argc,
+			  struct _ESExpResult **argv,
+			  gpointer data)
+{
+	ESExpResult *r;
+	const gchar *propname, *str;
+	EM365SExpData *sdata = data;
+
+	if (argc != 2 ||
+	    argv[0]->type != ESEXP_RES_STRING ||
+	    argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	propname = argv[0]->value.string;
+	str = argv[1]->value.string;
+
+	if (!g_ascii_strcasecmp (propname, "full_name") || !g_ascii_strcasecmp (propname, "email") ||
+	    (str && *str && !g_ascii_strcasecmp (propname, "x-evolution-any-field"))) {
+		if (!sdata->auto_comp_str) {
+			sdata->auto_comp_str = g_strdup (str);
+			sdata->is_autocompletion = TRUE;
+		}
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+	return r;
+}
+
+static ESExpResult *
+ebb_m365_func_exists (struct _ESExp *f,
+		      gint argc,
+		      struct _ESExpResult **argv,
+		      gpointer data)
+{
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+static struct {
+	const gchar *name;
+	ESExpFunc *func;
+	guint flags;
+} symbols[] = {
+	{ "and", ebb_m365_func_and_or, 0 },
+	{ "or", ebb_m365_func_and_or, 0},
+	{ "not", ebb_m365_func_not, 0 },
+	{ "contains", ebb_m365_func_contains, 0},
+	{ "is", ebb_m365_func_is, 0},
+	{ "beginswith", ebb_m365_func_beginswith, 0},
+	{ "endswith", ebb_m365_func_endswith, 0},
+	{ "exists", ebb_m365_func_exists, 0}
+};
+
+static gchar *
+ebb_m365_expr_to_search_text (const gchar *query)
+{
+	ESExp *sexp;
+	gchar *text = NULL;
+	EM365SExpData sdata;
+	guint ii;
+
+	sexp = e_sexp_new ();
+	memset (&sdata, 0, sizeof (EM365SExpData));
+	sdata.is_autocompletion = FALSE;
+
+	for (ii = 0; ii < G_N_ELEMENTS (symbols); ii++) {
+		e_sexp_add_function (
+			sexp, 0, (gchar *) symbols[ii].name,
+			symbols[ii].func,
+			&sdata);
+	}
+
+	e_sexp_input_text (sexp, query, strlen (query));
+
+	if (e_sexp_parse (sexp) == -1) {
+		const gchar *errstr = e_sexp_get_error (sexp);
+
+		g_printerr ("%s: Failed to parse query '%s': %s\n", G_STRFUNC, query, errstr ? errstr : "Unknown error");
+	} else {
+		ESExpResult *r;
+
+		r = e_sexp_eval (sexp);
+		if (r) {
+			if (sdata.is_autocompletion && sdata.auto_comp_str && *sdata.auto_comp_str)
+				text = sdata.auto_comp_str;
+			else
+				g_free (sdata.auto_comp_str);
+		}
+
+		e_sexp_result_free (sexp, r);
+	}
+
+	g_object_unref (sexp);
+
+	return text;
+}
+
 static void
 ebb_m365_convert_error_to_client_error (GError **perror)
 {
@@ -1567,6 +1794,99 @@ ebb_m365_convert_error_to_client_error (GError **perror)
 		g_error_free (*perror);
 		*perror = error;
 	}
+}
+
+static gboolean
+ebb_m365_enum_cached_for_offline (EBookBackendM365 *bbm365)
+{
+	if (bbm365->priv->folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS ||
+	    bbm365->priv->folder_kind == E_M365_FOLDER_KIND_USERS) {
+		ESourceOffline *offline_ext;
+
+		offline_ext = e_source_get_extension (e_backend_get_source (E_BACKEND (bbm365)), E_SOURCE_EXTENSION_OFFLINE);
+		return e_source_offline_get_stay_synchronized (offline_ext);
+	}
+
+	return TRUE;
+}
+
+static gboolean
+ebb_m365_update_cache_for_expression_sync (EBookBackendM365 *bbm365,
+					   const gchar *expr,
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	EBookCache *book_cache;
+	GSList *contacts = NULL; /* EM365Contact * */
+	gchar *text;
+	gboolean success = TRUE;
+
+	if (bbm365->priv->cached_for_offline ||
+	    bbm365->priv->folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		return success;
+
+	if (!expr || !*expr || g_ascii_strcasecmp (expr, "(contains \"x-evolution-any-field\" \"\")") == 0)
+		return success;
+
+	text = ebb_m365_expr_to_search_text (expr);
+	if (!text || !*text) {
+		g_free (text);
+		return success;
+	}
+
+	book_cache = e_book_meta_backend_ref_cache (E_BOOK_META_BACKEND (bbm365));
+	if (!E_IS_BOOK_CACHE (book_cache)) {
+		g_warn_if_fail (E_IS_BOOK_CACHE (book_cache));
+		g_free (text);
+		return FALSE;
+	}
+
+	LOCK (bbm365);
+
+	success = e_book_meta_backend_ensure_connected_sync (E_BOOK_META_BACKEND (bbm365), cancellable, error) &&
+		e_m365_connection_search_contacts_sync (bbm365->priv->cnc, NULL, bbm365->priv->folder_kind, bbm365->priv->folder_id, text, &contacts, cancellable, error);
+
+	if (success && contacts) {
+		EBookBackend *book_backend = E_BOOK_BACKEND (bbm365);
+		GSList *link;
+
+		for (link = contacts; link && success; link = g_slist_next (link)) {
+			EM365Contact *contact = link->data;
+			EContact *vcard;
+			gchar *object;
+			const gchar *id;
+
+			if (!contact)
+				continue;
+
+			id = e_m365_contact_get_id (contact);
+			if (!id)
+				continue;
+
+			vcard = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, &object, cancellable, error);
+
+			if (!g_cancellable_is_cancelled (cancellable))
+				g_warn_if_fail (object != NULL);
+
+			if (object && vcard) {
+				success = e_book_cache_put_contact (book_cache, vcard, object, 0, E_CACHE_IS_ONLINE, cancellable, error);
+
+				if (success)
+					e_book_backend_notify_update (book_backend, vcard);
+			}
+
+			g_clear_object (&vcard);
+			g_free (object);
+		}
+	}
+
+	UNLOCK (bbm365);
+
+	g_slist_free_full (contacts, (GDestroyNotify) json_object_unref);
+	g_clear_object (&book_cache);
+	g_free (text);
+
+	return success;
 }
 
 static void
@@ -1686,6 +2006,8 @@ ebb_m365_connect_sync (EBookMetaBackend *meta_backend,
 
 				folder_id = NULL;
 				success = TRUE;
+
+				ebb_m365_check_source_properties (bbm365);
 			}
 		} else {
 			*out_auth_result = E_SOURCE_AUTHENTICATION_ERROR;
@@ -1802,10 +2124,14 @@ ebb_m365_get_changes_sync (EBookMetaBackend *meta_backend,
 
 	LOCK (bbm365);
 
-	success = e_m365_connection_get_objects_delta_sync (bbm365->priv->cnc, NULL,
-		bbm365->priv->folder_kind, bbm365->priv->folder_id, "id", last_sync_tag, 0,
-		ebb_m365_get_objects_delta_cb, &odd,
-		out_new_sync_tag, cancellable, &local_error);
+	if (bbm365->priv->cached_for_offline) {
+		success = e_m365_connection_get_objects_delta_sync (bbm365->priv->cnc, NULL,
+			bbm365->priv->folder_kind, bbm365->priv->folder_id, "id", last_sync_tag, 0,
+			ebb_m365_get_objects_delta_cb, &odd,
+			out_new_sync_tag, cancellable, &local_error);
+	} else {
+		success = TRUE;
+	}
 
 	if (e_m365_connection_util_delta_token_failed (local_error)) {
 		GSList *known_uids = NULL, *link;
@@ -2134,7 +2460,7 @@ ebb_m365_search_sync (EBookMetaBackend *meta_backend,
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_M365 (meta_backend), FALSE);
 
 	/* Ignore errors, just try its best */
-	/*ebb_m365_update_cache_for_expression (E_BOOK_BACKEND_M365 (meta_backend), expr, cancellable, NULL);*/
+	ebb_m365_update_cache_for_expression_sync (E_BOOK_BACKEND_M365 (meta_backend), expr, cancellable, NULL);
 
 	/* Chain up to parent's method */
 	return E_BOOK_META_BACKEND_CLASS (e_book_backend_m365_parent_class)->search_sync (meta_backend, expr, meta_contact, out_contacts, cancellable, error);
@@ -2150,7 +2476,7 @@ ebb_m365_search_uids_sync (EBookMetaBackend *meta_backend,
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_M365 (meta_backend), FALSE);
 
 	/* Ignore errors, just try its best */
-	/*ebb_m365_update_cache_for_expression (E_BOOK_BACKEND_M365 (meta_backend), expr, cancellable, NULL);*/
+	ebb_m365_update_cache_for_expression_sync (E_BOOK_BACKEND_M365 (meta_backend), expr, cancellable, NULL);
 
 	/* Chain up to parent's method */
 	return E_BOOK_META_BACKEND_CLASS (e_book_backend_m365_parent_class)->search_uids_sync (meta_backend, expr,
@@ -2165,10 +2491,12 @@ ebb_m365_get_backend_property (EBookBackend *book_backend,
 	g_return_val_if_fail (prop_name != NULL, NULL);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
+		gboolean cached_for_offline = ebb_m365_enum_cached_for_offline (E_BOOK_BACKEND_M365 (book_backend));
+
 		return g_strjoin (",",
 			"net",
 			"contact-lists",
-			"do-initial-query",
+			cached_for_offline ? "do-initial-query" : "",
 			e_book_meta_backend_get_capabilities (E_BOOK_META_BACKEND (book_backend)),
 			NULL);
 	} else if (g_str_equal (prop_name, E_BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
@@ -2206,6 +2534,93 @@ ebb_m365_get_backend_property (EBookBackend *book_backend,
 	return E_BOOK_BACKEND_CLASS (e_book_backend_m365_parent_class)->impl_get_backend_property (book_backend, prop_name);
 }
 
+static void
+ebb_m365_start_view_search_thread_func (EBookBackend *book_backend,
+					gpointer user_data,
+					GCancellable *cancellable,
+					GError **error)
+{
+	EDataBookView *view = user_data;
+	EBookBackendM365 *bbm365;
+
+	g_return_if_fail (E_IS_BOOK_BACKEND_M365 (book_backend));
+	g_return_if_fail (E_IS_DATA_BOOK_VIEW (view));
+
+	bbm365 = E_BOOK_BACKEND_M365 (book_backend);
+
+	if (!g_cancellable_set_error_if_cancelled (cancellable, error)) {
+		EBookBackendSExp *sexp;
+		GSList *contacts = NULL;
+		const gchar *expr = NULL;
+
+		sexp = e_data_book_view_get_sexp (view);
+		if (sexp)
+			expr = e_book_backend_sexp_text (sexp);
+
+		/* this is called only for not-cached-for-offline books and it's enough to search for the contacts,
+		   the rest is done by the notifications when added/discovered a new contact */
+		if (e_book_meta_backend_search_sync (E_BOOK_META_BACKEND (book_backend), expr, TRUE, &contacts, cancellable, NULL))
+			g_slist_free_full (contacts, g_object_unref);
+	}
+
+	LOCK (bbm365);
+	g_hash_table_remove (bbm365->priv->view_cancellables, view);
+	UNLOCK (bbm365);
+}
+
+static void
+ebb_m365_start_view (EBookBackend *book_backend,
+		     EDataBookView *view)
+{
+	if ((e_data_book_view_get_flags (view) & E_BOOK_CLIENT_VIEW_FLAGS_MANUAL_QUERY) != 0) {
+		EBookBackendM365 *bbm365 = E_BOOK_BACKEND_M365 (book_backend);
+
+		if (!bbm365->priv->cached_for_offline) {
+			GCancellable *cancellable;
+
+			cancellable = g_cancellable_new ();
+
+			LOCK (bbm365);
+			g_hash_table_insert (bbm365->priv->view_cancellables, view, g_object_ref (cancellable));
+			UNLOCK (bbm365);
+
+			e_book_backend_schedule_custom_operation (book_backend, cancellable,
+				ebb_m365_start_view_search_thread_func, g_object_ref (view), g_object_unref);
+
+			g_clear_object (&cancellable);
+		}
+	}
+
+	/* Chain up to parent's method. */
+	E_BOOK_BACKEND_CLASS (e_book_backend_m365_parent_class)->impl_start_view (book_backend, view);
+}
+
+static void
+ebb_m365_stop_view (EBookBackend *book_backend,
+		    EDataBookView *view)
+{
+	if ((e_data_book_view_get_flags (view) & E_BOOK_CLIENT_VIEW_FLAGS_MANUAL_QUERY) != 0) {
+		EBookBackendM365 *bbm365 = E_BOOK_BACKEND_M365 (book_backend);
+		GCancellable *cancellable;
+		gpointer value = NULL;
+
+		LOCK (bbm365);
+		if (!g_hash_table_steal_extended (bbm365->priv->view_cancellables, view, NULL, &value))
+			value = NULL;
+		UNLOCK (bbm365);
+
+		cancellable = value;
+
+		if (cancellable) {
+			g_cancellable_cancel (cancellable);
+			g_clear_object (&cancellable);
+		}
+	}
+
+	/* Chain up to parent's method. */
+	E_BOOK_BACKEND_CLASS (e_book_backend_m365_parent_class)->impl_stop_view (book_backend, view);
+}
+
 static gboolean
 ebb_m365_get_destination_address (EBackend *backend,
 				  gchar **host,
@@ -2226,6 +2641,27 @@ ebb_m365_get_destination_address (EBackend *backend,
 }
 
 static void
+ebb_m365_check_source_properties (EBookBackendM365 *bbm365)
+{
+	gboolean cached_for_offline;
+
+	cached_for_offline = ebb_m365_enum_cached_for_offline (bbm365);
+
+	if ((cached_for_offline ? 1 : 0) != (bbm365->priv->cached_for_offline ? 1 : 0)) {
+		EBookBackend *book_backend = E_BOOK_BACKEND (bbm365);
+		gchar *value;
+
+		bbm365->priv->cached_for_offline = cached_for_offline;
+
+		value = ebb_m365_get_backend_property (book_backend, CLIENT_BACKEND_PROPERTY_CAPABILITIES);
+
+		e_book_backend_notify_property_changed (book_backend, CLIENT_BACKEND_PROPERTY_CAPABILITIES, value);
+
+		g_free (value);
+	}
+}
+
+static void
 e_book_backend_m365_dispose (GObject *object)
 {
 	EBookBackendM365 *bbm365 = E_BOOK_BACKEND_M365 (object);
@@ -2242,6 +2678,7 @@ e_book_backend_m365_finalize (GObject *object)
 	EBookBackendM365 *bbm365 = E_BOOK_BACKEND_M365 (object);
 
 	g_rec_mutex_clear (&bbm365->priv->property_lock);
+	g_hash_table_destroy (bbm365->priv->view_cancellables);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_book_backend_m365_parent_class)->finalize (object);
@@ -2253,6 +2690,10 @@ e_book_backend_m365_init (EBookBackendM365 *bbm365)
 	bbm365->priv = e_book_backend_m365_get_instance_private (bbm365);
 
 	g_rec_mutex_init (&bbm365->priv->property_lock);
+	bbm365->priv->view_cancellables = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
+
+	g_signal_connect (bbm365, "source-changed",
+		G_CALLBACK (ebb_m365_check_source_properties), NULL);
 }
 
 static void
@@ -2277,6 +2718,8 @@ e_book_backend_m365_class_init (EBookBackendM365Class *klass)
 
 	book_backend_class = E_BOOK_BACKEND_CLASS (klass);
 	book_backend_class->impl_get_backend_property = ebb_m365_get_backend_property;
+	book_backend_class->impl_start_view = ebb_m365_start_view;
+	book_backend_class->impl_stop_view = ebb_m365_stop_view;
 
 	backend_class = E_BACKEND_CLASS (klass);
 	backend_class->get_destination_address = ebb_m365_get_destination_address;

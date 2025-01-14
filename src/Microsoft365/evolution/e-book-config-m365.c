@@ -8,6 +8,7 @@
 #include <glib/gi18n-lib.h>
 
 #include "common/camel-m365-settings.h"
+#include "common/e-m365-connection.h"
 #include "common/e-source-m365-folder.h"
 
 #include "e-book-config-m365.h"
@@ -30,6 +31,18 @@ book_config_m365_insert_widgets (ESourceConfigBackend *backend,
 		return;
 
 	config = e_source_config_backend_get_config (backend);
+
+	if (e_source_has_extension (scratch_source, E_SOURCE_EXTENSION_M365_FOLDER)) {
+		ESourceM365Folder *m365_folder_ext;
+		const gchar *id;
+
+		m365_folder_ext = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_M365_FOLDER);
+		id = e_source_m365_folder_get_id (m365_folder_ext);
+
+		if (g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS) == 0 ||
+		    g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_USERS) == 0)
+			e_book_source_config_add_offline_toggle (E_BOOK_SOURCE_CONFIG (config), scratch_source);
+	}
 
 	e_source_config_add_refresh_interval (config, scratch_source);
 	e_source_config_add_refresh_on_metered_network (config, scratch_source);

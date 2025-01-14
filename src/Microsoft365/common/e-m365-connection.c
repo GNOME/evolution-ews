@@ -11,6 +11,7 @@
 #include <json-glib/json-glib.h>
 
 #include "camel-m365-settings.h"
+#include "e-ews-common-utils.h"
 #include "e-m365-json-utils.h"
 
 #include "e-m365-connection.h"
@@ -3756,6 +3757,129 @@ e_m365_connection_get_contacts_internal_sync (EM365Connection *cnc,
 	return success;
 }
 
+/* https://learn.microsoft.com/en-us/graph/aad-advanced-queries?tabs=http
+   https://learn.microsoft.com/en-us/graph/search-query-parameter?tabs=http */
+
+static gboolean
+e_m365_connection_search_contacts_internal_sync (EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EM365FolderKind folder_kind,
+						 const gchar *folder_id,
+						 const gchar *search_text,
+						 GSList **out_contacts, /* transfer full, EM365Contact * */
+						 GCancellable *cancellable,
+						 GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message = NULL;
+	const gchar *api_part = NULL;
+	const gchar *kind_str = NULL;
+	const gchar *kind_path_str = NULL;
+	GString *search_str = NULL;
+	gchar *uri, *filter = NULL, *mail_filter = NULL;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_kind == E_M365_FOLDER_KIND_CONTACTS ||
+			      folder_kind == E_M365_FOLDER_KIND_ORG_CONTACTS ||
+			      folder_kind == E_M365_FOLDER_KIND_USERS, FALSE);
+	if (folder_kind == E_M365_FOLDER_KIND_CONTACTS)
+		g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (search_text != NULL, FALSE);
+	g_return_val_if_fail (out_contacts != NULL, FALSE);
+
+	*out_contacts = NULL;
+
+	if (strchr (search_text, '\'')) {
+		search_str = e_ews_common_utils_str_replace_string (search_text, "'", "''");
+		search_text = search_str->str;
+	}
+
+	if (strchr (search_text, '\"')) {
+		GString *tmp;
+
+		/* remove double quotes */
+		tmp = e_ews_common_utils_str_replace_string (search_text, "\"", "");
+		if (search_str)
+			g_string_free (search_str, TRUE);
+
+		search_str = tmp;
+		search_text = search_str->str;
+	}
+
+	switch (folder_kind) {
+	case E_M365_FOLDER_KIND_CONTACTS:
+		g_return_val_if_fail (folder_id != NULL, FALSE);
+		kind_str = "contactFolders";
+		kind_path_str = "contacts";
+		mail_filter = g_strconcat ("\"emailAddresses:", search_text, "\"", NULL);
+		break;
+	case E_M365_FOLDER_KIND_ORG_CONTACTS:
+		api_part = "contacts";
+		mail_filter = g_strconcat ("\"mail:", search_text, "\"", NULL);
+		break;
+	case E_M365_FOLDER_KIND_USERS:
+		api_part = "users";
+		mail_filter = g_strconcat ("\"mail:", search_text, "\"", NULL);
+		break;
+	default:
+		g_warn_if_reached ();
+		break;
+	}
+
+	filter = g_strconcat (
+		"\"displayName:", search_text, "\""
+		" OR "
+		"\"givenName:", search_text, "\""
+		" OR "
+		"\"surname:", search_text, "\"",
+		mail_filter ? " OR " : NULL,
+		mail_filter,
+		NULL);
+
+	uri = e_m365_connection_construct_uri (cnc, api_part == NULL, user_override, E_M365_API_V1_0, api_part,
+		kind_str,
+		folder_id,
+		kind_path_str,
+		"$top", "50", /* no need for too many; server default is currently 250 */
+		"$count", "true", /* required */
+		"$search", filter,
+		NULL);
+
+	if (search_str)
+		g_string_free (search_str, TRUE);
+	g_free (mail_filter);
+	g_free (filter);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	/* required */
+	soup_message_headers_append (soup_message_get_request_headers (message), "ConsistencyLevel", "eventual");
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = out_contacts;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	if (!success && *out_contacts) {
+		g_slist_free_full (*out_contacts, (GDestroyNotify) json_object_unref);
+		*out_contacts = NULL;
+	}
+
+	return success;
+}
+
 gboolean
 e_m365_connection_get_contacts_sync (EM365Connection *cnc,
 				     const gchar *user_override, /* for which user, NULL to use the account user */
@@ -4074,6 +4198,20 @@ e_m365_connection_get_users_sync (EM365Connection *cnc,
 {
 	return e_m365_connection_get_contacts_internal_sync (cnc, user_override, E_M365_FOLDER_KIND_USERS,
 		NULL, ids, out_contacts, cancellable, error);
+}
+
+gboolean
+e_m365_connection_search_contacts_sync (EM365Connection *cnc,
+					const gchar *user_override, /* for which user, NULL to use the account user */
+					EM365FolderKind kind,
+					const gchar *folder_id,
+					const gchar *search_text,
+					GSList **out_contacts, /* transfer full, EM365Contact * */
+					GCancellable *cancellable,
+					GError **error)
+{
+	return e_m365_connection_search_contacts_internal_sync (cnc, user_override, kind,
+		folder_id, search_text, out_contacts, cancellable, error);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/user-list-calendargroups?view=graph-rest-1.0&tabs=http */

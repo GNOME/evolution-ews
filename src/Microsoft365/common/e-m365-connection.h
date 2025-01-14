@@ -441,6 +441,15 @@ gboolean	e_m365_connection_get_users_sync(EM365Connection *cnc,
 						 GPtrArray **out_contacts, /* EM365Contact * */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_search_contacts_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EM365FolderKind kind,
+						 const gchar *folder_id,
+						 const gchar *search_text,
+						 GSList **out_contacts, /* transfer full, EM365Contact * */
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_m365_connection_list_calendar_groups_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
