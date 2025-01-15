@@ -259,6 +259,14 @@ static MapData task_list_kind_map[] = {
 	{ "unknownFutureValue",	E_M365_TASK_LIST_KIND_UNKNOWN_FUTURE_VALUE }
 };
 
+static MapData website_type_map[] = {
+	{ "other",	E_M365_WEBSITE_TYPE_OTHER },
+	{ "home",	E_M365_WEBSITE_TYPE_HOME },
+	{ "work",	E_M365_WEBSITE_TYPE_WORK },
+	{ "blog",	E_M365_WEBSITE_TYPE_BLOG },
+	{ "profile",	E_M365_WEBSITE_TYPE_PROFILE }
+};
+
 const gchar *
 e_m365_calendar_color_to_rgb (EM365CalendarColorType color)
 {
@@ -2453,6 +2461,118 @@ const gchar *
 e_m365_contact_user_get_street_address (EM365Contact *contact)
 {
 	return e_m365_json_get_string_member (contact, "streetAddress", NULL);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/person?view=graph-rest-1.0 */
+const gchar *
+e_m365_contact_person_get_im_address (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "imAddress", NULL);
+}
+
+gboolean
+e_m365_contact_person_get_is_favorite (EM365Contact *contact)
+{
+	return e_m365_json_get_boolean_member (contact, "isFavorite", FALSE);
+}
+
+const gchar *
+e_m365_contact_person_get_type_class (EM365Contact *contact)
+{
+	JsonObject *obj;
+
+	obj = e_m365_json_get_object_member (contact, "personType");
+	if (!obj)
+		return NULL;
+
+	/* https://learn.microsoft.com/en-us/graph/api/resources/persontype?view=graph-rest-1.0 */
+	return e_m365_json_get_string_member (obj, "class", NULL);
+}
+
+const gchar *
+e_m365_contact_person_get_type_subclass (EM365Contact *contact)
+{
+	JsonObject *obj;
+
+	obj = e_m365_json_get_object_member (contact, "personType");
+	if (!obj)
+		return NULL;
+
+	/* https://learn.microsoft.com/en-us/graph/api/resources/persontype?view=graph-rest-1.0 */
+	return e_m365_json_get_string_member (obj, "subclass", NULL);
+}
+
+JsonArray * /* EM365Phone * */
+e_m365_contact_person_get_phones (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "phones");
+}
+
+JsonArray * /* EM365Location * */
+e_m365_contact_person_get_postal_addresses (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "postalAddresses");
+}
+
+JsonArray * /* EM365ScoredEmailAddress * */
+e_m365_contact_person_get_scored_email_addresses (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "scoredEmailAddresses");
+}
+
+const gchar *
+e_m365_contact_person_get_user_principal_name (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "userPrincipalName", NULL);
+}
+
+JsonArray * /* EM365Website * */
+e_m365_contact_person_get_websites (EM365Contact *contact)
+{
+	return e_m365_json_get_array_member (contact, "websites");
+}
+
+const gchar *
+e_m365_contact_person_get_yomi_company (EM365Contact *contact)
+{
+	return e_m365_json_get_string_member (contact, "yomiCompany", NULL);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/scoredemailaddress?view=graph-rest-1.0 */
+
+const gchar *
+e_m365_scored_email_address_get_address (EM365ScoredEmailAddress *scored_email_address)
+{
+	return e_m365_json_get_string_member (scored_email_address, "address", NULL);
+}
+
+gdouble
+e_m365_scored_email_address_get_relevance_score (EM365ScoredEmailAddress *scored_email_address)
+{
+	return e_m365_json_get_double_member (scored_email_address, "relevanceScore", -1.0);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/website?view=graph-rest-1.0 */
+
+const gchar *
+e_m365_website_get_address (EM365Website *website)
+{
+	return e_m365_json_get_string_member (website, "address", NULL);
+}
+
+const gchar *
+e_m365_website_get_display_name (EM365Website *website)
+{
+	return e_m365_json_get_string_member (website, "displayName", NULL);
+}
+
+EM365WebsiteType
+e_m365_website_get_type (EM365Website *website)
+{
+	return m365_json_utils_get_json_as_enum (website, "type",
+		website_type_map, G_N_ELEMENTS (website_type_map),
+		E_M365_WEBSITE_TYPE_NOT_SET,
+		E_M365_WEBSITE_TYPE_UNKNOWN);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/calendargroup?view=graph-rest-1.0 */

@@ -51,6 +51,7 @@ src/Microsoft365/camel/camel-m365-utils.c
 src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c
 src/Microsoft365/common/e-oauth2-service-microsoft365.c
 src/Microsoft365/common/e-m365-connection.c
+src/Microsoft365/evolution/e-book-config-m365.c
 src/Microsoft365/evolution/e-m365-comp-editor-extension.c
 src/Microsoft365/evolution/e-mail-config-m365-backend.c
 src/Microsoft365/registry/e-m365-backend.c

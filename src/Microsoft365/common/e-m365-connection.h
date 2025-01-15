@@ -19,6 +19,7 @@
 
 #define E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS	"folder-id::orgContacts"
 #define E_M365_ARTIFICIAL_FOLDER_ID_USERS		"folder-id::users"
+#define E_M365_ARTIFICIAL_FOLDER_ID_PEOPLE		"folder-id::people"
 
 /* Currently, as of 2020-06-17, there is a limitation to 20 requests:
    https://docs.microsoft.com/en-us/graph/known-issues#json-batching */
@@ -448,6 +449,18 @@ gboolean	e_m365_connection_search_contacts_sync
 						 const gchar *folder_id,
 						 const gchar *search_text,
 						 GSList **out_contacts, /* transfer full, EM365Contact * */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_people_accessible_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_people_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 guint max_entries,
+						 GPtrArray **out_contacts, /* EM365Contact * */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_list_calendar_groups_sync

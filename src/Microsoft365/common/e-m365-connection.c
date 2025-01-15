@@ -1348,6 +1348,7 @@ typedef struct _EM365ResponseData {
 	gpointer func_user_data;
 	gboolean read_only_once; /* To be able to just try authentication */
 	GSList **out_items; /* JsonObject * */
+	GPtrArray *out_array_items; /* JsonObject * */
 	gchar **out_delta_link; /* set only if available and not NULL */
 	GPtrArray *inout_requests; /* SoupMessage *, for the batch request */
 } EM365ResponseData;
@@ -1401,6 +1402,8 @@ e_m365_read_valued_response_cb (EM365Connection *cnc,
 			if (elem_object) {
 				if (response_data->out_items)
 					*response_data->out_items = g_slist_prepend (*response_data->out_items, json_object_ref (elem_object));
+				else if (response_data->out_array_items)
+					g_ptr_array_add (response_data->out_array_items, json_object_ref (elem_object));
 				else
 					items = g_slist_prepend (items, json_object_ref (elem_object));
 			}
@@ -1512,6 +1515,9 @@ e_m365_connection_authenticate_sync (EM365Connection *cnc,
 		break;
 	case E_M365_FOLDER_KIND_USERS:
 		success = e_m365_connection_get_users_accessible_sync (cnc, user_override, cancellable, &local_error);
+		break;
+	case E_M365_FOLDER_KIND_PEOPLE:
+		success = e_m365_connection_get_people_accessible_sync (cnc, user_override, cancellable, &local_error);
 		break;
 	case E_M365_FOLDER_KIND_CALENDAR:
 		if (folder_id && !*folder_id)
@@ -4212,6 +4218,114 @@ e_m365_connection_search_contacts_sync (EM365Connection *cnc,
 {
 	return e_m365_connection_search_contacts_internal_sync (cnc, user_override, kind,
 		folder_id, search_text, out_contacts, cancellable, error);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/user-list-people?view=graph-rest-1.0&tabs=http */
+
+static gboolean
+e_m365_connection_get_people_internal_sync (EM365Connection *cnc,
+					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    gboolean id_only,
+					    guint max_entries,
+					    GPtrArray **out_contacts,
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri, *max_entries_str = NULL;
+	const gchar *param_name1 = NULL, *param_value1 = NULL;
+	const gchar *param_name2 = NULL, *param_value2 = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_contacts != NULL, FALSE);
+
+	if (max_entries > 0) {
+		max_entries_str = g_strdup_printf ("%u", max_entries);
+
+		param_name1 = "$top";
+		param_value1 = max_entries_str;
+	}
+
+	if (id_only) {
+		param_name2 = "$select";
+		param_value2 = "id";
+	}
+
+	if (!param_name1) {
+		param_name1 = param_name2;
+		param_value1 = param_value2;
+		param_name2 = NULL;
+		param_value2 = NULL;
+	}
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		"people", NULL, NULL,
+		param_name1, param_value1,
+		param_name2, param_value2,
+		NULL);
+
+	g_free (max_entries_str);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.read_only_once = id_only;
+	rd.out_array_items = g_ptr_array_new_with_free_func ((GDestroyNotify) json_object_unref);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	if (success)
+		*out_contacts = rd.out_array_items;
+	else
+		g_ptr_array_unref (rd.out_array_items);
+
+	return success;
+}
+
+
+gboolean
+e_m365_connection_get_people_accessible_sync (EM365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	GPtrArray *contacts = NULL;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+
+	if (!e_m365_connection_get_people_internal_sync (cnc, user_override, TRUE, 1, &contacts, cancellable, error))
+		return FALSE;
+
+	g_clear_pointer (&contacts, g_ptr_array_unref);
+
+	return TRUE;
+}
+
+gboolean
+e_m365_connection_get_people_sync (EM365Connection *cnc,
+				   const gchar *user_override, /* for which user, NULL to use the account user */
+				   guint max_entries,
+				   GPtrArray **out_contacts, /* EM365Contact * */
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_contacts != NULL, FALSE);
+
+	return e_m365_connection_get_people_internal_sync (cnc, user_override, FALSE, max_entries, out_contacts, cancellable, error);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/user-list-calendargroups?view=graph-rest-1.0&tabs=http */

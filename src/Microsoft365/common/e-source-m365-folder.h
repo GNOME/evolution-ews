@@ -74,6 +74,11 @@ const gchar *	e_source_m365_folder_get_color	(ESourceM365Folder *extension);
 gchar *		e_source_m365_folder_dup_color	(ESourceM365Folder *extension);
 void		e_source_m365_folder_set_color	(ESourceM365Folder *extension,
 						 const gchar *color);
+guint		e_source_m365_folder_get_max_people
+						(ESourceM365Folder *extension);
+void		e_source_m365_folder_set_max_people
+						(ESourceM365Folder *extension,
+						 guint max_people);
 
 G_END_DECLS
 

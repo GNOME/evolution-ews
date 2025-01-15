@@ -13,6 +13,7 @@ struct _ESourceM365FolderPrivate {
 	gchar *display_name;
 	gchar *color;
 	gboolean is_default;
+	guint max_people;
 };
 
 enum {
@@ -21,7 +22,8 @@ enum {
 	PROP_IS_DEFAULT,
 	PROP_GROUP_ID,
 	PROP_DISPLAY_NAME,
-	PROP_COLOR
+	PROP_COLOR,
+	PROP_MAX_PEOPLE
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ESourceM365Folder, e_source_m365_folder, E_TYPE_SOURCE_EXTENSION)
@@ -61,6 +63,12 @@ source_m365_folder_set_property (GObject *object,
 			e_source_m365_folder_set_color (
 				E_SOURCE_M365_FOLDER (object),
 				g_value_get_string (value));
+			return;
+
+		case PROP_MAX_PEOPLE:
+			e_source_m365_folder_set_max_people (
+				E_SOURCE_M365_FOLDER (object),
+				g_value_get_uint (value));
 			return;
 	}
 
@@ -106,6 +114,13 @@ source_m365_folder_get_property (GObject *object,
 			g_value_take_string (
 				value,
 				e_source_m365_folder_dup_color (
+				E_SOURCE_M365_FOLDER (object)));
+			return;
+
+		case PROP_MAX_PEOPLE:
+			g_value_set_uint (
+				value,
+				e_source_m365_folder_get_max_people (
 				E_SOURCE_M365_FOLDER (object)));
 			return;
 	}
@@ -201,6 +216,19 @@ e_source_m365_folder_class_init (ESourceM365FolderClass *class)
 			"Color",
 			NULL,
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_MAX_PEOPLE,
+		g_param_spec_uint (
+			"max-people",
+			"MaxPeople",
+			NULL,
+			0, G_MAXUINT, 100,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS |
@@ -435,4 +463,32 @@ e_source_m365_folder_set_color (ESourceM365Folder *extension,
 	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
 
 	g_object_notify (G_OBJECT (extension), "color");
+}
+
+guint
+e_source_m365_folder_get_max_people (ESourceM365Folder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_M365_FOLDER (extension), 1);
+
+	return extension->priv->max_people;
+}
+
+void
+e_source_m365_folder_set_max_people (ESourceM365Folder *extension,
+				     guint max_people)
+{
+	g_return_if_fail (E_IS_SOURCE_M365_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if (extension->priv->max_people == max_people) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	extension->priv->max_people = max_people;
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "max-people");
 }

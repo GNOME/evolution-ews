@@ -40,8 +40,43 @@ book_config_m365_insert_widgets (ESourceConfigBackend *backend,
 		id = e_source_m365_folder_get_id (m365_folder_ext);
 
 		if (g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS) == 0 ||
-		    g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_USERS) == 0)
+		    g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_USERS) == 0) {
 			e_book_source_config_add_offline_toggle (E_BOOK_SOURCE_CONFIG (config), scratch_source);
+		} else if (g_strcmp0 (id, E_M365_ARTIFICIAL_FOLDER_ID_PEOPLE) == 0) {
+			GtkWidget *widget;
+			GtkWidget *container;
+			ESourceExtension *extension;
+
+			extension = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_M365_FOLDER);
+
+			widget = gtk_alignment_new (0.0, 0.5, 0.0, 0.0);
+			e_source_config_insert_widget (config, scratch_source, NULL, widget);
+			gtk_widget_show (widget);
+
+			container = widget;
+
+			widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+			gtk_container_add (GTK_CONTAINER (container), widget);
+			gtk_widget_show (widget);
+
+			container = widget;
+
+			widget = gtk_label_new (_("Maximum contacts to download"));
+			gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+			gtk_widget_show (widget);
+
+			widget = gtk_spin_button_new_with_range (0, G_MAXUINT, 1);
+			gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (widget), TRUE);
+			gtk_spin_button_set_update_policy (GTK_SPIN_BUTTON (widget), GTK_UPDATE_IF_VALID);
+			gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+			gtk_widget_show (widget);
+
+			e_binding_bind_property (
+				extension, "max-people",
+				widget, "value",
+				G_BINDING_BIDIRECTIONAL |
+				G_BINDING_SYNC_CREATE);
+		}
 	}
 
 	e_source_config_add_refresh_interval (config, scratch_source);

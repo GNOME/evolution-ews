@@ -43,9 +43,11 @@ G_BEGIN_DECLS
 #define EM365ResponseStatus		JsonObject
 #define EM365ScheduleInformation	JsonObject
 #define EM365ScheduleItem		JsonObject
+#define EM365ScoredEmailAddress		JsonObject
 #define EM365Task			JsonObject
 #define EM365TaskList			JsonObject
 #define EM365TimeOfDay			gint64
+#define EM365Website			JsonObject
 #define EM365WorkingHours		JsonObject
 
 #define E_M365_RECURRENCE_BLOB_NAME "Binary {00062002-0000-0000-c000-000000000046} Id 0x8216"
@@ -249,6 +251,16 @@ typedef enum _EM365TaskListKind {
 	E_M365_TASK_LIST_KIND_FLAGGED_EMAILS,
 	E_M365_TASK_LIST_KIND_UNKNOWN_FUTURE_VALUE
 } EM365TaskListKind;
+
+typedef enum _EM365WebsiteType {
+	E_M365_WEBSITE_TYPE_NOT_SET,
+	E_M365_WEBSITE_TYPE_UNKNOWN,
+	E_M365_WEBSITE_TYPE_OTHER,
+	E_M365_WEBSITE_TYPE_HOME,
+	E_M365_WEBSITE_TYPE_WORK,
+	E_M365_WEBSITE_TYPE_BLOG,
+	E_M365_WEBSITE_TYPE_PROFILE
+} EM365WebsiteType;
 
 const gchar *	e_m365_calendar_color_to_rgb		(EM365CalendarColorType color);
 EM365CalendarColorType
@@ -700,6 +712,29 @@ const gchar *	e_m365_contact_user_get_postal_code	(EM365Contact *contact);
 JsonArray *	e_m365_contact_user_get_proxy_addresses	(EM365Contact *contact); /* const gchar * */
 const gchar *	e_m365_contact_user_get_state		(EM365Contact *contact);
 const gchar *	e_m365_contact_user_get_street_address	(EM365Contact *contact);
+
+const gchar *	e_m365_contact_person_get_im_address	(EM365Contact *contact);
+gboolean	e_m365_contact_person_get_is_favorite	(EM365Contact *contact);
+const gchar *	e_m365_contact_person_get_type_class	(EM365Contact *contact);
+const gchar *	e_m365_contact_person_get_type_subclass	(EM365Contact *contact);
+JsonArray *	e_m365_contact_person_get_phones	(EM365Contact *contact); /* EM365Phone * */
+JsonArray *	e_m365_contact_person_get_postal_addresses			 /* EM365Location * */
+							(EM365Contact *contact);
+JsonArray *	e_m365_contact_person_get_scored_email_addresses		 /* EM365ScoredEmailAddress * */
+							(EM365Contact *contact);
+const gchar *	e_m365_contact_person_get_user_principal_name
+							(EM365Contact *contact);
+JsonArray *	e_m365_contact_person_get_websites	(EM365Contact *contact); /* EM365Website * */
+const gchar *	e_m365_contact_person_get_yomi_company	(EM365Contact *contact);
+
+const gchar *	e_m365_scored_email_address_get_address	(EM365ScoredEmailAddress *scored_email_address);
+gdouble		e_m365_scored_email_address_get_relevance_score
+							(EM365ScoredEmailAddress *scored_email_address);
+
+const gchar *	e_m365_website_get_address		(EM365Website *website);
+const gchar *	e_m365_website_get_display_name		(EM365Website *website);
+EM365WebsiteType
+		e_m365_website_get_type			(EM365Website *website);
 
 const gchar *	e_m365_calendar_group_get_id		(EM365CalendarGroup *group);
 const gchar *	e_m365_calendar_group_get_change_key	(EM365CalendarGroup *group);

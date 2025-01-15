@@ -311,6 +311,7 @@ m365_backend_forget_book_folders (EM365Backend *m365_backend,
 
 	g_hash_table_remove (ids, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS);
 	g_hash_table_remove (ids, E_M365_ARTIFICIAL_FOLDER_ID_USERS);
+	g_hash_table_remove (ids, E_M365_ARTIFICIAL_FOLDER_ID_PEOPLE);
 
 	m365_backend_forget_folders_hash (m365_backend, extension_name, ids);
 
@@ -417,6 +418,13 @@ m365_backend_sync_contact_folders_sync (EM365Backend *m365_backend,
 			E_M365_ARTIFICIAL_FOLDER_ID_USERS, NULL, _("Organizational Users"), TRUE, NULL);
 	} else {
 		m365_backend_remove_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, E_M365_ARTIFICIAL_FOLDER_ID_USERS);
+	}
+
+	if (e_m365_connection_get_people_accessible_sync (cnc, NULL, cancellable, NULL)) {
+		m365_backend_update_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK,
+			E_M365_ARTIFICIAL_FOLDER_ID_PEOPLE, NULL, _("Recent Contacts"), TRUE, NULL);
+	} else {
+		m365_backend_remove_resource (m365_backend, E_SOURCE_EXTENSION_ADDRESS_BOOK, E_M365_ARTIFICIAL_FOLDER_ID_PEOPLE);
 	}
 }
 
