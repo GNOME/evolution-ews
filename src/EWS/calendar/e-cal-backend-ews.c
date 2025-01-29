@@ -4500,6 +4500,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			E_CAL_STATIC_CAPABILITY_TASK_CAN_RECUR,
 			E_CAL_STATIC_CAPABILITY_TASK_HANDLE_RECUR,
 			E_CAL_STATIC_CAPABILITY_RETRACT_SUPPORTED,
+			E_CAL_STATIC_CAPABILITY_USER_IS_ORGANIZER_ONLY,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbews)),
 			NULL);
 	} else if (g_str_equal (prop_name, E_CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
