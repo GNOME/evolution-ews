@@ -4821,6 +4821,244 @@ e_m365_connection_delete_calendar_sync (EM365Connection *cnc,
 	return success;
 }
 
+/* https://learn.microsoft.com/en-us/graph/api/calendar-list-calendarpermissions?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_list_calendar_permissions_sync (EM365Connection *cnc,
+						  const gchar *user_override, /* for which user, NULL to use the account user */
+						  const gchar *group_id, /* nullable - calendar group for group calendars */
+						  const gchar *calendar_id,
+						  GSList **out_permissions, /* EM365CalendarPermission * */
+						  GCancellable *cancellable,
+						  GError **error)
+{
+	EM365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (out_permissions != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "calendarPermissions",
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EM365ResponseData));
+
+	rd.out_items = out_permissions;
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/calendar-post-calendarpermissions?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_create_calendar_permission_sync (EM365Connection *cnc,
+						   const gchar *user_override, /* for which user, NULL to use the account user */
+						   const gchar *group_id, /* nullable, then the default group is used */
+						   const gchar *calendar_id,
+						   JsonBuilder *permission,
+						   EM365CalendarPermission **out_created_permission,
+						   GCancellable *cancellable,
+						   GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (permission != NULL, FALSE);
+	g_return_val_if_fail (out_created_permission != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "calendarPermissions",
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_POST, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, permission);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_created_permission, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/calendarpermission-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_calendar_permission_sync (EM365Connection *cnc,
+						const gchar *user_override, /* for which user, NULL to use the account user */
+						const gchar *group_id, /* nullable, then the default group is used */
+						const gchar *calendar_id,
+						const gchar *permission_id,
+						EM365CalendarPermission **out_permission,
+						GCancellable *cancellable,
+						GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (permission_id != NULL, FALSE);
+	g_return_val_if_fail (out_permission != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "calendarPermissions",
+		"", permission_id,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_permission, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/calendarpermission-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_update_calendar_permission_sync (EM365Connection *cnc,
+						   const gchar *user_override, /* for which user, NULL to use the account user */
+						   const gchar *group_id, /* nullable - then the default group is used */
+						   const gchar *calendar_id,
+						   const gchar *permission_id,
+						   JsonBuilder *permission,
+						   GCancellable *cancellable,
+						   GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (permission_id != NULL, FALSE);
+	g_return_val_if_fail (permission != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "calendarPermissions",
+		"", permission_id,
+		NULL);
+
+	message = m365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, permission);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/calendarpermission-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_delete_calendar_permission_sync (EM365Connection *cnc,
+						   const gchar *user_override, /* for which user, NULL to use the account user */
+						   const gchar *group_id, /* nullable - then the default group is used */
+						   const gchar *calendar_id,
+						   const gchar *permission_id,
+						   GCancellable *cancellable,
+						   GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (calendar_id != NULL, FALSE);
+	g_return_val_if_fail (permission_id != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+		group_id ? "calendarGroups" : "calendars",
+		group_id,
+		group_id ? "calendars" : NULL,
+		"", calendar_id,
+		"", "calendarPermissions",
+		"", permission_id,
+		NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
 static void
 m365_connection_prefer_outlook_timezone (SoupMessage *message,
 					 const gchar *prefer_outlook_timezone)

@@ -537,6 +537,49 @@ gboolean	e_m365_connection_delete_calendar_sync
 						 const gchar *calendar_id,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_m365_connection_list_calendar_permissions_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - calendar group for group calendars */
+						 const gchar *calendar_id,
+						 GSList **out_permissions, /* EM365CalendarPermission * */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_create_calendar_permission_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 JsonBuilder *permission,
+						 EM365CalendarPermission **out_created_permission,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_calendar_permission_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable, then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *permission_id,
+						 EM365CalendarPermission **out_permission,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_update_calendar_permission_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *permission_id,
+						 JsonBuilder *permission,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_delete_calendar_permission_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *group_id, /* nullable - then the default group is used */
+						 const gchar *calendar_id,
+						 const gchar *permission_id,
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_m365_connection_list_events_sync
 						(EM365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */

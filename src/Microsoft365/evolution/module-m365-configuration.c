@@ -14,6 +14,7 @@
 #include "e-cal-config-m365.h"
 #include "e-book-config-m365.h"
 #include "e-m365-comp-editor-extension.h"
+#include "e-m365-config-ui-extension.h"
 #include "e-mail-config-m365-backend.h"
 
 /* Module Entry Points */
@@ -32,6 +33,7 @@ e_module_load (GTypeModule *type_module)
 
 	e_cal_config_m365_type_register (type_module);
 	e_book_config_m365_type_register (type_module);
+	e_m365_config_ui_extension_type_register (type_module);
 	e_m365_comp_editor_extension_type_register (type_module);
 	e_mail_config_m365_backend_type_register (type_module);
 }

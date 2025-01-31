@@ -16,6 +16,7 @@ G_BEGIN_DECLS
 #define EM365Attendee			JsonObject
 #define EM365Calendar			JsonObject
 #define EM365CalendarGroup		JsonObject
+#define EM365CalendarPermission		JsonObject
 #define EM365Category			JsonObject
 #define EM365ChecklistItem		JsonObject
 #define EM365Contact			JsonObject
@@ -84,6 +85,19 @@ typedef enum _EM365CalendarColorType {
 	E_M365_CALENDAR_COLOR_LIGHT_RED		= 8,
 	E_M365_CALENDAR_COLOR_MAX_COLOR		= 9
 } EM365CalendarColorType;
+
+typedef enum _EM365CalendarPermissionType {
+	E_M365_CALENDAR_PERMISSION_NOT_SET				 = -1,
+	E_M365_CALENDAR_PERMISSION_UNKNOWN				 = 0,
+	E_M365_CALENDAR_PERMISSION_NONE					 = 1 << 0,
+	E_M365_CALENDAR_PERMISSION_FREE_BUSY_READ			 = 1 << 1,
+	E_M365_CALENDAR_PERMISSION_LIMITED_READ				 = 1 << 2,
+	E_M365_CALENDAR_PERMISSION_READ					 = 1 << 3,
+	E_M365_CALENDAR_PERMISSION_WRITE				 = 1 << 4,
+	E_M365_CALENDAR_PERMISSION_DELEGATE_WITHOUT_PRIVATE_EVENT_ACCESS = 1 << 5,
+	E_M365_CALENDAR_PERMISSION_DELEGATE_WITH_PRIVATE_EVENT_ACCESS	 = 1 << 6,
+	E_M365_CALENDAR_PERMISSION_CUSTOM				 = 1 << 7
+} EM365CalendarPermissionType;
 
 typedef enum _EM365DayOfWeekType {
 	E_M365_DAY_OF_WEEK_NOT_SET,
@@ -771,6 +785,31 @@ EM365OnlineMeetingProviderType
 void		e_m365_calendar_add_default_online_meeting_provider
 							(JsonBuilder *builder,
 							 EM365OnlineMeetingProviderType provider);
+guint32		e_m365_calendar_permission_get_allowed_roles /* bit-or of EM365CalendarPermissionType */
+							(EM365CalendarPermission *permission);
+EM365EmailAddress *
+		e_m365_calendar_permission_get_email_address
+							(EM365CalendarPermission *permission);
+void		e_m365_calendar_permission_add_email_address
+							(JsonBuilder *builder,
+							 const gchar *name,
+							 const gchar *address);
+const gchar *	e_m365_calendar_permission_get_id	(EM365CalendarPermission *permission);
+gboolean	e_m365_calendar_permission_get_is_inside_organization
+							(EM365CalendarPermission *permission);
+void		e_m365_calendar_permission_add_is_inside_organization
+							(JsonBuilder *builder,
+							 gboolean value);
+gboolean	e_m365_calendar_permission_get_is_removable
+							(EM365CalendarPermission *permission);
+void		e_m365_calendar_permission_add_is_removable
+							(JsonBuilder *builder,
+							 gboolean value);
+EM365CalendarPermissionType
+		e_m365_calendar_permission_get_role	(EM365CalendarPermission *permission);
+void		e_m365_calendar_permission_add_role
+							(JsonBuilder *builder,
+							 EM365CalendarPermissionType value);
 EM365ResponseType
 		e_m365_response_status_get_response	(EM365ResponseStatus *response_status);
 time_t		e_m365_response_status_get_time		(EM365ResponseStatus *response_status);

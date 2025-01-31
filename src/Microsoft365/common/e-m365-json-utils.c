@@ -124,6 +124,17 @@ static struct _color_map {
 	{ "maxColor",	NULL,		E_M365_CALENDAR_COLOR_MAX_COLOR }
 };
 
+static MapData calendar_role_map[] = {
+	{ "none",				E_M365_CALENDAR_PERMISSION_NONE },
+	{ "freeBusyRead",			E_M365_CALENDAR_PERMISSION_FREE_BUSY_READ },
+	{ "limitedRead",			E_M365_CALENDAR_PERMISSION_LIMITED_READ },
+	{ "read",				E_M365_CALENDAR_PERMISSION_READ },
+	{ "write",				E_M365_CALENDAR_PERMISSION_WRITE },
+	{ "delegateWithoutPrivateEventAccess",	E_M365_CALENDAR_PERMISSION_DELEGATE_WITHOUT_PRIVATE_EVENT_ACCESS },
+	{ "delegateWithPrivateEventAccess",	E_M365_CALENDAR_PERMISSION_DELEGATE_WITH_PRIVATE_EVENT_ACCESS },
+	{ "custom",				E_M365_CALENDAR_PERMISSION_CUSTOM }
+};
+
 static MapData content_type_map[] = {
 	{ "text", E_M365_ITEM_BODY_CONTENT_TYPE_TEXT },
 	{ "html", E_M365_ITEM_BODY_CONTENT_TYPE_HTML }
@@ -2781,6 +2792,108 @@ e_m365_calendar_add_default_online_meeting_provider (JsonBuilder *builder,
 		meeting_provider_map, G_N_ELEMENTS (meeting_provider_map),
 		E_M365_ONLINE_MEETING_PROVIDER_NOT_SET,
 		E_M365_ONLINE_MEETING_PROVIDER_UNKNOWN);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/calendarpermission?view=graph-rest-1.0 */
+
+guint32
+e_m365_calendar_permission_get_allowed_roles (EM365CalendarPermission *permission)
+{
+	guint32 allowed_roles = E_M365_CALENDAR_PERMISSION_NOT_SET;
+	JsonArray *array;
+
+	array = e_m365_json_get_array_member (permission, "allowedRoles");
+
+	if (array) {
+		guint ii, len;
+
+		allowed_roles = E_M365_CALENDAR_PERMISSION_UNKNOWN;
+
+		len = json_array_get_length (array);
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *str = json_array_get_string_element (array, ii);
+			gint enum_value;
+
+			if (!str)
+				continue;
+
+			enum_value = m365_json_utils_json_value_as_enum (str,
+				calendar_role_map, G_N_ELEMENTS (calendar_role_map),
+				E_M365_CALENDAR_PERMISSION_NOT_SET,
+				E_M365_CALENDAR_PERMISSION_UNKNOWN);
+
+			if (enum_value != E_M365_CALENDAR_PERMISSION_NOT_SET)
+				allowed_roles |= enum_value;
+		}
+	}
+
+	return allowed_roles;
+}
+
+EM365EmailAddress *
+e_m365_calendar_permission_get_email_address (EM365CalendarPermission *permission)
+{
+	return e_m365_json_get_object_member (permission, "emailAddress");
+}
+
+void
+e_m365_calendar_permission_add_email_address (JsonBuilder *builder,
+					      const gchar *name,
+					      const gchar *address)
+{
+	e_m365_add_email_address (builder, "emailAddress", name, address);
+}
+
+const gchar *
+e_m365_calendar_permission_get_id (EM365CalendarPermission *permission)
+{
+	return e_m365_json_get_string_member (permission, "id", NULL);
+}
+
+gboolean
+e_m365_calendar_permission_get_is_inside_organization (EM365CalendarPermission *permission)
+{
+	return e_m365_json_get_boolean_member (permission, "isInsideOrganization", FALSE);
+}
+
+void
+e_m365_calendar_permission_add_is_inside_organization (JsonBuilder *builder,
+						       gboolean value)
+{
+	e_m365_json_add_boolean_member (builder, "isInsideOrganization", value);
+}
+
+gboolean
+e_m365_calendar_permission_get_is_removable (EM365CalendarPermission *permission)
+{
+	return e_m365_json_get_boolean_member (permission, "isRemovable", FALSE);
+}
+
+void
+e_m365_calendar_permission_add_is_removable (JsonBuilder *builder,
+					     gboolean value)
+{
+	e_m365_json_add_boolean_member (builder, "isRemovable", value);
+}
+
+EM365CalendarPermissionType
+e_m365_calendar_permission_get_role (EM365CalendarPermission *permission)
+{
+	return m365_json_utils_get_json_as_enum (permission, "role",
+		calendar_role_map, G_N_ELEMENTS (calendar_role_map),
+		E_M365_CALENDAR_PERMISSION_NOT_SET,
+		E_M365_CALENDAR_PERMISSION_UNKNOWN);
+}
+
+void
+e_m365_calendar_permission_add_role (JsonBuilder *builder,
+				     EM365CalendarPermissionType value)
+{
+	m365_json_utils_add_enum_as_json (builder, "role", value,
+		calendar_role_map, G_N_ELEMENTS (calendar_role_map),
+		E_M365_CALENDAR_PERMISSION_NOT_SET,
+		E_M365_CALENDAR_PERMISSION_UNKNOWN);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/responsestatus?view=graph-rest-1.0 */

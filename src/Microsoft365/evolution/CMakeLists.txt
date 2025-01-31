@@ -5,6 +5,10 @@ set(sources
 	e-book-config-m365.h
 	e-m365-comp-editor-extension.c
 	e-m365-comp-editor-extension.h
+	e-m365-config-ui-extension.c
+	e-m365-config-ui-extension.h
+	e-m365-edit-calendar-permissions.c
+	e-m365-edit-calendar-permissions.h
 	e-mail-config-m365-backend.c
 	e-mail-config-m365-backend.h
 	module-m365-configuration.c
