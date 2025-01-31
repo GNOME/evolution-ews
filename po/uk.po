@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-01-15 14:12+0000\n"
-"PO-Revision-Date: 2025-01-16 15:05+0200\n"
+"POT-Creation-Date: 2025-01-31 13:28+0000\n"
+"PO-Revision-Date: 2025-01-31 17:57+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -805,6 +805,7 @@ msgstr "Підписатися на теку іншого користувача
 #: ../src/EWS/evolution/e-ews-config-utils.c:1532
 #: ../src/EWS/evolution/e-ews-config-utils.c:1563
 #: ../src/EWS/evolution/e-ews-config-utils.c:1594
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:188
 msgid "Permissions…"
 msgstr "Права доступу…"
 
@@ -1695,7 +1696,6 @@ msgid "Cannot modify user contact"
 msgstr "Не можна змінювати контакт користувача"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2400
-#| msgid "Cannot modify user contact"
 msgid "Cannot modify recent contact"
 msgstr "Не можна змінювати нещодавно використаний контакт"
 
@@ -1708,7 +1708,6 @@ msgid "Cannot remove user contact"
 msgstr "Не можна вилучати контакт користувача"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2515
-#| msgid "Cannot remove user contact"
 msgid "Cannot remove recent contact"
 msgstr "Не вдалося вилучити нещодавно використаний контакт"
 
@@ -1925,7 +1924,7 @@ msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5250
+#: ../src/Microsoft365/common/e-m365-connection.c:5488
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Не вдалося зберегти екземпляр у «%s»"
@@ -1933,6 +1932,156 @@ msgstr "Не вдалося зберегти екземпляр у «%s»"
 #: ../src/Microsoft365/evolution/e-book-config-m365.c:64
 msgid "Maximum contacts to download"
 msgstr "Макс. к-ть контактів для отримання"
+
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:190
+#| msgid "Edit EWS calendar permissions"
+msgid "Edit Microsoft 365 calendar permissions"
+msgstr "Редагувати права доступу до календаря Microsoft 365"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:246
+msgid "Not shared"
+msgstr "Не оприлюднено"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:247
+msgid "Can view when I’m busy"
+msgstr "Можна переглядати за зайнятості"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:248
+msgid "Can view titles and locations"
+msgstr "Можна переглядати заголовки і місця"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:249
+msgid "Can view all details"
+msgstr "Можна переглядати усі параметри"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:250
+msgid "Can edit"
+msgstr "Можна редагувати"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
+#| msgid "Delegate can see my _private items"
+msgid "Delegate without private events"
+msgstr "Делегувати без конфіденційних подій"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
+#| msgid "Delegate can see my _private items"
+msgid "Delegate with private events"
+msgstr "Делегувати з конфіденційними подіями"
+
+#. Translators: It's for custom permission setting, like some not known what it is precisely
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
+#| msgctxt "PermissionsLevel"
+#| msgid "Custom"
+msgid "Custom"
+msgstr "Нетипові"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:278
+#| msgid "Unknown error"
+msgid "Unknown permission"
+msgstr "Невідомі права доступу"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:347
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:395
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:613
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:710
+#| msgid "Failed to create connection"
+msgid "Cannot create connection object."
+msgstr "Не вдалося створити об'єкт з'єднання."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:376
+#| msgid "Writing folder permissions, please wait…"
+msgid "Updating permission, please wait…"
+msgstr "Оновлюємо права доступу, будь ласка, зачекайте…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:377
+#| msgid "Failed to update GAL:"
+msgid "Failed to update permission: "
+msgstr "Не вдалося оновити права доступу: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:444
+#| msgid "Reading folder permissions, please wait…"
+msgid "Removing permission, please wait…"
+msgstr "Вилучаємо права доступу, будь ласка, зачекайте…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:445
+#| msgid "Failed to create connection"
+msgid "Failed to remove permission: "
+msgstr "Не вдалося вилучити права доступу: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:534
+#| msgid "Message to be sent within the organization"
+msgid "People in the Organization"
+msgstr "Особи в організації"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:567
+#| msgid "Delegate permissions"
+msgid "Remove permission"
+msgstr "Вилучити права доступу"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:626
+#| msgid "No items found"
+msgid "No valid email address found."
+msgstr "Не знайдено чинної адреси електронної пошти."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:679
+#| msgid "Reading folder permissions, please wait…"
+msgid "Saving new permission, please wait…"
+msgstr "Зберігаємо нові права доступу, будь ласка, зачекайте…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:680
+#| msgid "Delegate permissions"
+msgid "Failed to save permission: "
+msgstr "Не вдалося зберегти права доступу: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:800
+#| msgid "Edit EWS calendar permissions"
+msgid "Edit calendar permissions…"
+msgstr "Редагувати права доступу до календаря…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:803
+msgid "Cl_ose"
+msgstr "З_акрити"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:855
+msgid "_Cancel"
+msgstr "_Скасувати"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:863
+#| msgid "Calendar"
+msgid "Calendar:"
+msgstr "Календар:"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:897
+msgid ""
+"Choose sharing permissions for this calendar. You can add people from within "
+"the organization or outside of it. It can be changed any time."
+msgstr ""
+"Виберіть права доступу для цього календаря. Ви можете додавати осіб з"
+" організації або поза нею. Можна будь-коли змінювати."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:936
+msgid "_Share"
+msgstr "_Оприлюднити"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:972
+#| msgid "Message to be sent outside the organization"
+msgid "Inside the organization"
+msgstr "У межах організації"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:996
+#| msgid "Message to be sent outside the organization"
+msgid "Outside the organization"
+msgstr "Поза організацією"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1024
+#| msgid "Reading folder permissions, please wait…"
+msgid "Reading calendar permissions, please wait…"
+msgstr "Читаємо права доступу до календаря. Будь ласка, зачекайте…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1025
+#| msgid "Failed to read From address"
+msgid "Failed to read permissions: "
+msgstr "Не вдалося прочитати права доступу: "
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
@@ -1964,7 +2113,6 @@ msgid "Organizational Users"
 msgstr "Організаційні користувачі"
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:425
-#| msgid "Contacts"
 msgid "Recent Contacts"
 msgstr "Недавні контакти"
 
@@ -1985,12 +2133,6 @@ msgstr "Джерело даних «%s» не є відповідником те
 #, c-format
 #~ msgid "URL “%s” is not valid"
 #~ msgstr "Адреса «%s» є некоректною"
-
-#~ msgid "No items found"
-#~ msgstr "Пункти не знайдено"
-
-#~ msgid "Unknown error"
-#~ msgstr "Невідома помилка"
 
 #~ msgid "User “%s” was not found on the server"
 #~ msgstr "Користувача «%s» на сервері не виявлено"
