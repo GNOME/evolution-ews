@@ -1,3 +1,21 @@
+Evolution-EWS 3.55.2 2025-01-31
+-------------------------------
+
+Bug Fixes:
+	I#285 - m365: Search Organization contacts by default
+	I#293 - m365: Contacts: Ignore name part of an EMAIL attribute
+	I#295 - Calendar: Import of forwarded meeting as bare event
+
+Miscellaneous:
+	Check GSettings schemas not owned by the evolution-ews exist before using them
+	m365: Read "Recent contacts" from the server
+	m365: Allow edit of calendar permissions
+
+Translations:
+	Martin (sl)
+	Rafael Fontenelle (pt_BR)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.55.1 2025-01-03
 -------------------------------
 
