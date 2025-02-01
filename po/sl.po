@@ -9,18 +9,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-01-15 14:12+0000\n"
-"PO-Revision-Date: 2025-01-17 10:31+0100\n"
+"POT-Creation-Date: 2025-01-31 13:28+0000\n"
+"PO-Revision-Date: 2025-02-01 09:48+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || "
-"n%100==4 ? 3 : 0);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n"
+"%100==4 ? 3 : 0);\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:70
@@ -806,6 +806,7 @@ msgstr "Naročilo na mapo drugega uporabnika ..."
 #: ../src/EWS/evolution/e-ews-config-utils.c:1532
 #: ../src/EWS/evolution/e-ews-config-utils.c:1563
 #: ../src/EWS/evolution/e-ews-config-utils.c:1594
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:188
 msgid "Permissions…"
 msgstr "Dovoljenja …"
 
@@ -1918,7 +1919,7 @@ msgid "Failed to parse own Json data"
 msgstr "Razčlenjevanje lastnih podatkov Json je spodletelo"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5250
+#: ../src/Microsoft365/common/e-m365-connection.c:5488
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Primerka ni mogoče najti pri »%s«"
@@ -1926,6 +1927,134 @@ msgstr "Primerka ni mogoče najti pri »%s«"
 #: ../src/Microsoft365/evolution/e-book-config-m365.c:64
 msgid "Maximum contacts to download"
 msgstr "Največ stikov za prenos"
+
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:190
+msgid "Edit Microsoft 365 calendar permissions"
+msgstr "Uredi dovoljenja koledarja 365"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:246
+msgid "Not shared"
+msgstr "Ni v skupni rabi"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:247
+msgid "Can view when I’m busy"
+msgstr "Lahko si ogleda, ko sem zaposlen"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:248
+msgid "Can view titles and locations"
+msgstr "Lahko si ogleda naslove in lokacije"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:249
+msgid "Can view all details"
+msgstr "Lahko si ogleda vse podrobnosti"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:250
+msgid "Can edit"
+msgstr "Lahko ureja"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
+msgid "Delegate without private events"
+msgstr "Pooblaščenec brez zasebnih dogodkov"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
+msgid "Delegate with private events"
+msgstr "Pooblaščenec z zasebnimi dogodki"
+
+#. Translators: It's for custom permission setting, like some not known what it is precisely
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
+msgid "Custom"
+msgstr "Po meri"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:278
+msgid "Unknown permission"
+msgstr "Neznano dovoljenje"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:347
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:395
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:613
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:710
+msgid "Cannot create connection object."
+msgstr "Ni mogoče ustvariti predmeta povezave."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:376
+msgid "Updating permission, please wait…"
+msgstr "Poteka posodobitev dovoljenja …"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:377
+msgid "Failed to update permission: "
+msgstr "Posodabljanje dovoljenja je spodletelo:"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:444
+msgid "Removing permission, please wait…"
+msgstr "Odstranjevanje dovoljenja, počakajte ..."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:445
+msgid "Failed to remove permission: "
+msgstr "Dovoljenja ni bilo mogoče odstraniti: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:534
+msgid "People in the Organization"
+msgstr "Ljudje v organizaciji"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:567
+msgid "Remove permission"
+msgstr "Odstrani dovoljenje"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:626
+msgid "No valid email address found."
+msgstr "Veljavnega e-poštnega naslova ni mogoče najti."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:679
+msgid "Saving new permission, please wait…"
+msgstr "Shranjevanje novega dovoljenja je v teku ..."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:680
+msgid "Failed to save permission: "
+msgstr "Shranjevanje dovoljenja je spodletelo: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:800
+msgid "Edit calendar permissions…"
+msgstr "Uredi dovoljenja koledarja …"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:803
+msgid "Cl_ose"
+msgstr "Z_apri"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:855
+msgid "_Cancel"
+msgstr "Pre_kliči"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:863
+msgid "Calendar:"
+msgstr "Koledar:"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:897
+msgid ""
+"Choose sharing permissions for this calendar. You can add people from within "
+"the organization or outside of it. It can be changed any time."
+msgstr ""
+"Izberite dovoljenja za skupno rabo za ta koledar. Dodate lahko osebe iz "
+"organizacije ali zunaj nje. To lahko kadarkoli spremenite."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:936
+msgid "_Share"
+msgstr "_Deli z drugimi"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:972
+msgid "Inside the organization"
+msgstr "Znotraj organizacije"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:996
+msgid "Outside the organization"
+msgstr "Zunaj organizacije"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1024
+msgid "Reading calendar permissions, please wait…"
+msgstr "Poteka branje dovoljenj koledarja …"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1025
+msgid "Failed to read permissions: "
+msgstr "Branje dovoljenj je spodletelo: "
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
