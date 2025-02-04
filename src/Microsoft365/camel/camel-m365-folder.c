@@ -1415,9 +1415,59 @@ m365_folder_expunge_sync (CamelFolder *folder,
 			  GCancellable *cancellable,
 			  GError **error)
 {
-	/* it does nothing special here, everything is done as part of the m365_folder_synchronize_sync() */
+	CamelM365Store *m365_store;
+	CamelStore *parent_store;
+	CamelFolderSummary *folder_summary;
+	GPtrArray *uids;
+	gboolean success;
 
-	return TRUE;
+	if (!m365_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH))
+		return TRUE;
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	if (!parent_store) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
+		return FALSE;
+	}
+
+	folder_summary = camel_folder_get_folder_summary (folder);
+	uids = camel_folder_summary_get_array (folder_summary);
+
+	if (!uids || !uids->len) {
+		camel_folder_summary_free_array (uids);
+		return TRUE;
+	}
+
+	m365_store = CAMEL_M365_STORE (parent_store);
+
+	success = camel_m365_store_ensure_connected (m365_store, NULL, cancellable, error);
+
+	if (success) {
+		GSList *deleted_uids = NULL;
+		GError *local_error = NULL;
+		guint ii;
+
+		for (ii = 0; ii < uids->len; ii++) {
+			const gchar *uid = g_ptr_array_index (uids, ii);
+
+			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) uid);
+		}
+
+		success = m365_folder_delete_messages_sync (folder, m365_store, deleted_uids, TRUE, cancellable, &local_error);
+
+		if (local_error) {
+			camel_m365_store_maybe_disconnect (m365_store, local_error);
+			g_propagate_error (error, local_error);
+		}
+
+		g_slist_free (deleted_uids);
+	}
+
+	camel_folder_summary_free_array (uids);
+
+	return success;
 }
 
 static gboolean
