@@ -24,7 +24,8 @@ typedef struct _DailogData {
 	GtkWidget *dialog;
 	GtkWidget *progress_box;
 	GtkLabel *progress_label;
-	GtkWidget *progress_button;
+	GtkWidget *progress_cancel_button;
+	GtkWidget *progress_close_button;
 	GtkEntry *name_entry;
 	GtkComboBox *perms_combo;
 	GtkWidget *share_button;
@@ -40,6 +41,7 @@ typedef struct _DailogData {
 	gchar *calendar_id;
 	GCancellable *cancellable;
 	GtkCssProvider *css_provider;
+	GHashTable *perms;
 	guint n_in_org_rows;
 	guint n_out_org_rows;
 } DialogData;
@@ -65,6 +67,7 @@ dialog_data_unref (gpointer ptr)
 		g_clear_object (&dlg_data->cancellable);
 		g_clear_object (&dlg_data->dest_store);
 		g_clear_object (&dlg_data->css_provider);
+		g_clear_pointer (&dlg_data->perms, g_hash_table_unref);
 		g_free (dlg_data->group_id);
 		g_free (dlg_data->calendar_id);
 		g_free (dlg_data);
@@ -121,7 +124,8 @@ op_finish_idle_cb (gpointer user_data)
 		if (op_data->error) {
 			g_prefix_error (&op_data->error, "%s", op_data->failure_prefix);
 			gtk_label_set_text (op_data->dlg_data->progress_label, op_data->error->message);
-			gtk_widget_set_visible (op_data->dlg_data->progress_button, FALSE);
+			gtk_widget_set_visible (op_data->dlg_data->progress_cancel_button, FALSE);
+			gtk_widget_set_visible (op_data->dlg_data->progress_close_button, TRUE);
 		} else {
 			gtk_widget_set_visible (op_data->dlg_data->progress_box, FALSE);
 
@@ -131,7 +135,7 @@ op_finish_idle_cb (gpointer user_data)
 
 		gtk_widget_set_sensitive (GTK_WIDGET (op_data->dlg_data->name_entry), TRUE);
 		gtk_widget_set_sensitive (GTK_WIDGET (op_data->dlg_data->perms_combo), TRUE);
-		gtk_widget_set_sensitive (op_data->dlg_data->share_button, TRUE);
+		gtk_widget_set_sensitive (op_data->dlg_data->share_button, !e_str_is_empty (gtk_entry_get_text (op_data->dlg_data->name_entry)));
 		gtk_widget_set_sensitive (op_data->dlg_data->perms_scrolled, TRUE);
 	}
 
@@ -186,7 +190,8 @@ run_op_in_thread (DialogData *dlg_data,
 	gtk_widget_set_sensitive (dlg_data->perms_scrolled, FALSE);
 
 	gtk_label_set_text (dlg_data->progress_label, description);
-	gtk_widget_set_visible (dlg_data->progress_button, TRUE);
+	gtk_widget_set_visible (dlg_data->progress_cancel_button, TRUE);
+	gtk_widget_set_visible (dlg_data->progress_close_button, FALSE);
 	gtk_widget_set_visible (dlg_data->progress_box, TRUE);
 
 	g_thread_unref (g_thread_new ("m365-perm-op-thread", op_thread, op_data));
@@ -286,6 +291,7 @@ typedef struct _PermissionData {
 
 	DialogData *dlg_data;
 	gchar *id;
+	GtkWidget *combo;
 	GtkGrid *grid;
 	gint grid_row;
 	EM365CalendarPermissionType perm_type;
@@ -382,6 +388,23 @@ permission_combo_changed_cb (GtkComboBox *combo,
 }
 
 static void
+permission_grid_row_removed (DialogData *dlg_data,
+			     GtkGrid *grid,
+			     gint row)
+{
+	GHashTableIter iter;
+	gpointer value = NULL;
+
+	g_hash_table_iter_init (&iter, dlg_data->perms);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		PermissionData *perm_data = value;
+
+		if (perm_data && perm_data->grid == grid && perm_data->grid_row >= row)
+			perm_data->grid_row--;
+	}
+}
+
+static void
 remove_permission_thread (DialogData *dlg_data,
 			  gpointer user_data,
 			  gpointer *out_result,
@@ -406,6 +429,7 @@ remove_permission_idle (DialogData *dlg_data,
 			gpointer user_data)
 {
 	PermissionData *perm_data = user_data;
+
 	GtkWidget *label;
 	guint *p_n_rows;
 
@@ -424,13 +448,19 @@ remove_permission_idle (DialogData *dlg_data,
 	}
 
 	if (*p_n_rows > 0) {
-		gtk_grid_remove_row (perm_data->grid, perm_data->grid_row);
+		GtkGrid *grid = perm_data->grid;
+		gint row = perm_data->grid_row;
+
+		g_hash_table_remove (dlg_data->perms, perm_data->id);
+		gtk_grid_remove_row (grid, row);
 
 		*p_n_rows = (*p_n_rows) - 1;
 
 		if (!*p_n_rows) {
 			gtk_widget_set_visible (label, FALSE);
-			gtk_widget_set_visible (GTK_WIDGET (perm_data->grid), FALSE);
+			gtk_widget_set_visible (GTK_WIDGET (grid), FALSE);
+		} else {
+			permission_grid_row_removed (dlg_data, grid, row);
 		}
 	}
 }
@@ -459,7 +489,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 	guint *p_n_rows;
 	GtkWidget *widget;
 
-	if (!perm)
+	if (!perm || !e_m365_calendar_permission_get_id (perm))
 		return;
 
 	addr = e_m365_calendar_permission_get_email_address (perm);
@@ -471,6 +501,17 @@ add_permission_to_dialog (DialogData *dlg_data,
 
 	if ((!name || !*name) && (!address || !*address))
 		return;
+
+	perm_data = g_hash_table_lookup (dlg_data->perms, e_m365_calendar_permission_get_id (perm));
+	if (perm_data) {
+		g_signal_handlers_block_by_func (perm_data->combo, permission_combo_changed_cb, perm_data);
+		fill_perms_combo (GTK_COMBO_BOX (perm_data->combo),
+			e_m365_calendar_permission_get_allowed_roles (perm),
+			e_m365_calendar_permission_get_role (perm));
+		g_signal_handlers_unblock_by_func (perm_data->combo, permission_combo_changed_cb, perm_data);
+
+		return;
+	}
 
 	if (e_m365_calendar_permission_get_is_inside_organization (perm)) {
 		gtk_widget_set_visible (dlg_data->in_org_label, TRUE);
@@ -498,7 +539,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 			"use-underline", FALSE,
 			"xalign", 0.0,
 			"halign", GTK_ALIGN_START,
-			"max-width-chars", 50,
+			"max-width-chars", 45,
 			"width-chars", 25,
 			"ellipsize", PANGO_ELLIPSIZE_END,
 			NULL);
@@ -517,7 +558,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 			"attributes", attrs,
 			"xalign", 0.0,
 			"halign", GTK_ALIGN_START,
-			"max-width-chars", 50,
+			"max-width-chars", 45,
 			"width-chars", 25,
 			"ellipsize", PANGO_ELLIPSIZE_END,
 			NULL);
@@ -542,7 +583,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 			"xalign", 0.0,
 			"halign", GTK_ALIGN_START,
 			"valign", GTK_ALIGN_CENTER,
-			"max-width-chars", 50,
+			"max-width-chars", 45,
 			"width-chars", 25,
 			"ellipsize", PANGO_ELLIPSIZE_END,
 			"visible", TRUE,
@@ -559,6 +600,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 	g_signal_connect_data (widget, "changed",
 		G_CALLBACK (permission_combo_changed_cb), permission_data_ref (perm_data),
 		(GClosureNotify) permission_data_unref, 0);
+	perm_data->combo = widget;
 
 	gtk_grid_attach (grid, widget, 1, perm_data->grid_row, 1, 1);
 
@@ -577,7 +619,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 
 	*p_n_rows = (*p_n_rows) + 1;
 
-	permission_data_unref (perm_data);
+	g_hash_table_insert (dlg_data->perms, perm_data->id, perm_data);
 }
 
 typedef struct _ShareData {
@@ -652,6 +694,9 @@ create_permission_idle (DialogData *dlg_data,
 	EM365CalendarPermission *created_permission = result;
 
 	add_permission_to_dialog (dlg_data, created_permission);
+	gtk_entry_set_text (dlg_data->name_entry, "");
+	gtk_widget_grab_focus (GTK_WIDGET (dlg_data->name_entry));
+	e_util_ensure_scrolled_window_height (GTK_SCROLLED_WINDOW (dlg_data->perms_scrolled));
 }
 
 static void
@@ -729,6 +774,8 @@ read_calendar_permissions_idle (DialogData *dlg_data,
 
 		add_permission_to_dialog (dlg_data, perm);
 	}
+
+	e_util_ensure_scrolled_window_height (GTK_SCROLLED_WINDOW (dlg_data->perms_scrolled));
 }
 
 static void
@@ -740,6 +787,17 @@ progress_cancel_cb (GtkButton *button,
 	g_return_if_fail (dlg_data != NULL);
 
 	g_cancellable_cancel (dlg_data->cancellable);
+}
+
+static void
+progress_close_cb (GtkButton *button,
+		    gpointer user_data)
+{
+	DialogData *dlg_data = user_data;
+
+	g_return_if_fail (dlg_data != NULL);
+
+	gtk_widget_set_visible (dlg_data->progress_box, FALSE);
 }
 
 static void
@@ -783,18 +841,7 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 	dlg_data->group_id = g_strdup (group_id);
 	dlg_data->calendar_id = g_strdup (calendar_id);
 	dlg_data->css_provider = gtk_css_provider_new ();
-
-	if (!gtk_css_provider_load_from_data (dlg_data->css_provider,
-		"#progress-box {"
-			"padding:8px;"
-			"border:1px solid @theme_unfocused_selected_fg_color;"
-			"border-radius: 0 0 8px 8px;"
-			"color: white;"
-			"background-color:black;"
-			"opacity:0.7;"
-		"}", -1, &local_error)) {
-		g_warning ("%s: Failed to parse CSS data: %s", G_STRFUNC, local_error ? local_error->message : "Unknown error");
-	}
+	dlg_data->perms = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, permission_data_unref);
 
 	dlg_data->dialog = gtk_dialog_new_with_buttons (
 		_("Edit calendar permissions…"),
@@ -803,14 +850,11 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 		_("Cl_ose"), GTK_RESPONSE_CANCEL,
 		NULL);
 
-	gtk_window_set_default_size (GTK_WINDOW (dlg_data->dialog), 480, 300);
+	gtk_window_set_default_size (GTK_WINDOW (dlg_data->dialog), 580, 360);
 
 	dialog = G_OBJECT (dlg_data->dialog);
 	g_signal_connect (dialog, "response", G_CALLBACK (gtk_widget_destroy), NULL);
 	g_object_set_data_full (dialog, E_M365_PERM_DLG_DATA, dlg_data, dialog_data_unref);
-
-	gtk_style_context_add_provider (gtk_widget_get_style_context (dlg_data->dialog),
-		GTK_STYLE_PROVIDER (dlg_data->css_provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 	content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
@@ -845,7 +889,7 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 		"halign", GTK_ALIGN_START,
 		"max-width-chars", 60,
 		"width-chars", 30,
-		"ellipsize", PANGO_ELLIPSIZE_END,
+		"wrap", TRUE,
 		NULL);
 
 	gtk_box_pack_start (GTK_BOX (hvbox), widget, TRUE, TRUE, 0);
@@ -853,10 +897,42 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 	dlg_data->progress_label = GTK_LABEL (widget);
 
 	button = gtk_button_new_with_mnemonic (_("_Cancel"));
+	g_object_set (
+		G_OBJECT (button),
+		"halign", GTK_ALIGN_CENTER,
+		"valign", GTK_ALIGN_CENTER,
+		NULL);
 	gtk_box_pack_start (GTK_BOX (hvbox), button, FALSE, FALSE, 0);
 	g_signal_connect (button, "clicked", G_CALLBACK (progress_cancel_cb), dlg_data);
 
-	dlg_data->progress_button = button;
+	dlg_data->progress_cancel_button = button;
+
+	button = gtk_button_new_from_icon_name ("window-close", GTK_ICON_SIZE_BUTTON);
+	g_object_set (
+		G_OBJECT (button),
+		"halign", GTK_ALIGN_CENTER,
+		"valign", GTK_ALIGN_CENTER,
+		NULL);
+	gtk_box_pack_start (GTK_BOX (hvbox), button, FALSE, FALSE, 0);
+	g_signal_connect (button, "clicked", G_CALLBACK (progress_close_cb), dlg_data);
+
+	dlg_data->progress_close_button = button;
+
+	if (!gtk_css_provider_load_from_data (dlg_data->css_provider,
+		"box {"
+			"padding:8px;"
+			"border:1px solid @theme_unfocused_selected_fg_color;"
+			"border-radius: 0 0 8px 8px;"
+			"color: white;"
+			"background-color:black;"
+			"opacity:0.8;"
+		"}", -1, &local_error)) {
+		g_warning ("%s: Failed to parse CSS data: %s", G_STRFUNC, local_error ? local_error->message : "Unknown error");
+		g_clear_error (&local_error);
+	}
+
+	gtk_style_context_add_provider (gtk_widget_get_style_context (hvbox),
+		GTK_STYLE_PROVIDER (dlg_data->css_provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 	row = 0;
 
@@ -987,6 +1063,7 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 		G_OBJECT (widget),
 		"column-homogeneous", FALSE,
 		"row-homogeneous", TRUE,
+		"row-spacing", 4,
 		"visible", FALSE,
 		NULL);
 	gtk_box_pack_start (GTK_BOX (hvbox), widget, FALSE, FALSE, 0);
@@ -1011,6 +1088,7 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 		G_OBJECT (widget),
 		"column-homogeneous", FALSE,
 		"row-homogeneous", TRUE,
+		"row-spacing", 4,
 		"visible", FALSE,
 		NULL);
 	gtk_box_pack_start (GTK_BOX (hvbox), widget, FALSE, FALSE, 0);
