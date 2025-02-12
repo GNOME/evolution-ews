@@ -855,10 +855,7 @@ m365_store_delete_folder_sync (CamelStore *store,
 	CamelFolderInfo *folder_info;
 	EM365Connection *cnc = NULL;
 	gchar *folder_id;
-	gchar *trash_folder_id;
-	gchar *trash_full_name;
 	gboolean success;
-	gboolean is_under_trash_folder, claim_unsubscribe = TRUE;
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (CAMEL_IS_M365_STORE (store), FALSE);
@@ -886,32 +883,8 @@ m365_store_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	trash_folder_id = camel_m365_store_summary_dup_folder_id_for_type (m365_store->priv->summary, CAMEL_FOLDER_TYPE_TRASH);
-	trash_full_name = camel_m365_store_summary_dup_folder_full_name (m365_store->priv->summary, trash_folder_id);
-
-	if (!trash_full_name) {
-		camel_folder_info_free (folder_info);
-		g_free (trash_folder_id);
-		g_free (folder_id);
-
-		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, _("Cannot find “Deleted Items” folder"));
-
-		return FALSE;
-	}
-
-	is_under_trash_folder = g_str_has_prefix (folder_name, trash_full_name);
-
-	if (is_under_trash_folder) {
-		gint len = strlen (trash_full_name);
-
-		is_under_trash_folder = len > 0 && (trash_full_name[len - 1] == '/' || folder_name[len] == '/');
-	}
-
-	g_free (trash_full_name);
-
 	if (!camel_m365_store_ensure_connected (m365_store, &cnc, cancellable, error)) {
 		camel_folder_info_free (folder_info);
-		g_free (trash_folder_id);
 		g_free (folder_id);
 
 		return FALSE;
@@ -922,18 +895,14 @@ m365_store_delete_folder_sync (CamelStore *store,
 		/* do not delete foreign or public folders,
 		 * only remove them from the local cache */
 		success = TRUE;
-	} else if (is_under_trash_folder) {
-		success = e_m365_connection_delete_mail_folder_sync (cnc, NULL, folder_id, cancellable, &local_error);
 	} else {
-		success = m365_store_move_mail_folder (m365_store, cnc, folder_id, "deleteditems", cancellable, &local_error);
-		claim_unsubscribe = FALSE;
+		success = e_m365_connection_delete_mail_folder_sync (cnc, NULL, folder_id, cancellable, &local_error);
 	}
 
 	g_clear_object (&cnc);
 
 	if (!success) {
 		camel_folder_info_free (folder_info);
-		g_free (trash_folder_id);
 		g_free (folder_id);
 
 		camel_m365_store_maybe_disconnect (m365_store, local_error);
@@ -942,19 +911,15 @@ m365_store_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	if (is_under_trash_folder)
-		m365_store_delete_folders_from_summary_recursive (m365_store, folder_info, FALSE);
+	m365_store_delete_folders_from_summary_recursive (m365_store, folder_info, FALSE);
 
-	if (claim_unsubscribe) {
-		camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (m365_store), folder_info);
-		camel_store_folder_deleted (store, folder_info);
-	}
+	camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (m365_store), folder_info);
+	camel_store_folder_deleted (store, folder_info);
 
 	camel_folder_info_free (folder_info);
 
 	m365_store_save_summary (m365_store->priv->summary, G_STRFUNC);
 
-	g_free (trash_folder_id);
 	g_free (folder_id);
 
 	return TRUE;
