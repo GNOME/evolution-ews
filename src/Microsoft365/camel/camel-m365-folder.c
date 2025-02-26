@@ -481,6 +481,11 @@ m365_folder_get_message_sync (CamelFolder *folder,
 			e_m365_connection_util_read_raw_data_cb, cache_stream, cancellable, &local_error);
 
 		if (local_error) {
+			if (g_error_matches (local_error, E_M365_ERROR, E_M365_ERROR_ITEM_NOT_FOUND)) {
+				local_error->domain = CAMEL_FOLDER_ERROR;
+				local_error->code = CAMEL_FOLDER_ERROR_INVALID_UID;
+			}
+
 			camel_m365_store_maybe_disconnect (m365_store, local_error);
 
 			g_propagate_error (error, local_error);
