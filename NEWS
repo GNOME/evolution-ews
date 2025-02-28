@@ -1,3 +1,21 @@
+Evolution-EWS 3.55.3 2025-02-28
+-------------------------------
+
+Bug Fixes:
+	I#296 - m365: "Empty Trash" does not empty "Deleted Items" folder
+	I#297 - m365: Deleted folders should not show under Deleted Items
+
+Miscellaneous:
+	m365: Fix bugs in calendar permissions dialog
+	m365: Transform ItemNotFound error to Camel's InvalidUID error in folder's get_message()
+
+Translations:
+	Ekaterine Papava (ka)
+	Jiri Eischmann (cs)
+	Jürgen Benvenuti (de)
+	Martin (sl)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.55.2 2025-01-31
 -------------------------------
 
