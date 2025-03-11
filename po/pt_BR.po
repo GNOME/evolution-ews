@@ -6,20 +6,21 @@
 # Enrico Nicoletto <hiko@duck.com>, 2013, 2020-2023.
 # Juliano de Souza Camargo <julianosc@pm.me>, 2024.
 # Rafael Fontenelle <rafaelff@gnome.org>, 2012-2025.
+# Álvaro Burns <>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-01-15 14:12+0000\n"
-"PO-Revision-Date: 2025-01-17 14:09-0300\n"
-"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
+"POT-Creation-Date: 2025-03-01 20:57+0000\n"
+"PO-Revision-Date: 2025-03-06 19:31-0300\n"
+"Last-Translator: Álvaro Burns <>\n"
 "Language-Team: Brazilian Portuguese <https://br.gnome.org/traducao>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Gtranslator 47.1\n"
 "X-Project-Style: gnome\n"
 
@@ -187,12 +188,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Não é possível executar ações na pasta no modo desconectado"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3264
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1664
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1719
 msgid "Apply message _filters to this folder"
 msgstr "Aplicar _filtros de mensagem a esta pasta"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3276
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1676
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1731
 msgid "Always check for _new mail in this folder"
 msgstr "Sempre verificar por _novas mensagens nesta pasta"
 
@@ -400,7 +401,7 @@ msgstr ""
 "pastas públicas"
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:884
+#: ../src/Microsoft365/camel/camel-m365-store.c:881
 #, c-format
 msgid "Folder does not exist"
 msgstr "A pasta não existe"
@@ -461,13 +462,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Serviço Exchange para %s em %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3393
-#: ../src/Microsoft365/camel/camel-m365-store.c:1458
+#: ../src/Microsoft365/camel/camel-m365-store.c:1423
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Não foi possível localizar a pasta Lixeira"
 
 #: ../src/EWS/camel/camel-ews-store.c:3453
-#: ../src/Microsoft365/camel/camel-m365-store.c:1516
+#: ../src/Microsoft365/camel/camel-m365-store.c:1481
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Não foi possível localizar a pasta Lixo eletrônico"
@@ -513,8 +514,8 @@ msgstr ""
 "desconectado"
 
 #: ../src/EWS/camel/camel-ews-store.c:3898
-#: ../src/Microsoft365/camel/camel-m365-store.c:1791
-#: ../src/Microsoft365/camel/camel-m365-store.c:1804
+#: ../src/Microsoft365/camel/camel-m365-store.c:1756
+#: ../src/Microsoft365/camel/camel-m365-store.c:1769
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Você precisa estar trabalhando online para completar essa operação"
@@ -565,8 +566,8 @@ msgstr "OAuth2 (Office365)"
 
 #: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
 msgid ""
-"This option will use an OAuth 2.0 access token to connect to the "
-"Office365.com server"
+"This option will use an OAuth 2.0 access token to connect to the Office365."
+"com server"
 msgstr ""
 "Essa opção será usada em um token de acesso OAuth 2.0 para se conectar o "
 "servidor Office365.com"
@@ -811,6 +812,7 @@ msgstr "Inscrever-se à pasta de outro usuário…"
 #: ../src/EWS/evolution/e-ews-config-utils.c:1532
 #: ../src/EWS/evolution/e-ews-config-utils.c:1563
 #: ../src/EWS/evolution/e-ews-config-utils.c:1594
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:188
 msgid "Permissions…"
 msgstr "Permissões…"
 
@@ -1789,19 +1791,20 @@ msgid "Failed to get inline attachment data"
 msgstr "Falha ao obter informação do anexo na linha"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:530
-#: ../src/Microsoft365/camel/camel-m365-folder.c:949
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1448
+#: ../src/Microsoft365/camel/camel-m365-folder.c:535
+#: ../src/Microsoft365/camel/camel-m365-folder.c:954
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1315
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1436
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1503
 msgid "Invalid folder state (missing parent store)"
 msgstr "Estado de pasta inválido (faltando armazenamento pai)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1754
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1809
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Pasta “%s” não corresponde a nenhuma pasta conhecida"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1773
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1828
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Não foi possível carregar o resumo para “%s”"
@@ -1843,12 +1846,8 @@ msgstr "Falha ao criar conexão"
 msgid "Parent folder “%s” does not exist"
 msgstr "A pasta pai “%s” não existe"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:897
-msgid "Cannot find “Deleted Items” folder"
-msgstr "Não é possível encontrar a pasta “Itens excluídos”"
-
-#: ../src/Microsoft365/camel/camel-m365-store.c:988
-#: ../src/Microsoft365/camel/camel-m365-store.c:1026
+#: ../src/Microsoft365/camel/camel-m365-store.c:953
+#: ../src/Microsoft365/camel/camel-m365-store.c:991
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "A pasta “%s” não existe"
@@ -1922,7 +1921,7 @@ msgid "Failed to parse own Json data"
 msgstr "Falha ao analisar a própria informação Json"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5250
+#: ../src/Microsoft365/common/e-m365-connection.c:5488
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Não foi possível encontrar instância em '%s'"
@@ -1930,6 +1929,135 @@ msgstr "Não foi possível encontrar instância em '%s'"
 #: ../src/Microsoft365/evolution/e-book-config-m365.c:64
 msgid "Maximum contacts to download"
 msgstr "Máximo de contatos para baixar"
+
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:190
+msgid "Edit Microsoft 365 calendar permissions"
+msgstr "Editar permissões do calendário Microsoft 365"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
+msgid "Not shared"
+msgstr "Não compartilhado"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
+msgid "Can view when I’m busy"
+msgstr "Pode ver quando estou ocupado"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:253
+msgid "Can view titles and locations"
+msgstr "Pode ver títulos e locais"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
+msgid "Can view all details"
+msgstr "Pode ver todos os detalhes"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:255
+msgid "Can edit"
+msgstr "Pode editar"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:256
+msgid "Delegate without private events"
+msgstr "Delegar sem eventos privados"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:257
+msgid "Delegate with private events"
+msgstr "Delegar com eventos privados"
+
+#. Translators: It's for custom permission setting, like some not known what it is precisely
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:259
+msgid "Custom"
+msgstr "Personalizado"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:283
+msgid "Unknown permission"
+msgstr "Permissão desconhecida"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:353
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:418
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:655
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:755
+msgid "Cannot create connection object."
+msgstr "Não pode criar conexão."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:382
+msgid "Updating permission, please wait…"
+msgstr "Atualizando permissão, por favor aguarde…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:383
+msgid "Failed to update permission: "
+msgstr "Falha ao atualizar permissão: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:474
+msgid "Removing permission, please wait…"
+msgstr "Removendo permissão, por favor aguarde…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:475
+msgid "Failed to remove permission: "
+msgstr "Falha ao remover permissão: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:575
+msgid "People in the Organization"
+msgstr "Pessoas da organização"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:609
+msgid "Remove permission"
+msgstr "Remover permissões"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:668
+msgid "No valid email address found."
+msgstr "Nenhum endereço de e-mail válido encontrado."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:724
+msgid "Saving new permission, please wait…"
+msgstr "Salvando nova permissão, por favor aguarde…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:725
+msgid "Failed to save permission: "
+msgstr "Falha ao salvar permissão: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:847
+msgid "Edit calendar permissions…"
+msgstr "Editar permissões do calendário…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:850
+msgid "Cl_ose"
+msgstr "Fe_char"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:899
+msgid "_Cancel"
+msgstr "_Cancelar"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:939
+msgid "Calendar:"
+msgstr "Calendário:"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:973
+msgid ""
+"Choose sharing permissions for this calendar. You can add people from within "
+"the organization or outside of it. It can be changed any time."
+msgstr ""
+"Escolha permissões de compartilhamento para este calendário. Você pode "
+"adicionar pessoas de dentro ou de fora da organização. Isso pode ser "
+"alterado a qualquer momento."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1012
+msgid "_Share"
+msgstr "_Compartilhar"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1048
+msgid "Inside the organization"
+msgstr "Dentro da organização"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1073
+msgid "Outside the organization"
+msgstr "Fora da organização"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1102
+msgid "Reading calendar permissions, please wait…"
+msgstr "Recolocando permissões do calendário, por favor aguarde…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1103
+msgid "Failed to read permissions: "
+msgstr "Falha ao ler permissões: "
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
@@ -1970,3 +2098,6 @@ msgstr "Contatos recentes"
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Fonte de dados “%s” não representa uma pasta do Microsoft 365"
+
+#~ msgid "Cannot find “Deleted Items” folder"
+#~ msgstr "Não é possível encontrar a pasta “Itens excluídos”"
