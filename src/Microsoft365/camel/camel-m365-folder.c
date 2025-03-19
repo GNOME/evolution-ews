@@ -1291,6 +1291,16 @@ m365_folder_is_of_type (CamelFolder *folder,
 	return is_of_type;
 }
 
+static void
+m365_ignore_item_not_found (GError **inout_error,
+			    gboolean *out_success)
+{
+	if (g_error_matches (*inout_error, E_M365_ERROR, E_M365_ERROR_ITEM_NOT_FOUND)) {
+		g_clear_error (inout_error);
+		*out_success = TRUE;
+	}
+}
+
 static gboolean
 m365_folder_synchronize_sync (CamelFolder *folder,
 			      gboolean expunge,
@@ -1385,23 +1395,33 @@ m365_folder_synchronize_sync (CamelFolder *folder,
 			g_slist_free_full (mi_list, g_object_unref);
 			mi_list = NULL;
 			mi_list_len = 0;
+
+			m365_ignore_item_not_found (&local_error, &success);
 		}
 	}
 
-	if (mi_list != NULL && success)
+	if (mi_list != NULL && success) {
 		success = m365_folder_save_flags_sync (folder, m365_store, mi_list, cancellable, &local_error);
+		m365_ignore_item_not_found (&local_error, &success);
+	}
 	g_slist_free_full (mi_list, g_object_unref);
 
-	if (deleted_uids && success)
+	if (deleted_uids && success) {
 		success = m365_folder_delete_messages_sync (folder, m365_store, deleted_uids, m365_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, &local_error);
+		m365_ignore_item_not_found (&local_error, &success);
+	}
 	g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
 
-	if (junk_uids && success)
+	if (junk_uids && success) {
 		success = m365_folder_copy_move_to_folder_sync (folder, m365_store, junk_uids, "junkemail", FALSE, cancellable, &local_error);
+		m365_ignore_item_not_found (&local_error, &success);
+	}
 	g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 
-	if (inbox_uids && success)
+	if (inbox_uids && success) {
 		success = m365_folder_copy_move_to_folder_sync (folder, m365_store, inbox_uids, "inbox", FALSE, cancellable, &local_error);
+		m365_ignore_item_not_found (&local_error, &success);
+	}
 	g_slist_free_full (inbox_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save (folder_summary, NULL);
