@@ -719,8 +719,10 @@ camel_m365_utils_add_message_flags (JsonBuilder *builder,
 			}
 		}
 
-		if (did_add)
-			e_m365_mail_message_end_categories (builder);
+		/* unset it when no category/label found, in case there had been any set before */
+		if (!did_add)
+			e_m365_mail_message_begin_categories (builder);
+		e_m365_mail_message_end_categories (builder);
 	}
 
 	if (message && !(flags & CAMEL_MESSAGE_FLAGGED)) {
