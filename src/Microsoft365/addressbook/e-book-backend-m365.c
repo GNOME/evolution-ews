@@ -1340,22 +1340,26 @@ ebb_m365_contact_get_photo (EBookBackendM365 *bbm365,
 			    GError **error)
 {
 	GByteArray *photo_data = NULL;
+	const gchar *contact_id;
 	GError *local_error = NULL;
 
 	LOCK (bbm365);
 
-	if (bbm365->priv->folder_id) {
-		if (e_m365_connection_get_contact_photo_sync (cnc, NULL, bbm365->priv->folder_id,
-			e_m365_contact_get_id (m365_contact), &photo_data, cancellable, &local_error) &&
-		    photo_data && photo_data->len) {
-			EContactPhoto *photo;
+	if (bbm365->priv->folder_id)
+		contact_id = e_m365_contact_get_id (m365_contact);
+	else
+		contact_id = e_m365_contact_org_get_mail (m365_contact);
 
-			photo = e_contact_photo_new ();
-			e_contact_photo_set_inlined (photo, photo_data->data, photo_data->len);
-			e_contact_photo_set_mime_type (photo, "image/jpeg");
-			e_contact_set (inout_contact, field_id, photo);
-			e_contact_photo_free (photo);
-		}
+	if (contact_id && *contact_id &&
+	    e_m365_connection_get_contact_photo_sync (cnc, NULL, bbm365->priv->folder_id, contact_id, &photo_data, cancellable, &local_error) &&
+	    photo_data && photo_data->len) {
+		EContactPhoto *photo;
+
+		photo = e_contact_photo_new ();
+		e_contact_photo_set_inlined (photo, photo_data->data, photo_data->len);
+		e_contact_photo_set_mime_type (photo, "image/jpeg");
+		e_contact_set (inout_contact, field_id, photo);
+		e_contact_photo_free (photo);
 	}
 
 	UNLOCK (bbm365);

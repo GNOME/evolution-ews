@@ -3463,18 +3463,25 @@ e_m365_connection_get_contact_photo_sync (EM365Connection *cnc,
 	gchar *uri;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
-	g_return_val_if_fail (folder_id != NULL, FALSE);
 	g_return_val_if_fail (contact_id != NULL, FALSE);
 	g_return_val_if_fail (out_photo != NULL, FALSE);
 
-	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
-		"contactFolders",
-		folder_id,
-		"contacts",
-		"", contact_id,
-		"", "photo",
-		"", "$value",
-		NULL);
+	if (folder_id) {
+		uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, NULL,
+			"contactFolders",
+			folder_id,
+			"contacts",
+			"", contact_id,
+			"", "photo",
+			"", "$value",
+			NULL);
+	} else {
+		uri = e_m365_connection_construct_uri (cnc, FALSE, user_override, E_M365_API_V1_0, NULL,
+			contact_id,
+			"photo",
+			"$value",
+			NULL);
+	}
 
 	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
 
