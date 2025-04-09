@@ -809,9 +809,49 @@ name_entry_changed_cb (GtkEntry *entry,
 	gtk_widget_set_sensitive (share_button, !e_str_is_empty (gtk_entry_get_text (entry)));
 }
 
+static void
+ensure_proxy_resolver (EM365Connection *cnc,
+		       ESourceRegistry *registry,
+		       ESource *account_source,
+		       ESource *source)
+{
+	GProxyResolver *proxy_resolver;
+	ESourceAuthentication *extension;
+	ESource *proxy_source = NULL;
+	gchar *uid;
+
+	proxy_resolver = e_m365_connection_ref_proxy_resolver (cnc);
+	if (proxy_resolver) {
+		g_object_unref (proxy_resolver);
+		return;
+	}
+
+	if (e_source_has_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION))
+		extension = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
+	else
+		extension = e_source_get_extension (account_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+	uid = e_source_authentication_dup_proxy_uid (extension);
+	if (uid != NULL) {
+		proxy_source = e_source_registry_ref_source (registry, uid);
+		g_free (uid);
+	}
+
+	if (proxy_source != NULL) {
+		proxy_resolver = G_PROXY_RESOLVER (source);
+		if (!g_proxy_resolver_is_supported (proxy_resolver))
+			proxy_resolver = NULL;
+	}
+
+	e_m365_connection_set_proxy_resolver (cnc, proxy_resolver);
+
+	g_clear_object (&proxy_source);
+}
+
 void
 e_m365_edit_calendar_permissions (GtkWindow *parent,
-				  const gchar *account_name,
+				  ESourceRegistry *registry,
+				  ESource *account_source,
 				  ESource *source,
 				  CamelM365Settings *m365_settings,
 				  const gchar *group_id,
@@ -829,7 +869,8 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 
 	if (parent)
 		g_return_if_fail (GTK_IS_WINDOW (parent));
-	g_return_if_fail (account_name != NULL);
+	g_return_if_fail (E_IS_SOURCE_REGISTRY (registry));
+	g_return_if_fail (E_IS_SOURCE (account_source));
 	g_return_if_fail (E_IS_SOURCE (source));
 	g_return_if_fail (CAMEL_IS_M365_SETTINGS (m365_settings));
 	g_return_if_fail (calendar_id != NULL);
@@ -842,6 +883,8 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 	dlg_data->calendar_id = g_strdup (calendar_id);
 	dlg_data->css_provider = gtk_css_provider_new ();
 	dlg_data->perms = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, permission_data_unref);
+
+	ensure_proxy_resolver (dlg_data->cnc, registry, account_source, source);
 
 	dlg_data->dialog = gtk_dialog_new_with_buttons (
 		_("Edit calendar permissions…"),
@@ -946,8 +989,8 @@ e_m365_edit_calendar_permissions (GtkWindow *parent,
 		NULL);
 
 	text = gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL ?
-		g_strdup_printf ("%s : %s", e_source_get_display_name (source), account_name) :
-		g_strdup_printf ("%s : %s", account_name, e_source_get_display_name (source));
+		g_strdup_printf ("%s : %s", e_source_get_display_name (source), e_source_get_display_name (account_source)) :
+		g_strdup_printf ("%s : %s", e_source_get_display_name (account_source), e_source_get_display_name (source));
 	attrs = pango_attr_list_new ();
 	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
 	widget = gtk_label_new (text);

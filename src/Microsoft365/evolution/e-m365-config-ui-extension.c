@@ -105,8 +105,7 @@ action_m365_calendar_permissions_cb (EUIAction *action,
 	parent_window = gtk_widget_get_ancestor (GTK_WIDGET (shell_view), GTK_TYPE_WINDOW);
 
 	e_m365_edit_calendar_permissions (parent_window ? GTK_WINDOW (parent_window) : NULL,
-		e_source_get_display_name (parent_source),
-		source, CAMEL_M365_SETTINGS (settings),
+		registry, parent_source, source, CAMEL_M365_SETTINGS (settings),
 		group_id, folder_id);
 
 	g_free (folder_id);

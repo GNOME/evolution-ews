@@ -2038,6 +2038,11 @@ ebb_m365_connect_sync (EBookMetaBackend *meta_backend,
 		if (folder_id) {
 			cnc = e_m365_connection_new_for_backend (backend, registry, source, m365_settings);
 
+			e_binding_bind_property (
+				backend, "proxy-resolver",
+				cnc, "proxy-resolver",
+				G_BINDING_SYNC_CREATE);
+
 			if (g_ascii_strcasecmp (folder_id, E_M365_ARTIFICIAL_FOLDER_ID_ORG_CONTACTS) == 0) {
 				*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_ORG_CONTACTS, NULL, NULL,
 					out_certificate_pem, out_certificate_errors, cancellable, error);

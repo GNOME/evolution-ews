@@ -886,6 +886,11 @@ m365_backend_authenticate_sync (EBackend *backend,
 
 	cnc = e_m365_connection_new (e_backend_get_source (backend), m365_settings);
 
+	e_binding_bind_property (
+		backend, "proxy-resolver",
+		cnc, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
 	result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_UNKNOWN, NULL, NULL, out_certificate_pem, out_certificate_errors, cancellable, error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {

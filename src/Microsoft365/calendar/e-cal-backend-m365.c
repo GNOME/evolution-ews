@@ -363,6 +363,11 @@ ecb_m365_connect_sync (ECalMetaBackend *meta_backend,
 		if (folder_id) {
 			cnc = e_m365_connection_new_for_backend (backend, registry, source, m365_settings);
 
+			e_binding_bind_property (
+				backend, "proxy-resolver",
+				cnc, "proxy-resolver",
+				G_BINDING_SYNC_CREATE);
+
 			*out_auth_result = e_m365_connection_authenticate_sync (cnc, NULL, folder_kind, group_id, folder_id,
 				out_certificate_pem, out_certificate_errors, cancellable, error);
 

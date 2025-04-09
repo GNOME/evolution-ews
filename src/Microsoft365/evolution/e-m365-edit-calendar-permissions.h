@@ -12,7 +12,8 @@
 #include "common/camel-m365-settings.h"
 
 void	e_m365_edit_calendar_permissions	(GtkWindow *parent,
-						 const gchar *account_name,
+						 ESourceRegistry *registry,
+						 ESource *account_source,
 						 ESource *source,
 						 CamelM365Settings *m365_settings,
 						 const gchar *group_id,
