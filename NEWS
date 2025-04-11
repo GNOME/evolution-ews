@@ -1,3 +1,10 @@
+Evolution-EWS 3.56.1 2025-04-11
+-------------------------------
+
+Bug Fixes:
+	I#298 - m365: Empty Junk and then Empty Trash produces error
+	I#301 - m365: Cannot unset message label
+
 Evolution-EWS 3.56.0 2025-03-14
 -------------------------------
 
