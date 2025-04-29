@@ -3789,7 +3789,16 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 				g_free (response);
 				response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
 				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
-				found = TRUE;
+				found = response && g_ascii_strcasecmp (response, "NEEDS-ACTION") != 0;
+				if (found) {
+					/* stop early when have a response, in case
+					   the user is in the attendees multiple times */
+					g_clear_object (&attendee);
+					break;
+				} else {
+					g_clear_pointer (&response, g_free);
+					found = FALSE;
+				}
 			}
 		}
 	}

@@ -1440,6 +1440,16 @@ ecb_m365_get_current_user_meeting_reponse (ECalBackendM365 *cbm365,
 			if (attendee_mail && ((current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) ||
 			    (aliases && g_hash_table_contains (aliases, attendee_mail)))) {
 				found = ecb_m365_get_rsvp (attendee, &response, out_rsvp_requested);
+				if (found) {
+					if (response == E_M365_RESPONSE_NOT_RESPONDED) {
+						found = FALSE;
+					} else {
+						/* stop early when have a response, in case
+						   the user is in the attendees multiple times */
+						g_clear_object (&attendee);
+						break;
+					}
+				}
 			}
 		}
 	}
