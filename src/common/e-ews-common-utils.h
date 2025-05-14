@@ -25,6 +25,9 @@ ICalProperty *	e_ews_common_utils_find_attendee		(ECalBackend *cal_backend,
 								 ICalComponent *icomp,
 								 GHashTable *aliases);
 gboolean	e_ews_common_utils_gsettings_schema_exists	(const gchar *schema_id);
+GHashTable *	e_ews_common_utils_dup_mail_addresses		(ESourceRegistry *registry,
+								 ESource *child_source,
+								 gchar **inout_user_email);
 
 G_END_DECLS
 

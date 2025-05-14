@@ -524,3 +524,54 @@ e_ews_common_utils_gsettings_schema_exists (const gchar *schema_id)
 
 	return TRUE;
 }
+
+GHashTable *
+e_ews_common_utils_dup_mail_addresses (ESourceRegistry *registry,
+				       ESource *child_source,
+				       gchar **inout_user_email)
+{
+	GHashTable *aliases = NULL;
+	GList *identities, *link;
+	const gchar *parent_uid;
+
+	g_return_val_if_fail (E_IS_SOURCE_REGISTRY (registry), NULL);
+	g_return_val_if_fail (E_IS_SOURCE (child_source), NULL);
+
+	parent_uid = e_source_get_parent (child_source);
+
+	if (!parent_uid || !*parent_uid)
+		return NULL;
+
+	identities = e_source_registry_list_enabled (registry, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+
+	for (link = identities; link; link = g_list_next (link)) {
+		ESource *mail_identity = link->data;
+
+		if (g_strcmp0 (parent_uid, e_source_get_parent (mail_identity)) == 0) {
+			ESourceMailIdentity *extension;
+			gchar *address;
+
+			extension = e_source_get_extension (mail_identity, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+			aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
+
+			address = e_source_mail_identity_dup_address (extension);
+			if (address && *address) {
+				if (inout_user_email && (!*inout_user_email || !**inout_user_email)) {
+					g_free (*inout_user_email);
+					*inout_user_email = g_strdup (address);
+				}
+
+				if (!aliases)
+					aliases = g_hash_table_new_full (camel_strcase_hash, camel_strcase_equal, g_free, g_free);
+				g_hash_table_insert (aliases, address, e_source_mail_identity_dup_name (extension));
+			} else {
+				g_free (address);
+			}
+			break;
+		}
+	}
+
+	g_list_free_full (identities, g_object_unref);
+
+	return aliases;
+}
