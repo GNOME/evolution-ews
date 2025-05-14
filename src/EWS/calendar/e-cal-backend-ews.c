@@ -191,41 +191,6 @@ ecb_ews_update_sync_tag_stamp (ECalBackendEws *cbews)
 	g_clear_object (&cal_cache);
 }
 
-static GHashTable *
-ecb_ews_get_mail_aliases (ECalBackendEws *cbews)
-{
-	ESource *source;
-	ESourceRegistry *registry;
-	GHashTable *aliases = NULL;
-	GList *identities, *link;
-	const gchar *parent_uid;
-
-	source = e_backend_get_source (E_BACKEND (cbews));
-	parent_uid = e_source_get_parent (source);
-
-	if (!parent_uid || !*parent_uid)
-		return NULL;
-
-	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbews));
-	identities = e_source_registry_list_enabled (registry, E_SOURCE_EXTENSION_MAIL_IDENTITY);
-
-	for (link = identities; link; link = g_list_next (link)) {
-		ESource *mail_identity = link->data;
-
-		if (g_strcmp0 (parent_uid, e_source_get_parent (mail_identity)) == 0) {
-			ESourceMailIdentity *extension;
-
-			extension = e_source_get_extension (mail_identity, E_SOURCE_EXTENSION_MAIL_IDENTITY);
-			aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
-			break;
-		}
-	}
-
-	g_list_free_full (identities, g_object_unref);
-
-	return aliases;
-}
-
 static void
 ecb_ews_convert_error_to_edc_error (GError **perror)
 {
@@ -1756,7 +1721,8 @@ ecb_ews_organizer_is_user (ECalBackendEws *cbews,
 		if (!is_organizer) {
 			GHashTable *aliases;
 
-			aliases = ecb_ews_get_mail_aliases (cbews);
+			aliases = e_ews_common_utils_dup_mail_addresses (e_cal_backend_get_registry (E_CAL_BACKEND (cbews)),
+				e_backend_get_source (E_BACKEND (cbews)), NULL);
 
 			if (aliases) {
 				is_organizer = g_hash_table_contains (aliases, email);
@@ -4144,7 +4110,8 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 
 	ews_settings = ecb_ews_get_collection_settings (cbews);
 	user_email = camel_ews_settings_dup_email (ews_settings);
-	aliases = ecb_ews_get_mail_aliases (cbews);
+	aliases = e_ews_common_utils_dup_mail_addresses (e_cal_backend_get_registry (E_CAL_BACKEND (cbews)),
+		e_backend_get_source (E_BACKEND (cbews)), &user_email);
 
 	switch (i_cal_component_get_method (icomp)) {
 	case I_CAL_METHOD_REQUEST:
@@ -4618,6 +4585,8 @@ ecb_ews_constructed (GObject *object)
 {
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
 	ECalCache *cal_cache;
+	CamelEwsSettings *ews_settings;
+	gchar *user_email;
 	gchar *cache_dirname;
 
 	/* Chain up to parent's method. */
@@ -4639,6 +4608,25 @@ ecb_ews_constructed (GObject *object)
 	g_mkdir_with_parents (cbews->priv->attachments_dir, 0777);
 
 	g_free (cache_dirname);
+
+	/* ensure the user email is set */
+	ews_settings = ecb_ews_get_collection_settings (cbews);
+	user_email = camel_ews_settings_dup_email (ews_settings);
+
+	if (!user_email || !*user_email) {
+		GHashTable *addresses;
+
+		g_clear_pointer (&user_email, g_free);
+
+		addresses = e_ews_common_utils_dup_mail_addresses (e_cal_backend_get_registry (E_CAL_BACKEND (cbews)),
+			e_backend_get_source (E_BACKEND (cbews)), &user_email);
+		g_clear_pointer (&addresses, g_hash_table_unref);
+
+		if (user_email && *user_email)
+			camel_ews_settings_set_email (ews_settings, user_email);
+	}
+
+	g_free (user_email);
 }
 
 static void

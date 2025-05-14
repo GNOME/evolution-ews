@@ -989,41 +989,6 @@ ecb_m365_save_recurrence_changes_locked_sync (ECalBackendM365 *cbm365,
 	return success;
 }
 
-static GHashTable *
-ecb_m365_get_mail_aliases (ECalBackendM365 *cbm365)
-{
-	ESource *source;
-	ESourceRegistry *registry;
-	GHashTable *aliases = NULL;
-	GList *identities, *link;
-	const gchar *parent_uid;
-
-	source = e_backend_get_source (E_BACKEND (cbm365));
-	parent_uid = e_source_get_parent (source);
-
-	if (!parent_uid || !*parent_uid)
-		return NULL;
-
-	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbm365));
-	identities = e_source_registry_list_enabled (registry, E_SOURCE_EXTENSION_MAIL_IDENTITY);
-
-	for (link = identities; link; link = g_list_next (link)) {
-		ESource *mail_identity = link->data;
-
-		if (g_strcmp0 (parent_uid, e_source_get_parent (mail_identity)) == 0) {
-			ESourceMailIdentity *extension;
-
-			extension = e_source_get_extension (mail_identity, E_SOURCE_EXTENSION_MAIL_IDENTITY);
-			aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
-			break;
-		}
-	}
-
-	g_list_free_full (identities, g_object_unref);
-
-	return aliases;
-}
-
 static gboolean
 ecb_m365_organizer_is_user (ECalBackendM365 *cbm365,
 			    ICalComponent *icomp)
@@ -1057,7 +1022,8 @@ ecb_m365_organizer_is_user (ECalBackendM365 *cbm365,
 		if (!is_organizer) {
 			GHashTable *aliases;
 
-			aliases = ecb_m365_get_mail_aliases (cbm365);
+			aliases = e_ews_common_utils_dup_mail_addresses (e_cal_backend_get_registry (E_CAL_BACKEND (cbm365)),
+				e_backend_get_source (E_BACKEND (cbm365)), NULL);
 
 			if (aliases) {
 				is_organizer = g_hash_table_contains (aliases, email);
@@ -1571,7 +1537,8 @@ ecb_m365_receive_objects_sync (ECalBackendSync *sync_backend,
 
 	m365_settings = camel_m365_settings_get_from_backend (E_BACKEND (cal_backend), e_cal_backend_get_registry (cal_backend));
 	user_email = camel_m365_settings_dup_email (m365_settings);
-	aliases = ecb_m365_get_mail_aliases (cbm365);
+	aliases = e_ews_common_utils_dup_mail_addresses (e_cal_backend_get_registry (E_CAL_BACKEND (cbm365)),
+		e_backend_get_source (E_BACKEND (cbm365)), &user_email);
 
 	switch (i_cal_component_get_method (icomp)) {
 	case I_CAL_METHOD_REQUEST:
@@ -2083,6 +2050,9 @@ ecb_m365_constructed (GObject *object)
 {
 	ECalBackendM365 *cbm365 = E_CAL_BACKEND_M365 (object);
 	ECalCache *cal_cache;
+	ESourceRegistry *registry;
+	CamelM365Settings *m365_settings;
+	gchar *user_email;
 	gchar *cache_dirname;
 
 	/* Chain up to parent's method. */
@@ -2106,6 +2076,26 @@ ecb_m365_constructed (GObject *object)
 	g_free (cache_dirname);
 
 	e_m365_tz_utils_ref_windows_zones ();
+
+	/* ensure the user email is set */
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbm365));
+	m365_settings = camel_m365_settings_get_from_backend (E_BACKEND (cbm365), registry);
+	user_email = camel_m365_settings_dup_email (m365_settings);
+
+	if (!user_email || !*user_email) {
+		GHashTable *addresses;
+
+		g_clear_pointer (&user_email, g_free);
+
+		addresses = e_ews_common_utils_dup_mail_addresses (registry,
+			e_backend_get_source (E_BACKEND (cbm365)), &user_email);
+		g_clear_pointer (&addresses, g_hash_table_unref);
+
+		if (user_email && *user_email)
+			camel_m365_settings_set_email (m365_settings, user_email);
+	}
+
+	g_free (user_email);
 }
 
 static void
