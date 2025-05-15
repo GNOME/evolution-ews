@@ -81,7 +81,20 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 	}
 
 	if (g_strcmp0 (fid, EWS_PUBLIC_FOLDER_ROOT_ID) == 0)
-		fi->flags |= CAMEL_FOLDER_CHILDREN;
+		fi->flags |= CAMEL_FOLDER_CHILDREN | CAMEL_FOLDER_NOSELECT;
+
+	if (g_strcmp0 (fid, EWS_FOREIGN_FOLDER_ROOT_ID) == 0) {
+		fi->flags |= CAMEL_FOLDER_NOSELECT;
+	} else {
+		gchar *parent_fid;
+
+		parent_fid = camel_ews_store_summary_get_parent_folder_id (ews_summary, fid, NULL);
+
+		if (g_strcmp0 (parent_fid, EWS_FOREIGN_FOLDER_ROOT_ID) == 0)
+			fi->flags |= CAMEL_FOLDER_NOSELECT;
+
+		g_free (parent_fid);
+	}
 
 	return fi;
 }

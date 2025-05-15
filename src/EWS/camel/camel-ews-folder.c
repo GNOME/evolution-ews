@@ -1720,6 +1720,7 @@ ews_synchronize_sync (CamelFolder *folder,
 	CamelFolderSummary *folder_summary;
 	GPtrArray *uids;
 	GSList *mi_list = NULL, *deleted_uids = NULL, *junk_uids = NULL, *inbox_uids = NULL;
+	gchar *fid;
 	gint mi_list_len = 0;
 	gboolean is_junk_folder;
 	gboolean success = TRUE;
@@ -1727,6 +1728,28 @@ ews_synchronize_sync (CamelFolder *folder,
 	GError *local_error = NULL;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
+
+	fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, camel_folder_get_full_name (folder));
+
+	if (g_strcmp0 (fid, EWS_FOREIGN_FOLDER_ROOT_ID) == 0 ||
+	    g_strcmp0 (fid, EWS_PUBLIC_FOLDER_ROOT_ID) == 0) {
+		g_free (fid);
+		return TRUE;
+	} else if (fid) {
+		gchar *parent_fid;
+
+		parent_fid = camel_ews_store_summary_get_parent_folder_id (ews_store->summary, fid, NULL);
+
+		if (g_strcmp0 (parent_fid, EWS_FOREIGN_FOLDER_ROOT_ID) == 0) {
+			g_free (parent_fid);
+			g_free (fid);
+			return TRUE;
+		}
+
+		g_free (parent_fid);
+	}
+
+	g_free (fid);
 
 	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
@@ -2371,12 +2394,35 @@ ews_refresh_info_sync (CamelFolder *folder,
 	ews_folder = (CamelEwsFolder *) folder;
 	priv = ews_folder->priv;
 
-	if (!camel_ews_store_connected (ews_store, cancellable, error))
+	id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, full_name);
+
+	if (g_strcmp0 (id, EWS_FOREIGN_FOLDER_ROOT_ID) == 0 ||
+	    g_strcmp0 (id, EWS_PUBLIC_FOLDER_ROOT_ID) == 0) {
+		g_free (id);
+		return TRUE;
+	} else {
+		gchar *parent_fid;
+
+		parent_fid = camel_ews_store_summary_get_parent_folder_id (ews_store->summary, id, NULL);
+
+		if (g_strcmp0 (parent_fid, EWS_FOREIGN_FOLDER_ROOT_ID) == 0) {
+			g_free (parent_fid);
+			g_free (id);
+			return TRUE;
+		}
+
+		g_free (parent_fid);
+	}
+
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
+		g_free (id);
 		return FALSE;
+	}
 
 	g_mutex_lock (&priv->state_lock);
 
 	if (priv->refreshing) {
+		g_free (id);
 		g_mutex_unlock (&priv->state_lock);
 		return TRUE;
 	}
@@ -2385,15 +2431,17 @@ ews_refresh_info_sync (CamelFolder *folder,
 	g_mutex_unlock (&priv->state_lock);
 
 	cnc = camel_ews_store_ref_connection (ews_store);
-	g_return_val_if_fail (cnc != NULL, FALSE);
+	if (!cnc) {
+		g_free (id);
+		g_warn_if_reached ();
+		return FALSE;
+	}
 
 	folder_summary = camel_folder_get_folder_summary (folder);
 	camel_folder_summary_prepare_fetch_all (folder_summary, NULL);
 
 	change_info = camel_folder_change_info_new ();
 	last_folder_update_time = g_get_monotonic_time ();
-	id = camel_ews_store_summary_get_folder_id_from_name (
-		ews_store->summary, full_name);
 
 	camel_operation_push_message (cancellable, _("Refreshing folder “%s”"), camel_folder_get_display_name (folder));
 

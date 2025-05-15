@@ -790,6 +790,15 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	gtk_widget_show (GTK_WIDGET (dialog));
 }
 
+static gboolean
+e_ews_looks_like_guid (const gchar *value)
+{
+	/* GUID is of form "01234567-9012-4567-9012-456789012345" */
+	if (!value)
+		return FALSE;
+	return strlen (value) == 36 && value[8] == '-' && value[13] == '-' && value[18] == '-' && value[23] == '-';
+}
+
 gboolean
 e_ews_subscribe_foreign_folder_resolve_name_sync (EEwsConnection *cnc,
 						  const gchar *name,
@@ -853,6 +862,50 @@ e_ews_subscribe_foreign_folder_resolve_name_sync (EEwsConnection *cnc,
 				error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND,
 				_("User name “%s” is ambiguous, specify it more precisely, please"), name);
 			return FALSE;
+		}
+
+		/* try to look up for the real name when the mailbox name looks like a GUID */
+		if (out_display_name && e_ews_looks_like_guid (*out_display_name)) {
+			GSList *contacts = NULL;
+
+			if (e_ews_connection_resolve_names_sync (cnc, G_PRIORITY_DEFAULT,
+				*out_display_name, EWS_SEARCH_AD, NULL, TRUE,
+				&includes_last_item, &mailboxes, &contacts,
+				cancellable, NULL)) {
+				GSList *link;
+				gboolean found = FALSE;
+
+				for (link = contacts; link && !found; link = g_slist_next (link)) {
+					EEwsItem *contact_item = link->data;
+
+					if (contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT) {
+						const gchar *value;
+
+						value = e_ews_item_get_fileas (contact_item);
+						if (!value || !*value)
+							value = e_ews_item_get_display_name (contact_item);
+
+						if (value && *value && !e_ews_looks_like_guid (value)) {
+							found = TRUE;
+							g_free (*out_display_name);
+							*out_display_name = g_strdup (value);
+						}
+					}
+				}
+
+				for (link = mailboxes; link && !found; link = g_slist_next (link)) {
+					EwsMailbox *mb = link->data;
+
+					if (mb && mb->name && *mb->name && !e_ews_looks_like_guid (mb->name)) {
+						found = TRUE;
+						g_free (*out_display_name);
+						*out_display_name = g_strdup (mb->name);
+					}
+				}
+
+				e_util_free_nullable_object_slist (contacts);
+				g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+			}
 		}
 	}
 

@@ -3171,7 +3171,7 @@ ews_rename_folder_sync (CamelStore *store,
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	EEwsConnection *connection;
 	const gchar *old_slash, *new_slash;
-	gchar *fid;
+	gchar *fid, *parent_fid;
 	gchar *changekey;
 	gboolean res = FALSE;
 	GError *local_error = NULL;
@@ -3179,16 +3179,56 @@ ews_rename_folder_sync (CamelStore *store,
 	if (!strcmp (old_name, new_name))
 		return TRUE;
 
-	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
-		return FALSE;
-	}
-
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary, old_name);
 	if (!fid) {
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
 			CAMEL_STORE_ERROR_NO_FOLDER,
 			_("Folder %s does not exist"), old_name);
+		return FALSE;
+	}
+
+	old_slash = g_strrstr (old_name, "/");
+	new_slash = g_strrstr (new_name, "/");
+
+	if (old_slash)
+		old_slash++;
+	else
+		old_slash = old_name;
+
+	if (new_slash)
+		new_slash++;
+	else
+		new_slash = new_name;
+
+	parent_fid = camel_ews_store_summary_get_parent_folder_id (ews_summary, fid, NULL);
+	if (g_strcmp0 (parent_fid, EWS_FOREIGN_FOLDER_ROOT_ID) == 0) {
+		gboolean success = FALSE;
+
+		if (strcmp (old_slash, new_slash) != 0) {
+			gint parent_len = old_slash - old_name;
+			if (new_slash - new_name != parent_len ||
+			    strncmp (old_name, new_name, parent_len)) {
+				/* do nothing when moving the folder, the error is set below */
+			} else {
+				camel_ews_store_summary_set_folder_name (ews_summary, fid, new_slash);
+				success = TRUE;
+			}
+		}
+
+		g_free (parent_fid);
+		g_free (fid);
+
+		if (!success)
+			g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_INVALID, _("Cannot move a foreign folder"));
+
+		return success;
+	}
+
+	g_free (parent_fid);
+
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
+		g_free (fid);
 		return FALSE;
 	}
 
@@ -3203,19 +3243,6 @@ ews_rename_folder_sync (CamelStore *store,
 	}
 
 	connection = camel_ews_store_ref_connection (ews_store);
-
-	old_slash = g_strrstr (old_name, "/");
-	new_slash = g_strrstr (new_name, "/");
-
-	if (old_slash)
-		old_slash++;
-	else
-		old_slash = old_name;
-
-	if (new_slash)
-		new_slash++;
-	else
-		new_slash = new_name;
 
 	if (strcmp (old_slash, new_slash)) {
 		gint parent_len = old_slash - old_name;
