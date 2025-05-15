@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-01-31 13:28+0000\n"
-"PO-Revision-Date: 2025-01-31 17:57+0200\n"
+"POT-Creation-Date: 2025-05-15 14:14+0000\n"
+"PO-Revision-Date: 2025-05-15 22:06+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -68,33 +68,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3900
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -102,13 +102,13 @@ msgstr ""
 "Неможливо створити зустрічі, які організовано іншими користувачами, у "
 "календарі вебслужб Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Нараду в інтернеті можна створювати лише у календарі основного користувача."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3888
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1651
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не вдалося знайти користувача «%s» серед учасників"
@@ -165,28 +165,28 @@ msgstr "Не вдалося створити шлях «%s»: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Не вдалося перемістити кеш-файл повідомлень з «%s» до «%s»: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1921
+#: ../src/EWS/camel/camel-ews-folder.c:1944
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не вдалося завантажити резюме щодо %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2398
+#: ../src/EWS/camel/camel-ews-folder.c:2446
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Оновлення теки «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2591
+#: ../src/EWS/camel/camel-ews-folder.c:2639
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3264
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1664
+#: ../src/EWS/camel/camel-ews-folder.c:3312
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1739
 msgid "Apply message _filters to this folder"
 msgstr "Застосувати _фільтри повідомлень до цієї теки"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3276
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1676
+#: ../src/EWS/camel/camel-ews-folder.c:3324
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1751
 msgid "Always check for _new mail in this folder"
 msgstr "Завжди перевіряти _нову пошту у цій теці"
 
@@ -406,7 +406,7 @@ msgstr ""
 "загальнодоступних тек"
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:884
+#: ../src/Microsoft365/camel/camel-m365-store.c:881
 #, c-format
 msgid "Folder does not exist"
 msgstr "Теки не існує"
@@ -425,99 +425,104 @@ msgstr ""
 "Неможливо вилучити теку у «%s» — ця тека використовується лише для "
 "загальнодоступних тек"
 
-#: ../src/EWS/camel/camel-ews-store.c:3191
-#: ../src/EWS/camel/camel-ews-store.c:3287
+#: ../src/EWS/camel/camel-ews-store.c:3187
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Теки %s не існує"
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
+#: ../src/EWS/camel/camel-ews-store.c:3223
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot move a foreign folder"
+msgstr "Не можна переміщувати сторонню теку"
+
+#: ../src/EWS/camel/camel-ews-store.c:3240
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Немає запису зміни ключа для теки %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3243
+#: ../src/EWS/camel/camel-ews-store.c:3270
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Не можна одночасно перейменовувати і пересувати теку"
 
-#: ../src/EWS/camel/camel-ews-store.c:3274
-#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3301
+#: ../src/EWS/camel/camel-ews-store.c:3324
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Не вдалося знайти ідентифікатор теки для батьківської теки %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3287
-#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3324
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Вхідні"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3373
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Сервер Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3349
+#: ../src/EWS/camel/camel-ews-store.c:3376
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Служба Exchange для %s на %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3393
-#: ../src/Microsoft365/camel/camel-m365-store.c:1458
+#: ../src/EWS/camel/camel-ews-store.c:3420
+#: ../src/Microsoft365/camel/camel-m365-store.c:1423
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Не вдалося знайти теку «Смітник»"
 
-#: ../src/EWS/camel/camel-ews-store.c:3453
-#: ../src/Microsoft365/camel/camel-m365-store.c:1516
+#: ../src/EWS/camel/camel-ews-store.c:3480
+#: ../src/Microsoft365/camel/camel-m365-store.c:1481
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Не вдалося знайти теку «Спам»"
 
-#: ../src/EWS/camel/camel-ews-store.c:3658
+#: ../src/EWS/camel/camel-ews-store.c:3685
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Не можна підписуватися на теки EWS в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3708
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Неможливо підписатися на теку «%s» — немає загальнодоступних тек"
 
-#: ../src/EWS/camel/camel-ews-store.c:3691
+#: ../src/EWS/camel/camel-ews-store.c:3718
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Неможливо підписатися на теку «%s» — теку не знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3700
+#: ../src/EWS/camel/camel-ews-store.c:3727
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Неможливо підписатися на теку «%s» — ідентифікатор теки не знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3711
+#: ../src/EWS/camel/camel-ews-store.c:3738
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "Неможливо підписатися на теку «%s» — загальнодоступної кореневої теки не "
 "знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3787
+#: ../src/EWS/camel/camel-ews-store.c:3814
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не можна скасовувати підписку на теки EWS в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-store.c:3898
-#: ../src/Microsoft365/camel/camel-m365-store.c:1791
-#: ../src/Microsoft365/camel/camel-m365-store.c:1804
+#: ../src/EWS/camel/camel-ews-store.c:3925
+#: ../src/Microsoft365/camel/camel-m365-store.c:1756
+#: ../src/Microsoft365/camel/camel-m365-store.c:1769
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Потрібно бути в мережі, щоб завершити цю операцію"
 
-#: ../src/EWS/camel/camel-ews-store.c:3970
-#: ../src/EWS/camel/camel-ews-store.c:4007
+#: ../src/EWS/camel/camel-ews-store.c:3997
+#: ../src/EWS/camel/camel-ews-store.c:4034
 msgid "Unsetting the “Out of Office” status"
 msgstr "Скасовуємо стан «За межами офісу»"
 
@@ -805,7 +810,7 @@ msgstr "Підписатися на теку іншого користувача
 #: ../src/EWS/evolution/e-ews-config-utils.c:1532
 #: ../src/EWS/evolution/e-ews-config-utils.c:1563
 #: ../src/EWS/evolution/e-ews-config-utils.c:1594
-#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:188
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:187
 msgid "Permissions…"
 msgstr "Права доступу…"
 
@@ -1186,7 +1191,7 @@ msgstr "Назва _теки:"
 msgid "Include _subfolders"
 msgstr "Вк_лючати підтеки"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:854
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:863
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr ""
@@ -1197,7 +1202,7 @@ msgstr ""
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:890
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:943
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
@@ -1678,57 +1683,57 @@ msgstr "Не вдалося визначити належний клас тек 
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Джерело даних «%s» не є відповідником теки веб служб Exchange"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2083
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2092
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:394
 msgid "Folder ID is not set"
 msgstr "Не встановлено ідентифікатор теки"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2384
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2393
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Не вдалося зберегти список контактів до адресної книги Microsoft 365"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2396
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2405
 msgid "Cannot modify organizational contact"
 msgstr "Не можна змінювати організаційний контакт"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2398
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2407
 msgid "Cannot modify user contact"
 msgstr "Не можна змінювати контакт користувача"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2400
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2409
 msgid "Cannot modify recent contact"
 msgstr "Не можна змінювати нещодавно використаний контакт"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2511
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2520
 msgid "Cannot remove organizational contact"
 msgstr "Не можна вилучати організаційний контакт"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2513
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2522
 msgid "Cannot remove user contact"
 msgstr "Не можна вилучати контакт користувача"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2515
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2524
 msgid "Cannot remove recent contact"
 msgstr "Не вдалося вилучити нещодавно використаний контакт"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
 msgid ""
 "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Зберігання для від'єднаних екземплярів неможливе, оскільки його підтримки у "
 "Microsoft 365 не передбачено"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1144
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1115
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "У календарі Microsoft 365 можна зберігати лише прості події"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1157
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1128
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "У теці завдань Microsoft 365 можна зберігати лише прості завдання"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1208
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1664
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1179
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1646
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
@@ -1786,19 +1791,20 @@ msgid "Failed to get inline attachment data"
 msgstr "Не вдалося отримати дані вбудованого долучення"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:530
-#: ../src/Microsoft365/camel/camel-m365-folder.c:949
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1448
+#: ../src/Microsoft365/camel/camel-m365-folder.c:535
+#: ../src/Microsoft365/camel/camel-m365-folder.c:954
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1325
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1523
 msgid "Invalid folder state (missing parent store)"
 msgstr "Некоректний стан теки (пропущено батьківське сховище)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1754
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1829
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Тека «%s» не відповідає жодній відомій теці"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1773
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1848
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Не вдалося завантажити резюме щодо «%s»"
@@ -1840,12 +1846,8 @@ msgstr "Не вдалося створити з'єднання"
 msgid "Parent folder “%s” does not exist"
 msgstr "Батьківської теки «%s» не існує"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:897
-msgid "Cannot find “Deleted Items” folder"
-msgstr "Не вдалося знайти теку «Вилучені записи»"
-
-#: ../src/Microsoft365/camel/camel-m365-store.c:988
-#: ../src/Microsoft365/camel/camel-m365-store.c:1026
+#: ../src/Microsoft365/camel/camel-m365-store.c:953
+#: ../src/Microsoft365/camel/camel-m365-store.c:991
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Теки «%s» не існує"
@@ -1861,7 +1863,7 @@ msgstr ""
 "«Від»"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:944
+#: ../src/Microsoft365/camel/camel-m365-utils.c:946
 msgid "Failed to re-encode parts to base64: "
 msgstr "Не вдалося перекодувати частини до base64: "
 
@@ -1924,7 +1926,7 @@ msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5488
+#: ../src/Microsoft365/common/e-m365-connection.c:5495
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Не вдалося зберегти екземпляр у «%s»"
@@ -1933,153 +1935,131 @@ msgstr "Не вдалося зберегти екземпляр у «%s»"
 msgid "Maximum contacts to download"
 msgstr "Макс. к-ть контактів для отримання"
 
-#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:190
-#| msgid "Edit EWS calendar permissions"
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:189
 msgid "Edit Microsoft 365 calendar permissions"
 msgstr "Редагувати права доступу до календаря Microsoft 365"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:246
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
 msgid "Not shared"
 msgstr "Не оприлюднено"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:247
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
 msgid "Can view when I’m busy"
 msgstr "Можна переглядати за зайнятості"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:248
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:253
 msgid "Can view titles and locations"
 msgstr "Можна переглядати заголовки і місця"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:249
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
 msgid "Can view all details"
 msgstr "Можна переглядати усі параметри"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:250
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:255
 msgid "Can edit"
 msgstr "Можна редагувати"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
-#| msgid "Delegate can see my _private items"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:256
 msgid "Delegate without private events"
 msgstr "Делегувати без конфіденційних подій"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
-#| msgid "Delegate can see my _private items"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:257
 msgid "Delegate with private events"
 msgstr "Делегувати з конфіденційними подіями"
 
 #. Translators: It's for custom permission setting, like some not known what it is precisely
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
-#| msgctxt "PermissionsLevel"
-#| msgid "Custom"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:259
 msgid "Custom"
 msgstr "Нетипові"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:278
-#| msgid "Unknown error"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:283
 msgid "Unknown permission"
 msgstr "Невідомі права доступу"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:347
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:395
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:613
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:710
-#| msgid "Failed to create connection"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:353
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:418
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:655
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:755
 msgid "Cannot create connection object."
 msgstr "Не вдалося створити об'єкт з'єднання."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:376
-#| msgid "Writing folder permissions, please wait…"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:382
 msgid "Updating permission, please wait…"
 msgstr "Оновлюємо права доступу, будь ласка, зачекайте…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:377
-#| msgid "Failed to update GAL:"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:383
 msgid "Failed to update permission: "
 msgstr "Не вдалося оновити права доступу: "
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:444
-#| msgid "Reading folder permissions, please wait…"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:474
 msgid "Removing permission, please wait…"
 msgstr "Вилучаємо права доступу, будь ласка, зачекайте…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:445
-#| msgid "Failed to create connection"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:475
 msgid "Failed to remove permission: "
 msgstr "Не вдалося вилучити права доступу: "
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:534
-#| msgid "Message to be sent within the organization"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:575
 msgid "People in the Organization"
 msgstr "Особи в організації"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:567
-#| msgid "Delegate permissions"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:609
 msgid "Remove permission"
 msgstr "Вилучити права доступу"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:626
-#| msgid "No items found"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:668
 msgid "No valid email address found."
 msgstr "Не знайдено чинної адреси електронної пошти."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:679
-#| msgid "Reading folder permissions, please wait…"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:724
 msgid "Saving new permission, please wait…"
 msgstr "Зберігаємо нові права доступу, будь ласка, зачекайте…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:680
-#| msgid "Delegate permissions"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:725
 msgid "Failed to save permission: "
 msgstr "Не вдалося зберегти права доступу: "
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:800
-#| msgid "Edit EWS calendar permissions"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:890
 msgid "Edit calendar permissions…"
 msgstr "Редагувати права доступу до календаря…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:803
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:893
 msgid "Cl_ose"
 msgstr "З_акрити"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:855
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:942
 msgid "_Cancel"
 msgstr "_Скасувати"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:863
-#| msgid "Calendar"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:982
 msgid "Calendar:"
 msgstr "Календар:"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:897
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1016
 msgid ""
 "Choose sharing permissions for this calendar. You can add people from within "
 "the organization or outside of it. It can be changed any time."
 msgstr ""
-"Виберіть права доступу для цього календаря. Ви можете додавати осіб з"
-" організації або поза нею. Можна будь-коли змінювати."
+"Виберіть права доступу для цього календаря. Ви можете додавати осіб з "
+"організації або поза нею. Можна будь-коли змінювати."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:936
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1055
 msgid "_Share"
 msgstr "_Оприлюднити"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:972
-#| msgid "Message to be sent outside the organization"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1091
 msgid "Inside the organization"
 msgstr "У межах організації"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:996
-#| msgid "Message to be sent outside the organization"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1116
 msgid "Outside the organization"
 msgstr "Поза організацією"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1024
-#| msgid "Reading folder permissions, please wait…"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1145
 msgid "Reading calendar permissions, please wait…"
 msgstr "Читаємо права доступу до календаря. Будь ласка, зачекайте…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1025
-#| msgid "Failed to read From address"
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1146
 msgid "Failed to read permissions: "
 msgstr "Не вдалося прочитати права доступу: "
 
@@ -2120,6 +2100,9 @@ msgstr "Недавні контакти"
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Джерело даних «%s» не є відповідником теки Microsoft 365"
+
+#~ msgid "Cannot find “Deleted Items” folder"
+#~ msgstr "Не вдалося знайти теку «Вилучені записи»"
 
 #~ msgid ""
 #~ "Cannot add messages into a Microsoft 365 account from another account. "
