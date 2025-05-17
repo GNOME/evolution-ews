@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-01-31 13:28+0000\n"
-"PO-Revision-Date: 2025-02-01 09:48+0100\n"
+"POT-Creation-Date: 2025-05-15 14:14+0000\n"
+"PO-Revision-Date: 2025-05-17 18:47+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -71,33 +71,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Nastavljanje slike stika je spodletelo:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Prosto"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zasedeno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Poskusno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
 msgid "Cannot determine EWS ItemId"
 msgstr "ItemId EWS ni mogoče določiti"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3900
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -105,12 +105,12 @@ msgstr ""
 "Srečanj, ki jih organizirajo drugi uporabniki v koledarju spletnih storitev "
 "Exchange ni mogoče ustvariti."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Spletno srečanje lahko ustvarite le v glavnem uporabniškem koledarju."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3888
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1651
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Med prisotnimi ni mogoče najti uporabnika »%s«"
@@ -167,28 +167,28 @@ msgstr "Ni mogoče ustvariti poti predpomnilnika »%s«: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Premikanje datoteke predpomnilnika iz »%s« v »%s« je spodletelo: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1921
+#: ../src/EWS/camel/camel-ews-folder.c:1944
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2398
+#: ../src/EWS/camel/camel-ews-folder.c:2446
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Osveževanje mape »%s«"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2591
+#: ../src/EWS/camel/camel-ews-folder.c:2639
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanja na mapi v načinu brez povezave"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3264
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1664
+#: ../src/EWS/camel/camel-ews-folder.c:3312
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1739
 msgid "Apply message _filters to this folder"
 msgstr "Uve_ljavi filtre sporočil v tej mapi"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3276
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1676
+#: ../src/EWS/camel/camel-ews-folder.c:3324
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1751
 msgid "Always check for _new mail in this folder"
 msgstr "Vedno preveri, ali je v tej mapi _nova pošta"
 
@@ -399,7 +399,7 @@ msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Mape pod »%s« ni mogoče ustvariti, saj se uporablja le za javne mape."
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:884
+#: ../src/Microsoft365/camel/camel-m365-store.c:881
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
@@ -415,97 +415,101 @@ msgstr ""
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Mape »%s« ni mogoče odstraniti, saj se uporablja le za javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3191
-#: ../src/EWS/camel/camel-ews-store.c:3287
+#: ../src/EWS/camel/camel-ews-store.c:3187
+#: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne obstaja."
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
+#: ../src/EWS/camel/camel-ews-store.c:3223
+msgid "Cannot move a foreign folder"
+msgstr "Ni mogoče premakniti tuje mape"
+
+#: ../src/EWS/camel/camel-ews-store.c:3240
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ni zapisa ključa za mapo %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3243
+#: ../src/EWS/camel/camel-ews-store.c:3270
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ni mogoče hkrati preimenovati in premakniti mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3274
-#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3301
+#: ../src/EWS/camel/camel-ews-store.c:3324
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Ni mogoče najti ID mape za nadrejeno mapo %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3287
-#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3324
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Prejeto"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3373
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Strežnik Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3349
+#: ../src/EWS/camel/camel-ews-store.c:3376
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3393
-#: ../src/Microsoft365/camel/camel-m365-store.c:1458
+#: ../src/EWS/camel/camel-ews-store.c:3420
+#: ../src/Microsoft365/camel/camel-m365-store.c:1423
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Mape Smeti ni mogoče najti"
 
-#: ../src/EWS/camel/camel-ews-store.c:3453
-#: ../src/Microsoft365/camel/camel-m365-store.c:1516
+#: ../src/EWS/camel/camel-ews-store.c:3480
+#: ../src/Microsoft365/camel/camel-m365-store.c:1481
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Mape za vsiljeno pošto ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3658
+#: ../src/EWS/camel/camel-ews-store.c:3685
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave se ni mogoče naročiti na mape EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3708
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker ustrezne javne mape ni na voljo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3691
+#: ../src/EWS/camel/camel-ews-store.c:3718
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3700
+#: ../src/EWS/camel/camel-ews-store.c:3727
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker ID mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3711
+#: ../src/EWS/camel/camel-ews-store.c:3738
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, korena javne mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3787
+#: ../src/EWS/camel/camel-ews-store.c:3814
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče preklicati naročil na mape EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:3898
-#: ../src/Microsoft365/camel/camel-m365-store.c:1791
-#: ../src/Microsoft365/camel/camel-m365-store.c:1804
+#: ../src/EWS/camel/camel-ews-store.c:3925
+#: ../src/Microsoft365/camel/camel-m365-store.c:1756
+#: ../src/Microsoft365/camel/camel-m365-store.c:1769
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3970
-#: ../src/EWS/camel/camel-ews-store.c:4007
+#: ../src/EWS/camel/camel-ews-store.c:3997
+#: ../src/EWS/camel/camel-ews-store.c:4034
 msgid "Unsetting the “Out of Office” status"
 msgstr "Poteka preklic nastavitve stanja »Izven pisarne«"
 
@@ -806,7 +810,7 @@ msgstr "Naročilo na mapo drugega uporabnika ..."
 #: ../src/EWS/evolution/e-ews-config-utils.c:1532
 #: ../src/EWS/evolution/e-ews-config-utils.c:1563
 #: ../src/EWS/evolution/e-ews-config-utils.c:1594
-#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:188
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:187
 msgid "Permissions…"
 msgstr "Dovoljenja …"
 
@@ -1183,7 +1187,7 @@ msgstr "I_me mape:"
 msgid "Include _subfolders"
 msgstr "_Upoštevaj podmape"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:854
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:863
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Uporabniško ime »%s« ni enoznačno, določite ga natančneje."
@@ -1193,7 +1197,7 @@ msgstr "Uporabniško ime »%s« ni enoznačno, določite ga natančneje."
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:890
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:943
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
@@ -1668,55 +1672,55 @@ msgstr "Za novo mapo »%s« ni mogoče določiti ustreznega razreda mape"
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Vir podatkov »%s« ne predstavlja mape spletnih storitev Exchange"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2083
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2092
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:394
 msgid "Folder ID is not set"
 msgstr "ID mape ni določen"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2384
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2393
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr "Seznama stikov ni mogoče shraniti v adresar Microsoft 365"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2396
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2405
 msgid "Cannot modify organizational contact"
 msgstr "Stika organizacije ni mogoče spremeniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2398
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2407
 msgid "Cannot modify user contact"
 msgstr "Stika uporabnika ni mogoče spremeniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2400
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2409
 msgid "Cannot modify recent contact"
 msgstr "Nedavnega stika ni mogoče spremeniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2511
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2520
 msgid "Cannot remove organizational contact"
 msgstr "Stika organizacije ni mogoče odstraniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2513
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2522
 msgid "Cannot remove user contact"
 msgstr "Stika uporabnika ni mogoče odstraniti"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2515
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2524
 msgid "Cannot remove recent contact"
 msgstr "Nedavnega stika ni mogoče odstraniti"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
 msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Ločenih primerkov ni mogoče shraniti, ker niso podprti v okolju Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1144
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1115
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "V koledar okolja Microsoft 365 lahko shranite le preproste dogodke"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1157
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1128
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "V mapo Microsoft 365 z opravili lahko shranite le preprosta opravila"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1208
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1664
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1179
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1646
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
@@ -1774,19 +1778,20 @@ msgid "Failed to get inline attachment data"
 msgstr "Podatkov o prilogah v vrstici ni bilo mogoče pridobiti"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:530
-#: ../src/Microsoft365/camel/camel-m365-folder.c:949
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1448
+#: ../src/Microsoft365/camel/camel-m365-folder.c:535
+#: ../src/Microsoft365/camel/camel-m365-folder.c:954
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1325
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1523
 msgid "Invalid folder state (missing parent store)"
 msgstr "Neveljavno stanje mape (manjkajoča nadrejena shramba)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1754
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1829
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mapa »%s« ne ustreza nobeni znani mapi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1773
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1848
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ni mogoče naložiti povzetka za »%s«"
@@ -1828,12 +1833,8 @@ msgstr "Povezave ni bilo mogoče ustvariti"
 msgid "Parent folder “%s” does not exist"
 msgstr "Nadrejena mapa »%s« ne obstaja"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:897
-msgid "Cannot find “Deleted Items” folder"
-msgstr "Mape »Izbrisano« ni mogoče najti"
-
-#: ../src/Microsoft365/camel/camel-m365-store.c:988
-#: ../src/Microsoft365/camel/camel-m365-store.c:1026
+#: ../src/Microsoft365/camel/camel-m365-store.c:953
+#: ../src/Microsoft365/camel/camel-m365-store.c:991
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Mapa »%s« ne obstaja."
@@ -1849,7 +1850,7 @@ msgstr ""
 "pošiljateljev"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:944
+#: ../src/Microsoft365/camel/camel-m365-utils.c:946
 msgid "Failed to re-encode parts to base64: "
 msgstr "Delov ni bilo mogoče znova kodirati v base64: "
 
@@ -1919,7 +1920,7 @@ msgid "Failed to parse own Json data"
 msgstr "Razčlenjevanje lastnih podatkov Json je spodletelo"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5488
+#: ../src/Microsoft365/common/e-m365-connection.c:5495
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Primerka ni mogoče najti pri »%s«"
@@ -1928,107 +1929,107 @@ msgstr "Primerka ni mogoče najti pri »%s«"
 msgid "Maximum contacts to download"
 msgstr "Največ stikov za prenos"
 
-#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:190
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:189
 msgid "Edit Microsoft 365 calendar permissions"
 msgstr "Uredi dovoljenja koledarja 365"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:246
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
 msgid "Not shared"
 msgstr "Ni v skupni rabi"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:247
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
 msgid "Can view when I’m busy"
 msgstr "Lahko si ogleda, ko sem zaposlen"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:248
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:253
 msgid "Can view titles and locations"
 msgstr "Lahko si ogleda naslove in lokacije"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:249
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
 msgid "Can view all details"
 msgstr "Lahko si ogleda vse podrobnosti"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:250
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:255
 msgid "Can edit"
 msgstr "Lahko ureja"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:256
 msgid "Delegate without private events"
 msgstr "Pooblaščenec brez zasebnih dogodkov"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:257
 msgid "Delegate with private events"
 msgstr "Pooblaščenec z zasebnimi dogodki"
 
 #. Translators: It's for custom permission setting, like some not known what it is precisely
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:259
 msgid "Custom"
 msgstr "Po meri"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:278
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:283
 msgid "Unknown permission"
 msgstr "Neznano dovoljenje"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:347
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:395
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:613
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:710
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:353
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:418
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:655
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:755
 msgid "Cannot create connection object."
 msgstr "Ni mogoče ustvariti predmeta povezave."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:376
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:382
 msgid "Updating permission, please wait…"
 msgstr "Poteka posodobitev dovoljenja …"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:377
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:383
 msgid "Failed to update permission: "
 msgstr "Posodabljanje dovoljenja je spodletelo:"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:444
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:474
 msgid "Removing permission, please wait…"
 msgstr "Odstranjevanje dovoljenja, počakajte ..."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:445
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:475
 msgid "Failed to remove permission: "
 msgstr "Dovoljenja ni bilo mogoče odstraniti: "
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:534
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:575
 msgid "People in the Organization"
 msgstr "Ljudje v organizaciji"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:567
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:609
 msgid "Remove permission"
 msgstr "Odstrani dovoljenje"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:626
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:668
 msgid "No valid email address found."
 msgstr "Veljavnega e-poštnega naslova ni mogoče najti."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:679
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:724
 msgid "Saving new permission, please wait…"
 msgstr "Shranjevanje novega dovoljenja je v teku ..."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:680
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:725
 msgid "Failed to save permission: "
 msgstr "Shranjevanje dovoljenja je spodletelo: "
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:800
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:890
 msgid "Edit calendar permissions…"
 msgstr "Uredi dovoljenja koledarja …"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:803
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:893
 msgid "Cl_ose"
 msgstr "Z_apri"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:855
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:942
 msgid "_Cancel"
 msgstr "Pre_kliči"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:863
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:982
 msgid "Calendar:"
 msgstr "Koledar:"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:897
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1016
 msgid ""
 "Choose sharing permissions for this calendar. You can add people from within "
 "the organization or outside of it. It can be changed any time."
@@ -2036,23 +2037,23 @@ msgstr ""
 "Izberite dovoljenja za skupno rabo za ta koledar. Dodate lahko osebe iz "
 "organizacije ali zunaj nje. To lahko kadarkoli spremenite."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:936
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1055
 msgid "_Share"
 msgstr "_Deli z drugimi"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:972
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1091
 msgid "Inside the organization"
 msgstr "Znotraj organizacije"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:996
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1116
 msgid "Outside the organization"
 msgstr "Zunaj organizacije"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1024
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1145
 msgid "Reading calendar permissions, please wait…"
 msgstr "Poteka branje dovoljenj koledarja …"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1025
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1146
 msgid "Failed to read permissions: "
 msgstr "Branje dovoljenj je spodletelo: "
 
