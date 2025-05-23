@@ -1,3 +1,10 @@
+Evolution-EWS 3.56.2 2025-05-23
+-------------------------------
+
+Bug Fixes:
+	I#306 - Cannot accept meeting invitations (duplicated attendee)
+	I#307 - m365: GOA account rejects creating meetings
+
 Evolution-EWS 3.56.1 2025-04-11
 -------------------------------
 
