@@ -9,10 +9,11 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "e-ews-common-utils.h"
+
 #include "common/camel-m365-settings.h"
 #include "common/e-m365-connection.h"
 
-#include "camel-m365-folder-search.h"
 #include "camel-m365-folder-summary.h"
 #include "camel-m365-store.h"
 #include "camel-m365-store-summary.h"
@@ -46,17 +47,11 @@
 #define LOCK_CACHE(_folder) g_rec_mutex_lock (&_folder->priv->cache_lock)
 #define UNLOCK_CACHE(_folder) g_rec_mutex_unlock (&_folder->priv->cache_lock)
 
-#define LOCK_SEARCH(_folder) g_mutex_lock (&_folder->priv->search_lock)
-#define UNLOCK_SEARCH(_folder) g_mutex_unlock (&_folder->priv->search_lock)
-
 struct _CamelM365FolderPrivate {
 	gchar *id; /* folder ID; stays the same for the full life of the folder */
 
 	GRecMutex cache_lock;
 	CamelDataCache *cache;
-
-	GMutex search_lock;
-	CamelFolderSearch *search;
 
 	/* To not download the same message multiple times from different threads */
 	GMutex get_message_lock;
@@ -236,7 +231,7 @@ m365_folder_forget_all_mails (CamelM365Folder *m365_folder)
 	folder = CAMEL_FOLDER (m365_folder);
 	g_return_if_fail (folder != NULL);
 
-	known_uids = camel_folder_summary_get_array (camel_folder_get_folder_summary (folder));
+	known_uids = camel_folder_summary_dup_uids (camel_folder_get_folder_summary (folder));
 
 	if (!known_uids)
 		return;
@@ -262,7 +257,7 @@ m365_folder_forget_all_mails (CamelM365Folder *m365_folder)
 		camel_folder_changed (folder, changes);
 
 	camel_folder_change_info_free (changes);
-	camel_folder_summary_free_array (known_uids);
+	g_ptr_array_unref (known_uids);
 }
 
 static guint32
@@ -283,105 +278,6 @@ m365_folder_get_message_cached (CamelFolder *folder,
 				GCancellable *cancellable)
 {
 	return m365_folder_get_message_from_cache (CAMEL_M365_FOLDER (folder), message_uid, cancellable, NULL);
-}
-
-static void
-m365_folder_exec_search (CamelFolder *folder,
-			 const gchar *expression,
-			 GPtrArray *uids,
-			 GPtrArray **out_matches,
-			 guint32 *out_count,
-			 GCancellable *cancellable,
-			 GError **error)
-{
-	CamelM365Folder *m365_folder;
-	CamelM365FolderSearch *m365_folder_search;
-
-	g_return_if_fail (CAMEL_IS_M365_FOLDER (folder));
-
-	m365_folder = CAMEL_M365_FOLDER (folder);
-
-	LOCK_SEARCH (m365_folder);
-
-	m365_folder_search = CAMEL_M365_FOLDER_SEARCH (m365_folder->priv->search);
-
-	camel_folder_search_set_folder (m365_folder->priv->search, folder);
-	camel_m365_folder_search_clear_cached_results (m365_folder_search);
-	camel_m365_folder_search_set_cancellable_and_error (m365_folder_search, cancellable, error);
-
-	if (out_matches)
-		*out_matches = camel_folder_search_search (m365_folder->priv->search, expression, uids, cancellable, error);
-
-	if (out_count)
-		*out_count = camel_folder_search_count (m365_folder->priv->search, expression, cancellable, error);
-
-	camel_m365_folder_search_set_cancellable_and_error (m365_folder_search, NULL, NULL);
-	camel_m365_folder_search_clear_cached_results (m365_folder_search);
-
-	UNLOCK_SEARCH (m365_folder);
-}
-
-static GPtrArray *
-m365_folder_search_by_expression (CamelFolder *folder,
-				  const gchar *expression,
-				  GCancellable *cancellable,
-				  GError **error)
-{
-	GPtrArray *matches = NULL;
-
-	m365_folder_exec_search (folder, expression, NULL, &matches, NULL, cancellable, error);
-
-	return matches;
-}
-
-static guint32
-m365_folder_count_by_expression (CamelFolder *folder,
-				 const gchar *expression,
-				 GCancellable *cancellable,
-				 GError **error)
-{
-	guint32 count = 0;
-
-	m365_folder_exec_search (folder, expression, NULL, NULL, &count, cancellable, error);
-
-	return count;
-}
-
-static GPtrArray *
-m365_folder_search_by_uids (CamelFolder *folder,
-			    const gchar *expression,
-			    GPtrArray *uids,
-			    GCancellable *cancellable,
-			    GError **error)
-{
-	GPtrArray *matches = NULL;
-
-	if (uids->len == 0)
-		return g_ptr_array_new ();
-
-	m365_folder_exec_search (folder, expression, uids, &matches, NULL, cancellable, error);
-
-	return matches;
-}
-
-static void
-m365_folder_search_free (CamelFolder *folder,
-			 GPtrArray *uids)
-{
-	CamelM365Folder *m365_folder;
-
-	if (!uids)
-		return;
-
-	g_return_if_fail (CAMEL_IS_M365_FOLDER (folder));
-
-	m365_folder = CAMEL_M365_FOLDER (folder);
-
-	LOCK_SEARCH (m365_folder);
-
-	camel_folder_search_free_result (m365_folder->priv->search, uids);
-
-	UNLOCK_SEARCH (m365_folder);
 }
 
 static gint
@@ -830,7 +726,7 @@ m365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 
 	ctmp = e_m365_mail_message_get_internet_message_id (mail);
 	if (ctmp && *ctmp)
-		camel_message_info_set_message_id (mi, camel_folder_search_util_hash_message_id (ctmp, TRUE));
+		camel_message_info_set_message_id (mi, camel_search_util_hash_message_id (ctmp, TRUE));
 
 	i64 = e_m365_json_get_integer_single_value_extended_property (mail, E_M365_PT_MESSAGE_SIZE_NAME, 0);
 	if (i64 > 0)
@@ -855,7 +751,7 @@ m365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 typedef struct _SummaryDeltaData {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *changes;
-	GList *removed_uids; /* gchar * - from the Camel string pool */
+	GPtrArray *removed_uids; /* gchar * - from the Camel string pool */
 } SummaryDeltaData;
 
 static gboolean
@@ -891,7 +787,9 @@ m365_folder_got_summary_messages_cb (EM365Connection *cnc,
 			sdd->changes = camel_folder_change_info_new ();
 
 		if (e_m365_delta_is_removed_object (mail)) {
-			sdd->removed_uids = g_list_prepend (sdd->removed_uids, (gpointer) camel_pstring_strdup (id));
+			if (!sdd->removed_uids)
+				sdd->removed_uids = g_ptr_array_new_with_free_func ((GDestroyNotify) camel_pstring_free);
+			g_ptr_array_add (sdd->removed_uids, (gpointer) camel_pstring_strdup (id));
 
 			camel_folder_change_info_remove_uid (sdd->changes, id);
 		} else {
@@ -994,7 +892,7 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 	if (sdd.removed_uids) {
 		camel_folder_summary_remove_uids (folder_summary, sdd.removed_uids);
 
-		g_list_free_full (sdd.removed_uids, (GDestroyNotify) camel_pstring_free);
+		g_ptr_array_unref (sdd.removed_uids);
 	}
 
 	m365_folder_save_summary (m365_folder);
@@ -1060,7 +958,7 @@ m365_folder_copy_move_to_folder_sync (CamelFolder *folder,
 		CamelFolderChangeInfo *src_changes;
 		CamelM365Folder *m365_folder;
 		GSList *des_link, *src_link;
-		GList *removed_uids = NULL;
+		GPtrArray *removed_uids = NULL;
 
 		src_changes = camel_folder_change_info_new ();
 		m365_folder = CAMEL_M365_FOLDER (folder);
@@ -1075,7 +973,9 @@ m365_folder_copy_move_to_folder_sync (CamelFolder *folder,
 
 			m365_folder_cache_remove (m365_folder, src_uid, NULL);
 
-			removed_uids = g_list_prepend (removed_uids, (gpointer) src_uid);
+			if (!removed_uids)
+				removed_uids = g_ptr_array_new ();
+			g_ptr_array_add (removed_uids, (gpointer) src_uid);
 			camel_folder_change_info_remove_uid (src_changes, src_uid);
 		}
 
@@ -1085,7 +985,7 @@ m365_folder_copy_move_to_folder_sync (CamelFolder *folder,
 			summary = camel_folder_get_folder_summary (folder);
 			camel_folder_summary_remove_uids (summary, removed_uids);
 
-			g_list_free (removed_uids);
+			g_ptr_array_unref (removed_uids);
 		}
 
 		if (camel_folder_change_info_changed (src_changes))
@@ -1123,7 +1023,7 @@ m365_folder_delete_messages_sync (CamelFolder *folder,
 		if (deleted_uids) {
 			CamelFolderChangeInfo *changes;
 			CamelM365Folder *m365_folder;
-			GList *removed_uids = NULL;
+			GPtrArray *removed_uids = NULL;
 
 			m365_folder = CAMEL_M365_FOLDER (folder);
 			changes = camel_folder_change_info_new ();
@@ -1136,7 +1036,9 @@ m365_folder_delete_messages_sync (CamelFolder *folder,
 
 				m365_folder_cache_remove (m365_folder, uid, NULL);
 
-				removed_uids = g_list_prepend (removed_uids, (gpointer) uid);
+				if (!removed_uids)
+					removed_uids = g_ptr_array_new ();
+				g_ptr_array_add (removed_uids, (gpointer) uid);
 				camel_folder_change_info_remove_uid (changes, uid);
 			}
 
@@ -1146,7 +1048,7 @@ m365_folder_delete_messages_sync (CamelFolder *folder,
 				summary = camel_folder_get_folder_summary (folder);
 				camel_folder_summary_remove_uids (summary, removed_uids);
 
-				g_list_free (removed_uids);
+				g_ptr_array_unref (removed_uids);
 			}
 
 			if (camel_folder_change_info_changed (changes))
@@ -1336,13 +1238,13 @@ m365_folder_synchronize_sync (CamelFolder *folder,
 	if (camel_folder_summary_get_deleted_count (folder_summary) > 0 ||
 	    camel_folder_summary_get_junk_count (folder_summary) > 0) {
 		camel_folder_summary_prepare_fetch_all (folder_summary, NULL);
-		uids = camel_folder_summary_get_array (folder_summary);
+		uids = camel_folder_summary_dup_uids (folder_summary);
 	} else {
-		uids = camel_folder_summary_get_changed (folder_summary);
+		uids = camel_folder_summary_dup_changed (folder_summary);
 	}
 
 	if (!uids || !uids->len) {
-		camel_folder_summary_free_array (uids);
+		g_ptr_array_unref (uids);
 		return TRUE;
 	}
 
@@ -1425,7 +1327,7 @@ m365_folder_synchronize_sync (CamelFolder *folder,
 	g_slist_free_full (inbox_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save (folder_summary, NULL);
-	camel_folder_summary_free_array (uids);
+	g_ptr_array_unref (uids);
 
 	if (local_error) {
 		camel_m365_store_maybe_disconnect (m365_store, local_error);
@@ -1458,10 +1360,10 @@ m365_folder_expunge_sync (CamelFolder *folder,
 	}
 
 	folder_summary = camel_folder_get_folder_summary (folder);
-	uids = camel_folder_summary_get_array (folder_summary);
+	uids = camel_folder_summary_dup_uids (folder_summary);
 
 	if (!uids || !uids->len) {
-		camel_folder_summary_free_array (uids);
+		g_ptr_array_unref (uids);
 		return TRUE;
 	}
 
@@ -1490,7 +1392,7 @@ m365_folder_expunge_sync (CamelFolder *folder,
 		g_slist_free (deleted_uids);
 	}
 
-	camel_folder_summary_free_array (uids);
+	g_ptr_array_unref (uids);
 
 	return success;
 }
@@ -1577,6 +1479,85 @@ m365_folder_get_filename (CamelFolder *folder,
 	CamelM365Folder *m365_folder = CAMEL_M365_FOLDER (folder);
 
 	return m365_folder_cache_dup_filename (m365_folder, uid);
+}
+
+static gboolean
+m365_folder_search_body_sync (CamelFolder *folder,
+			      /* const */ GPtrArray *words, /* gchar * */
+			      GPtrArray **out_uids, /* gchar * */
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	CamelStore *parent_store;
+	CamelM365Store *m365_store;
+	EM365Connection *cnc = NULL;
+	GSList *found_messages = NULL;
+	GString *expression;
+	guint ii;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (CAMEL_IS_M365_FOLDER (folder), FALSE);
+	g_return_val_if_fail (words != NULL, FALSE);
+	g_return_val_if_fail (out_uids != NULL, FALSE);
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	if (!parent_store) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
+		return FALSE;
+	}
+
+	m365_store = CAMEL_M365_STORE (parent_store);
+
+	if (!camel_m365_store_ensure_connected (m365_store, NULL, cancellable, error))
+		return FALSE;
+
+	cnc = camel_m365_store_ref_connection (m365_store);
+	expression = g_string_new ("");
+
+	for (ii = 0; ii < words->len; ii++) {
+		GString *word;
+
+		if (ii > 0)
+			g_string_append (expression, " and ");
+
+		word = e_ews_common_utils_str_replace_string (g_ptr_array_index (words, ii), "'", "''");
+
+		g_string_append (expression, "contains(body/content, '");
+		g_string_append (expression, word->str);
+		g_string_append (expression, "')");
+
+		g_string_free (word, TRUE);
+	}
+
+	if (e_m365_connection_list_messages_sync (cnc, NULL, camel_m365_folder_get_id (CAMEL_M365_FOLDER (folder)),
+		"id", expression->str, &found_messages, cancellable, error)) {
+		GPtrArray *matches = NULL;
+		const GSList *link;
+
+		for (link = found_messages; link; link = g_slist_next (link)) {
+			EM365MailMessage *msg = link->data;
+
+			if (!msg || !e_m365_mail_message_get_id (msg))
+				continue;
+
+			if (!matches)
+				matches = g_ptr_array_new_with_free_func ((GDestroyNotify) camel_pstring_free);
+
+			g_ptr_array_add (matches, (gpointer) camel_pstring_strdup (e_m365_mail_message_get_id (msg)));
+		}
+
+		*out_uids = matches;
+	} else {
+		success = FALSE;
+	}
+
+	g_slist_free_full (found_messages, (GDestroyNotify) json_object_unref);
+	g_string_free (expression, TRUE);
+	g_clear_object (&cnc);
+
+	return success;
 }
 
 static void
@@ -1674,10 +1655,6 @@ m365_folder_dispose (GObject *object)
 	g_clear_object (&m365_folder->priv->cache);
 	UNLOCK_CACHE (m365_folder);
 
-	LOCK_SEARCH (m365_folder);
-	g_clear_object (&m365_folder->priv->search);
-	UNLOCK_SEARCH (m365_folder);
-
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (camel_m365_folder_parent_class)->dispose (object);
 }
@@ -1688,7 +1665,6 @@ m365_folder_finalize (GObject *object)
 	CamelM365Folder *m365_folder = CAMEL_M365_FOLDER (object);
 
 	g_rec_mutex_clear (&m365_folder->priv->cache_lock);
-	g_mutex_clear (&m365_folder->priv->search_lock);
 	g_mutex_clear (&m365_folder->priv->get_message_lock);
 	g_cond_clear (&m365_folder->priv->get_message_cond);
 
@@ -1716,10 +1692,6 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 	folder_class = CAMEL_FOLDER_CLASS (klass);
 	folder_class->get_permanent_flags = m365_folder_get_permanent_flags;
 	folder_class->get_message_cached = m365_folder_get_message_cached;
-	folder_class->search_by_expression = m365_folder_search_by_expression;
-	folder_class->count_by_expression = m365_folder_count_by_expression;
-	folder_class->search_by_uids = m365_folder_search_by_uids;
-	folder_class->search_free = m365_folder_search_free;
 	folder_class->cmp_uids = m365_folder_cmp_uids;
 	folder_class->append_message_sync = m365_folder_append_message_sync;
 	folder_class->get_message_sync = m365_folder_get_message_sync;
@@ -1729,6 +1701,7 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 	folder_class->transfer_messages_to_sync = m365_folder_transfer_messages_to_sync;
 	folder_class->prepare_content_refresh = m365_folder_prepare_content_refresh;
 	folder_class->get_filename = m365_folder_get_filename;
+	folder_class->search_body_sync = m365_folder_search_body_sync;
 
 	g_object_class_install_property (
 		object_class,
@@ -1763,7 +1736,6 @@ camel_m365_folder_init (CamelM365Folder *m365_folder)
 	m365_folder->priv = camel_m365_folder_get_instance_private (m365_folder);
 
 	g_rec_mutex_init (&m365_folder->priv->cache_lock);
-	g_mutex_init (&m365_folder->priv->search_lock);
 	g_mutex_init (&m365_folder->priv->get_message_lock);
 	g_cond_init (&m365_folder->priv->get_message_cond);
 
@@ -1918,8 +1890,6 @@ camel_m365_folder_new (CamelStore *store,
 		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
 
 	camel_m365_store_connect_folder_summary (m365_store, folder_summary);
-
-	m365_folder->priv->search = camel_m365_folder_search_new (m365_store);
 
 	return folder;
 }

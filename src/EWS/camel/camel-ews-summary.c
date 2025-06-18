@@ -21,8 +21,8 @@
 #define d(x)
 
 /*Prototypes*/
-static gboolean summary_header_load (CamelFolderSummary *s, CamelFIRecord *mir);
-static CamelFIRecord * summary_header_save (CamelFolderSummary *s, GError **error);
+static gboolean summary_header_load (CamelFolderSummary *s, CamelStoreDBFolderRecord *record);
+static gboolean summary_header_save (CamelFolderSummary *s, CamelStoreDBFolderRecord *inout_record, GError **error);
 
 /*End of Prototypes*/
 
@@ -92,19 +92,19 @@ camel_ews_summary_new (struct _CamelFolder *folder)
 
 static gboolean
 summary_header_load (CamelFolderSummary *s,
-		     CamelFIRecord *mir)
+		     CamelStoreDBFolderRecord *record)
 {
 	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
 	const gchar *sync_state = NULL;
 	gchar *part;
 
-	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, mir))
+	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, record))
 		return FALSE;
 
 	ews_summary->priv->version = 0;
 	ews_summary->priv->sync_tag_stamp = 0;
 
-	part = mir->bdata;
+	part = record->bdata;
 
 	if (part) {
 		EXTRACT_FIRST_DIGIT (ews_summary->priv->version);
@@ -140,30 +140,28 @@ summary_header_load (CamelFolderSummary *s,
 	return TRUE;
 }
 
-static CamelFIRecord *
+static gboolean
 summary_header_save (CamelFolderSummary *s,
+		     CamelStoreDBFolderRecord *inout_record,
 		     GError **error)
 {
 	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
-	struct _CamelFIRecord *fir;
 	gchar *sync_state;
 	guint sync_tag_stamp;
 
-	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_save (s, error);
-	if (!fir)
-		return NULL;
+	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_save (s, inout_record, error))
+		return FALSE;
 
 	sync_state = camel_ews_summary_dup_sync_state (ews_summary);
 	sync_tag_stamp = camel_ews_summary_get_sync_tag_stamp (ews_summary);
 
-	fir->bdata = g_strdup_printf ("%d %u %s", CAMEL_EWS_SUMMARY_VERSION, sync_tag_stamp, sync_state);
+	inout_record->bdata = g_strdup_printf ("%d %u %s", CAMEL_EWS_SUMMARY_VERSION, sync_tag_stamp, sync_state);
 
 	g_free (sync_state);
 
 	ews_summary->priv->version = CAMEL_EWS_SUMMARY_VERSION;
 
-	return fir;
-
+	return TRUE;
 }
 
 gboolean
@@ -267,7 +265,7 @@ ews_summary_clear (CamelFolderSummary *summary,
 	gint i;
 
 	changes = camel_folder_change_info_new ();
-	known_uids = camel_folder_summary_get_array (summary);
+	known_uids = camel_folder_summary_dup_uids (summary);
 	for (i = 0; i < known_uids->len; i++) {
 		const gchar *uid = g_ptr_array_index (known_uids, i);
 
@@ -284,7 +282,7 @@ ews_summary_clear (CamelFolderSummary *summary,
 	if (camel_folder_change_info_changed (changes))
 		camel_folder_changed (camel_folder_summary_get_folder (summary), changes);
 	camel_folder_change_info_free (changes);
-	camel_folder_summary_free_array (known_uids);
+	g_ptr_array_unref (known_uids);
 }
 
 gint32

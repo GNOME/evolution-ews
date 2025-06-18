@@ -853,7 +853,7 @@ message_func_relative_months (ESExp *f,
 
 	} else {
 		r = e_sexp_result_new (f, ESEXP_RES_INT);
-		r->value.number = camel_folder_search_util_add_months (time (NULL), argv[0]->value.number);
+		r->value.number = camel_search_util_add_months (time (NULL), argv[0]->value.number);
 	}
 
 	return r;

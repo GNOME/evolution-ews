@@ -22,6 +22,9 @@ which needs to be better organized via functions */
 #include <glib/gstdio.h>
 #include <libecal/libecal.h>
 
+#include "e-ews-common-utils.h"
+#include "common/e-ews-query-to-restriction.h"
+
 #include "common/camel-ews-settings.h"
 #include "common/e-ews-camel-common.h"
 #include "common/e-ews-connection.h"
@@ -30,7 +33,6 @@ which needs to be better organized via functions */
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
-#include "camel-ews-search.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
@@ -56,7 +58,6 @@ which needs to be better organized via functions */
 #define SUMMARY_POSTITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS " message:From message:Sender"
 
 struct _CamelEwsFolderPrivate {
-	GMutex search_lock;	/* for locking the search object */
 	GRecMutex cache_lock;	/* for locking the cache object */
 
 	/* For syncronizing refresh_info/sync_changes */
@@ -1182,127 +1183,6 @@ ews_folder_get_message_cached (CamelFolder *folder,
 	return camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, message_uid, cancellable, NULL);
 }
 
-static GPtrArray *
-ews_folder_search_by_expression (CamelFolder *folder,
-                                 const gchar *expression,
-                                 GCancellable *cancellable,
-                                 GError **error)
-{
-	CamelEwsFolder *ews_folder;
-	CamelEwsSearch *ews_search;
-	CamelEwsFolderPrivate *priv;
-	GPtrArray *matches;
-
-	ews_folder = CAMEL_EWS_FOLDER (folder);
-	priv = ews_folder->priv;
-
-	g_mutex_lock (&priv->search_lock);
-
-	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
-
-	camel_folder_search_set_folder (ews_folder->search, folder);
-	camel_ews_search_clear_cached_results (ews_search);
-	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
-
-	matches = camel_folder_search_search (ews_folder->search, expression, NULL, cancellable, error);
-
-	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
-	camel_ews_search_clear_cached_results (ews_search);
-
-	g_mutex_unlock (&priv->search_lock);
-
-	return matches;
-}
-
-static guint32
-ews_folder_count_by_expression (CamelFolder *folder,
-                                const gchar *expression,
-                                GCancellable *cancellable,
-                                GError **error)
-{
-	CamelEwsFolder *ews_folder;
-	CamelEwsSearch *ews_search;
-	CamelEwsFolderPrivate *priv;
-	guint32 matches;
-
-	ews_folder = CAMEL_EWS_FOLDER (folder);
-	priv = ews_folder->priv;
-
-	g_mutex_lock (&priv->search_lock);
-
-	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
-
-	camel_folder_search_set_folder (ews_folder->search, folder);
-	camel_ews_search_clear_cached_results (ews_search);
-	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
-
-	matches = camel_folder_search_count (ews_folder->search, expression, cancellable, error);
-
-	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
-	camel_ews_search_clear_cached_results (ews_search);
-
-	g_mutex_unlock (&priv->search_lock);
-
-	return matches;
-}
-
-static GPtrArray *
-ews_folder_search_by_uids (CamelFolder *folder,
-                           const gchar *expression,
-                           GPtrArray *uids,
-                           GCancellable *cancellable,
-                           GError **error)
-{
-	CamelEwsFolder *ews_folder;
-	CamelEwsSearch *ews_search;
-	CamelEwsFolderPrivate *priv;
-	GPtrArray *matches;
-
-	ews_folder = CAMEL_EWS_FOLDER (folder);
-	priv = ews_folder->priv;
-
-	if (uids->len == 0)
-		return g_ptr_array_new ();
-
-	g_mutex_lock (&priv->search_lock);
-
-	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
-
-	camel_folder_search_set_folder (ews_folder->search, folder);
-	camel_ews_search_clear_cached_results (ews_search);
-	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
-
-	matches = camel_folder_search_search (ews_folder->search, expression, uids, cancellable, error);
-
-	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
-	camel_ews_search_clear_cached_results (ews_search);
-
-	g_mutex_unlock (&priv->search_lock);
-
-	return matches;
-}
-
-static void
-ews_folder_search_free (CamelFolder *folder,
-                        GPtrArray *uids)
-{
-	CamelEwsFolder *ews_folder;
-	CamelEwsFolderPrivate *priv;
-
-	ews_folder = CAMEL_EWS_FOLDER (folder);
-	priv = ews_folder->priv;
-
-	g_return_if_fail (ews_folder->search);
-
-	g_mutex_lock (&priv->search_lock);
-
-	camel_folder_search_free_result (ews_folder->search, uids);
-
-	g_mutex_unlock (&priv->search_lock);
-
-	return;
-}
-
 /********************* folder functions*************************/
 
 static gboolean
@@ -1758,12 +1638,12 @@ ews_synchronize_sync (CamelFolder *folder,
 	if (camel_folder_summary_get_deleted_count (folder_summary) > 0 ||
 	    camel_folder_summary_get_junk_count (folder_summary) > 0) {
 		camel_folder_summary_prepare_fetch_all (folder_summary, NULL);
-		uids = camel_folder_summary_get_array (folder_summary);
+		uids = camel_folder_summary_dup_uids (folder_summary);
 	} else {
-		uids = camel_folder_summary_get_changed (folder_summary);
+		uids = camel_folder_summary_dup_changed (folder_summary);
 	}
 	if (!uids || !uids->len) {
-		camel_folder_summary_free_array (uids);
+		g_ptr_array_unref (uids);
 		return TRUE;
 	}
 
@@ -1834,7 +1714,7 @@ ews_synchronize_sync (CamelFolder *folder,
 	g_slist_free_full (inbox_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save (folder_summary, NULL);
-	camel_folder_summary_free_array (uids);
+	g_ptr_array_unref (uids);
 
 	if (local_error)
 		g_propagate_error (error, local_error);
@@ -2013,12 +1893,6 @@ camel_ews_folder_new (CamelStore *store,
 
 	if (add_folder_flags)
 		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
-
-	ews_folder->search = camel_ews_search_new (CAMEL_EWS_STORE (store));
-	if (!ews_folder->search) {
-		g_object_unref (folder);
-		return NULL;
-	}
 
 	g_signal_connect (folder_summary, "notify::saved-count", G_CALLBACK (ews_folder_count_notify_cb), folder);
 	g_signal_connect (folder_summary, "notify::unread-count", G_CALLBACK (ews_folder_count_notify_cb), folder);
@@ -2340,7 +2214,7 @@ ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
 	folder = CAMEL_FOLDER (ews_folder);
 	g_return_if_fail (folder != NULL);
 
-	known_uids = camel_folder_summary_get_array (camel_folder_get_folder_summary (folder));
+	known_uids = camel_folder_summary_dup_uids (camel_folder_get_folder_summary (folder));
 	if (!known_uids)
 		return;
 
@@ -2364,7 +2238,7 @@ ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
 	}
 
 	camel_folder_change_info_free (changes);
-	camel_folder_summary_free_array (known_uids);
+	g_ptr_array_unref (known_uids);
 }
 
 static gboolean
@@ -2550,7 +2424,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 		    g_hash_table_size (updating_summary_uids) > 0) {
 			GHashTableIter iter;
 			gpointer key;
-			GList *removed_uids = NULL;
+			GPtrArray *removed_uids = g_ptr_array_sized_new (g_hash_table_size (updating_summary_uids));
 
 			g_hash_table_iter_init (&iter, updating_summary_uids);
 			while (g_hash_table_iter_next (&iter, &key, NULL)) {
@@ -2559,12 +2433,12 @@ ews_refresh_info_sync (CamelFolder *folder,
 				camel_folder_change_info_remove_uid (change_info, uid);
 				ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
 
-				removed_uids = g_list_prepend (removed_uids, (gpointer) uid);
+				g_ptr_array_add (removed_uids, (gpointer) uid);
 			}
 
 			camel_folder_summary_remove_uids (folder_summary, removed_uids);
 
-			g_list_free (removed_uids);
+			g_ptr_array_unref (removed_uids);
 		}
 
 		g_hash_table_destroy (updating_summary_uids);
@@ -3082,7 +2956,7 @@ ews_expunge_sync (CamelFolder *folder,
 	is_trash = ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH);
 
 	camel_folder_summary_prepare_fetch_all (camel_folder_get_folder_summary (folder), NULL);
-	known_uids = camel_folder_summary_get_array (camel_folder_get_folder_summary (folder));
+	known_uids = camel_folder_summary_dup_uids (camel_folder_get_folder_summary (folder));
 
 	if (known_uids == NULL)
 		return TRUE;
@@ -3099,7 +2973,7 @@ ews_expunge_sync (CamelFolder *folder,
 			camel_ews_store_maybe_disconnect (CAMEL_EWS_STORE (parent_store), local_error);
 			g_propagate_error (error, local_error);
 
-			camel_folder_summary_free_array (known_uids);
+			g_ptr_array_unref (known_uids);
 
 			return FALSE;
 		}
@@ -3125,7 +2999,7 @@ ews_expunge_sync (CamelFolder *folder,
 	}
 
 	g_slist_free_full (deleted_items, (GDestroyNotify) camel_pstring_free);
-	camel_folder_summary_free_array (known_uids);
+	g_ptr_array_unref (known_uids);
 
 	return ret;
 }
@@ -3139,6 +3013,123 @@ ews_cmp_uids (CamelFolder *folder,
 	g_return_val_if_fail (uid2 != NULL, 0);
 
 	return strcmp (uid1, uid2);
+}
+
+static gboolean
+ews_search_body_sync (CamelFolder *folder,
+		      /* const */ GPtrArray *words, /* gchar * */
+		      GPtrArray **out_uids, /* gchar * */
+		      GCancellable *cancellable,
+		      GError **error)
+{
+	CamelStore *parent_store;
+	CamelEwsFolder *ews_folder;
+	CamelEwsStore *ews_store;
+	gboolean success = FALSE;
+
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+
+	/* Sanity check. */
+	g_return_val_if_fail (ews_folder != NULL, FALSE);
+
+	parent_store = camel_folder_get_parent_store (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
+
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
+		return FALSE;
+
+	if (ews_folder != NULL) {
+		EEwsConnection *connection = NULL;
+		gchar *folder_id = NULL;
+		gboolean can_search;
+
+		/* there should always be one, held by one of the callers of this function */
+		g_warn_if_fail (ews_store != NULL);
+
+		can_search = ews_store != NULL && words != NULL;
+
+		if (can_search) {
+			folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
+				camel_folder_get_full_name (CAMEL_FOLDER (ews_folder)));
+			if (!folder_id)
+				can_search = FALSE;
+		}
+
+		if (can_search) {
+			connection = camel_ews_store_ref_connection (ews_store);
+			if (!connection)
+				can_search = FALSE;
+		}
+
+		if (can_search) {
+			EwsFolderId *fid;
+			GSList *found_items = NULL;
+			gboolean includes_last_item = FALSE;
+			GString *expression;
+			guint ii;
+
+			fid = e_ews_folder_id_new (folder_id, NULL, FALSE);
+			expression = g_string_new ("");
+
+			if (words->len >= 2)
+				g_string_append (expression, "(and ");
+
+			for (ii = 0; ii < words->len; ii++) {
+				GString *word;
+
+				word = e_ews_common_utils_str_replace_string (g_ptr_array_index (words, ii), "\"", "\\\"");
+
+				g_string_append (expression, "(body-contains \"");
+				g_string_append (expression, word->str);
+				g_string_append (expression, "\")");
+
+				g_string_free (word, TRUE);
+			}
+
+			/* Close the 'and' */
+			if (words->len >= 2)
+				g_string_append_c (expression, ')');
+
+			success = e_ews_connection_find_folder_items_sync (
+				connection, EWS_PRIORITY_MEDIUM,
+				fid, "IdOnly", NULL, NULL, expression->str, NULL,
+				E_EWS_FOLDER_TYPE_MAILBOX, &includes_last_item, &found_items,
+				e_ews_query_to_restriction,
+				cancellable, error);
+			if (success) {
+				GPtrArray *matches = NULL;
+				const GSList *link;
+
+				for (link = found_items; link; link = g_slist_next (link)) {
+					EEwsItem *item = link->data;
+					const EwsId *id;
+
+					if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
+						continue;
+
+					id = e_ews_item_get_id (item);
+					if (!id || !id->id)
+						continue;
+
+					if (!matches)
+						matches = g_ptr_array_new_with_free_func ((GDestroyNotify) camel_pstring_free);
+
+					g_ptr_array_add (matches, (gpointer) camel_pstring_strdup (id->id));
+				}
+
+				*out_uids = matches;
+			}
+
+			g_slist_free_full (found_items, g_object_unref);
+			g_string_free (expression, TRUE);
+			e_ews_folder_id_free (fid);
+		}
+
+		g_clear_object (&connection);
+		g_free (folder_id);
+	}
+
+	return success;
 }
 
 static void
@@ -3208,11 +3199,6 @@ ews_folder_dispose (GObject *object)
 		ews_folder->cache = NULL;
 	}
 
-	if (ews_folder->search != NULL) {
-		g_object_unref (ews_folder->search);
-		ews_folder->search = NULL;
-	}
-
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);
 }
@@ -3224,7 +3210,6 @@ ews_folder_finalize (GObject *object)
 
 	ews_folder = CAMEL_EWS_FOLDER (object);
 
-	g_mutex_clear (&ews_folder->priv->search_lock);
 	g_mutex_clear (&ews_folder->priv->state_lock);
 	g_rec_mutex_clear (&ews_folder->priv->cache_lock);
 	g_hash_table_destroy (ews_folder->priv->fetching_uids);
@@ -3290,11 +3275,7 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	folder_class->get_permanent_flags = ews_folder_get_permanent_flags;
 	folder_class->get_message_sync = ews_folder_get_message_sync;
 	folder_class->get_message_cached = ews_folder_get_message_cached;
-	folder_class->search_by_expression = ews_folder_search_by_expression;
-	folder_class->count_by_expression = ews_folder_count_by_expression;
 	folder_class->cmp_uids = ews_cmp_uids;
-	folder_class->search_by_uids = ews_folder_search_by_uids;
-	folder_class->search_free = ews_folder_search_free;
 	folder_class->append_message_sync = ews_append_message_sync;
 	folder_class->refresh_info_sync = ews_refresh_info_sync;
 	folder_class->synchronize_sync = ews_synchronize_sync;
@@ -3302,6 +3283,7 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	folder_class->transfer_messages_to_sync = ews_transfer_messages_to_sync;
 	folder_class->prepare_content_refresh = ews_prepare_content_refresh;
 	folder_class->get_filename = ews_get_filename;
+	folder_class->search_body_sync = ews_search_body_sync;
 
 	g_object_class_install_property (
 		object_class,
@@ -3337,7 +3319,6 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 
 	camel_folder_set_flags (folder, CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY);
 
-	g_mutex_init (&ews_folder->priv->search_lock);
 	g_mutex_init (&ews_folder->priv->state_lock);
 	g_rec_mutex_init (&ews_folder->priv->cache_lock);
 

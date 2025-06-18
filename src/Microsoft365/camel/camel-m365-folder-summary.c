@@ -24,18 +24,18 @@ G_DEFINE_TYPE_WITH_PRIVATE (CamelM365FolderSummary, camel_m365_folder_summary, C
 
 static gboolean
 m365_folder_summary_header_load (CamelFolderSummary *summary,
-				 CamelFIRecord *mir)
+				 CamelStoreDBFolderRecord *record)
 {
 	CamelM365FolderSummary *m365_summary = CAMEL_M365_FOLDER_SUMMARY (summary);
 	const gchar *delta_link = NULL;
 	gchar *part;
 
-	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_m365_folder_summary_parent_class)->summary_header_load (summary, mir))
+	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_m365_folder_summary_parent_class)->summary_header_load (summary, record))
 		return FALSE;
 
 	m365_summary->priv->version = 0;
 
-	part = mir->bdata;
+	part = record->bdata;
 
 	if (part)
 		m365_summary->priv->version = camel_util_bdata_get_number (&part, 0);
@@ -61,22 +61,20 @@ m365_folder_summary_header_load (CamelFolderSummary *summary,
 	return TRUE;
 }
 
-static CamelFIRecord *
+static gboolean
 m365_folder_summary_header_save (CamelFolderSummary *summary,
+				 CamelStoreDBFolderRecord *inout_record,
 				 GError **error)
 {
 	CamelM365FolderSummary *m365_summary = CAMEL_M365_FOLDER_SUMMARY (summary);
-	CamelFIRecord *fir;
 	gchar *delta_link;
 
-	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_m365_folder_summary_parent_class)->summary_header_save (summary, error);
-
-	if (!fir)
-		return NULL;
+	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_m365_folder_summary_parent_class)->summary_header_save (summary, inout_record, error))
+		return FALSE;
 
 	delta_link = camel_m365_folder_summary_dup_delta_link (m365_summary);
 
-	fir->bdata = g_strdup_printf ("%d %s", CAMEL_M365_FOLDER_SUMMARY_VERSION, delta_link ? delta_link : "");
+	inout_record->bdata = g_strdup_printf ("%d %s", CAMEL_M365_FOLDER_SUMMARY_VERSION, delta_link ? delta_link : "");
 
 	g_free (delta_link);
 
@@ -86,7 +84,7 @@ m365_folder_summary_header_save (CamelFolderSummary *summary,
 
 	UNLOCK (m365_summary);
 
-	return fir;
+	return TRUE;
 }
 
 static void
@@ -201,7 +199,7 @@ camel_m365_folder_summary_clear (CamelFolderSummary *summary)
 	gint i;
 
 	changes = camel_folder_change_info_new ();
-	known_uids = camel_folder_summary_get_array (summary);
+	known_uids = camel_folder_summary_dup_uids (summary);
 
 	for (i = 0; i < known_uids->len; i++) {
 		const gchar *uid = g_ptr_array_index (known_uids, i);
@@ -217,7 +215,7 @@ camel_m365_folder_summary_clear (CamelFolderSummary *summary)
 	if (camel_folder_change_info_changed (changes))
 		camel_folder_changed (camel_folder_summary_get_folder (summary), changes);
 	camel_folder_change_info_free (changes);
-	camel_folder_summary_free_array (known_uids);
+	g_ptr_array_unref (known_uids);
 }
 
 static gboolean

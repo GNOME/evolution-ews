@@ -366,29 +366,28 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 	const gchar *full_name;
 	CamelEwsStore *ews_store;
 	GSList *l;
-	GList *items_deleted_list = NULL;
+	GPtrArray *to_delete;
 
 	folder = CAMEL_FOLDER (ews_folder);
 	full_name = camel_folder_get_full_name (folder);
 
 	store = camel_folder_get_parent_store (folder);
 	ews_store = CAMEL_EWS_STORE (store);
+	to_delete = g_ptr_array_sized_new (g_slist_length (items_deleted));
 
 	for (l = items_deleted; l != NULL; l = g_slist_next (l)) {
 		const gchar *id = l->data;
 
-		items_deleted_list = g_list_prepend (
-			items_deleted_list, (gpointer) id);
+		g_ptr_array_add (to_delete, (gpointer) id);
 
 		camel_folder_summary_remove_uid (camel_folder_get_folder_summary (folder), id);
 		camel_folder_change_info_remove_uid (change_info, id);
 	}
 
-	items_deleted_list = g_list_reverse (items_deleted_list);
-	camel_db_delete_uids (
+	camel_store_db_delete_messages (
 		camel_store_get_db (CAMEL_STORE (ews_store)),
-		full_name, items_deleted_list, NULL);
-	g_list_free (items_deleted_list);
+		full_name, to_delete, NULL);
+	g_ptr_array_unref (to_delete);
 
 	g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
 	g_slist_free (items_deleted);

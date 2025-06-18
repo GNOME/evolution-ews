@@ -41,7 +41,6 @@ struct _CamelEwsFolder {
 	CamelOfflineFolder parent;
 	CamelEwsFolderPrivate *priv;
 
-	CamelFolderSearch *search;
 	CamelDataCache *cache;
 };
 
