@@ -51,21 +51,13 @@ static CamelProviderConfEntry m365_conf_entries[] = {
 };
 
 static CamelProvider m365_provider = {
-	"microsoft365",
-	N_("Microsoft 365"),
-
-	N_("For accessing Microsoft 365 server"),
-
-	"mail",
-
-	CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE |
-	CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_IS_EXTERNAL,
-
-	CAMEL_URL_ALLOW_USER | CAMEL_URL_ALLOW_AUTH | CAMEL_URL_HIDDEN_HOST,
-
-	m365_conf_entries,
-
-	/* ... */
+	.protocol = "microsoft365",
+	.name = N_("Microsoft 365"),
+	.description = N_("For accessing Microsoft 365 server"),
+	.domain = "mail",
+	.flags = CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE | CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_IS_EXTERNAL,
+	.url_flags = CAMEL_URL_ALLOW_USER | CAMEL_URL_ALLOW_AUTH | CAMEL_URL_HIDDEN_HOST,
+	.extra_conf = m365_conf_entries,
 };
 
 void

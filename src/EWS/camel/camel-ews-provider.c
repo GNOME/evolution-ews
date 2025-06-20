@@ -66,51 +66,37 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 };
 
 static CamelProvider ews_provider = {
-	"ews",
-	N_("Exchange Web Services"),
-
-	N_("For accessing Exchange servers using Web Services"),
-
-	"mail",
-
-	CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE |
-	CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_IS_EXTERNAL,
-
-	CAMEL_URL_ALLOW_USER | CAMEL_URL_ALLOW_AUTH | CAMEL_URL_HIDDEN_HOST,
-
-	ews_conf_entries,
-
-	/* ... */
+	.protocol = "ews",
+	.name = N_("Exchange Web Services"),
+	.description = N_("For accessing Exchange servers using Web Services"),
+	.domain = "mail",
+	.flags = CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE | CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_IS_EXTERNAL,
+	.url_flags = CAMEL_URL_ALLOW_USER | CAMEL_URL_ALLOW_AUTH | CAMEL_URL_HIDDEN_HOST,
+	.extra_conf = ews_conf_entries,
 };
 
 CamelServiceAuthType camel_ews_ntlm_authtype = {
-	N_("NTLM"),
-
-	N_("This option will connect to the Exchange server using a "
-	   "plaintext password with NTLM authentication."),
-
-	"",
-	TRUE
+	.name = N_("NTLM"),
+	.description = N_("This option will connect to the Exchange server using a "
+			  "plaintext password with NTLM authentication."),
+	.authproto = "",
+	.need_password = TRUE
 };
 
 CamelServiceAuthType camel_ews_basic_authtype = {
-	N_("Basic"),
-
-	N_("This option will connect to the Exchange server using a "
-	   "plaintext password with Basic authentication."),
-
-	"PLAIN",
-	TRUE
+	.name = N_("Basic"),
+	.description = N_("This option will connect to the Exchange server using a "
+			  "plaintext password with Basic authentication."),
+	.authproto = "PLAIN",
+	.need_password = TRUE
 };
 
 CamelServiceAuthType camel_ews_gssapi_authtype = {
-	N_("Kerberos"),
-
-	N_("This option will connect to the Exchange server using a "
-	   "Kerberos/GSSAPI authentication."),
-
-	"GSSAPI",
-	FALSE
+	.name = N_("Kerberos"),
+	.description = N_("This option will connect to the Exchange server using a "
+			  "Kerberos/GSSAPI authentication."),
+	.authproto = "GSSAPI",
+	.need_password = FALSE
 };
 
 void
