@@ -1,3 +1,29 @@
+Evolution-EWS 3.57.1 2025-06-27
+-------------------------------
+
+Bug Fixes:
+	I#298 - m365: Empty Junk and then Empty Trash produces error
+	I#301 - m365: Cannot unset message label
+	I#303 - m365: Also load photos of Organizational Users
+	I#306 - Cannot accept meeting invitations (duplicated attendee)
+	I#307 - m365: GOA account rejects creating meetings
+	I#308 - Foreign Folders: Look up DisplayName for GUID-like Mailbox Name
+
+Miscellaneous:
+	m365: Propagate proxy settings to all connections
+	Adapt to Camel API changes
+	Reference CamelProvider struct members by name in initialization
+
+Translations:
+	Asier Saratsua Garmendia (eu)
+	Boyuan Yang (zh_CN)
+	Ekaterine Papava (ka)
+	Emin Tufan Çetin (tr)
+	Juliano de Souza Camargo (pt_BR)
+	Martin (sl)
+	Vincent Chatelain (fr)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.56.0 2025-03-14
 -------------------------------
 
