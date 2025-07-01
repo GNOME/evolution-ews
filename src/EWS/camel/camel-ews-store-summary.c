@@ -34,7 +34,7 @@ struct _CamelEwsStoreSummaryPrivate {
 	GFileMonitor *monitor_delete;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsStoreSummary, camel_ews_store_summary, CAMEL_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (CamelEwsStoreSummary, camel_ews_store_summary, G_TYPE_OBJECT)
 
 static void
 ews_store_summary_finalize (GObject *object)

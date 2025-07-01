@@ -62,12 +62,10 @@ struct _CamelM365FolderPrivate {
 	gboolean check_folder;
 };
 
-/* The custom property ID is a CamelArg artifact.
- * It still identifies the property in state files. */
 enum {
 	PROP_0,
-	PROP_APPLY_FILTERS = 0x2501,
-	PROP_CHECK_FOLDER = 0x2502
+	PROP_APPLY_FILTERS,
+	PROP_CHECK_FOLDER
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (CamelM365Folder, camel_m365_folder, CAMEL_TYPE_OFFLINE_FOLDER)
@@ -1703,6 +1701,9 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 	folder_class->get_filename = m365_folder_get_filename;
 	folder_class->search_body_sync = m365_folder_search_body_sync;
 
+	camel_folder_class_map_legacy_property (folder_class, "apply-filters", 0x2501);
+	camel_folder_class_map_legacy_property (folder_class, "check-folder", 0x2502);
+
 	g_object_class_install_property (
 		object_class,
 		PROP_APPLY_FILTERS,
@@ -1713,7 +1714,7 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_EXPLICIT_NOTIFY |
-			CAMEL_PARAM_PERSISTENT));
+			CAMEL_FOLDER_PARAM_PERSISTENT));
 
 	g_object_class_install_property (
 		object_class,
@@ -1725,7 +1726,7 @@ camel_m365_folder_class_init (CamelM365FolderClass *klass)
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_EXPLICIT_NOTIFY |
-			CAMEL_PARAM_PERSISTENT));
+			CAMEL_FOLDER_PARAM_PERSISTENT));
 }
 
 static void
@@ -1839,9 +1840,8 @@ camel_m365_folder_new (CamelStore *store,
 
 	/* set/load persistent state */
 	state_file = g_build_filename (folder_dir, "cmeta", NULL);
-	camel_object_set_state_filename (CAMEL_OBJECT (folder), state_file);
-	camel_object_state_read (CAMEL_OBJECT (folder));
-	g_free (state_file);
+	camel_folder_take_state_filename (folder, g_steal_pointer (&state_file));
+	camel_folder_load_state (folder);
 
 	m365_folder->priv->cache = camel_data_cache_new (folder_dir, error);
 	if (!m365_folder->priv->cache) {

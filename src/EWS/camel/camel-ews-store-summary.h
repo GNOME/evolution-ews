@@ -47,12 +47,12 @@ typedef struct _CamelEwsStoreSummaryClass CamelEwsStoreSummaryClass;
 typedef struct _CamelEwsStoreSummaryPrivate CamelEwsStoreSummaryPrivate;
 
 struct _CamelEwsStoreSummary {
-	CamelObject parent;
+	GObject parent;
 	CamelEwsStoreSummaryPrivate *priv;
 };
 
 struct _CamelEwsStoreSummaryClass {
-	CamelObjectClass parent_class;
+	GObjectClass parent_class;
 };
 
 GType		camel_ews_store_summary_get_type	(void);
