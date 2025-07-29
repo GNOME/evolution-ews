@@ -7297,3 +7297,113 @@ e_m365_connection_delete_linked_resource_sync (EM365Connection *cnc,
 
 	return success;
 }
+
+/* https://learn.microsoft.com/en-us/graph/api/user-get-mailboxsettings?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_mailbox_settings_sync (EM365Connection *cnc,
+					     const gchar *user_override, /* for which user, NULL to use the account user */
+					     EM365MailboxSettings **out_mailbox_settings,
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_mailbox_settings != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "users",
+		"mailboxSettings", NULL, NULL, NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_mailbox_settings, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/user-update-mailboxsettings?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_update_mailbox_settings_sync (EM365Connection *cnc,
+						const gchar *user_override, /* for which user, NULL to use the account user */
+						JsonBuilder *in_mailbox_settings,
+						GCancellable *cancellable,
+						GError **error)
+{
+	SoupMessage *message;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (in_mailbox_settings != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "users",
+		"mailboxSettings", NULL, NULL, NULL);
+
+	message = m365_connection_new_soup_message ("PATCH", uri, CSM_DISABLE_RESPONSE, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_m365_connection_set_json_body (message, in_mailbox_settings);
+
+	success = m365_connection_send_request_sync (cnc, message, NULL, e_m365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/user-get-mailboxsettings?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_m365_connection_get_automatic_replies_setting_sync (EM365Connection *cnc,
+						      const gchar *user_override, /* for which user, NULL to use the account user */
+						      EM365AutomaticRepliesSetting **out_automatic_replies_setting,
+						      GCancellable *cancellable,
+						      GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_automatic_replies_setting != NULL, FALSE);
+
+	uri = e_m365_connection_construct_uri (cnc, TRUE, user_override, E_M365_API_V1_0, "users",
+		"mailboxSettings", "automaticRepliesSetting", NULL, NULL);
+
+	message = m365_connection_new_soup_message (SOUP_METHOD_GET, uri, CSM_DEFAULT, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = m365_connection_send_request_sync (cnc, message, e_m365_read_json_object_response_cb, NULL, out_automatic_replies_setting, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}

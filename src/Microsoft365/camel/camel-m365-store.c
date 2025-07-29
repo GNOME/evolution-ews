@@ -10,6 +10,7 @@
 
 #include "common/camel-m365-settings.h"
 #include "common/e-m365-connection.h"
+#include "common/e-m365-enumtypes.h"
 #include "camel-m365-folder.h"
 #include "camel-m365-store-summary.h"
 #include "camel-m365-utils.h"
@@ -26,6 +27,8 @@ struct _CamelM365StorePrivate {
 	CamelM365StoreSummary *summary;
 	EM365Connection *cnc;
 	GHashTable *default_folders;
+	gboolean has_ooo_set;
+	CamelM365StoreOooAlertState ooo_alert_state;
 };
 
 static void camel_m365_store_initable_init (GInitableIface *iface);
@@ -35,7 +38,9 @@ static GInitableIface *parent_initable_interface;
 enum {
 	PROP_0,
 	PROP_CONNECTABLE,
-	PROP_HOST_REACHABLE
+	PROP_HOST_REACHABLE,
+	PROP_HAS_OOO_SET,
+	PROP_OOO_ALERT_STATE
 };
 
 G_DEFINE_TYPE_WITH_CODE (CamelM365Store, camel_m365_store, CAMEL_TYPE_OFFLINE_STORE,
@@ -493,6 +498,31 @@ m365_store_get_categories_cb (CamelSession *session,
 	g_object_unref (cnc);
 }
 
+static void
+m365_update_has_ooo_set (CamelSession *session,
+			 GCancellable *cancellable,
+			 gpointer user_data,
+			 GError **error)
+{
+	CamelM365Store *self = user_data;
+	EM365AutomaticRepliesSetting *setting = NULL;
+	EM365Connection *cnc;
+
+	cnc = camel_m365_store_ref_connection (self);
+	if (!cnc)
+		return;
+
+	camel_operation_push_message (cancellable, _("Checking “Out of Office” settings"));
+
+	if (e_m365_connection_get_automatic_replies_setting_sync (cnc, NULL,  &setting, cancellable, error) && setting) {
+		camel_m365_store_set_has_ooo_set (self, e_m365_automatic_replies_setting_get_status (setting) == E_M365_AUTOMATIC_REPLIES_STATUS_ALWAYS_ENABLED);
+		g_clear_pointer (&setting, json_object_unref);
+	}
+
+	camel_operation_pop_message (cancellable);
+	g_clear_object (&cnc);
+}
+
 static gboolean
 m365_store_connect_sync (CamelService *service,
 			 GCancellable *cancellable,
@@ -532,6 +562,18 @@ m365_store_connect_sync (CamelService *service,
 		success = camel_session_authenticate_sync (session, service, "Microsoft365", cancellable, error);
 
 		if (success) {
+			CamelM365StoreOooAlertState state;
+
+			state = camel_m365_store_get_ooo_alert_state (m365_store);
+
+			if (state == CAMEL_M365_STORE_OOO_ALERT_STATE_UNKNOWN) {
+				camel_session_submit_job (
+					session, _("Checking “Out of Office” settings"),
+					m365_update_has_ooo_set,
+					g_object_ref (m365_store),
+					g_object_unref);
+			}
+
 			camel_session_submit_job (
 				session, _("Look up Microsoft 365 categories"),
 				m365_store_get_categories_cb,
@@ -1573,6 +1615,16 @@ m365_store_set_property (GObject *object,
 				CAMEL_NETWORK_SERVICE (object),
 				g_value_get_object (value));
 			return;
+		case PROP_HAS_OOO_SET:
+			camel_m365_store_set_has_ooo_set (
+				CAMEL_M365_STORE (object),
+				g_value_get_boolean (value));
+			return;
+		case PROP_OOO_ALERT_STATE:
+			camel_m365_store_set_ooo_alert_state (
+				CAMEL_M365_STORE (object),
+				g_value_get_enum (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1596,6 +1648,18 @@ m365_store_get_property (GObject *object,
 				value,
 				camel_network_service_get_host_reachable (
 					CAMEL_NETWORK_SERVICE (object)));
+			return;
+		case PROP_HAS_OOO_SET:
+			g_value_set_boolean (
+				value,
+				camel_m365_store_get_has_ooo_set (
+				CAMEL_M365_STORE (object)));
+			return;
+		case PROP_OOO_ALERT_STATE:
+			g_value_set_enum (
+				value,
+				camel_m365_store_get_ooo_alert_state (
+				CAMEL_M365_STORE (object)));
 			return;
 	}
 
@@ -1649,6 +1713,28 @@ camel_m365_store_class_init (CamelM365StoreClass *class)
 	object_class->get_property = m365_store_get_property;
 	object_class->dispose = m365_store_dispose;
 	object_class->finalize = m365_store_finalize;
+
+
+	g_object_class_install_property (
+		object_class,
+		PROP_HAS_OOO_SET,
+		g_param_spec_boolean (
+			"has-ooo-set", NULL, NULL,
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OOO_ALERT_STATE,
+		g_param_spec_enum (
+			"ooo-alert-state", NULL, NULL,
+			CAMEL_TYPE_M365_STORE_OOO_ALERT_STATE,
+			CAMEL_M365_STORE_OOO_ALERT_STATE_UNKNOWN,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
 
 	/* Inherited from CamelNetworkService */
 	g_object_class_override_property (
@@ -1834,4 +1920,106 @@ camel_m365_store_connect_folder_summary (CamelM365Store *m365_store,
 		camel_m365_store_summary_connect_folder_summary (m365_store->priv->summary, folder_summary);
 
 	UNLOCK (m365_store);
+}
+
+void
+camel_m365_store_set_has_ooo_set (CamelM365Store *self,
+				  gboolean has_ooo_set)
+{
+	g_return_if_fail (CAMEL_IS_M365_STORE (self));
+
+	if ((self->priv->has_ooo_set ? 1 : 0) == (has_ooo_set ? 1 : 0))
+		return;
+
+	self->priv->has_ooo_set = has_ooo_set;
+	g_object_notify (G_OBJECT (self), "has-ooo-set");
+}
+
+gboolean
+camel_m365_store_get_has_ooo_set (const CamelM365Store *self)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_STORE (self), FALSE);
+
+	return self->priv->has_ooo_set;
+}
+
+void
+camel_m365_store_set_ooo_alert_state (CamelM365Store *self,
+				      CamelM365StoreOooAlertState state)
+{
+	g_return_if_fail (CAMEL_IS_M365_STORE (self));
+
+	if (self->priv->ooo_alert_state == state)
+		return;
+
+	self->priv->ooo_alert_state = state;
+	g_object_notify (G_OBJECT (self), "ooo-alert-state");
+}
+
+CamelM365StoreOooAlertState
+camel_m365_store_get_ooo_alert_state (const CamelM365Store *self)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_STORE (self), CAMEL_M365_STORE_OOO_ALERT_STATE_UNKNOWN);
+
+	return self->priv->ooo_alert_state;
+}
+
+static void
+m365_store_unset_oof_settings_state (CamelSession *session,
+				     GCancellable *cancellable,
+				     gpointer user_data,
+				     GError **error)
+{
+
+	CamelM365Store *self = user_data;
+	EM365Connection *cnc;
+	EM365AutomaticRepliesSetting *setting = NULL;
+
+	camel_operation_push_message (cancellable, _("Unsetting the “Out of Office” status"));
+
+	cnc = camel_m365_store_ref_connection (self);
+
+	if (e_m365_connection_get_automatic_replies_setting_sync (cnc, NULL, &setting, cancellable, error) && setting) {
+		if (e_m365_automatic_replies_setting_get_status (setting) != E_M365_AUTOMATIC_REPLIES_STATUS_DISABLED) {
+			JsonBuilder *builder;
+
+			builder = json_builder_new_immutable ();
+
+			e_m365_begin_mailbox_settings (builder);
+			e_m365_begin_automatic_replies_setting (builder);
+			e_m365_automatic_replies_setting_add_status (builder, E_M365_AUTOMATIC_REPLIES_STATUS_DISABLED);
+			e_m365_end_automatic_replies_setting (builder);
+			e_m365_end_mailbox_settings (builder);
+
+			e_m365_connection_update_mailbox_settings_sync (cnc, NULL, builder, cancellable, error);
+
+			g_clear_object (&builder);
+		}
+
+		g_clear_pointer (&setting, json_object_unref);
+	}
+
+	camel_operation_pop_message (cancellable);
+
+	g_clear_object (&cnc);
+}
+
+void
+camel_m365_store_unset_oof_settings_state (CamelM365Store *self)
+{
+	CamelService *service;
+	CamelSession *session;
+
+	g_return_if_fail (CAMEL_IS_M365_STORE (self));
+
+	service = CAMEL_SERVICE (self);
+	session = camel_service_ref_session (service);
+
+	camel_session_submit_job (
+		session, _("Unsetting the “Out of Office” status"),
+		m365_store_unset_oof_settings_state,
+		g_object_ref (self),
+		g_object_unref);
+
+	g_object_unref (session);
 }

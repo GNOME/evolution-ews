@@ -63,6 +63,17 @@ void		camel_m365_store_maybe_disconnect
 void		camel_m365_store_connect_folder_summary
 						(CamelM365Store *m365_store,
 						 CamelFolderSummary *folder_summary);
+void		camel_m365_store_set_has_ooo_set(CamelM365Store *self,
+						 gboolean has_ooo_set);
+gboolean	camel_m365_store_get_has_ooo_set(const CamelM365Store *self);
+void		camel_m365_store_set_ooo_alert_state
+						(CamelM365Store *self,
+						 CamelM365StoreOooAlertState state);
+CamelM365StoreOooAlertState
+		camel_m365_store_get_ooo_alert_state
+						(const CamelM365Store *self);
+void		camel_m365_store_unset_oof_settings_state
+						(CamelM365Store *self);
 
 G_END_DECLS
 

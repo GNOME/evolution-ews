@@ -106,6 +106,12 @@ static MapData attendee_map[] = {
 	{ "resource", E_M365_ATTENDEE_RESOURCE }
 };
 
+static MapData automatic_replies_status_map[] = {
+	{ "disabled", E_M365_AUTOMATIC_REPLIES_STATUS_DISABLED },
+	{ "alwaysEnabled", E_M365_AUTOMATIC_REPLIES_STATUS_ALWAYS_ENABLED },
+	{ "scheduled", E_M365_AUTOMATIC_REPLIES_STATUS_SCHEDULED }
+};
+
 static struct _color_map {
 	const gchar *name;
 	const gchar *rgb;
@@ -155,6 +161,12 @@ static MapData event_type_map[] = {
 	{ "occurrence",		E_M365_EVENT_TYPE_OCCURRENCE },
 	{ "exception",		E_M365_EVENT_TYPE_EXCEPTION },
 	{ "seriesMaster",	E_M365_EVENT_TYPE_SERIES_MASTER }
+};
+
+static MapData external_audience_scope_map[] = {
+	{ "none", E_M365_EXTERNAL_AUDIENCE_SCOPE_NONE },
+	{ "contactsOnly", E_M365_EXTERNAL_AUDIENCE_SCOPE_CONTACTS_ONLY },
+	{ "all", E_M365_EXTERNAL_AUDIENCE_SCOPE_ALL }
 };
 
 static MapData flag_status_map[] = {
@@ -4415,4 +4427,130 @@ e_m365_linked_resource_add_web_url (JsonBuilder *builder,
 				    const gchar *value)
 {
 	e_m365_json_add_string_member (builder, "webUrl", value);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/mailboxsettings?view=graph-rest-1.0 */
+
+EM365AutomaticRepliesSetting *
+e_m365_mailbox_settings_get_automatic_replies_setting (EM365MailboxSettings *malbox_settings)
+{
+	return e_m365_json_get_object_member (malbox_settings, "automaticRepliesSetting");
+}
+
+void
+e_m365_begin_mailbox_settings (JsonBuilder *builder)
+{
+	e_m365_json_begin_object_member (builder, NULL);
+}
+
+void
+e_m365_end_mailbox_settings (JsonBuilder *builder)
+{
+	e_m365_json_end_object_member (builder);
+}
+
+/* https://learn.microsoft.com/en-us/graph/api/resources/automaticrepliessetting?view=graph-rest-1.0 */
+
+void
+e_m365_begin_automatic_replies_setting (JsonBuilder *builder)
+{
+	e_m365_json_begin_object_member (builder, "automaticRepliesSetting");
+}
+
+void
+e_m365_end_automatic_replies_setting (JsonBuilder *builder)
+{
+	e_m365_json_end_object_member (builder);
+}
+
+EM365ExternalAudienceScopeType
+e_m365_automatic_replies_setting_get_external_audience (EM365AutomaticRepliesSetting *automatic_replies_setting)
+{
+	return m365_json_utils_get_json_as_enum (automatic_replies_setting, "externalAudience",
+		external_audience_scope_map, G_N_ELEMENTS (external_audience_scope_map),
+		E_M365_EXTERNAL_AUDIENCE_SCOPE_NOT_SET,
+		E_M365_EXTERNAL_AUDIENCE_SCOPE_UNKNOWN);
+}
+
+void
+e_m365_automatic_replies_setting_add_external_audience (JsonBuilder *builder,
+							EM365ExternalAudienceScopeType value)
+{
+	m365_json_utils_add_enum_as_json (builder, "externalAudience", value,
+		external_audience_scope_map, G_N_ELEMENTS (external_audience_scope_map),
+		E_M365_EXTERNAL_AUDIENCE_SCOPE_NOT_SET,
+		E_M365_EXTERNAL_AUDIENCE_SCOPE_UNKNOWN);
+}
+
+const gchar *
+e_m365_automatic_replies_setting_get_external_reply_message (EM365AutomaticRepliesSetting *automatic_replies_setting)
+{
+	return e_m365_json_get_string_member (automatic_replies_setting, "externalReplyMessage", NULL);
+}
+
+void
+e_m365_automatic_replies_setting_add_external_reply_message (JsonBuilder *builder,
+							     const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "externalReplyMessage", value);
+}
+
+const gchar *
+e_m365_automatic_replies_setting_get_internal_reply_message (EM365AutomaticRepliesSetting *automatic_replies_setting)
+{
+	return e_m365_json_get_string_member (automatic_replies_setting, "internalReplyMessage", NULL);
+}
+
+void
+e_m365_automatic_replies_setting_add_internal_reply_message (JsonBuilder *builder,
+							     const gchar *value)
+{
+	e_m365_json_add_string_member (builder, "internalReplyMessage", value);
+}
+
+EM365DateTimeWithZone *
+e_m365_automatic_replies_setting_get_scheduled_end_date_time (EM365AutomaticRepliesSetting *automatic_replies_setting)
+{
+	return e_m365_json_get_object_member (automatic_replies_setting, "scheduledEndDateTime");
+}
+
+void
+e_m365_automatic_replies_setting_add_scheduled_end_date_time (JsonBuilder *builder,
+							      time_t date_time,
+							      const gchar *zone)
+{
+	e_m365_add_date_time (builder, "scheduledEndDateTime", date_time, zone);
+}
+
+EM365DateTimeWithZone *
+e_m365_automatic_replies_setting_get_scheduled_start_date_time (EM365AutomaticRepliesSetting *automatic_replies_setting)
+{
+	return e_m365_json_get_object_member (automatic_replies_setting, "scheduledStartDateTime");
+}
+
+void
+e_m365_automatic_replies_setting_add_scheduled_start_date_time (JsonBuilder *builder,
+								time_t date_time,
+								const gchar *zone)
+{
+	e_m365_add_date_time (builder, "scheduledStartDateTime", date_time, zone);
+}
+
+EM365AutomaticRepliesStatusType
+e_m365_automatic_replies_setting_get_status (EM365AutomaticRepliesSetting *automatic_replies_setting)
+{
+	return m365_json_utils_get_json_as_enum (automatic_replies_setting, "status",
+		automatic_replies_status_map, G_N_ELEMENTS (automatic_replies_status_map),
+		E_M365_AUTOMATIC_REPLIES_STATUS_NOT_SET,
+		E_M365_AUTOMATIC_REPLIES_STATUS_UNKNOWN);
+}
+
+void
+e_m365_automatic_replies_setting_add_status (JsonBuilder *builder,
+					     EM365AutomaticRepliesStatusType value)
+{
+	m365_json_utils_add_enum_as_json (builder, "status", value,
+		automatic_replies_status_map, G_N_ELEMENTS (automatic_replies_status_map),
+		E_M365_AUTOMATIC_REPLIES_STATUS_NOT_SET,
+		E_M365_AUTOMATIC_REPLIES_STATUS_UNKNOWN);
 }

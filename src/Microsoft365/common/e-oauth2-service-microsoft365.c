@@ -30,7 +30,7 @@
 				" Mail.ReadWrite.Shared" \
 				" Mail.Send" \
 				" Mail.Send.Shared" \
-				" MailboxSettings.Read" \
+				" MailboxSettings.ReadWrite" \
 				/* " Notes.Create" */ \
 				/* " Notes.ReadWrite.All" */ \
 				" offline_access" \

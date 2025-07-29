@@ -9,11 +9,17 @@ set(sources
 	e-m365-config-ui-extension.h
 	e-m365-edit-calendar-permissions.c
 	e-m365-edit-calendar-permissions.h
+	e-m365-ooo-notificator.c
+	e-m365-ooo-notificator.h
 	e-mail-config-m365-backend.c
 	e-mail-config-m365-backend.h
+	e-mail-config-m365-notebook.c
+	e-mail-config-m365-notebook.h
+	e-mail-config-m365-ooo-page.c
+	e-mail-config-m365-ooo-page.h
 	module-m365-configuration.c
 )
-set(extra_deps)
+set(extra_deps camelmicrosoft365-priv)
 set(extra_defines)
 set(extra_cflags
 	${EVOLUTION_CALENDAR_CFLAGS}

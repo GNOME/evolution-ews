@@ -14,6 +14,7 @@ G_BEGIN_DECLS
 /* Just for better readability */
 #define EM365Attachment			JsonObject
 #define EM365Attendee			JsonObject
+#define EM365AutomaticRepliesSetting	JsonObject
 #define EM365Calendar			JsonObject
 #define EM365CalendarGroup		JsonObject
 #define EM365CalendarPermission		JsonObject
@@ -31,6 +32,7 @@ G_BEGIN_DECLS
 #define EM365ItemBody			JsonObject
 #define EM365LinkedResource		JsonObject
 #define EM365Location			JsonObject
+#define EM365MailboxSettings		JsonObject
 #define EM365MailFolder			JsonObject
 #define EM365MailMessage		JsonObject
 #define EM365OnlineMeetingInfo		JsonObject
@@ -69,6 +71,14 @@ typedef enum _EM365AttendeeType {
 	E_M365_ATTENDEE_OPTIONAL,
 	E_M365_ATTENDEE_RESOURCE
 } EM365AttendeeType;
+
+typedef enum _EM365AutomaticRepliesStatusType {
+	E_M365_AUTOMATIC_REPLIES_STATUS_NOT_SET,
+	E_M365_AUTOMATIC_REPLIES_STATUS_UNKNOWN,
+	E_M365_AUTOMATIC_REPLIES_STATUS_DISABLED,
+	E_M365_AUTOMATIC_REPLIES_STATUS_ALWAYS_ENABLED,
+	E_M365_AUTOMATIC_REPLIES_STATUS_SCHEDULED
+} EM365AutomaticRepliesStatusType;
 
 typedef enum _EM365CalendarColorType {
 	E_M365_CALENDAR_COLOR_NOT_SET		= -3,
@@ -119,6 +129,14 @@ typedef enum _EM365EventTypeType {
 	E_M365_EVENT_TYPE_EXCEPTION,
 	E_M365_EVENT_TYPE_SERIES_MASTER
 } EM365EventTypeType;
+
+typedef enum _EM365ExternalAudienceScopeType {
+	E_M365_EXTERNAL_AUDIENCE_SCOPE_NOT_SET,
+	E_M365_EXTERNAL_AUDIENCE_SCOPE_UNKNOWN,
+	E_M365_EXTERNAL_AUDIENCE_SCOPE_NONE,
+	E_M365_EXTERNAL_AUDIENCE_SCOPE_CONTACTS_ONLY,
+	E_M365_EXTERNAL_AUDIENCE_SCOPE_ALL
+} EM365ExternalAudienceScopeType;
 
 typedef enum _EM365FollowupFlagStatusType {
 	E_M365_FOLLOWUP_FLAG_STATUS_NOT_SET,
@@ -1198,6 +1216,50 @@ void		e_m365_linked_resource_add_external_id	(JsonBuilder *builder,
 const gchar *	e_m365_linked_resource_get_web_url	(EM365LinkedResource *resource);
 void		e_m365_linked_resource_add_web_url	(JsonBuilder *builder,
 							 const gchar *value);
+EM365AutomaticRepliesSetting *
+		e_m365_mailbox_settings_get_automatic_replies_setting
+							(EM365MailboxSettings *malbox_settings);
+void		e_m365_begin_mailbox_settings		(JsonBuilder *builder);
+void		e_m365_end_mailbox_settings		(JsonBuilder *builder);
+
+void		e_m365_begin_automatic_replies_setting	(JsonBuilder *builder);
+void		e_m365_end_automatic_replies_setting	(JsonBuilder *builder);
+EM365ExternalAudienceScopeType
+		e_m365_automatic_replies_setting_get_external_audience
+							(EM365AutomaticRepliesSetting *automatic_replies_setting);
+void		e_m365_automatic_replies_setting_add_external_audience
+							(JsonBuilder *builder,
+							 EM365ExternalAudienceScopeType value);
+const gchar *	e_m365_automatic_replies_setting_get_external_reply_message
+							(EM365AutomaticRepliesSetting *automatic_replies_setting);
+void		e_m365_automatic_replies_setting_add_external_reply_message
+							(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_m365_automatic_replies_setting_get_internal_reply_message
+							(EM365AutomaticRepliesSetting *automatic_replies_setting);
+void		e_m365_automatic_replies_setting_add_internal_reply_message
+							(JsonBuilder *builder,
+							 const gchar *value);
+EM365DateTimeWithZone *
+		e_m365_automatic_replies_setting_get_scheduled_end_date_time
+							(EM365AutomaticRepliesSetting *automatic_replies_setting);
+void		e_m365_automatic_replies_setting_add_scheduled_end_date_time
+							(JsonBuilder *builder,
+							 time_t date_time,
+							 const gchar *zone);
+EM365DateTimeWithZone *
+		e_m365_automatic_replies_setting_get_scheduled_start_date_time
+							(EM365AutomaticRepliesSetting *automatic_replies_setting);
+void		e_m365_automatic_replies_setting_add_scheduled_start_date_time
+							(JsonBuilder *builder,
+							 time_t date_time,
+							 const gchar *zone);
+EM365AutomaticRepliesStatusType
+		e_m365_automatic_replies_setting_get_status
+							(EM365AutomaticRepliesSetting *automatic_replies_setting);
+void		e_m365_automatic_replies_setting_add_status
+							(JsonBuilder *builder,
+							 EM365AutomaticRepliesStatusType value);
 
 G_END_DECLS
 

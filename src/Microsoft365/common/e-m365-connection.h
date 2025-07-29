@@ -915,7 +915,7 @@ gboolean	e_m365_connection_get_linked_resource_sync
 						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 const gchar *resource_id,
-						 EM365LinkedResource **out_resource, /* nullable */
+						 EM365LinkedResource **out_resource,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_create_linked_resource_sync
@@ -924,7 +924,7 @@ gboolean	e_m365_connection_create_linked_resource_sync
 						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 JsonBuilder *in_resource,
-						 EM365LinkedResource **out_resource, /* nullable */
+						 EM365LinkedResource **out_resource,
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_m365_connection_update_linked_resource_sync
@@ -942,6 +942,24 @@ gboolean	e_m365_connection_delete_linked_resource_sync
 						 const gchar *task_list_id,
 						 const gchar *task_id,
 						 const gchar *resource_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_mailbox_settings_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EM365MailboxSettings **out_mailbox_settings,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_update_mailbox_settings_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 JsonBuilder *in_mailbox_settings,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_m365_connection_get_automatic_replies_setting_sync
+						(EM365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 EM365AutomaticRepliesSetting **out_automatic_replies_setting,
 						 GCancellable *cancellable,
 						 GError **error);
 
