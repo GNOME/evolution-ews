@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-05-15 14:14+0000\n"
-"PO-Revision-Date: 2025-05-17 18:47+0200\n"
+"POT-Creation-Date: 2025-07-29 15:24+0000\n"
+"PO-Revision-Date: 2025-07-29 21:17+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -30,7 +30,7 @@ msgid "Exchange Web Services"
 msgstr "Spletna storitev Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:72
+#: ../src/EWS/camel/camel-ews-provider.c:71
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
 
@@ -132,29 +132,29 @@ msgstr "Ni mogoče najti vira pomoči za Microsoft365 za koledar »%s«"
 msgid "Invalid occurrence ID"
 msgstr "ID neveljavne pojavitve"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:363
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Ni mogoče odpreti začasne datoteke vsebine MIME."
 
-#: ../src/EWS/camel/camel-ews-folder.c:372
+#: ../src/EWS/camel/camel-ews-folder.c:371
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Ni mogoče ustvariti razčlenjevalnika iz vsebine MIME!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:381
+#: ../src/EWS/camel/camel-ews-folder.c:380
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Ni mogoče razčleniti zahtev srečanj vsebine MIME!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:494
-#: ../src/EWS/camel/camel-ews-folder.c:707
+#: ../src/EWS/camel/camel-ews-folder.c:493
+#: ../src/EWS/camel/camel-ews-folder.c:706
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Ni mogoče ustvariti datoteke predpomnilnika"
 
-#: ../src/EWS/camel/camel-ews-folder.c:824
-#: ../src/EWS/camel/camel-ews-folder.c:968
+#: ../src/EWS/camel/camel-ews-folder.c:823
+#: ../src/EWS/camel/camel-ews-folder.c:967
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Ni mogoče ustvariti poti predpomnilnika »%s«: %s"
@@ -162,33 +162,33 @@ msgstr "Ni mogoče ustvariti poti predpomnilnika »%s«: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:982
+#: ../src/EWS/camel/camel-ews-folder.c:981
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Premikanje datoteke predpomnilnika iz »%s« v »%s« je spodletelo: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1944
+#: ../src/EWS/camel/camel-ews-folder.c:1822
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2446
+#: ../src/EWS/camel/camel-ews-folder.c:2317
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Osveževanje mape »%s«"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2639
+#: ../src/EWS/camel/camel-ews-folder.c:2510
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanja na mapi v načinu brez povezave"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3312
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1739
+#: ../src/EWS/camel/camel-ews-folder.c:3294
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1713
 msgid "Apply message _filters to this folder"
 msgstr "Uve_ljavi filtre sporočil v tej mapi"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3324
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1751
+#: ../src/EWS/camel/camel-ews-folder.c:3306
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1725
 msgid "Always check for _new mail in this folder"
 msgstr "Vedno preveri, ali je v tej mapi _nova pošta"
 
@@ -262,11 +262,11 @@ msgstr "Prepiši _uporabniške vrednosti glave"
 msgid "Al_ways connect with HTTP/1"
 msgstr "_Vedno se poveži s HTTP/1"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:79
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:89
+#: ../src/EWS/camel/camel-ews-provider.c:80
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -274,11 +274,11 @@ msgstr ""
 "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim "
 "geslom z overjanjem NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:87
 msgid "Basic"
 msgstr "Osnovno"
 
-#: ../src/EWS/camel/camel-ews-provider.c:99
+#: ../src/EWS/camel/camel-ews-provider.c:88
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -286,11 +286,11 @@ msgstr ""
 "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim "
 "geslom z osnovnim overjanjem."
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:95
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:109
+#: ../src/EWS/camel/camel-ews-provider.c:96
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -299,7 +299,7 @@ msgstr ""
 "Kerberos/GSSAPI."
 
 #: ../src/EWS/camel/camel-ews-store.c:313
-#: ../src/Microsoft365/camel/camel-m365-store.c:73
+#: ../src/Microsoft365/camel/camel-m365-store.c:78
 #, c-format
 msgid "Session has no storage path"
 msgstr "Seja nima določene poti shrambe"
@@ -326,6 +326,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
+#: ../src/Microsoft365/camel/camel-m365-store.c:515
+#: ../src/Microsoft365/camel/camel-m365-store.c:571
 msgid "Checking “Out of Office” settings"
 msgstr "Preverjanje nastavitve stanja »Izven pisarne«"
 
@@ -361,7 +363,7 @@ msgid "Updating foreign folders"
 msgstr "Posodabljanje tujih map"
 
 #: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:633
+#: ../src/Microsoft365/camel/camel-m365-store.c:675
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
@@ -375,7 +377,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Javnih map EWS ni mogoče najti."
 
 #: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:696
+#: ../src/Microsoft365/camel/camel-m365-store.c:738
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Mape »%s« ni mogoče ustvariti, ker že obstaja."
@@ -399,7 +401,7 @@ msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Mape pod »%s« ni mogoče ustvariti, saj se uporablja le za javne mape."
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/Microsoft365/camel/camel-m365-store.c:923
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
@@ -461,13 +463,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1423
+#: ../src/Microsoft365/camel/camel-m365-store.c:1465
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Mape Smeti ni mogoče najti"
 
 #: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1481
+#: ../src/Microsoft365/camel/camel-m365-store.c:1523
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Mape za vsiljeno pošto ni mogoče najti."
@@ -502,14 +504,16 @@ msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče preklicati naročil na mape EWS"
 
 #: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1756
-#: ../src/Microsoft365/camel/camel-m365-store.c:1769
+#: ../src/Microsoft365/camel/camel-m365-store.c:1842
+#: ../src/Microsoft365/camel/camel-m365-store.c:1855
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 
 #: ../src/EWS/camel/camel-ews-store.c:3997
 #: ../src/EWS/camel/camel-ews-store.c:4034
+#: ../src/Microsoft365/camel/camel-m365-store.c:1978
+#: ../src/Microsoft365/camel/camel-m365-store.c:2019
 msgid "Unsetting the “Out of Office” status"
 msgstr "Poteka preklic nastavitve stanja »Izven pisarne«"
 
@@ -1041,10 +1045,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Poteka branje dovoljenj mape …"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
 msgid "Unset on Server"
 msgstr "Prekliči nastavitev na strežniku"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
 msgid "Unset the “Out of Office” status"
 msgstr "Prekliči nastavitev stanja »Izven pisarne«"
 
@@ -1523,10 +1529,13 @@ msgstr "Pridobi seznam"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1535,54 +1544,67 @@ msgstr ""
 "zunanjim stikom, ki vam pošljejo sporočilo."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
 msgid "Do _not send Out of Office replies"
 msgstr "_Ne pošiljaj odgovore o odsotnosti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
 msgid "_Send Out of Office replies"
 msgstr "Pošlji odzive _odsotnosti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Pošlji odzive odsotnosti le v obdobju:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
 msgid "_From:"
 msgstr "_Od:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
 msgid "_To:"
 msgstr "_Za:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
 msgid "I_nternal:"
 msgstr "_Notranji:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
 msgid "Message to be sent within the organization"
 msgstr "Sporočilo za prejemnike znotraj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
 msgid "E_xternal:"
 msgstr "_Zunanji:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
 msgid "Message to be sent outside the organization"
 msgstr "Sporočilo za zunanje prejemnike"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
 msgid "Do not reply to senders outside the organization"
 msgstr "Ne odgovarjaj pošiljateljem zunaj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
 msgid "Reply only to known senders outside the organization"
 msgstr "Odgovarjaj le znanim pošiljateljem zunaj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
 msgid "Reply to any sender outside the organization"
 msgstr "Odgovori vsem pošiljateljem zunaj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
 msgid "Retrieving “Out of Office” settings"
 msgstr "Pridobivanje nastavitev »Odsotnosti iz pisarne« ..."
 
@@ -1638,6 +1660,7 @@ msgid "Failed to locate offline address books."
 msgstr "Iskanje nepovezanih imenikov je spodletelo."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Ni mogoče pridobiti nastavitev za sporočila »odsotnosti«."
 
@@ -1777,21 +1800,22 @@ msgstr "Branje URI priponke je spodletelo"
 msgid "Failed to get inline attachment data"
 msgstr "Podatkov o prilogah v vrstici ni bilo mogoče pridobiti"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:535
-#: ../src/Microsoft365/camel/camel-m365-folder.c:954
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1325
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1523
+#: ../src/Microsoft365/camel/camel-m365-folder.c:328
+#: ../src/Microsoft365/camel/camel-m365-folder.c:429
+#: ../src/Microsoft365/camel/camel-m365-folder.c:850
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1225
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1356
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1423
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1505
 msgid "Invalid folder state (missing parent store)"
 msgstr "Neveljavno stanje mape (manjkajoča nadrejena shramba)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1829
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1802
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mapa »%s« ne ustreza nobeni znani mapi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1848
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1821
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ni mogoče naložiti povzetka za »%s«"
@@ -1800,41 +1824,41 @@ msgstr "Ni mogoče naložiti povzetka za »%s«"
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:57
+#: ../src/Microsoft365/camel/camel-m365-provider.c:56
 msgid "For accessing Microsoft 365 server"
 msgstr "Za dostop do strežnika Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:141
+#: ../src/Microsoft365/camel/camel-m365-store.c:146
 #: ../src/Microsoft365/camel/camel-m365-transport.c:249
 msgid "Microsoft 365 server"
 msgstr "Strežnik Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-store.c:148
 msgid "Mail receive via Microsoft 365"
 msgstr "Prejemanje pošte prek okolja Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:198
+#: ../src/Microsoft365/camel/camel-m365-store.c:203
 #: ../src/Microsoft365/common/e-m365-connection.c:1472
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Nepravilno oblikovan naslov URI: »%s«"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:536
+#: ../src/Microsoft365/camel/camel-m365-store.c:578
 msgid "Look up Microsoft 365 categories"
 msgstr "Iskanje kategorij Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:545
+#: ../src/Microsoft365/camel/camel-m365-store.c:587
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Povezave ni bilo mogoče ustvariti"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:710
+#: ../src/Microsoft365/camel/camel-m365-store.c:752
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Nadrejena mapa »%s« ne obstaja"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:953
-#: ../src/Microsoft365/camel/camel-m365-store.c:991
+#: ../src/Microsoft365/camel/camel-m365-store.c:995
+#: ../src/Microsoft365/camel/camel-m365-store.c:1033
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Mapa »%s« ne obstaja."
@@ -2057,6 +2081,11 @@ msgstr "Poteka branje dovoljenj koledarja …"
 msgid "Failed to read permissions: "
 msgstr "Branje dovoljenj je spodletelo: "
 
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#, c-format
+msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
+msgstr "Na vašem računu Microsoft 365 »%s« je določeno stanje »Izven pisarne«."
+
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Preglasi nastavitve Office365 OAuth2"
@@ -2077,6 +2106,11 @@ msgstr "Privzeti najemnik je »%s«"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:328
 msgid "_Redirect URI:"
 msgstr "_Preusmeritveni naslov URI:"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#, c-format
+msgid "The reported error was “%s”."
+msgstr "Napaka v poročilu je »%s«."
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:411
 msgid "Organizational Contacts"
