@@ -1,3 +1,16 @@
+Evolution-EWS 3.57.2 2025-08-01
+-------------------------------
+
+Bug Fixes:
+	I#304 - m365: Allow setting Out of Office message
+
+Miscellaneous:
+	Adapt to libcamel API changes
+
+Translations:
+	Martin (sl)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.57.1 2025-06-27
 -------------------------------
 
