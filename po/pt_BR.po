@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-05-15 14:14+0000\n"
-"PO-Revision-Date: 2025-05-16 08:24-0300\n"
+"POT-Creation-Date: 2025-08-01 14:35+0000\n"
+"PO-Revision-Date: 2025-08-05 08:55-0300\n"
 "Last-Translator: Juliano de Souza Camargo <julianosc@pm.me>\n"
 "Language-Team: Brazilian Portuguese <https://br.gnome.org/traducao>\n"
 "Language: pt_BR\n"
@@ -32,7 +32,7 @@ msgid "Exchange Web Services"
 msgstr "Web services do Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:72
+#: ../src/EWS/camel/camel-ews-provider.c:71
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acessar servidores Exchange usando Web services"
 
@@ -137,29 +137,29 @@ msgstr ""
 msgid "Invalid occurrence ID"
 msgstr "ID de ocorrência inválida"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:363
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Não foi possível abrir o arquivo temporário de mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:372
+#: ../src/EWS/camel/camel-ews-folder.c:371
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Não foi possível gerar o analisador a partir do mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:381
+#: ../src/EWS/camel/camel-ews-folder.c:380
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Não foi possível analisar o mimecontent da solicitação de reunião!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:494
-#: ../src/EWS/camel/camel-ews-folder.c:707
+#: ../src/EWS/camel/camel-ews-folder.c:493
+#: ../src/EWS/camel/camel-ews-folder.c:706
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Não foi possível criar o arquivo de cache"
 
-#: ../src/EWS/camel/camel-ews-folder.c:824
-#: ../src/EWS/camel/camel-ews-folder.c:968
+#: ../src/EWS/camel/camel-ews-folder.c:823
+#: ../src/EWS/camel/camel-ews-folder.c:967
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Não foi possível criar o caminho de cache “%s”: %s"
@@ -167,33 +167,33 @@ msgstr "Não foi possível criar o caminho de cache “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:982
+#: ../src/EWS/camel/camel-ews-folder.c:981
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Falha ao mover o arquivo de cache de mensagens de “%s” para “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1944
+#: ../src/EWS/camel/camel-ews-folder.c:1822
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Não foi possível carregar o resumo para %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2446
+#: ../src/EWS/camel/camel-ews-folder.c:2317
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Atualizando a pasta “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2639
+#: ../src/EWS/camel/camel-ews-folder.c:2510
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Não é possível executar ações na pasta no modo desconectado"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3312
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1739
+#: ../src/EWS/camel/camel-ews-folder.c:3294
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1713
 msgid "Apply message _filters to this folder"
 msgstr "Aplicar _filtros de mensagem a esta pasta"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3324
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1751
+#: ../src/EWS/camel/camel-ews-folder.c:3306
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1725
 msgid "Always check for _new mail in this folder"
 msgstr "Sempre verificar por _novas mensagens nesta pasta"
 
@@ -266,11 +266,11 @@ msgstr "Sobrescrever valor do cabeçalho _User-Agent"
 msgid "Al_ways connect with HTTP/1"
 msgstr "Se_mpre conectar-se com HTTP/1"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:79
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:89
+#: ../src/EWS/camel/camel-ews-provider.c:80
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -278,11 +278,11 @@ msgstr ""
 "Essa opção conectará ao servidor Exchange usando uma senha em texto simples "
 "com autenticação NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:87
 msgid "Basic"
 msgstr "Básico"
 
-#: ../src/EWS/camel/camel-ews-provider.c:99
+#: ../src/EWS/camel/camel-ews-provider.c:88
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -290,11 +290,11 @@ msgstr ""
 "Essa opção conectará ao servidor Exchange usando uma senha em texto simples "
 "com autenticação Básica."
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:95
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:109
+#: ../src/EWS/camel/camel-ews-provider.c:96
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -303,7 +303,7 @@ msgstr ""
 "GSSAPI."
 
 #: ../src/EWS/camel/camel-ews-store.c:313
-#: ../src/Microsoft365/camel/camel-m365-store.c:73
+#: ../src/Microsoft365/camel/camel-m365-store.c:78
 #, c-format
 msgid "Session has no storage path"
 msgstr "A sessão não possui caminho de armazenamento"
@@ -330,6 +330,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
+#: ../src/Microsoft365/camel/camel-m365-store.c:515
+#: ../src/Microsoft365/camel/camel-m365-store.c:571
 msgid "Checking “Out of Office” settings"
 msgstr "Verificando configurações de “Fora do escritório”"
 
@@ -361,7 +363,7 @@ msgid "Updating foreign folders"
 msgstr "Atualizando pastas externas"
 
 #: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:633
+#: ../src/Microsoft365/camel/camel-m365-store.c:675
 #, c-format
 msgid "No such folder: %s"
 msgstr "Pasta inexistente: %s"
@@ -375,7 +377,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Não foi possível encontrar nenhuma pasta EWS pública"
 
 #: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:696
+#: ../src/Microsoft365/camel/camel-m365-store.c:738
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Não foi possível criar a pasta “%s”, pois ela já existe"
@@ -401,7 +403,7 @@ msgstr ""
 "pastas públicas"
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/Microsoft365/camel/camel-m365-store.c:923
 #, c-format
 msgid "Folder does not exist"
 msgstr "A pasta não existe"
@@ -466,13 +468,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Serviço Exchange para %s em %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1423
+#: ../src/Microsoft365/camel/camel-m365-store.c:1465
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Não foi possível localizar a pasta Lixeira"
 
 #: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1481
+#: ../src/Microsoft365/camel/camel-m365-store.c:1523
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Não foi possível localizar a pasta Lixo eletrônico"
@@ -518,14 +520,16 @@ msgstr ""
 "desconectado"
 
 #: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1756
-#: ../src/Microsoft365/camel/camel-m365-store.c:1769
+#: ../src/Microsoft365/camel/camel-m365-store.c:1842
+#: ../src/Microsoft365/camel/camel-m365-store.c:1855
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Você precisa estar trabalhando online para completar essa operação"
 
 #: ../src/EWS/camel/camel-ews-store.c:3997
 #: ../src/EWS/camel/camel-ews-store.c:4034
+#: ../src/Microsoft365/camel/camel-m365-store.c:1978
+#: ../src/Microsoft365/camel/camel-m365-store.c:2019
 msgid "Unsetting the “Out of Office” status"
 msgstr "Desmarcando o estado de “Fora do escritório”"
 
@@ -1047,10 +1051,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Lendo permissões da pasta, por favor aguarde…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
 msgid "Unset on Server"
 msgstr "Desmarcar no servidor"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
 msgid "Unset the “Out of Office” status"
 msgstr "Desmarcar o estado de “Fora do escritório”"
 
@@ -1533,10 +1539,13 @@ msgstr "Buscar lista"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
 msgid "Out of Office"
 msgstr "Fora do escritório"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1545,56 +1554,69 @@ msgstr ""
 "pessoa interna ou externa que enviar um e-mail para você."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
 msgid "Do _not send Out of Office replies"
 msgstr "_Não enviar respostas de Fora do escritório"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
 msgid "_Send Out of Office replies"
 msgstr "En_viar respostas de Fora do escritório"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "Enviar respostas de Fora do escritório somente d_urante este período de "
 "tempo:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
 msgid "_From:"
 msgstr "_De:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
 msgid "_To:"
 msgstr "_Para:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
 msgid "I_nternal:"
 msgstr "I_nterno:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
 msgid "Message to be sent within the organization"
 msgstr "Mensagem que deve ser enviada para dentro da organização"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
 msgid "E_xternal:"
 msgstr "E_xterna:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
 msgid "Message to be sent outside the organization"
 msgstr "Mensagem que deve ser enviada para fora da organização"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
 msgid "Do not reply to senders outside the organization"
 msgstr "Não responder remetentes de fora da organização"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
 msgid "Reply only to known senders outside the organization"
 msgstr "Responder somente remetentes conhecidos de fora da organização"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
 msgid "Reply to any sender outside the organization"
 msgstr "Responder a qualquer remetente de fora da organização"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
 msgid "Retrieving “Out of Office” settings"
 msgstr "Obtendo configurações de “Fora do escritório”"
 
@@ -1647,6 +1669,7 @@ msgid "Failed to locate offline address books."
 msgstr "Falha ao localizar o catálogo de endereços offline."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Falha ao obter configurações de “Fora do escritório”."
 
@@ -1794,21 +1817,22 @@ msgstr "Não foi possível ler o anexo URI"
 msgid "Failed to get inline attachment data"
 msgstr "Falha ao obter informação do anexo na linha"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:535
-#: ../src/Microsoft365/camel/camel-m365-folder.c:954
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1325
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1523
+#: ../src/Microsoft365/camel/camel-m365-folder.c:328
+#: ../src/Microsoft365/camel/camel-m365-folder.c:429
+#: ../src/Microsoft365/camel/camel-m365-folder.c:850
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1225
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1356
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1423
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1505
 msgid "Invalid folder state (missing parent store)"
 msgstr "Estado de pasta inválido (faltando armazenamento pai)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1829
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1802
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Pasta “%s” não corresponde a nenhuma pasta conhecida"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1848
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1821
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Não foi possível carregar o resumo para “%s”"
@@ -1817,41 +1841,41 @@ msgstr "Não foi possível carregar o resumo para “%s”"
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:57
+#: ../src/Microsoft365/camel/camel-m365-provider.c:56
 msgid "For accessing Microsoft 365 server"
 msgstr "Para acessar o servidor do Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:141
+#: ../src/Microsoft365/camel/camel-m365-store.c:146
 #: ../src/Microsoft365/camel/camel-m365-transport.c:249
 msgid "Microsoft 365 server"
 msgstr "Servidor Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-store.c:148
 msgid "Mail receive via Microsoft 365"
 msgstr "E-mail recebido via Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:198
+#: ../src/Microsoft365/camel/camel-m365-store.c:203
 #: ../src/Microsoft365/common/e-m365-connection.c:1472
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "URI mal formado: “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:536
+#: ../src/Microsoft365/camel/camel-m365-store.c:578
 msgid "Look up Microsoft 365 categories"
 msgstr "Procurar categorias do Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:545
+#: ../src/Microsoft365/camel/camel-m365-store.c:587
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Falha ao criar conexão"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:710
+#: ../src/Microsoft365/camel/camel-m365-store.c:752
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "A pasta pai “%s” não existe"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:953
-#: ../src/Microsoft365/camel/camel-m365-store.c:991
+#: ../src/Microsoft365/camel/camel-m365-store.c:995
+#: ../src/Microsoft365/camel/camel-m365-store.c:1033
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "A pasta “%s” não existe"
@@ -2063,6 +2087,12 @@ msgstr "Recolocando permissões do calendário, por favor aguarde…"
 msgid "Failed to read permissions: "
 msgstr "Falha ao ler permissões: "
 
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#, c-format
+msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
+msgstr ""
+"Sua conta Microsoft 365 “%s” tem o estado definido como “Fora do escritório”."
+
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "_Sobrescrever configurações de OAuth2 do Microsoft 365"
@@ -2085,6 +2115,11 @@ msgstr "Locatário padrão é “%s”"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:328
 msgid "_Redirect URI:"
 msgstr "URI de _redirecionamento:"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#, c-format
+msgid "The reported error was “%s”."
+msgstr "O erro relatado foi “%s”."
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:411
 msgid "Organizational Contacts"
