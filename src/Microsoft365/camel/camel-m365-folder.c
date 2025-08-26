@@ -750,6 +750,7 @@ typedef struct _SummaryDeltaData {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *changes;
 	GPtrArray *removed_uids; /* gchar * - from the Camel string pool */
+	GHashTable *known_uids; /* (nullable) if not NULL, then holds currently known UID-s and which left are removed; it's when checking without delta link */
 } SummaryDeltaData;
 
 static gboolean
@@ -780,6 +781,13 @@ m365_folder_got_summary_messages_cb (EM365Connection *cnc,
 
 		if (!id)
 			continue;
+
+		if (sdd->known_uids) {
+			const gchar *pooled_uid = camel_pstring_peek (id);
+
+			if (pooled_uid)
+				g_hash_table_remove (sdd->known_uids, pooled_uid);
+		}
 
 		if (!sdd->changes)
 			sdd->changes = camel_folder_change_info_new ();
@@ -866,6 +874,10 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 	sdd.folder = folder;
 	sdd.changes = NULL;
 	sdd.removed_uids = NULL;
+	sdd.known_uids = NULL;
+
+	if (!curr_delta_link)
+		sdd.known_uids = camel_folder_summary_get_hash (folder_summary);
 
 	success = e_m365_connection_get_objects_delta_sync (cnc, NULL, E_M365_FOLDER_KIND_MAIL, folder_id, M365_FETCH_SUMMARY_PROPERTIES,
 		curr_delta_link, 0, m365_folder_got_summary_messages_cb, &sdd,
@@ -886,6 +898,27 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 
 	if (success && new_delta_link)
 		camel_m365_folder_summary_set_delta_link (m365_folder_summary, new_delta_link);
+
+	/* what left are UID-s no longer on the server */
+	if (sdd.known_uids) {
+		GHashTableIter iter;
+		gpointer key = NULL;
+
+		g_hash_table_iter_init (&iter, sdd.known_uids);
+		while (g_hash_table_iter_next (&iter, &key, NULL)) {
+			const gchar *uid = key;
+
+			if (!sdd.removed_uids)
+				sdd.removed_uids = g_ptr_array_new_with_free_func ((GDestroyNotify) camel_pstring_free);
+			g_ptr_array_add (sdd.removed_uids, (gpointer) camel_pstring_strdup (uid));
+
+			if (!sdd.changes)
+				sdd.changes = camel_folder_change_info_new ();
+			camel_folder_change_info_remove_uid (sdd.changes, uid);
+		}
+
+		g_hash_table_unref (sdd.known_uids);
+	}
 
 	if (sdd.removed_uids) {
 		camel_folder_summary_remove_uids (folder_summary, sdd.removed_uids);

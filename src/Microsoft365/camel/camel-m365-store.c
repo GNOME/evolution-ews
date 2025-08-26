@@ -27,6 +27,7 @@ struct _CamelM365StorePrivate {
 	CamelM365StoreSummary *summary;
 	EM365Connection *cnc;
 	GHashTable *default_folders;
+	gboolean did_folder_list_refresh;
 	gboolean has_ooo_set;
 	CamelM365StoreOooAlertState ooo_alert_state;
 };
@@ -1230,7 +1231,8 @@ m365_store_get_folder_info_sync (CamelStore *store,
 		gboolean refresh_online;
 
 		refresh_online = !(flags & CAMEL_STORE_FOLDER_INFO_FAST) ||
-				  (flags & CAMEL_STORE_FOLDER_INFO_REFRESH) != 0;
+				  (flags & CAMEL_STORE_FOLDER_INFO_REFRESH) != 0 ||
+				 !m365_store->priv->did_folder_list_refresh;
 
 		if (!refresh_online) {
 			gchar *delta_link;
@@ -1253,6 +1255,8 @@ m365_store_get_folder_info_sync (CamelStore *store,
 				FoldersDeltaData fdd;
 				gchar *old_delta_link, *new_delta_link = NULL;
 				GError *local_error = NULL;
+
+				m365_store->priv->did_folder_list_refresh = TRUE;
 
 				LOCK (m365_store);
 
