@@ -519,11 +519,9 @@ e_m365_connection_init (EM365Connection *cnc)
 gboolean
 e_m365_connection_util_delta_token_failed (const GError *error)
 {
-	return g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
-	       g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_BAD_REQUEST) ||
-	       g_error_matches (error, E_M365_ERROR, E_M365_ERROR_SYNC_STATE_NOT_FOUND) ||
-	       /* Returned by the OAuth2 service when the token cannot be refreshed */
-	       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CONNECTION_REFUSED);
+	return g_error_matches (error, E_SOUP_SESSION_ERROR, SOUP_STATUS_BAD_REQUEST) ||
+	       g_error_matches (error, E_M365_ERROR, E_M365_ERROR_ID_MALFORMED) ||
+	       g_error_matches (error, E_M365_ERROR, E_M365_ERROR_SYNC_STATE_NOT_FOUND);
 }
 
 void

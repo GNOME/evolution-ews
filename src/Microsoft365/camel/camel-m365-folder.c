@@ -215,49 +215,6 @@ m365_folder_save_summary (CamelM365Folder *m365_folder)
 	}
 }
 
-static void
-m365_folder_forget_all_mails (CamelM365Folder *m365_folder)
-{
-	CamelFolder *folder;
-	CamelFolderChangeInfo *changes;
-	CamelFolderSummary *folder_summary;
-	GPtrArray *known_uids;
-	gint ii;
-
-	g_return_if_fail (CAMEL_IS_M365_FOLDER (m365_folder));
-
-	folder = CAMEL_FOLDER (m365_folder);
-	g_return_if_fail (folder != NULL);
-
-	known_uids = camel_folder_summary_dup_uids (camel_folder_get_folder_summary (folder));
-
-	if (!known_uids)
-		return;
-
-	changes = camel_folder_change_info_new ();
-	folder_summary = camel_folder_get_folder_summary (folder);
-
-	camel_folder_summary_lock (folder_summary);
-
-	for (ii = 0; ii < known_uids->len; ii++) {
-		const gchar *uid = g_ptr_array_index (known_uids, ii);
-
-		camel_folder_change_info_remove_uid (changes, uid);
-		m365_folder_cache_remove (m365_folder, uid, NULL);
-	}
-
-	camel_folder_summary_clear (folder_summary, NULL);
-	camel_folder_summary_unlock (folder_summary);
-
-	m365_folder_save_summary (m365_folder);
-
-	if (camel_folder_change_info_changed (changes))
-		camel_folder_changed (folder, changes);
-
-	camel_folder_change_info_free (changes);
-	g_ptr_array_unref (known_uids);
-}
-
 static guint32
 m365_folder_get_permanent_flags (CamelFolder *folder)
 {
@@ -889,7 +846,8 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 
 		camel_m365_folder_summary_set_delta_link (m365_folder_summary, NULL);
 
-		m365_folder_forget_all_mails (m365_folder);
+		g_warn_if_fail (sdd.known_uids == NULL);
+		sdd.known_uids = camel_folder_summary_get_hash (folder_summary);
 
 		success = e_m365_connection_get_objects_delta_sync (cnc, NULL, E_M365_FOLDER_KIND_MAIL, folder_id, M365_FETCH_SUMMARY_PROPERTIES,
 			NULL, 0, m365_folder_got_summary_messages_cb, &sdd,
@@ -900,7 +858,7 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 		camel_m365_folder_summary_set_delta_link (m365_folder_summary, new_delta_link);
 
 	/* what left are UID-s no longer on the server */
-	if (sdd.known_uids) {
+	if (success && sdd.known_uids) {
 		GHashTableIter iter;
 		gpointer key = NULL;
 
@@ -915,10 +873,11 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 			if (!sdd.changes)
 				sdd.changes = camel_folder_change_info_new ();
 			camel_folder_change_info_remove_uid (sdd.changes, uid);
+			m365_folder_cache_remove (m365_folder, uid, NULL);
 		}
-
-		g_hash_table_unref (sdd.known_uids);
 	}
+
+	g_clear_pointer (&sdd.known_uids, g_hash_table_unref);
 
 	if (sdd.removed_uids) {
 		camel_folder_summary_remove_uids (folder_summary, sdd.removed_uids);
