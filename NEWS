@@ -1,3 +1,16 @@
+Evolution-EWS 3.57.3 2025-08-29
+-------------------------------
+
+Bug Fixes:
+	I#312 - m365: E-mails/folders not always in sync with the server
+	I#313 - m365: Better detect when delta token is rejected by the server
+
+Translations:
+	Asier Saratsua Garmendia (eu)
+	Balázs Úr (hu)
+	Juliano de Souza Camargo (pt_BR)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.57.2 2025-08-01
 -------------------------------
 
