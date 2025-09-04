@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-07-29 19:24+0000\n"
-"PO-Revision-Date: 2025-07-30 21:44+0300\n"
+"POT-Creation-Date: 2025-09-04 09:02+0000\n"
+"PO-Revision-Date: 2025-09-04 18:48+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -181,12 +181,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1713
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr "Застосувати _фільтри повідомлень до цієї теки"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1725
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr "Завжди перевіряти _нову пошту у цій теці"
 
@@ -299,7 +299,7 @@ msgstr ""
 "відбуватиметься за допомогою системи розпізнавання Kerberos/GSSAPI."
 
 #: ../src/EWS/camel/camel-ews-store.c:313
-#: ../src/Microsoft365/camel/camel-m365-store.c:78
+#: ../src/Microsoft365/camel/camel-m365-store.c:79
 #, c-format
 msgid "Session has no storage path"
 msgstr "У сеансу немає шляху для зберігання даних"
@@ -326,8 +326,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
-#: ../src/Microsoft365/camel/camel-m365-store.c:515
-#: ../src/Microsoft365/camel/camel-m365-store.c:571
+#: ../src/Microsoft365/camel/camel-m365-store.c:516
+#: ../src/Microsoft365/camel/camel-m365-store.c:572
 msgid "Checking “Out of Office” settings"
 msgstr "Перевіряємо параметр «За межами офісу»"
 
@@ -367,7 +367,7 @@ msgid "Updating foreign folders"
 msgstr "Оновлюємо сторонні теки"
 
 #: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:675
+#: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Немає такої теки: %s"
@@ -382,7 +382,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Не вдалося знайти жодної загальнодоступної теки EWS"
 
 #: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:738
+#: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Не вдалося створити теку «%s» — тека вже існує"
@@ -408,7 +408,7 @@ msgstr ""
 "загальнодоступних тек"
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:923
+#: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Теки не існує"
@@ -473,13 +473,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Служба Exchange для %s на %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1465
+#: ../src/Microsoft365/camel/camel-m365-store.c:1469
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Не вдалося знайти теку «Смітник»"
 
 #: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1523
+#: ../src/Microsoft365/camel/camel-m365-store.c:1527
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Не вдалося знайти теку «Спам»"
@@ -516,16 +516,16 @@ msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не можна скасовувати підписку на теки EWS в автономному режимі"
 
 #: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1842
-#: ../src/Microsoft365/camel/camel-m365-store.c:1855
+#: ../src/Microsoft365/camel/camel-m365-store.c:1846
+#: ../src/Microsoft365/camel/camel-m365-store.c:1859
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Потрібно бути в мережі, щоб завершити цю операцію"
 
 #: ../src/EWS/camel/camel-ews-store.c:3997
 #: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1978
-#: ../src/Microsoft365/camel/camel-m365-store.c:2019
+#: ../src/Microsoft365/camel/camel-m365-store.c:1982
+#: ../src/Microsoft365/camel/camel-m365-store.c:2023
 msgid "Unsetting the “Out of Office” status"
 msgstr "Скасовуємо стан «За межами офісу»"
 
@@ -1812,22 +1812,26 @@ msgstr "Не вдалося прочитати адресу долучення"
 msgid "Failed to get inline attachment data"
 msgstr "Не вдалося отримати дані вбудованого долучення"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:328
-#: ../src/Microsoft365/camel/camel-m365-folder.c:429
-#: ../src/Microsoft365/camel/camel-m365-folder.c:850
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1225
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1356
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1423
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1505
+#: ../src/Microsoft365/camel/camel-m365-folder.c:285
+#: ../src/Microsoft365/camel/camel-m365-folder.c:386
+#: ../src/Microsoft365/camel/camel-m365-folder.c:888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
 msgid "Invalid folder state (missing parent store)"
 msgstr "Некоректний стан теки (пропущено батьківське сховище)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1802
+#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+msgid "Follow-up"
+msgstr "До виконання"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Тека «%s» не відповідає жодній відомій теці"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1821
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Не вдалося завантажити резюме щодо «%s»"
@@ -1840,37 +1844,37 @@ msgstr "Microsoft 365"
 msgid "For accessing Microsoft 365 server"
 msgstr "Для доступу до сервера Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:146
+#: ../src/Microsoft365/camel/camel-m365-store.c:147
 #: ../src/Microsoft365/camel/camel-m365-transport.c:249
 msgid "Microsoft 365 server"
 msgstr "Сервер Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:148
+#: ../src/Microsoft365/camel/camel-m365-store.c:149
 msgid "Mail receive via Microsoft 365"
 msgstr "Отримання пошти за допомогою Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:203
-#: ../src/Microsoft365/common/e-m365-connection.c:1472
+#: ../src/Microsoft365/camel/camel-m365-store.c:204
+#: ../src/Microsoft365/common/e-m365-connection.c:1470
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Помилкове форматування адреси: «%s»"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:578
+#: ../src/Microsoft365/camel/camel-m365-store.c:579
 msgid "Look up Microsoft 365 categories"
 msgstr "Пошук у категоріях Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:587
+#: ../src/Microsoft365/camel/camel-m365-store.c:588
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Не вдалося створити з'єднання"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:752
+#: ../src/Microsoft365/camel/camel-m365-store.c:753
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Батьківської теки «%s» не існує"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:995
-#: ../src/Microsoft365/camel/camel-m365-store.c:1033
+#: ../src/Microsoft365/camel/camel-m365-store.c:996
+#: ../src/Microsoft365/camel/camel-m365-store.c:1034
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Теки «%s» не існує"
@@ -1886,7 +1890,7 @@ msgstr ""
 "«Від»"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:946
+#: ../src/Microsoft365/camel/camel-m365-utils.c:994
 msgid "Failed to re-encode parts to base64: "
 msgstr "Не вдалося перекодувати частини до base64: "
 
@@ -1908,7 +1912,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1113
+#: ../src/Microsoft365/common/e-m365-connection.c:1111
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural ""
@@ -1922,7 +1926,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1119
+#: ../src/Microsoft365/common/e-m365-connection.c:1117
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1935,21 +1939,21 @@ msgstr[2] ""
 msgstr[3] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d секунда)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1244
-#: ../src/Microsoft365/common/e-m365-connection.c:1271
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1269
 msgid "Invalid data"
 msgstr "Некоректні дані"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1267
 msgid "Operation was cancelled"
 msgstr "Дію скасовано"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1966
+#: ../src/Microsoft365/common/e-m365-connection.c:1964
 msgid "Failed to parse own Json data"
 msgstr "Не вдалося обробити власні дані JSON"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5495
+#: ../src/Microsoft365/common/e-m365-connection.c:5493
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Не вдалося зберегти екземпляр у «%s»"
@@ -2088,7 +2092,6 @@ msgstr "Не вдалося прочитати права доступу: "
 
 #: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
 #, c-format
-#| msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
 msgstr ""
 "Для вашого облікового запису Microsoft 365 «%s» встановлено стан «За межами "
@@ -2117,7 +2120,6 @@ msgstr "Адреса переспр_ямовування:"
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
 #, c-format
-#| msgid "The reported error was “{0}”."
 msgid "The reported error was “%s”."
 msgstr "Повідомлено про помилку «%s»."
 
