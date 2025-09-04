@@ -673,6 +673,7 @@ camel_m365_utils_add_message_flags (JsonBuilder *builder,
 				    CamelMessageInfo *info,
 				    CamelMimeMessage *message)
 {
+	const gchar *follow_up;
 	guint32 flags = 0;
 
 	if (info) {
@@ -745,6 +746,53 @@ camel_m365_utils_add_message_flags (JsonBuilder *builder,
 		(flags & CAMEL_MESSAGE_FLAGGED) != 0 ? E_M365_IMPORTANCE_HIGH : E_M365_IMPORTANCE_NORMAL);
 
 	e_m365_mail_message_add_is_read (builder, (flags & CAMEL_MESSAGE_SEEN) != 0);
+
+	follow_up = camel_message_info_get_user_tag (info, "follow-up");
+	if (follow_up && !*follow_up)
+		follow_up = NULL;
+
+	e_m365_mail_message_begin_flag (builder);
+
+	if (follow_up) {
+		const gchar *completed, *due_by, *follow_up_start;
+		time_t completed_tt = (time_t) 0 , due_by_tt = (time_t) 0, start_tt = (time_t) 0;
+
+		completed = camel_message_info_get_user_tag (info, "completed-on");
+		due_by = camel_message_info_get_user_tag (info, "due-by");
+		follow_up_start = camel_message_info_get_user_tag (info, "follow-up-start");
+
+		if (completed && *completed)
+			completed_tt = camel_header_decode_date (completed, NULL);
+
+		if (due_by && *due_by)
+			due_by_tt = camel_header_decode_date (due_by, NULL);
+
+		if (follow_up_start && *follow_up_start)
+			start_tt = camel_header_decode_date (follow_up_start, NULL);
+
+		if (!start_tt)
+			start_tt = time (NULL);
+
+		e_m365_followup_flag_add_flag_status (builder, completed_tt != (time_t) 0 ?
+			E_M365_FOLLOWUP_FLAG_STATUS_COMPLETE : E_M365_FOLLOWUP_FLAG_STATUS_FLAGGED);
+
+		if (completed_tt != (time_t) 0) {
+			e_m365_followup_flag_add_completed_date_time (builder, completed_tt, NULL);
+		} else if (due_by_tt != (time_t) 0) {
+			e_m365_followup_flag_add_start_date_time (builder, start_tt, NULL);
+				e_m365_followup_flag_add_due_date_time (builder, due_by_tt, NULL);
+		}
+
+		if (!follow_up_start || !*follow_up_start) {
+			gchar *text = camel_header_format_date (start_tt, 0);
+			camel_message_info_set_user_tag (info, "follow-up-start", text);
+			g_free (text);
+		}
+	} else {
+		e_m365_followup_flag_add_flag_status (builder, E_M365_FOLLOWUP_FLAG_STATUS_NOT_FLAGGED);
+	}
+
+	e_m365_mail_message_end_flag (builder);
 }
 
 static void

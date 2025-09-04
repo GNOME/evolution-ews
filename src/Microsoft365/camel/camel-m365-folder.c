@@ -490,6 +490,7 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 				 EM365MailMessage *mail)
 {
 	CamelM365MessageInfo *m365_mi;
+	EM365FollowupFlag *followup_flag;
 	guint32 flags = 0;
 	gboolean changed = FALSE;
 
@@ -544,6 +545,78 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 			camel_message_info_set_preview (mi, ctmp);
 			changed = TRUE;
 		}
+	}
+
+	followup_flag = e_m365_mail_message_get_flag (mail);
+	if (followup_flag) {
+		EM365DateTimeWithZone *completed_datetime, *due_by_datetime;
+		time_t completed_tt = (time_t) 0, due_by_tt = (time_t) 0;
+		const gchar *followup_name = g_dgettext ("evolution", "Follow-up"); /* not provided in the API; borrow from Evolution */
+		gboolean set_start = TRUE;
+
+		completed_datetime = e_m365_followup_flag_get_completed_date_time (followup_flag);
+		if (completed_datetime)
+			completed_tt = e_m365_date_time_get_date_time (completed_datetime);
+
+		due_by_datetime = e_m365_followup_flag_get_due_date_time (followup_flag);
+		if (due_by_datetime)
+			due_by_tt = e_m365_date_time_get_date_time (due_by_datetime);
+
+		switch (e_m365_followup_flag_get_flag_status (followup_flag)) {
+		default:
+		case E_M365_FOLLOWUP_FLAG_STATUS_NOT_SET:
+		case E_M365_FOLLOWUP_FLAG_STATUS_UNKNOWN:
+		case E_M365_FOLLOWUP_FLAG_STATUS_NOT_FLAGGED:
+			changed = camel_message_info_set_user_tag (mi, "follow-up", NULL) || changed;
+			changed = camel_message_info_set_user_tag (mi, "completed-on", NULL) || changed;
+			changed = camel_message_info_set_user_tag (mi, "due-by", NULL) || changed;
+			changed = camel_message_info_set_user_tag (mi, "follow-up-start", NULL) || changed;
+			set_start = FALSE;
+			break;
+		case E_M365_FOLLOWUP_FLAG_STATUS_COMPLETE:
+			if (!camel_message_info_get_user_tag (mi, "follow-up"))
+				changed = camel_message_info_set_user_tag (mi, "follow-up", followup_name) || changed;
+			if (completed_tt != (time_t) 0) {
+				gchar *text = camel_header_format_date (completed_tt, 0);
+				changed = camel_message_info_set_user_tag (mi, "completed-on", text) || changed;
+				g_free (text);
+			} else {
+				changed = camel_message_info_set_user_tag (mi, "completed-on", NULL) || changed;
+			}
+			break;
+		case E_M365_FOLLOWUP_FLAG_STATUS_FLAGGED:
+			changed = camel_message_info_set_user_tag (mi, "follow-up", followup_name) || changed;
+			changed = camel_message_info_set_user_tag (mi, "completed-on", NULL) || changed;
+			if (due_by_tt != (time_t) 0) {
+				gchar *text = camel_header_format_date (due_by_tt, 0);
+				changed = camel_message_info_set_user_tag (mi, "due-by", text) || changed;
+				g_free (text);
+			} else {
+				changed = camel_message_info_set_user_tag (mi, "due-by", NULL) || changed;
+			}
+			break;
+		}
+
+		if (set_start) {
+			EM365DateTimeWithZone *start_datetime;
+			gchar *text;
+			time_t start_tt = (time_t) 0;
+
+			start_datetime = e_m365_followup_flag_get_start_date_time (followup_flag);
+			if (start_datetime)
+				start_tt = e_m365_date_time_get_date_time (start_datetime);
+			if (!start_tt)
+				start_tt = time (NULL);
+
+			text = camel_header_format_date (start_tt, 0);
+			changed = camel_message_info_set_user_tag (mi, "follow-up-start", text) || changed;
+			g_free (text);
+		}
+	} else {
+		changed = camel_message_info_set_user_tag (mi, "follow-up", NULL) || changed;
+		changed = camel_message_info_set_user_tag (mi, "completed-on", NULL) || changed;
+		changed = camel_message_info_set_user_tag (mi, "due-by", NULL) || changed;
+		changed = camel_message_info_set_user_tag (mi, "follow-up-start", NULL) || changed;
 	}
 
 	return changed;
