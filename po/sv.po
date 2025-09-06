@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-08-28 13:51+0000\n"
-"PO-Revision-Date: 2025-08-30 12:55+0200\n"
+"POT-Creation-Date: 2025-09-04 07:50+0000\n"
+"PO-Revision-Date: 2025-09-06 16:44+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -180,12 +180,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan inte utföra åtgärder på mappen i frånkopplat läge"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1705
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr "Tillämpa meddelande_filter på denna mapp"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1717
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr "Leta alltid efter _ny e-post i denna mapp"
 
@@ -1768,20 +1768,24 @@ msgstr "Misslyckades med att erhålla data för infogad bilaga"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:285
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:815
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1217
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1348
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1415
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1497
+#: ../src/Microsoft365/camel/camel-m365-folder.c:888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
 msgid "Invalid folder state (missing parent store)"
 msgstr "Ogiltigt mapptillstånd (saknar överordnad lagring)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1794
+#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+msgid "Follow-up"
+msgstr "Följ upp"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mappen ”%s” motsvarar ingen känd mapp"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1813
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Kunde inte läsa in sammanfattning för ”%s”"
@@ -1839,7 +1843,7 @@ msgstr ""
 "Microsoft 365-servern kan inte skicka meddelande med flera avsändaradresser"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:946
+#: ../src/Microsoft365/camel/camel-m365-utils.c:994
 msgid "Failed to re-encode parts to base64: "
 msgstr "Misslyckades med att koda om delar till base64: "
 
