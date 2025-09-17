@@ -711,7 +711,7 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"timeout",
 			"timeout",
 			"Connection timeout in seconds",
-			0, G_MAXUINT, 120,
+			0, G_MAXUINT, 15,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
