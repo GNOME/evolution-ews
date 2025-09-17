@@ -19,10 +19,6 @@
 #include "camel-ews-store.h"
 #include "camel-ews-transport.h"
 
-static void add_hash (guint *hash, gchar *s);
-static guint ews_url_hash (gconstpointer key);
-static gint ews_url_equal (gconstpointer a, gconstpointer b);
-
 static CamelProviderConfEntry ews_conf_entries[] = {
 	/* override the labels/defaults of the standard settings */
 
@@ -102,8 +98,6 @@ CamelServiceAuthType camel_ews_gssapi_authtype = {
 void
 camel_provider_module_init (void)
 {
-	ews_provider.url_hash = ews_url_hash;
-	ews_provider.url_equal = ews_url_equal;
 	ews_provider.authtypes = g_list_append (g_list_append (g_list_append (NULL,
 		&camel_ews_ntlm_authtype),
 		&camel_ews_basic_authtype),
@@ -132,37 +126,4 @@ camel_provider_module_init (void)
 	}
 
 	camel_provider_register (&ews_provider);
-}
-
-static void
-add_hash (guint *hash,
-          gchar *s)
-{
-	if (s)
-		*hash ^= g_str_hash(s);
-}
-
-static guint
-ews_url_hash (gconstpointer key)
-{
-	const CamelURL *u = (CamelURL *) key;
-	guint hash = 0;
-
-	add_hash (&hash, u->user);
-	add_hash (&hash, u->host);
-	hash ^= u->port;
-
-	return hash;
-}
-
-static gint
-ews_url_equal (gconstpointer a,
-               gconstpointer b)
-{
-	const CamelURL *u1 = a, *u2 = b;
-
-	return ((g_strcmp0 (u1->protocol, u2->protocol) == 0)
-		&& (g_strcmp0 (u1->user, u2->user) == 0)
-		&& (g_strcmp0 (u1->host, u2->host) == 0)
-		&& (u1->port == u2->port));
 }

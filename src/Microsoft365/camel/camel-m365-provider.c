@@ -15,10 +15,6 @@
 #include "camel-m365-store.h"
 #include "camel-m365-transport.h"
 
-static void add_hash (guint *hash, gchar *s);
-static guint m365_url_hash (gconstpointer key);
-static gint m365_url_equal (gconstpointer a, gconstpointer b);
-
 static CamelProviderConfEntry m365_conf_entries[] = {
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "mailcheck", NULL,
 	  N_("Checking for new mail") },
@@ -66,8 +62,6 @@ camel_provider_module_init (void)
 	bindtextdomain (GETTEXT_PACKAGE, M365_LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
-	m365_provider.url_hash = m365_url_hash;
-	m365_provider.url_equal = m365_url_equal;
 	m365_provider.authtypes = NULL;
 	m365_provider.translation_domain = GETTEXT_PACKAGE;
 	m365_provider.object_types[CAMEL_PROVIDER_STORE] =  CAMEL_TYPE_M365_STORE;
@@ -76,37 +70,4 @@ camel_provider_module_init (void)
 	g_type_ensure (CAMEL_TYPE_SASL_XOAUTH2_MICROSOFT365);
 
 	camel_provider_register (&m365_provider);
-}
-
-static void
-add_hash (guint *hash,
-          gchar *s)
-{
-	if (s)
-		*hash ^= g_str_hash(s);
-}
-
-static guint
-m365_url_hash (gconstpointer key)
-{
-	const CamelURL *u = (CamelURL *) key;
-	guint hash = 0;
-
-	add_hash (&hash, u->user);
-	add_hash (&hash, u->host);
-	hash ^= u->port;
-
-	return hash;
-}
-
-static gint
-m365_url_equal (gconstpointer a,
-		gconstpointer b)
-{
-	const CamelURL *u1 = a, *u2 = b;
-
-	return ((g_strcmp0 (u1->protocol, u2->protocol) == 0)
-		&& (g_strcmp0 (u1->user, u2->user) == 0)
-		&& (g_strcmp0 (u1->host, u2->host) == 0)
-		&& (u1->port == u2->port));
 }
