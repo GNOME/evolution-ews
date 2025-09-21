@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-08-27 18:34+0200\n"
+"POT-Creation-Date: 2025-09-21 16:16+0200\n"
 "PO-Revision-Date: 2025-08-27 14:20+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
@@ -183,12 +183,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1746
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr "_Filtrowanie wiadomości w tym katalogu"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1758
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr "Sprawdzanie _nowych wiadomości w tym katalogu przez cały czas"
 
@@ -1813,22 +1813,26 @@ msgstr "Odczytanie adresu URI załącznika się nie powiodło"
 msgid "Failed to get inline attachment data"
 msgstr "Uzyskanie danych załącznika w treści wiadomości się nie powiodło"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:328
-#: ../src/Microsoft365/camel/camel-m365-folder.c:429
-#: ../src/Microsoft365/camel/camel-m365-folder.c:858
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1258
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1389
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1538
+#: ../src/Microsoft365/camel/camel-m365-folder.c:285
+#: ../src/Microsoft365/camel/camel-m365-folder.c:386
+#: ../src/Microsoft365/camel/camel-m365-folder.c:888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
 msgid "Invalid folder state (missing parent store)"
 msgstr "Nieprawidłowy stan katalogu (brak przechowalni nadrzędnej)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1835
+#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+msgid "Follow-up"
+msgstr "Kontynuuj"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Katalog „%s” nie odpowiada żadnemu znanemu katalogowi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1854
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nie można wczytać zestawienia dla „%s”"
@@ -1851,7 +1855,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Odbieranie poczty przez Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1472
+#: ../src/Microsoft365/common/e-m365-connection.c:1470
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Błędnie sformatowany adres URI: „%s”"
@@ -1885,7 +1889,7 @@ msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Serwer Microsoft 365 nie może wysłać wiadomości z wieloma adresatami"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:946
+#: ../src/Microsoft365/camel/camel-m365-utils.c:994
 msgid "Failed to re-encode parts to base64: "
 msgstr "Ponowne zakodowanie części do Base64 się nie powiodło: "
 
@@ -1907,7 +1911,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1113
+#: ../src/Microsoft365/common/e-m365-connection.c:1111
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1918,7 +1922,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Microsoft 365 jest zajęty, oczekiwanie na ponowienie (%d∶%02d minut)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1119
+#: ../src/Microsoft365/common/e-m365-connection.c:1117
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1929,21 +1933,21 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Microsoft 365 jest zajęty, oczekiwanie na ponowienie (%d sekund)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1244
-#: ../src/Microsoft365/common/e-m365-connection.c:1271
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1269
 msgid "Invalid data"
 msgstr "Nieprawidłowe dane"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1267
 msgid "Operation was cancelled"
 msgstr "Anulowano działanie"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1966
+#: ../src/Microsoft365/common/e-m365-connection.c:1964
 msgid "Failed to parse own Json data"
 msgstr "Przetworzenie własnych danych JSON się nie powiodło"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5495
+#: ../src/Microsoft365/common/e-m365-connection.c:5493
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Nie można było odnaleźć wystąpienia w dniu %s"
