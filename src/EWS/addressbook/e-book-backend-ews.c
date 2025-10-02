@@ -188,7 +188,7 @@ ebb_ews_store_original_vcard (EContact *contact)
 	/* This makes sure it's not saved also in the original vCard */
 	ebb_ews_remove_x_attribute (contact, X_EWS_ORIGINAL_VCARD);
 
-	vcard_str = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+	vcard_str = e_vcard_to_string (E_VCARD (contact));
 
 	ebb_ews_store_x_attribute (contact, X_EWS_ORIGINAL_VCARD, vcard_str);
 
@@ -3038,7 +3038,7 @@ ebb_ews_gal_store_contact (EContact *contact,
 			data->fetch_gal_photos_list = g_slist_prepend (data->fetch_gal_photos_list, g_strdup (uid));
 
 		nfo = e_book_meta_backend_info_new (uid, e_contact_get_const (contact, E_CONTACT_REV), NULL, NULL);
-		nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+		nfo->object = e_vcard_to_string (E_VCARD (contact));
 
 		if (g_hash_table_remove (data->uids, uid)) {
 			data->changed++;
@@ -3570,7 +3570,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 
 				nfo = e_book_meta_backend_info_new (e_contact_get_const (contact, E_CONTACT_UID),
 					e_contact_get_const (contact, E_CONTACT_REV), NULL, NULL);
-				nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+				nfo->object = e_vcard_to_string (E_VCARD (contact));
 
 				found_infos = g_slist_prepend (found_infos, nfo);
 
@@ -3673,7 +3673,7 @@ ebb_ews_contact_to_info (EContact *contact,
 		e_contact_get_const (contact, E_CONTACT_UID),
 		e_contact_get_const (contact, E_CONTACT_REV),
 		NULL, NULL);
-	nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+	nfo->object = e_vcard_to_string (E_VCARD (contact));
 
 	return nfo;
 }
@@ -3737,7 +3737,7 @@ ebb_ews_migrate_data_cb (ECache *cache,
 				ebb_ews_store_original_vcard (contact);
 			}
 
-			vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+			vcard = e_vcard_to_string (E_VCARD (contact));
 			if (vcard && *vcard)
 				*out_object = vcard;
 			else

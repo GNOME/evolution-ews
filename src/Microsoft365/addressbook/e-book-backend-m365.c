@@ -1538,7 +1538,7 @@ ebb_m365_json_contact_to_vcard (EBookBackendM365 *bbm365,
 	}
 
 	if (success)
-		*out_object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+		*out_object = e_vcard_to_string (E_VCARD (contact));
 	else
 		g_clear_object (&contact);
 
@@ -2438,7 +2438,7 @@ ebb_m365_save_contact_sync (EBookMetaBackend *meta_backend,
 				success = ebb_m365_contact_to_json_2nd_go_locked (bbm365, contact, old_contact, uid, cancellable, error);
 
 			if (success)
-				*out_new_extra = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+				*out_new_extra = e_vcard_to_string (E_VCARD (contact));
 		} else {
 			EM365Contact *created_contact = NULL;
 
