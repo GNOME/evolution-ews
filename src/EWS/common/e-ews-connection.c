@@ -649,6 +649,51 @@ e_ews_connection_send_request_sync (EEwsConnection *cnc,
 					if (!local_error2)
 						g_set_error_literal (&local_error2, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED, _("Authentication failed"));
 				}
+			} else if (soup_message_get_status (message) == SOUP_STATUS_INTERNAL_SERVER_ERROR) {
+				GByteArray *data = e_soup_session_util_get_message_bytes (message);
+
+				if (data && data->len) {
+					xmlDoc *doc = e_xml_parse_data (data->data, data->len);
+					if (doc) {
+						xmlXPathContextPtr xpath_ctx;
+
+						xpath_ctx = e_xml_new_xpath_context_with_namespaces (doc, "s", "http://schemas.xmlsoap.org/soap/envelope/", NULL);
+						if (xpath_ctx) {
+							gchar *string;
+
+							string = e_xml_xpath_eval_as_string (xpath_ctx, "/s:Envelope/s:Body/s:Fault/faultstring");
+							if (string && *string) {
+								GQuark errdomain = E_SOUP_SESSION_ERROR;
+								gint errcode = SOUP_STATUS_INTERNAL_SERVER_ERROR;
+								gchar *codestr;
+
+								codestr = e_xml_xpath_eval_as_string (xpath_ctx, "/s:Envelope/s:Body/s:Fault/faultcode");
+								if (codestr && *codestr) {
+									const gchar *ptr;
+									gint ewscode;
+
+									/* the code can have set a namespace, just skip it if it does */
+									ptr = strchr (codestr, ':');
+									ewscode = ews_get_error_code (ptr ? ptr + 1 : codestr);
+
+									if (ewscode > EWS_CONNECTION_ERROR_NONE && ewscode < EWS_CONNECTION_ERROR_NORESPONSE) {
+										errdomain = EWS_CONNECTION_ERROR;
+										errcode = ewscode;
+									}
+								}
+
+								g_free (codestr);
+
+								local_error2 = g_error_new_literal (errdomain, errcode, string);
+							}
+
+							g_free (string);
+							xmlXPathFreeContext (xpath_ctx);
+						}
+
+						xmlFreeDoc (doc);
+					}
+				}
 			}
 		}
 
