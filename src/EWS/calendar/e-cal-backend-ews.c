@@ -1918,151 +1918,203 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 	if (cbews->priv->is_freebusy_calendar) {
 		ESourceEwsFolder *ews_folder;
 		EEWSFreeBusyData fbdata;
-		GSList *free_busy = NULL, *link;
+		GHashTable *known = NULL;
+		GHashTable *recognized; /* gchar *UID */
+		GHashTableIter iter;
+		gpointer key;
+		gint n_weeks, from_week;
 		time_t today;
 
 		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (cbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
 
 		today = time_day_begin (time (NULL));
 
-		fbdata.period_start = time_add_week (today, -e_source_ews_folder_get_freebusy_weeks_before (ews_folder));
-		fbdata.period_end = time_day_end (time_add_week (today, e_source_ews_folder_get_freebusy_weeks_after (ews_folder)));
+		from_week = -e_source_ews_folder_get_freebusy_weeks_before (ews_folder);
+		if (from_week < -27)
+			from_week = -27;
+		n_weeks = -from_week + e_source_ews_folder_get_freebusy_weeks_after (ews_folder);
+		if (n_weeks > 80)
+			n_weeks = 80;
+		if (n_weeks < 1)
+			n_weeks = 1;
+
+		fbdata.period_end = time_add_week (today, from_week) - 1;
 		fbdata.user_mails = g_slist_prepend (NULL, e_source_ews_folder_dup_foreign_mail (ews_folder));
 
-		success = e_ews_connection_get_free_busy_sync (cbews->priv->cnc, G_PRIORITY_DEFAULT,
-			e_ews_cal_utils_prepare_free_busy_request, &fbdata,
-			&free_busy, cancellable, &local_error);
+		/* the event can split among multiple chunks, then do not add it multiple times */
+		recognized = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-		if (success) {
-			ICalTimezone *utc_zone = i_cal_timezone_get_utc_timezone ();
-			GSList *comps = NULL;
-			GHashTable *known;
-			GHashTableIter iter;
-			gpointer key;
+		while (n_weeks > 0) {
+			GSList *free_busy = NULL, *link;
 
-			known = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+			fbdata.period_start = fbdata.period_end + 1;
+			fbdata.period_end = time_day_end (time_add_week (fbdata.period_start + 1, n_weeks <= 5 ? n_weeks : 5));
 
-			if (e_cal_cache_search_components (cal_cache, NULL, &comps, cancellable, NULL)) {
-				for (link = comps; link; link = g_slist_next (link)) {
-					ECalComponent *comp = link->data;
-					ICalComponent *icomp;
-					const gchar *uid;
+			if (n_weeks < 5)
+				n_weeks = 0;
+			else
+				n_weeks -= 5;
 
-					if (!comp)
-						continue;
+			success = e_ews_connection_get_free_busy_sync (cbews->priv->cnc, G_PRIORITY_DEFAULT,
+				e_ews_cal_utils_prepare_free_busy_request, &fbdata,
+				&free_busy, cancellable, &local_error);
 
-					icomp = e_cal_component_get_icalcomponent (comp);
-					if (!icomp)
-						continue;
+			if (success) {
+				ICalTimezone *utc_zone = i_cal_timezone_get_utc_timezone ();
 
-					uid = i_cal_component_get_uid (icomp);
+				if (!known) {
+					GSList *comps = NULL;
 
-					if (uid && *uid)
-						g_hash_table_insert (known, g_strdup (uid), g_object_ref (comp));
+					known = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+
+					if (e_cal_cache_search_components (cal_cache, NULL, &comps, cancellable, NULL)) {
+						for (link = comps; link; link = g_slist_next (link)) {
+							ECalComponent *comp = link->data;
+							ICalComponent *icomp;
+							const gchar *uid;
+
+							if (!comp)
+								continue;
+
+							icomp = e_cal_component_get_icalcomponent (comp);
+							if (!icomp)
+								continue;
+
+							uid = i_cal_component_get_uid (icomp);
+
+							if (uid && *uid)
+								g_hash_table_insert (known, g_strdup (uid), g_object_ref (comp));
+						}
+
+						g_slist_free_full (comps, g_object_unref);
+					}
 				}
 
-				g_slist_free_full (comps, g_object_unref);
-			}
+				for (link = free_busy; link; link = g_slist_next (link)) {
+					ICalComponent *fbcomp = link->data;
+					ICalProperty *fbprop;
+					ICalParameter *param;
+					ICalPeriod *fb;
+					ICalParameterFbtype fbtype;
 
-			for (link = free_busy; link; link = g_slist_next (link)) {
-				ICalComponent *fbcomp = link->data;
-				ICalProperty *fbprop;
-				ICalParameter *param;
-				ICalPeriod *fb;
-				ICalParameterFbtype fbtype;
-
-				if (!fbcomp || i_cal_component_isa (fbcomp) != I_CAL_VFREEBUSY_COMPONENT)
-					continue;
-
-				for (fbprop = i_cal_component_get_first_property (fbcomp, I_CAL_FREEBUSY_PROPERTY);
-				     fbprop;
-				     g_object_unref (fbprop), fbprop = i_cal_component_get_next_property (fbcomp, I_CAL_FREEBUSY_PROPERTY)) {
-					ECalComponent *ecomp;
-					ICalComponent *vevent;
-					ICalTime *itt;
-					gchar *id, *summary, *location;
-
-					param = i_cal_property_get_first_parameter (fbprop, I_CAL_FBTYPE_PARAMETER);
-					if (!param)
+					if (!fbcomp || i_cal_component_isa (fbcomp) != I_CAL_VFREEBUSY_COMPONENT)
 						continue;
 
-					fbtype = i_cal_parameter_get_fbtype (param);
-					g_clear_object (&param);
+					for (fbprop = i_cal_component_get_first_property (fbcomp, I_CAL_FREEBUSY_PROPERTY);
+					     fbprop;
+					     g_object_unref (fbprop), fbprop = i_cal_component_get_next_property (fbcomp, I_CAL_FREEBUSY_PROPERTY)) {
+						ECalComponent *ecomp;
+						ICalComponent *vevent;
+						ICalTime *itt;
+						gchar *id, *summary, *location;
 
-					if (fbtype != I_CAL_FBTYPE_FREE &&
-					    fbtype != I_CAL_FBTYPE_BUSY &&
-					    fbtype != I_CAL_FBTYPE_BUSYUNAVAILABLE &&
-					    fbtype != I_CAL_FBTYPE_BUSYTENTATIVE)
-						continue;
+						param = i_cal_property_get_first_parameter (fbprop, I_CAL_FBTYPE_PARAMETER);
+						if (!param)
+							continue;
 
-					fb = i_cal_property_get_freebusy (fbprop);
-					id = i_cal_property_get_parameter_as_string (fbprop, "X-EWS-ID");
-					summary = i_cal_property_get_parameter_as_string (fbprop, "X-SUMMARY");
-					location = i_cal_property_get_parameter_as_string (fbprop, "X-LOCATION");
+						fbtype = i_cal_parameter_get_fbtype (param);
+						g_clear_object (&param);
 
-					vevent = i_cal_component_new_vevent ();
+						if (fbtype != I_CAL_FBTYPE_FREE &&
+						    fbtype != I_CAL_FBTYPE_BUSY &&
+						    fbtype != I_CAL_FBTYPE_BUSYUNAVAILABLE &&
+						    fbtype != I_CAL_FBTYPE_BUSYTENTATIVE &&
+						    fbtype != I_CAL_FBTYPE_X)
+							continue;
 
-					if (id && *id) {
-						i_cal_component_set_uid (vevent, id);
-					} else {
-						gchar *uid, *start, *end;
+						fb = i_cal_property_get_freebusy (fbprop);
+						id = i_cal_property_get_parameter_as_string (fbprop, "X-EWS-ID");
+						summary = i_cal_property_get_parameter_as_string (fbprop, "X-SUMMARY");
+						location = i_cal_property_get_parameter_as_string (fbprop, "X-LOCATION");
+
+						vevent = i_cal_component_new_vevent ();
+
+						if (id && *id) {
+							i_cal_component_set_uid (vevent, id);
+						} else {
+							gchar *uid, *start, *end;
+
+							itt = i_cal_period_get_start (fb);
+							start = i_cal_time_as_ical_string (itt);
+							g_clear_object (&itt);
+
+							itt = i_cal_period_get_end (fb);
+							end = i_cal_time_as_ical_string (itt);
+							g_clear_object (&itt);
+
+							uid = g_strdup_printf ("%s-%s-%d", start, end, (gint) fbtype);
+
+							i_cal_component_set_uid (vevent, uid);
+
+							g_free (start);
+							g_free (end);
+							g_free (uid);
+						}
 
 						itt = i_cal_period_get_start (fb);
-						start = i_cal_time_as_ical_string (itt);
+						i_cal_time_set_timezone (itt, utc_zone);
+						i_cal_component_set_dtstart (vevent, itt);
 						g_clear_object (&itt);
 
 						itt = i_cal_period_get_end (fb);
-						end = i_cal_time_as_ical_string (itt);
+						i_cal_time_set_timezone (itt, utc_zone);
+						i_cal_component_set_dtend (vevent, itt);
 						g_clear_object (&itt);
 
-						uid = g_strdup_printf ("%s-%s-%d", start, end, (gint) fbtype);
+						itt = i_cal_time_new_current_with_zone (utc_zone);
+						i_cal_component_take_property (vevent, i_cal_property_new_created (itt));
+						g_clear_object (&itt);
 
-						i_cal_component_set_uid (vevent, uid);
+						if (fbtype == I_CAL_FBTYPE_FREE)
+							i_cal_component_take_property (vevent, i_cal_property_new_transp (I_CAL_TRANSP_TRANSPARENT));
 
-						g_free (start);
-						g_free (end);
-						g_free (uid);
-					}
+						if (summary && *summary) {
+							i_cal_component_set_summary (vevent, summary);
+						} else {
+							if (fbtype == I_CAL_FBTYPE_FREE) {
+								i_cal_component_set_summary (vevent, C_("FreeBusyType", "Free"));
+							} else if (fbtype == I_CAL_FBTYPE_BUSY) {
+								i_cal_component_set_summary (vevent, C_("FreeBusyType", "Busy"));
+							} else if (fbtype == I_CAL_FBTYPE_BUSYUNAVAILABLE) {
+								i_cal_component_set_summary (vevent, C_("FreeBusyType", "Out of Office"));
+							} else if (fbtype == I_CAL_FBTYPE_BUSYTENTATIVE) {
+								i_cal_component_set_summary (vevent, C_("FreeBusyType", "Tentative"));
+							} else if (fbtype == I_CAL_FBTYPE_X) {
+								gchar *str = i_cal_property_get_parameter_as_string (fbprop, "FBTYPE");
+								if (str && str[0] == 'X' && str[1] == '-') {
+									i_cal_component_set_summary (vevent, str + 2);
+								}
+								g_free (str);
+							}
+						}
 
-					itt = i_cal_period_get_start (fb);
-					i_cal_time_set_timezone (itt, utc_zone);
-					i_cal_component_set_dtstart (vevent, itt);
-					g_clear_object (&itt);
+						if (location && *location)
+							i_cal_component_set_location (vevent, location);
 
-					itt = i_cal_period_get_end (fb);
-					i_cal_time_set_timezone (itt, utc_zone);
-					i_cal_component_set_dtend (vevent, itt);
-					g_clear_object (&itt);
+						ecomp = g_hash_table_lookup (known, i_cal_component_get_uid (vevent));
+						if (ecomp) {
+							g_object_ref (ecomp);
 
-					itt = i_cal_time_new_current_with_zone (utc_zone);
-					i_cal_component_take_property (vevent, i_cal_property_new_created (itt));
-					g_clear_object (&itt);
+							/* This dereferences the ecomp, thus the ref() call above to keep it alive */
+							g_hash_table_remove (known, i_cal_component_get_uid (vevent));
 
-					if (fbtype == I_CAL_FBTYPE_FREE) {
-						i_cal_component_set_summary (vevent, C_("FreeBusyType", "Free"));
-						i_cal_component_take_property (vevent, i_cal_property_new_transp (I_CAL_TRANSP_TRANSPARENT));
-					} else if (fbtype == I_CAL_FBTYPE_BUSY) {
-						i_cal_component_set_summary (vevent, C_("FreeBusyType", "Busy"));
-					} else if (fbtype == I_CAL_FBTYPE_BUSYUNAVAILABLE) {
-						i_cal_component_set_summary (vevent, C_("FreeBusyType", "Out of Office"));
-					} else if (fbtype == I_CAL_FBTYPE_BUSYTENTATIVE) {
-						i_cal_component_set_summary (vevent, C_("FreeBusyType", "Tentative"));
-					}
+							if (ecb_ews_freebusy_ecomp_changed (ecomp, vevent)) {
+								ECalMetaBackendInfo *nfo;
+								gchar *revision = e_util_generate_uid ();
 
-					if (summary && *summary)
-						i_cal_component_set_summary (vevent, summary);
+								e_cal_util_component_set_x_property (vevent, "X-EVOLUTION-CHANGEKEY", revision);
 
-					if (location && *location)
-						i_cal_component_set_location (vevent, location);
+								nfo = e_cal_meta_backend_info_new (i_cal_component_get_uid (vevent), NULL, NULL, NULL);
+								nfo->revision = revision;
+								nfo->object = i_cal_component_as_ical_string (vevent);
 
-					ecomp = g_hash_table_lookup (known, i_cal_component_get_uid (vevent));
-					if (ecomp) {
-						g_object_ref (ecomp);
+								*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
+							}
 
-						/* This dereferences the ecomp, thus the ref() call above to keep it alive */
-						g_hash_table_remove (known, i_cal_component_get_uid (vevent));
+							g_clear_object (&ecomp);
 
-						if (ecb_ews_freebusy_ecomp_changed (ecomp, vevent)) {
+							g_hash_table_add (recognized, g_strdup (i_cal_component_get_uid (vevent)));
+						} else if (!g_hash_table_contains (recognized, i_cal_component_get_uid (vevent))) {
 							ECalMetaBackendInfo *nfo;
 							gchar *revision = e_util_generate_uid ();
 
@@ -2072,30 +2124,35 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 							nfo->revision = revision;
 							nfo->object = i_cal_component_as_ical_string (vevent);
 
-							*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
+							*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
+
+							g_hash_table_add (recognized, g_strdup (i_cal_component_get_uid (vevent)));
 						}
 
-						g_clear_object (&ecomp);
-					} else {
-						ECalMetaBackendInfo *nfo;
-						gchar *revision = e_util_generate_uid ();
-
-						e_cal_util_component_set_x_property (vevent, "X-EVOLUTION-CHANGEKEY", revision);
-
-						nfo = e_cal_meta_backend_info_new (i_cal_component_get_uid (vevent), NULL, NULL, NULL);
-						nfo->revision = revision;
-						nfo->object = i_cal_component_as_ical_string (vevent);
-
-						*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
+						g_free (id);
+						g_free (summary);
+						g_free (location);
+						g_clear_object (&fb);
+						g_object_unref (vevent);
 					}
-
-					g_free (id);
-					g_free (summary);
-					g_free (location);
-					g_object_unref (vevent);
 				}
-			}
 
+				g_slist_free_full (free_busy, g_object_unref);
+			} else {
+				if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NOFREEBUSYACCESS)) {
+					e_cal_meta_backend_empty_cache_sync (meta_backend, cancellable, NULL);
+
+					e_cal_backend_notify_error (E_CAL_BACKEND (cbews), local_error->message);
+					g_clear_error (&local_error);
+					success = TRUE;
+				} else {
+					g_propagate_error (error, local_error);
+				}
+				break;
+			}
+		}
+
+		if (known && success) {
 			g_hash_table_iter_init (&iter, known);
 			while (g_hash_table_iter_next (&iter, &key, NULL)) {
 				const gchar *uid = key;
@@ -2103,20 +2160,11 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 				*out_removed_objects = g_slist_prepend (*out_removed_objects,
 					e_cal_meta_backend_info_new (uid, NULL, NULL, NULL));
 			}
-
-			g_hash_table_destroy (known);
-		} else if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NOFREEBUSYACCESS)) {
-			e_cal_meta_backend_empty_cache_sync (meta_backend, cancellable, NULL);
-
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbews), local_error->message);
-			g_clear_error (&local_error);
-			success = TRUE;
-		} else {
-			g_propagate_error (error, local_error);
 		}
 
-		g_slist_free_full (free_busy, g_object_unref);
 		g_slist_free_full (fbdata.user_mails, g_free);
+		g_clear_pointer (&known, g_hash_table_destroy);
+		g_hash_table_destroy (recognized);
 	} else {
 		GSList *items_created = NULL, *items_modified = NULL, *items_deleted = NULL, *link;
 		EEwsAdditionalProps *add_props;

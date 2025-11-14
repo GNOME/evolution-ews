@@ -6597,6 +6597,15 @@ ews_handle_free_busy_view (ESoapParameter *param,
 					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY-UNAVAILABLE");
 				else if (!strcmp (value, "Free"))
 					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "FREE");
+				else if (!strcmp (value, "WorkingElsewhere")) {
+					gchar *x_value = g_strconcat ("X-", C_("FreeBusyType", "Working elsewhere"), NULL);
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", x_value);
+					g_free (x_value);
+				} else {
+					gchar *x_value = g_strconcat ("X-", value, NULL);
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", x_value);
+					g_free (x_value);
+				}
 				g_free (value);
 			} else if (!g_ascii_strcasecmp (name, "CalendarEventDetails")) {
 				ESoapParameter *dparam;
