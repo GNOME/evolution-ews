@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-09-04 07:50+0000\n"
-"PO-Revision-Date: 2025-09-04 10:54+0200\n"
+"POT-Creation-Date: 2025-11-14 09:04+0000\n"
+"PO-Revision-Date: 2025-11-16 01:47+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -23,18 +23,18 @@ msgstr ""
 "X-Generator: Poedit 2.2.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:66
 #: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
 msgstr "Spletna storitev Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:71
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
 
-#: ../src/common/e-ews-common-utils.c:157
+#: ../src/common/e-ews-common-utils.c:116
 #, c-format
 msgid "Invalid folder URI “%s”"
 msgstr "Neveljaven URI mape »%s«"
@@ -71,33 +71,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Nastavljanje slike stika je spodletelo:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2075
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Prosto"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2077
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zasedeno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Poskusno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2678
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2952
 msgid "Cannot determine EWS ItemId"
 msgstr "ItemId EWS ni mogoče določiti"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3249
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3923
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -105,11 +105,11 @@ msgstr ""
 "Srečanj, ki jih organizirajo drugi uporabniki v koledarju spletnih storitev "
 "Exchange ni mogoče ustvariti."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3286
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Spletno srečanje lahko ustvarite le v glavnem uporabniškem koledarju."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3911
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -192,81 +192,81 @@ msgstr "Uve_ljavi filtre sporočil v tej mapi"
 msgid "Always check for _new mail in this folder"
 msgstr "Vedno preveri, ali je v tej mapi _nova pošta"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
-#: ../src/Microsoft365/camel/camel-m365-provider.c:24
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "Preverjanje za novo pošto"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
-#: ../src/Microsoft365/camel/camel-m365-provider.c:26
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "Preveri za _nova sporočila v vseh mapah"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr "_Prisluhni opozorilom sprememb na strežniku"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
-#: ../src/Microsoft365/camel/camel-m365-provider.c:29
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "Možnosti"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
-#: ../src/Microsoft365/camel/camel-m365-provider.c:31
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "Uvelj_avi filtre na novih sporočilih v mapi dohodne pošte na tem strežniku"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
-#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "Med novimi sporočili preveri za _vsiljeno pošto"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
-#: ../src/Microsoft365/camel/camel-m365-provider.c:35
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Vsiljeno pošto preveri le v mapi _dohodnih sporočil"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
-#: ../src/Microsoft365/camel/camel-m365-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "_Uskladi oddaljeno pošto vseh map"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:44
 msgid "Show _Public Folders beside user folders"
 msgstr "Pokaži _javne mape poleg uporabniških map"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
-#: ../src/Microsoft365/camel/camel-m365-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "Povezava"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
-#: ../src/Microsoft365/camel/camel-m365-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Časovna pre_koračitev povezave (v sekundah) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
-#: ../src/Microsoft365/camel/camel-m365-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Število _sočasnih povezav za uporabo"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:55
 msgid "Override _User-Agent header value"
 msgstr "Prepiši _uporabniške vrednosti glave"
 
-#: ../src/EWS/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:58
 msgid "Al_ways connect with HTTP/1"
 msgstr "_Vedno se poveži s HTTP/1"
 
-#: ../src/EWS/camel/camel-ews-provider.c:79
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:80
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -274,11 +274,11 @@ msgstr ""
 "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim "
 "geslom z overjanjem NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "Osnovno"
 
-#: ../src/EWS/camel/camel-ews-provider.c:88
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -286,11 +286,11 @@ msgstr ""
 "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim "
 "geslom z osnovnim overjanjem."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:96
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -618,56 +618,61 @@ msgstr[3] ""
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/EWS/common/e-ews-connection.c:2458
+#: ../src/EWS/common/e-ews-connection.c:2503
 msgid "Failed to find <Autodiscover> element"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2468
+#: ../src/EWS/common/e-ews-connection.c:2513
 msgid "Failed to find <Response> element"
 msgstr "Iskanje predmeta <odziva> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2478
+#: ../src/EWS/common/e-ews-connection.c:2523
 msgid "Failed to find <Account> element"
 msgstr "Iskanje predmeta <računa> je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:2523
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Samodejno odkrivanje predmetov odgovora <ASUrl> je spodletelo"
 
-#: ../src/EWS/common/e-ews-connection.c:2599
+#: ../src/EWS/common/e-ews-connection.c:2644
 msgid "URL cannot be NULL"
 msgstr "URL ne sme biti NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3024
+#: ../src/EWS/common/e-ews-connection.c:3069
 msgid "Email address is missing a domain part"
 msgstr "V elektronskem naslovu manjka del z domeno"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3278
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke imenika OAB XML je spodletelo."
 
-#: ../src/EWS/common/e-ews-connection.c:3271
+#: ../src/EWS/common/e-ews-connection.c:3316
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje imenika <OAB> je spodletelo.\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "Delo drugje"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr ""
 "Potrebujete vsaj strežnik Microsoft Exchange 2010 s servisnim paketom SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8928
+#: ../src/EWS/common/e-ews-connection.c:8982
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Potrebujete vsaj strežnik Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9081
+#: ../src/EWS/common/e-ews-connection.c:9135
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Potrebujete vsaj strežnik Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9221
+#: ../src/EWS/common/e-ews-connection.c:9275
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr ""
 "Potrebujete vsaj strežnik Microsoft Exchange 2007 s servisnim paketom SP1"
@@ -1824,11 +1829,11 @@ msgstr "Mapa »%s« ne ustreza nobeni znani mapi"
 msgid "Could not load summary for “%s”"
 msgstr "Ni mogoče naložiti povzetka za »%s«"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:56
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
 msgid "For accessing Microsoft 365 server"
 msgstr "Za dostop do strežnika Microsoft 365"
 
