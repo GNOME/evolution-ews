@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-11-16 00:52+0000\n"
-"PO-Revision-Date: 2025-11-16 20:04+0200\n"
+"POT-Creation-Date: 2025-11-18 16:45+0000\n"
+"PO-Revision-Date: 2025-11-18 22:41+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -68,33 +68,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Не вдалося встановити фотографію контакту:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2075
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Вільний"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2077
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Зайнятий"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "За межами офісу"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Умовно прийнято"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2678
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2952
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
 msgid "Cannot determine EWS ItemId"
 msgstr "Не вдалося визначити ідентифікатор запису EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3249
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3923
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -102,12 +102,12 @@ msgstr ""
 "Неможливо створити зустрічі, які організовано іншими користувачами, у "
 "календарі вебслужб Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3286
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Нараду в інтернеті можна створювати лише у календарі основного користувача."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3911
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -730,6 +730,19 @@ msgstr "О_тримувати фотографії контактів"
 #: ../src/EWS/evolution/e-book-config-ews.c:101
 msgid "Tries to look up for user photo"
 msgstr "Намагатися отримати фотографії користувачів"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr ""
+"Показ подій у вказаному у тижнях діапазоні часу з центром у поточному дні"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "_До:"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "_Після:"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
