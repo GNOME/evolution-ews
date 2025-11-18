@@ -22,6 +22,7 @@ src/EWS/common/e-ews-connection-utils.c
 src/EWS/common/e-ews-folder.c
 src/EWS/common/e-oauth2-service-office365.c
 src/EWS/evolution/e-book-config-ews.c
+src/EWS/evolution/e-cal-config-ews.c
 src/EWS/evolution/e-ews-comp-editor-extension.c
 src/EWS/evolution/e-ews-config-lookup.c
 src/EWS/evolution/e-ews-config-utils.c
