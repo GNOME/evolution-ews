@@ -5,6 +5,10 @@
 
 #include "evolution-ews-config.h"
 
+#include <glib/gi18n-lib.h>
+
+#include "common/e-source-ews-folder.h"
+
 #include "e-cal-config-ews.h"
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -48,6 +52,67 @@ cal_config_ews_insert_widgets (ESourceConfigBackend *backend,
 		return;
 
 	config = e_source_config_backend_get_config (backend);
+
+	if (e_source_has_extension (scratch_source, E_SOURCE_EXTENSION_EWS_FOLDER)) {
+		ESourceEwsFolder *ews_folder;
+		const gchar *id;
+
+		ews_folder = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_EWS_FOLDER);
+		id = e_source_ews_folder_get_id (ews_folder);
+
+		if (id && g_str_has_prefix (id, "freebusy-calendar::")) {
+			GtkWidget *widget;
+			GtkGrid *grid;
+
+			widget = gtk_grid_new ();
+			e_source_config_insert_widget (config, scratch_source, NULL, widget);
+
+			grid = GTK_GRID (widget);
+
+			widget = gtk_label_new (_("Show events in time before and after today, in weeks"));
+			gtk_grid_attach (grid, widget, 0, 0, 4, 1);
+
+			widget = gtk_label_new_with_mnemonic (_("_Before:"));
+			g_object_set (widget,
+				"halign", GTK_ALIGN_END,
+				"margin-start", 12,
+				"margin-end", 4,
+				NULL);
+			gtk_grid_attach (grid, widget, 0, 1, 1, 1);
+
+			widget = gtk_spin_button_new_with_range (0, 5, 1);
+			gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (widget), TRUE);
+			gtk_spin_button_set_update_policy (GTK_SPIN_BUTTON (widget), GTK_UPDATE_IF_VALID);
+			gtk_grid_attach (grid, widget, 1, 1, 1, 1);
+
+			e_binding_bind_property (
+				ews_folder, "freebusy-weeks-before",
+				widget, "value",
+				G_BINDING_BIDIRECTIONAL |
+				G_BINDING_SYNC_CREATE);
+
+			widget = gtk_label_new_with_mnemonic (_("_After:"));
+			g_object_set (widget,
+				"halign", GTK_ALIGN_END,
+				"margin-start", 12,
+				"margin-end", 4,
+				NULL);
+			gtk_grid_attach (grid, widget, 2, 1, 1, 1);
+
+			widget = gtk_spin_button_new_with_range (0, 54, 1);
+			gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (widget), TRUE);
+			gtk_spin_button_set_update_policy (GTK_SPIN_BUTTON (widget), GTK_UPDATE_IF_VALID);
+			gtk_grid_attach (grid, widget, 3, 1, 1, 1);
+
+			e_binding_bind_property (
+				ews_folder, "freebusy-weeks-after",
+				widget, "value",
+				G_BINDING_BIDIRECTIONAL |
+				G_BINDING_SYNC_CREATE);
+
+			gtk_widget_show_all (GTK_WIDGET (grid));
+		}
+	}
 
 	e_source_config_add_refresh_interval (config, scratch_source);
 	e_source_config_add_refresh_on_metered_network (config, scratch_source);

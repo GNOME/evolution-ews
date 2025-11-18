@@ -62,6 +62,8 @@ struct _ECalBackendEwsPrivate {
 	gchar *last_subscription_id;
 
 	gboolean is_freebusy_calendar;
+	gint freebusy_calendar_weeks_before;
+	gint freebusy_calendar_weeks_after;
 
 	gchar *attachments_dir;
 
@@ -1822,6 +1824,11 @@ ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 		cbews->priv->folder_id = e_source_ews_folder_dup_id (ews_folder);
 		cbews->priv->is_freebusy_calendar = cbews->priv->folder_id && g_str_has_prefix (cbews->priv->folder_id, "freebusy-calendar::");
 
+		if (cbews->priv->is_freebusy_calendar) {
+			cbews->priv->freebusy_calendar_weeks_before = e_source_ews_folder_get_freebusy_weeks_before (ews_folder);
+			cbews->priv->freebusy_calendar_weeks_after = e_source_ews_folder_get_freebusy_weeks_after (ews_folder);
+		}
+
 		g_signal_connect_swapped (cbews->priv->cnc, "server-notification",
 			G_CALLBACK (ecb_ews_server_notification_cb), cbews);
 
@@ -1926,13 +1933,15 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 		time_t today;
 
 		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (cbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+		cbews->priv->freebusy_calendar_weeks_before = e_source_ews_folder_get_freebusy_weeks_before (ews_folder);
+		cbews->priv->freebusy_calendar_weeks_after = e_source_ews_folder_get_freebusy_weeks_after (ews_folder);
 
 		today = time_day_begin (time (NULL));
 
-		from_week = -e_source_ews_folder_get_freebusy_weeks_before (ews_folder);
+		from_week = -cbews->priv->freebusy_calendar_weeks_before;
 		if (from_week < -27)
 			from_week = -27;
-		n_weeks = -from_week + e_source_ews_folder_get_freebusy_weeks_after (ews_folder);
+		n_weeks = -from_week + cbews->priv->freebusy_calendar_weeks_after;
 		if (n_weeks > 80)
 			n_weeks = 80;
 		if (n_weeks < 1)
@@ -3520,6 +3529,36 @@ ecb_ews_remove_component_sync (ECalMetaBackend *meta_backend,
 }
 
 static void
+ecb_ews_source_changed (ECalMetaBackend *meta_backend)
+{
+	ECalMetaBackendClass *cal_meta_backend_class;
+	ECalBackendEws *cbews;
+
+	cal_meta_backend_class = E_CAL_META_BACKEND_CLASS (e_cal_backend_ews_parent_class);
+	if (cal_meta_backend_class->source_changed != NULL)
+		cal_meta_backend_class->source_changed (meta_backend);
+
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend));
+
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
+
+	if (cbews->priv->is_freebusy_calendar && e_backend_get_online (E_BACKEND (cbews))) {
+		ESource *source = e_backend_get_source (E_BACKEND (cbews));
+		ESourceEwsFolder *ews_folder;
+
+		ews_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+
+		if (cbews->priv->freebusy_calendar_weeks_before != e_source_ews_folder_get_freebusy_weeks_before (ews_folder) ||
+		    cbews->priv->freebusy_calendar_weeks_after != e_source_ews_folder_get_freebusy_weeks_after (ews_folder)) {
+			cbews->priv->freebusy_calendar_weeks_before = e_source_ews_folder_get_freebusy_weeks_before (ews_folder);
+			cbews->priv->freebusy_calendar_weeks_after = e_source_ews_folder_get_freebusy_weeks_after (ews_folder);
+
+			e_cal_meta_backend_schedule_refresh (meta_backend);
+		}
+	}
+}
+
+static void
 ecb_ews_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 			    EDataCal *cal,
 			    GCancellable *cancellable,
@@ -4732,6 +4771,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *klass)
 	cal_meta_backend_class->load_component_sync = ecb_ews_load_component_sync;
 	cal_meta_backend_class->save_component_sync = ecb_ews_save_component_sync;
 	cal_meta_backend_class->remove_component_sync = ecb_ews_remove_component_sync;
+	cal_meta_backend_class->source_changed = ecb_ews_source_changed;
 
 	cal_backend_sync_class = E_CAL_BACKEND_SYNC_CLASS (klass);
 	cal_backend_sync_class->discard_alarm_sync = ecb_ews_discard_alarm_sync;
