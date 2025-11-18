@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
 "POT-Creation-Date: 2025-11-18 12:59+0000\n"
-"PO-Revision-Date: 2025-11-18 17:42+0100\n"
+"PO-Revision-Date: 2025-11-18 17:44+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -732,8 +732,9 @@ msgid "Tries to look up for user photo"
 msgstr "Poskuša poiskati fotografijo uporabnika"
 
 #: ../src/EWS/evolution/e-cal-config-ews.c:72
+#, fuzzy
 msgid "Show events in time before and after today, in weeks"
-msgstr ""
+msgstr "Pokaži dogodke pred in po današnjem dnevu, v tednih"
 
 #: ../src/EWS/evolution/e-cal-config-ews.c:75
 msgid "_Before:"
