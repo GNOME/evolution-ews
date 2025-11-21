@@ -1,3 +1,15 @@
+Evolution-EWS 3.58.2 2025-11-21
+-------------------------------
+
+Bug Fixes:
+	I#319 - Free/Busy calendar limited by server
+
+Miscellaneous:
+	EWS: Try to extract error information from "Internal Server Error" response
+
+Translations:
+	Sabri Ünal (tr)
+
 Evolution-EWS 3.58.1 2025-10-10
 -------------------------------
 
