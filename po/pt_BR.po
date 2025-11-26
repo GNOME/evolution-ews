@@ -12,31 +12,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-09-06 21:47+0000\n"
-"PO-Revision-Date: 2025-09-09 14:38-0300\n"
+"POT-Creation-Date: 2025-11-19 22:03+0000\n"
+"PO-Revision-Date: 2025-11-26 12:08-0300\n"
 "Last-Translator: Juliano de Souza Camargo <julianosc@pm.me>\n"
-"Language-Team: Brazilian Portuguese <https://br.gnome.org/traducao>\n"
+"Language-Team: Brazilian Portuguese <https://br.gnome.org/traducao/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 49.0\n"
 "X-Project-Style: gnome\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:66
 #: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
 msgstr "Web services do Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:71
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acessar servidores Exchange usando Web services"
 
-#: ../src/common/e-ews-common-utils.c:157
+#: ../src/common/e-ews-common-utils.c:116
 #, c-format
 msgid "Invalid folder URI “%s”"
 msgstr "URI de pasta inválida: “%s”"
@@ -73,33 +73,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Falha ao definir a foto de contato:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Livre"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fora do escritório"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Tentativa"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
 msgid "Cannot determine EWS ItemId"
 msgstr "Não foi possível determinar ItemId de EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -107,12 +107,12 @@ msgstr ""
 "Não foi possível criar reuniões organizadas por outros usuários em um "
 "calendário de Web Services do Exchange."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Reunião online somente pode ser criada no calendário principal do usuário."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -197,80 +197,80 @@ msgstr "Aplicar _filtros de mensagem a esta pasta"
 msgid "Always check for _new mail in this folder"
 msgstr "Sempre verificar por _novas mensagens nesta pasta"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
-#: ../src/Microsoft365/camel/camel-m365-provider.c:24
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "Verificando se há novas mensagens"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
-#: ../src/Microsoft365/camel/camel-m365-provider.c:26
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "_Verificar se há novas mensagens em todas as pastas"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr "_Detectar notificações de alterações no servidor"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
-#: ../src/Microsoft365/camel/camel-m365-provider.c:29
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "Opções"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
-#: ../src/Microsoft365/camel/camel-m365-provider.c:31
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplicar filtros a novas mensagens na Caixa de Entrada nesse servidor"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
-#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "Verificar se há _lixo eletrônico nas novas mensagens"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
-#: ../src/Microsoft365/camel/camel-m365-provider.c:35
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Verificar se há mensagens de lixo eletrônico apenas na pasta IN_BOX"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
-#: ../src/Microsoft365/camel/camel-m365-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Sincroni_zar localmente as mensagens remotas em todas pastas"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:44
 msgid "Show _Public Folders beside user folders"
 msgstr "Mostra pastas _públicas além das pastas de usuário"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
-#: ../src/Microsoft365/camel/camel-m365-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "Conexão"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
-#: ../src/Microsoft365/camel/camel-m365-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Limite de _tempo de espera por conexão (em segundos) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
-#: ../src/Microsoft365/camel/camel-m365-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Núme_ro de conexões concorrentes para usar"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:55
 msgid "Override _User-Agent header value"
 msgstr "Sobrescrever valor do cabeçalho _User-Agent"
 
-#: ../src/EWS/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:58
 msgid "Al_ways connect with HTTP/1"
 msgstr "Se_mpre conectar-se com HTTP/1"
 
-#: ../src/EWS/camel/camel-ews-provider.c:79
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:80
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -278,11 +278,11 @@ msgstr ""
 "Essa opção conectará ao servidor Exchange usando uma senha em texto simples "
 "com autenticação NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "Básico"
 
-#: ../src/EWS/camel/camel-ews-provider.c:88
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -290,11 +290,11 @@ msgstr ""
 "Essa opção conectará ao servidor Exchange usando uma senha em texto simples "
 "com autenticação Básica."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:96
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -574,8 +574,8 @@ msgstr "OAuth2 (Office365)"
 
 #: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
 msgid ""
-"This option will use an OAuth 2.0 access token to connect to the Office365."
-"com server"
+"This option will use an OAuth 2.0 access token to connect to the "
+"Office365.com server"
 msgstr ""
 "Essa opção será usada em um token de acesso OAuth 2.0 para se conectar o "
 "servidor Office365.com"
@@ -625,55 +625,60 @@ msgstr[1] ""
 msgid "Authentication failed"
 msgstr "Falha na autenticação"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falha ao analisar XML de resposta da descoberta automática"
 
-#: ../src/EWS/common/e-ews-connection.c:2458
+#: ../src/EWS/common/e-ews-connection.c:2503
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falha ao localizar o elemento <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2468
+#: ../src/EWS/common/e-ews-connection.c:2513
 msgid "Failed to find <Response> element"
 msgstr "Falha ao localizar o elemento <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2478
+#: ../src/EWS/common/e-ews-connection.c:2523
 msgid "Failed to find <Account> element"
 msgstr "Falha ao localizar o elemento <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2523
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Falha ao localizar <ASUrl> na resposta da descoberta automática"
 
-#: ../src/EWS/common/e-ews-connection.c:2599
+#: ../src/EWS/common/e-ews-connection.c:2644
 msgid "URL cannot be NULL"
 msgstr "A URL não pode ser NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3024
+#: ../src/EWS/common/e-ews-connection.c:3069
 msgid "Email address is missing a domain part"
 msgstr "O endereço de e-mail está sem a parte de domínio"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3278
 msgid "Failed to parse oab XML"
 msgstr "Falha ao analisar o XML oab"
 
-#: ../src/EWS/common/e-ews-connection.c:3271
+#: ../src/EWS/common/e-ews-connection.c:3316
 msgid "Failed to find <OAB> element\n"
 msgstr "O elemento <OAB> não foi encontrado\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "Trabalhando noutros locais"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Requer pelo menos o servidor Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8928
+#: ../src/EWS/common/e-ews-connection.c:8982
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Requer pelo menos o servidor Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9081
+#: ../src/EWS/common/e-ews-connection.c:9135
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Requer pelo menos o servidor Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9221
+#: ../src/EWS/common/e-ews-connection.c:9275
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Requer pelo menos o servidor Microsoft Exchange 2007 SP1"
 
@@ -732,6 +737,18 @@ msgstr "_Obter fotos de contato"
 #: ../src/EWS/evolution/e-book-config-ews.c:101
 msgid "Tries to look up for user photo"
 msgstr "Tenta procurar por foto do usuário"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr "Mostra eventos anteriores e posteriores a hoje, em semanas"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "_Antes:"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "_Depois:"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
@@ -1841,11 +1858,11 @@ msgstr "Pasta “%s” não corresponde a nenhuma pasta conhecida"
 msgid "Could not load summary for “%s”"
 msgstr "Não foi possível carregar o resumo para “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:56
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
 msgid "For accessing Microsoft 365 server"
 msgstr "Para acessar o servidor do Microsoft 365"
 
