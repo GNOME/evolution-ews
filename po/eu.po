@@ -18,8 +18,8 @@
 msgid ""
 msgstr "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-08-10 13:27+0000\n"
-"PO-Revision-Date: 2025-08-18 10:00+0100\n"
+"POT-Creation-Date: 2025-11-29 16:05+0000\n"
+"PO-Revision-Date: 2025-12-02 10:00+0100\n"
 "Last-Translator: Asier Saratsua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
@@ -29,18 +29,18 @@ msgstr "Project-Id-Version: evolution-ews master\n"
 "Plural-Forms: nplurals=2; plural=n != 1;-\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:66
 #: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
 msgstr "Exchange web-zerbitzuak"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:71
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange zerbitzarietara atzitzea, web-zerbitzuak erabiliz"
 
-#: ../src/common/e-ews-common-utils.c:157
+#: ../src/common/e-ews-common-utils.c:116
 #, c-format
 msgid "Invalid folder URI “%s”"
 msgstr "Karpetaren URI baliogabea: “%s”"
@@ -75,43 +75,43 @@ msgstr "Ezin da kontaktuen zerrenda gorde; EWS Server 2010 bertsioa edo berriago
 msgid "Failed to set contact photo:"
 msgstr "Huts egin du kontaktuko argazkia ezartzeak:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Librea"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Lanpetuta"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Bulegotik kanpo"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Behin-behinekoa"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
 msgid "Cannot determine EWS ItemId"
 msgstr "Ezin da EWS ItemId-a zehaztu"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr "Ezin dira sortu beste erabiltzaile batzuek antolatutako bilerak Exchange Web Services egutegi batean."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Lineako bilerak erabiltzaileren egutegi nagusian soilik sortu daitezke."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -183,116 +183,116 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ezin da karpetan ekintzarik landu lineaz kanpo moduan"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1713
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr "Aplikatu mezuen _iragazkiak karpeta honi"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1725
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr "Begiratu beti mezu _berriak dauden karpeta honetan"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
-#: ../src/Microsoft365/camel/camel-m365-provider.c:24
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "Mezu berririk badagoen begiratzen"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
-#: ../src/Microsoft365/camel/camel-m365-provider.c:26
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "_Begiratu karpeta guztietan mezu berririk dagoen"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr "_Entzun zerbitzariaren aldaketen jakinarazpenak"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
-#: ../src/Microsoft365/camel/camel-m365-provider.c:29
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "Aukerak"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
-#: ../src/Microsoft365/camel/camel-m365-provider.c:31
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Aplikatu iragazkiak zerbitzari honetako 'Sarrera'ko ontziko mezu berriei"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
-#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "Begiratu mezu berrietan eduki _Baztergarriak dituzten"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
-#: ../src/Microsoft365/camel/camel-m365-provider.c:35
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "_SARRERAKO ONTZIAn bakarrik begiratu mezu baztergarririk dagoen"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
-#: ../src/Microsoft365/camel/camel-m365-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "_Sinkronizatu automatikoki urruneko mezuak lokalki karpeta guztietan"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:44
 msgid "Show _Public Folders beside user folders"
 msgstr "Erakutsi karpeta _publikoak erabiltzaile-karpeten ondoan"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
-#: ../src/Microsoft365/camel/camel-m365-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "Konexioa"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
-#: ../src/Microsoft365/camel/camel-m365-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Konexioaren _iraungitze-denbora (segundotan) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
-#: ../src/Microsoft365/camel/camel-m365-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Erabiliko den aldibereko konexio _kopurua"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:55
 msgid "Override _User-Agent header value"
 msgstr "Gainidatzi '_User-Agent' goiburuaren balioa"
 
-#: ../src/EWS/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:58
 msgid "Al_ways connect with HTTP/1"
 msgstr "_Beti konektatu HTTP/1-ekin"
 
-#: ../src/EWS/camel/camel-ews-provider.c:79
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:80
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
 msgstr "Aukera honekin, Exchange zerbitzarira konektatuko zara testu arrunteko pasahitz baten eta NTLM autentifikazioaren bidez."
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "Oinarrizkoa"
 
-#: ../src/EWS/camel/camel-ews-provider.c:88
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 msgstr "Aukera honekin, Exchange zerbitzarira konektatuko zara testu arrunteko pasahitz baten eta oinarrizko autentifikazioaren bidez."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:96
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr "Aukera honekin, Exchange zerbitzarira konektatuko zara Kerberos/GSSAPI autentifikazioa erabiliz."
 
 #: ../src/EWS/camel/camel-ews-store.c:313
-#: ../src/Microsoft365/camel/camel-m365-store.c:78
+#: ../src/Microsoft365/camel/camel-m365-store.c:79
 #, c-format
 msgid "Session has no storage path"
 msgstr "Saioak ez du biltegiratze-biderik"
@@ -319,8 +319,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
-#: ../src/Microsoft365/camel/camel-m365-store.c:515
-#: ../src/Microsoft365/camel/camel-m365-store.c:571
+#: ../src/Microsoft365/camel/camel-m365-store.c:516
+#: ../src/Microsoft365/camel/camel-m365-store.c:572
 msgid "Checking “Out of Office” settings"
 msgstr "“Bulegotik kanpo” egoeraren ezarpenak begiratzen"
 
@@ -352,7 +352,7 @@ msgid "Updating foreign folders"
 msgstr "Kanpoko karpetak eguneratzen"
 
 #: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:675
+#: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Karpeta ez dago: %s"
@@ -366,7 +366,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Ezin da EWS-ko karpeta publikorik aurkitu"
 
 #: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:738
+#: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Ezin da “%s” karpeta sortu, badago lehendik"
@@ -388,7 +388,7 @@ msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Ezin da karpetarik  sortu “%s” kokalekuan, karpeta publikoentzat soilik erabiltzen da"
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:923
+#: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Karpeta ez da existitzen"
@@ -449,13 +449,13 @@ msgid "Exchange service for %s on %s"
 msgstr "Exchange zerbitzua %s(e)rako %s(e)n"
 
 #: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1465
+#: ../src/Microsoft365/camel/camel-m365-store.c:1469
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Ezin izan da Zakarrontzia karpeta aurkitu"
 
 #: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1523
+#: ../src/Microsoft365/camel/camel-m365-store.c:1527
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Ezin izan da Baztergarria karpeta aurkitu"
@@ -490,16 +490,16 @@ msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Ezin da EWS karpeten harpidetza eten lineaz kanpo"
 
 #: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1842
-#: ../src/Microsoft365/camel/camel-m365-store.c:1855
+#: ../src/Microsoft365/camel/camel-m365-store.c:1846
+#: ../src/Microsoft365/camel/camel-m365-store.c:1859
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Linean jardun behar duzu lanean eragiketa hau bukatzeko"
 
 #: ../src/EWS/camel/camel-ews-store.c:3997
 #: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1978
-#: ../src/Microsoft365/camel/camel-m365-store.c:2019
+#: ../src/Microsoft365/camel/camel-m365-store.c:1982
+#: ../src/Microsoft365/camel/camel-m365-store.c:2023
 msgid "Unsetting the “Out of Office” status"
 msgstr "“Bulegotik kanpo” egoeraren ezarpena kentzen"
 
@@ -581,55 +581,60 @@ msgstr[1] "Exchange zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d s
 msgid "Authentication failed"
 msgstr "Autentifikazioak huts egin du"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to parse autodiscover response XML"
 msgstr "Huts egin du autodiscover (automatikoki ezagutu) XML erantzuna analizatzean"
 
-#: ../src/EWS/common/e-ews-connection.c:2458
+#: ../src/EWS/common/e-ews-connection.c:2503
 msgid "Failed to find <Autodiscover> element"
 msgstr "Huts egin du <Autodiscover> (detekzio automatikoa) elementua bilatzean"
 
-#: ../src/EWS/common/e-ews-connection.c:2468
+#: ../src/EWS/common/e-ews-connection.c:2513
 msgid "Failed to find <Response> element"
 msgstr "Huts egin du <Response> (erantzuna) elementua bilatzean"
 
-#: ../src/EWS/common/e-ews-connection.c:2478
+#: ../src/EWS/common/e-ews-connection.c:2523
 msgid "Failed to find <Account> element"
 msgstr "Huts egin du <Account> (kontua) elementua bilatzean"
 
-#: ../src/EWS/common/e-ews-connection.c:2523
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Huts egin du <ASUrl> detekzio automatikoaren erantzunean bilatzeak"
 
-#: ../src/EWS/common/e-ews-connection.c:2599
+#: ../src/EWS/common/e-ews-connection.c:2644
 msgid "URL cannot be NULL"
 msgstr "URLa ezin da NULL izan"
 
-#: ../src/EWS/common/e-ews-connection.c:3024
+#: ../src/EWS/common/e-ews-connection.c:3069
 msgid "Email address is missing a domain part"
 msgstr "Helbide elektronikoari domeinuaren zatia falta zaio"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3278
 msgid "Failed to parse oab XML"
 msgstr "Huts egin du OAB XML analizatzean"
 
-#: ../src/EWS/common/e-ews-connection.c:3271
+#: ../src/EWS/common/e-ews-connection.c:3316
 msgid "Failed to find <OAB> element\n"
 msgstr "Huts egin du <OAB> elementua bilatzean\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "Beste nonbait lanean"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Gutxienez Microsoft Exchange 2010 SP1 zerbitzaria behar du"
 
-#: ../src/EWS/common/e-ews-connection.c:8928
+#: ../src/EWS/common/e-ews-connection.c:8982
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Gutxienez Microsoft Exchange 2013 zerbitzaria behar du"
 
-#: ../src/EWS/common/e-ews-connection.c:9081
+#: ../src/EWS/common/e-ews-connection.c:9135
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Gutxienez Microsoft Exchange 2010 zerbitzaria behar du"
 
-#: ../src/EWS/common/e-ews-connection.c:9221
+#: ../src/EWS/common/e-ews-connection.c:9275
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Gutxienez Microsoft Exchange 2007 SP1 zerbitzaria behar du"
 
@@ -684,6 +689,18 @@ msgstr "_Lortu kontaktuen argazkia"
 #: ../src/EWS/evolution/e-book-config-ews.c:101
 msgid "Tries to look up for user photo"
 msgstr "Erabiltzaile-argazkia bilatzen saiatzen da"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr "Erakutsi gertaerak denboran gaur baino lehen eta ondoren, astez aste"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "_Aurretik:"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "_Ondoren:"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
@@ -1720,65 +1737,69 @@ msgstr "Huts egin du eranskinaren URIa irakurtzeak"
 msgid "Failed to get inline attachment data"
 msgstr "Huts egin du barneko eranskin-datuak eskuratzeak"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:328
-#: ../src/Microsoft365/camel/camel-m365-folder.c:429
-#: ../src/Microsoft365/camel/camel-m365-folder.c:850
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1225
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1356
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1423
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1505
+#: ../src/Microsoft365/camel/camel-m365-folder.c:285
+#: ../src/Microsoft365/camel/camel-m365-folder.c:386
+#: ../src/Microsoft365/camel/camel-m365-folder.c:888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
 msgid "Invalid folder state (missing parent store)"
 msgstr "Karpeta-egoera baliogabea (biltegi gurasoa falta da)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1802
+#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+msgid "Follow-up"
+msgstr "Jarraipena"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "“%s” karpeta ez da karpeta ezaguna"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1821
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ezin izan da “%s”(r)en laburpena kargatu"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:56
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
 msgid "For accessing Microsoft 365 server"
 msgstr "Microsoft 365 zerbitzaria atzitzeko"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:146
+#: ../src/Microsoft365/camel/camel-m365-store.c:147
 #: ../src/Microsoft365/camel/camel-m365-transport.c:249
 msgid "Microsoft 365 server"
 msgstr "Microsoft 365 zerbitzaria"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:148
+#: ../src/Microsoft365/camel/camel-m365-store.c:149
 msgid "Mail receive via Microsoft 365"
 msgstr "Microsoft 365 bidez posta jasotzea"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:203
-#: ../src/Microsoft365/common/e-m365-connection.c:1472
+#: ../src/Microsoft365/camel/camel-m365-store.c:204
+#: ../src/Microsoft365/common/e-m365-connection.c:1470
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Formatu okerreko URIa: “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:578
+#: ../src/Microsoft365/camel/camel-m365-store.c:579
 msgid "Look up Microsoft 365 categories"
 msgstr "Kontsultatu Microsoft 365 kategoriak"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:587
+#: ../src/Microsoft365/camel/camel-m365-store.c:588
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Huts egin du konexioa sortzeak"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:752
+#: ../src/Microsoft365/camel/camel-m365-store.c:753
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Ez dago “%s” karpeta gurasorik"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:995
-#: ../src/Microsoft365/camel/camel-m365-store.c:1033
+#: ../src/Microsoft365/camel/camel-m365-store.c:996
+#: ../src/Microsoft365/camel/camel-m365-store.c:1034
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Ez dago “%s” karpetarik"
@@ -1792,7 +1813,7 @@ msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Microsoft 365 zerbitzariak ezin du mezua bidali bidaltzaile-helbide bat baino gehiagorekin"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:946
+#: ../src/Microsoft365/camel/camel-m365-utils.c:994
 msgid "Failed to re-encode parts to base64: "
 msgstr "Huts egin du zatiak base64 oinarriarekin birkodetzeak: "
 
@@ -1812,35 +1833,35 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1113
+#: ../src/Microsoft365/common/e-m365-connection.c:1111
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Microsoft 365 zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d:%02d minutu)"
 msgstr[1] "Microsoft 365 zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d:%02d minutu)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1119
+#: ../src/Microsoft365/common/e-m365-connection.c:1117
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Microsoft 365 zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d segundo)"
 msgstr[1] "Microsoft 365 zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d segundo)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1244
-#: ../src/Microsoft365/common/e-m365-connection.c:1271
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1269
 msgid "Invalid data"
 msgstr "Datu baliogabeak"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1267
 msgid "Operation was cancelled"
 msgstr "Eragiketa bertan behera utzi da"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1966
+#: ../src/Microsoft365/common/e-m365-connection.c:1964
 msgid "Failed to parse own Json data"
 msgstr "Huts egin du JSON datu propioak analizatzeak"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5495
+#: ../src/Microsoft365/common/e-m365-connection.c:5493
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Ezin da instantzia aurkitu '%s' unean"
