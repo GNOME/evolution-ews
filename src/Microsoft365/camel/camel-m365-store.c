@@ -1448,9 +1448,11 @@ m365_store_initial_setup_sync (CamelStore *store,
 }
 
 static CamelFolder *
-m365_store_get_trash_folder_sync (CamelStore *store,
-				  GCancellable *cancellable,
-				  GError **error)
+m365_get_folder_from_type_sync (CamelStore *store,
+				guint64 folder_type,
+				const gchar *error_message,
+				GCancellable *cancellable,
+				GError **error)
 {
 	CamelM365Store *m365_store;
 	CamelFolder *folder = NULL;
@@ -1462,11 +1464,11 @@ m365_store_get_trash_folder_sync (CamelStore *store,
 
 	LOCK (m365_store);
 
-	folder_id = camel_m365_store_summary_dup_folder_id_for_type (m365_store->priv->summary, CAMEL_FOLDER_TYPE_TRASH);
+	folder_id = camel_m365_store_summary_dup_folder_id_for_type (m365_store->priv->summary, folder_type);
 
 	if (!folder_id) {
 		UNLOCK (m365_store);
-		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, _("Could not locate Trash folder"));
+		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, error_message);
 		return NULL;
 	}
 
@@ -1478,6 +1480,30 @@ m365_store_get_trash_folder_sync (CamelStore *store,
 
 	g_free (folder_name);
 	g_free (folder_id);
+
+	return folder;
+}
+
+static CamelFolder *
+m365_store_get_inbox_folder_sync (CamelStore *store,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_STORE (store), NULL);
+
+	return m365_get_folder_from_type_sync (store, CAMEL_FOLDER_TYPE_INBOX, _("Could not locate Inbox folder"), cancellable, error);
+}
+
+static CamelFolder *
+m365_store_get_trash_folder_sync (CamelStore *store,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	CamelFolder *folder = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_M365_STORE (store), NULL);
+
+	folder = m365_get_folder_from_type_sync (store, CAMEL_FOLDER_TYPE_TRASH, _("Could not locate Trash folder"), cancellable, error);
 
 	if (folder) {
 		GPtrArray *folders;
@@ -1513,29 +1539,9 @@ m365_store_get_junk_folder_sync (CamelStore *store,
 				 GCancellable *cancellable,
 				 GError **error)
 {
-	CamelM365Store *m365_store;
-	CamelFolder *folder = NULL;
-	gchar *folder_id, *folder_name;
-
 	g_return_val_if_fail (CAMEL_IS_M365_STORE (store), NULL);
 
-	m365_store = CAMEL_M365_STORE (store);
-
-	folder_id = camel_m365_store_summary_dup_folder_id_for_type (m365_store->priv->summary, CAMEL_FOLDER_TYPE_JUNK);
-
-	if (!folder_id) {
-		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, _("Could not locate Junk folder"));
-		return NULL;
-	}
-
-	folder_name = camel_m365_store_summary_dup_folder_full_name (m365_store->priv->summary, folder_id);
-
-	folder = camel_store_get_folder_sync (store, folder_name, 0, cancellable, error);
-
-	g_free (folder_name);
-	g_free (folder_id);
-
-	return folder;
+	return m365_get_folder_from_type_sync (store, CAMEL_FOLDER_TYPE_JUNK, _("Could not locate Junk folder"), cancellable, error);
 }
 
 static gboolean
@@ -1718,7 +1724,6 @@ camel_m365_store_class_init (CamelM365StoreClass *class)
 	object_class->dispose = m365_store_dispose;
 	object_class->finalize = m365_store_finalize;
 
-
 	g_object_class_install_property (
 		object_class,
 		PROP_HAS_OOO_SET,
@@ -1767,6 +1772,7 @@ camel_m365_store_class_init (CamelM365StoreClass *class)
 	store_class->rename_folder_sync = m365_store_rename_folder_sync;
 	store_class->get_folder_info_sync = m365_store_get_folder_info_sync;
 	store_class->initial_setup_sync = m365_store_initial_setup_sync;
+	store_class->get_inbox_folder_sync = m365_store_get_inbox_folder_sync;
 	store_class->get_trash_folder_sync = m365_store_get_trash_folder_sync;
 	store_class->get_junk_folder_sync = m365_store_get_junk_folder_sync;
 	store_class->can_refresh_folder = m365_store_can_refresh_folder;
