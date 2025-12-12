@@ -1798,6 +1798,7 @@ camel_ews_folder_new (CamelStore *store,
 	gint offline_limit_value = 0;
 	guint32 add_folder_flags = 0;
 	gchar *state_file;
+	gchar *folder_id;
 	const gchar *short_name;
 
 	short_name = strrchr (folder_name, '/');
@@ -1886,6 +1887,21 @@ camel_ews_folder_new (CamelStore *store,
 
 		if (filter_junk && !filter_junk_inbox)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
+	}
+
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (CAMEL_EWS_STORE (store)->summary, folder_name);
+	if (folder_id) {
+		guint64 store_folder_flags;
+
+		store_folder_flags = camel_ews_store_summary_get_folder_flags (CAMEL_EWS_STORE (store)->summary, folder_id, NULL);
+
+		if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
+			add_folder_flags |= CAMEL_FOLDER_IS_JUNK;
+
+		if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
+			add_folder_flags |= CAMEL_FOLDER_IS_TRASH;
+
+		g_free (folder_id);
 	}
 
 	if (add_folder_flags)

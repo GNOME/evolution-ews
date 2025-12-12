@@ -1854,12 +1854,14 @@ camel_m365_folder_new (CamelStore *store,
 	CamelTimeUnit offline_limit_unit;
 	gint offline_limit_value = 0;
 	guint32 add_folder_flags = 0;
+	guint32 store_folder_flags;
 	gchar *state_file;
 	gchar *folder_id;
 
 	m365_store = CAMEL_M365_STORE (store);
 	m365_store_summary = camel_m365_store_ref_store_summary (m365_store);
 	folder_id = camel_m365_store_summary_dup_folder_id_for_full_name (m365_store_summary, full_name);
+	store_folder_flags = camel_m365_store_summary_get_folder_flags_for_full_name (m365_store_summary, full_name);
 	g_clear_object (&m365_store_summary);
 
 	if (!folder_id) {
@@ -1950,6 +1952,12 @@ camel_m365_folder_new (CamelStore *store,
 		if (filter_junk && !filter_junk_inbox)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
 	}
+
+	if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
+		add_folder_flags |= CAMEL_FOLDER_IS_JUNK;
+
+	if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
+		add_folder_flags |= CAMEL_FOLDER_IS_TRASH;
 
 	if (add_folder_flags)
 		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
