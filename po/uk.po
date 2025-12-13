@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-36\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-11-18 16:45+0000\n"
-"PO-Revision-Date: 2025-11-18 22:41+0200\n"
+"POT-Creation-Date: 2025-12-12 21:57+0000\n"
+"PO-Revision-Date: 2025-12-13 20:27+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -165,27 +165,27 @@ msgstr "Не вдалося створити шлях «%s»: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Не вдалося перемістити кеш-файл повідомлень з «%s» до «%s»: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1822
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не вдалося завантажити резюме щодо %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2317
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Оновлення теки «%s»"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2510
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не можна виконувати дії над текою в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3294
+#: ../src/EWS/camel/camel-ews-folder.c:3310
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr "Застосувати _фільтри повідомлень до цієї теки"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3306
+#: ../src/EWS/camel/camel-ews-folder.c:3322
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr "Завжди перевіряти _нову пошту у цій теці"
@@ -472,60 +472,64 @@ msgstr "Сервер Exchange %s"
 msgid "Exchange service for %s on %s"
 msgstr "Служба Exchange для %s на %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1469
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+#| msgid "Could not locate Junk folder"
+msgid "Could not locate Inbox folder"
+msgstr "Не вдалося знайти теку «Вхідні»"
+
+#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Не вдалося знайти теку «Смітник»"
 
-#: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1527
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Не вдалося знайти теку «Спам»"
 
-#: ../src/EWS/camel/camel-ews-store.c:3685
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Не можна підписуватися на теки EWS в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-store.c:3708
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Неможливо підписатися на теку «%s» — немає загальнодоступних тек"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3714
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Неможливо підписатися на теку «%s» — теку не знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3727
+#: ../src/EWS/camel/camel-ews-store.c:3723
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Неможливо підписатися на теку «%s» — ідентифікатор теки не знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3738
+#: ../src/EWS/camel/camel-ews-store.c:3734
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "Неможливо підписатися на теку «%s» — загальнодоступної кореневої теки не "
 "знайдено"
 
-#: ../src/EWS/camel/camel-ews-store.c:3814
+#: ../src/EWS/camel/camel-ews-store.c:3810
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не можна скасовувати підписку на теки EWS в автономному режимі"
 
-#: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1846
-#: ../src/Microsoft365/camel/camel-m365-store.c:1859
+#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Потрібно бути в мережі, щоб завершити цю операцію"
 
-#: ../src/EWS/camel/camel-ews-store.c:3997
-#: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1982
-#: ../src/Microsoft365/camel/camel-m365-store.c:2023
+#: ../src/EWS/camel/camel-ews-store.c:3993
+#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr "Скасовуємо стан «За межами офісу»"
 
@@ -1634,8 +1638,7 @@ msgstr "Параметри отримання «За межами офісу»"
 #. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:109
 #, c-format
-msgid ""
-"%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
 msgstr ""
 "Надійшло запрошення від %s (%s) щодо перегляду його або її календаря "
 "Microsoft Exchange."
@@ -1714,8 +1717,7 @@ msgstr "Успішно оформлено підписку на теку кор�
 #: ../src/EWS/registry/e-ews-backend.c:1044
 #: ../src/Microsoft365/registry/e-m365-backend.c:728
 #, c-format
-msgid ""
-"Could not determine a suitable folder class for a new folder named “%s”"
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Не вдалося визначити належний клас тек для нової теки із назвою «%s»"
 
 #: ../src/EWS/registry/e-ews-backend.c:1132
@@ -1758,8 +1760,7 @@ msgstr "Не вдалося вилучити нещодавно використ
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
-msgid ""
-"Cannot store detached instances, because not supported in Microsoft 365"
+msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Зберігання для від'єднаних екземплярів неможливе, оскільки його підтримки у "
 "Microsoft 365 не передбачено"
@@ -1844,12 +1845,12 @@ msgstr "Некоректний стан теки (пропущено батьк�
 msgid "Follow-up"
 msgstr "До виконання"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1869
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Тека «%s» не відповідає жодній відомій теці"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1888
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Не вдалося завантажити резюме щодо «%s»"
@@ -1933,8 +1934,7 @@ msgstr "Microsoft365"
 #: ../src/Microsoft365/common/e-m365-connection.c:1111
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
-msgid_plural ""
-"Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
+msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Сервер Microsoft 365 зайнято, очікуємо на повторну спробу (%d:%02d хвилина)"
 msgstr[1] ""
