@@ -1,5 +1,5 @@
 # Georgian translation for evolution-ews.
-# Copyright (C) 2024 evolution-ews's COPYRIGHT HOLDER
+# Copyright (C) 2024 evolution-ews's authors
 # This file is distributed under the same license as the evolution-ews package.
 # Ekaterine Papava <papava.e@gtu.ge>, 2024-2025.
 #
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-05-15 14:14+0000\n"
-"PO-Revision-Date: 2025-05-19 01:14+0200\n"
+"POT-Creation-Date: 2025-12-15 15:13+0000\n"
+"PO-Revision-Date: 2025-12-20 08:45+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <ka@li.org>\n"
 "Language: ka\n"
@@ -16,24 +16,24 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.8\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:66
 #: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
-msgstr ""
+msgstr "Exchange Web Services"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:72
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr ""
 
-#: ../src/common/e-ews-common-utils.c:157
+#: ../src/common/e-ews-common-utils.c:116
 #, c-format
 msgid "Invalid folder URI “%s”"
-msgstr ""
+msgstr "არასწორი საქაღალდის URI \"%s\""
 
 #: ../src/common/e-ms-oapxbc-util.c:43
 msgid "Failed to create MS OAPXBC app: "
@@ -41,7 +41,7 @@ msgstr ""
 
 #: ../src/common/e-ms-oapxbc-util.c:51
 msgid "Failed to get accounts: "
-msgstr ""
+msgstr "ანგარიშების მიღება ჩავარდა: "
 
 #: ../src/common/e-ms-oapxbc-util.c:78
 #, c-format
@@ -50,11 +50,11 @@ msgstr ""
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:2883
 msgid "Fetching contact photos…"
-msgstr ""
+msgstr "კონტაქტის ფოტოების გამოთხოვა…"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:4068
 msgid "Failed to update GAL:"
-msgstr ""
+msgstr "GAL-ის განახლება ჩავარდა:"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:4235
 msgid ""
@@ -63,45 +63,45 @@ msgstr ""
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:4333
 msgid "Failed to set contact photo:"
-msgstr ""
+msgstr "კონტაქტის ფოტოს დაყენება ჩავარდა:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "თავისუფალი"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "დაკავებული"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "ოფისიდან-გასულია"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "სავარაუდო"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
 msgid "Cannot determine EWS ItemId"
 msgstr ""
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr ""
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -122,29 +122,29 @@ msgstr ""
 msgid "Invalid occurrence ID"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:363
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:372
+#: ../src/EWS/camel/camel-ews-folder.c:371
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:381
+#: ../src/EWS/camel/camel-ews-folder.c:380
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:494
-#: ../src/EWS/camel/camel-ews-folder.c:707
+#: ../src/EWS/camel/camel-ews-folder.c:493
+#: ../src/EWS/camel/camel-ews-folder.c:706
 #, c-format
 msgid "Unable to create cache file"
-msgstr ""
+msgstr "კეშის ფაილის შექმნა შეუძლებელია"
 
-#: ../src/EWS/camel/camel-ews-folder.c:824
-#: ../src/EWS/camel/camel-ews-folder.c:968
+#: ../src/EWS/camel/camel-ews-folder.c:823
+#: ../src/EWS/camel/camel-ews-folder.c:967
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr ""
@@ -152,137 +152,137 @@ msgstr ""
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:982
+#: ../src/EWS/camel/camel-ews-folder.c:981
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:1944
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s-სთვის შეჯამების ჩატვირთვის შეცდომა"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2446
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "საქაღალდის (\"%s\") განახლება"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2639
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:3312
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1739
+#: ../src/EWS/camel/camel-ews-folder.c:3310
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-folder.c:3324
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1751
+#: ../src/EWS/camel/camel-ews-folder.c:3322
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
-#: ../src/Microsoft365/camel/camel-m365-provider.c:24
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "ახალი ელფოსტის შემოწმება"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
-#: ../src/Microsoft365/camel/camel-m365-provider.c:26
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "_ახალი შეტყობინებების შემოწმება ყველა საქაღალდეში"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
-#: ../src/Microsoft365/camel/camel-m365-provider.c:29
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "მორგება"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
-#: ../src/Microsoft365/camel/camel-m365-provider.c:31
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "სერვერზე შემოსულ ფოსტაზე ფილტრების _გადატარება"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
-#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "ახალი შეტყობინებების _სპამზე შემოწმება"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
-#: ../src/Microsoft365/camel/camel-m365-provider.c:35
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "შემოსული საქაღალდის მხოლოდ სპამზე შემოწმება"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
-#: ../src/Microsoft365/camel/camel-m365-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "დაშორებული ელფოსტის ლოკალურ საქაღალდეებთან სინქრონიზაცია"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:44
 msgid "Show _Public Folders beside user folders"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
-#: ../src/Microsoft365/camel/camel-m365-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "კავშირი"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
-#: ../src/Microsoft365/camel/camel-m365-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
-#: ../src/Microsoft365/camel/camel-m365-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
 msgid "Numbe_r of concurrent connections to use"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:55
 msgid "Override _User-Agent header value"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:58
 msgid "Al_ways connect with HTTP/1"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:89
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "საწყისი"
 
-#: ../src/EWS/camel/camel-ews-provider.c:99
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:109
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr ""
 
 #: ../src/EWS/camel/camel-ews-store.c:313
-#: ../src/Microsoft365/camel/camel-m365-store.c:73
+#: ../src/Microsoft365/camel/camel-m365-store.c:79
 #, c-format
 msgid "Session has no storage path"
 msgstr "სესიას საცავის ბილიკი არ გააჩნია"
@@ -309,6 +309,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
+#: ../src/Microsoft365/camel/camel-m365-store.c:516
+#: ../src/Microsoft365/camel/camel-m365-store.c:572
 msgid "Checking “Out of Office” settings"
 msgstr ""
 
@@ -327,7 +329,7 @@ msgstr[0] ""
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
-msgstr[0] ""
+msgstr[0] "პაროლის ვადა %d დღეში იწურება."
 
 #: ../src/EWS/camel/camel-ews-store.c:1783
 msgid "Updating foreign folder structure"
@@ -338,7 +340,7 @@ msgid "Updating foreign folders"
 msgstr "გარე საქაღალდეების განახლება"
 
 #: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:633
+#: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "საქაღალდე არ არსებობს: %s"
@@ -352,15 +354,15 @@ msgid "Cannot find any EWS public folders"
 msgstr ""
 
 #: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:696
+#: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
-msgstr ""
+msgstr "საქაღალდის \"%s\" შექმნა შეუძლებელია. ის უკვე არსებობს"
 
 #: ../src/EWS/camel/camel-ews-store.c:2884
 #, c-format
 msgid "Parent folder %s does not exist"
-msgstr ""
+msgstr "მშობელი საქაღალდე %s არ არსებობს"
 
 #: ../src/EWS/camel/camel-ews-store.c:2894
 #, c-format
@@ -374,10 +376,10 @@ msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 
 #: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
-msgstr ""
+msgstr "საქაღალდე არ არსებობს"
 
 #: ../src/EWS/camel/camel-ews-store.c:3021
 #, c-format
@@ -393,7 +395,7 @@ msgstr ""
 #: ../src/EWS/camel/camel-ews-store.c:3314
 #, c-format
 msgid "Folder %s does not exist"
-msgstr ""
+msgstr "საქაღალდე %s არ არსებობს"
 
 #: ../src/EWS/camel/camel-ews-store.c:3223
 msgid "Cannot move a foreign folder"
@@ -427,73 +429,78 @@ msgstr "საფოსტო ყუთი"
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
-msgstr ""
+msgstr "Exchange-ის სერვერი %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3376
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1423
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+msgid "Could not locate Inbox folder"
+msgstr "შემომავალი საქაღალდის დადგენა შეუძლებელია"
+
+#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
-msgstr ""
+msgstr "ნაგვის ყუთის საქაღალდის აღმოჩენის შეცდომა"
 
-#: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1481
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
-msgstr ""
+msgstr "სპამის საქაღალდის აღმოჩენის სეცდომა"
 
-#: ../src/EWS/camel/camel-ews-store.c:3685
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3708
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3714
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3727
+#: ../src/EWS/camel/camel-ews-store.c:3723
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3738
+#: ../src/EWS/camel/camel-ews-store.c:3734
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3814
+#: ../src/EWS/camel/camel-ews-store.c:3810
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr ""
 
-#: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1756
-#: ../src/Microsoft365/camel/camel-m365-store.c:1769
+#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "ამ ქმედების დასასრულებლად ინტერნეტთან წვდომა აუცილებელია"
 
-#: ../src/EWS/camel/camel-ews-store.c:3997
-#: ../src/EWS/camel/camel-ews-store.c:4034
+#: ../src/EWS/camel/camel-ews-store.c:3993
+#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr ""
 
 #: ../src/EWS/camel/camel-ews-store.h:39
 msgid "Foreign Folders"
-msgstr ""
+msgstr "გარე საქაღალდეები"
 
 #: ../src/EWS/camel/camel-ews-store.h:41
 msgid "Public Folders"
-msgstr ""
+msgstr "საჯარო საქაღალდეები"
 
 #: ../src/EWS/camel/camel-ews-transport.c:295
 #, c-format
@@ -512,17 +519,17 @@ msgstr ""
 #: ../src/EWS/camel/camel-ews-transport.c:360
 #: ../src/Microsoft365/camel/camel-m365-transport.c:297
 msgid "Failed to read From address"
-msgstr ""
+msgstr "მისამართიდან წაკითხვის შეცდომა"
 
 #: ../src/EWS/camel/camel-ews-transport.c:370
 #: ../src/Microsoft365/camel/camel-m365-transport.c:307
 #, c-format
 msgid "Service not connected"
-msgstr ""
+msgstr "სერვისი დაკავშირებული არაა"
 
 #: ../src/EWS/common/camel-sasl-xoauth2-office365.c:13
 msgid "OAuth2 (Office365)"
-msgstr ""
+msgstr "OAuth2 (Office365)"
 
 #: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
 msgid ""
@@ -563,57 +570,62 @@ msgstr[0] ""
 msgid "Authentication failed"
 msgstr "ავთენტიკაციის შეცდომა"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to parse autodiscover response XML"
 msgstr "ავტომატური აღმომჩენის XML პასუხის დამუშავების შეცდომა"
 
-#: ../src/EWS/common/e-ews-connection.c:2458
+#: ../src/EWS/common/e-ews-connection.c:2503
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> ელემენტის პოვნის შეცდომა"
 
-#: ../src/EWS/common/e-ews-connection.c:2468
+#: ../src/EWS/common/e-ews-connection.c:2513
 msgid "Failed to find <Response> element"
 msgstr "<Response> ელემენტის პოვნის შეცდომა"
 
-#: ../src/EWS/common/e-ews-connection.c:2478
+#: ../src/EWS/common/e-ews-connection.c:2523
 msgid "Failed to find <Account> element"
 msgstr ""
 
-#: ../src/EWS/common/e-ews-connection.c:2523
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr ""
 
-#: ../src/EWS/common/e-ews-connection.c:2599
+#: ../src/EWS/common/e-ews-connection.c:2644
 msgid "URL cannot be NULL"
-msgstr ""
+msgstr "ბმული ნულოვანი ვერ იქნება"
 
-#: ../src/EWS/common/e-ews-connection.c:3024
+#: ../src/EWS/common/e-ews-connection.c:3069
 msgid "Email address is missing a domain part"
 msgstr ""
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3278
 msgid "Failed to parse oab XML"
 msgstr ""
 
-#: ../src/EWS/common/e-ews-connection.c:3271
+#: ../src/EWS/common/e-ews-connection.c:3316
 msgid "Failed to find <OAB> element\n"
 msgstr ""
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "მუშაობს სხვაგან"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
-msgstr ""
+msgstr "სჭირდება, სულ ცოტა Microsoft Exchange 2010 SP1 server"
 
-#: ../src/EWS/common/e-ews-connection.c:8928
+#: ../src/EWS/common/e-ews-connection.c:8982
 msgid "Requires at least Microsoft Exchange 2013 server"
-msgstr ""
+msgstr "სჭირდება, სულ ცოტა Microsoft Exchange 2013 server"
 
-#: ../src/EWS/common/e-ews-connection.c:9081
+#: ../src/EWS/common/e-ews-connection.c:9135
 msgid "Requires at least Microsoft Exchange 2010 server"
-msgstr ""
+msgstr "სჭირდება, სულ ცოტა Microsoft Exchange 2010 server"
 
-#: ../src/EWS/common/e-ews-connection.c:9221
+#: ../src/EWS/common/e-ews-connection.c:9275
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
-msgstr ""
+msgstr "სჭირდება, სულ ცოტა Microsoft Exchange 2007 SP1 server"
 
 #: ../src/EWS/common/e-ews-connection-utils.c:205
 #, c-format
@@ -661,16 +673,28 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-book-config-ews.c:100
 msgid "_Fetch contact photos"
-msgstr ""
+msgstr "კონტაქტის _ფოტოების გამოთხოვა"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:101
 msgid "Tries to look up for user photo"
 msgstr ""
 
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr ""
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "მითითე_ბულ დრომდე:"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "მითითებული _დროის შემდეგ:"
+
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
 msgid "Online Meeting"
-msgstr ""
+msgstr "ინტერნეტშეხვედრა"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:248
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:211
@@ -717,7 +741,7 @@ msgstr "საქაღალდის ზომის მიღების შ
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:740
 msgid "Folder Sizes"
-msgstr ""
+msgstr "საქაღალდის ზომები"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:743
 msgid "_Close"
@@ -744,7 +768,7 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1132
 msgid "Folder Sizes…"
-msgstr ""
+msgstr "საქაღალდის ზომები…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1139
 msgid "Subscribe to folder of other user…"
@@ -761,23 +785,23 @@ msgstr "წვდომები…"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1150
 msgid "Edit EWS folder permissions"
-msgstr ""
+msgstr "EWS საქაღალდის წვდომების ჩასწორება"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1503
 msgid "Edit EWS calendar permissions"
-msgstr ""
+msgstr "EWS კალენდრის წვდომების ჩასწორება"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1534
 msgid "Edit EWS tasks permissions"
-msgstr ""
+msgstr "EWS ამოცანის წვდომების ჩასწორება"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1565
 msgid "Edit EWS memos permissions"
-msgstr ""
+msgstr "EWS შენიშვნის წვდომების ჩასწორება"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:1596
 msgid "Edit EWS contacts permissions"
-msgstr ""
+msgstr "EWS კონტაქტის წვდომების ჩასწორება"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:67
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:388
@@ -828,12 +852,12 @@ msgstr "მოხალისე"
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:119
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time"
-msgstr ""
+msgstr "თავისუფალი/დაკავებული დრო"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:121
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time, subject, location"
-msgstr ""
+msgstr "თავისუფალი/დაკავებული დრო, თემა, მდებარეობა"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:123
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:411
@@ -872,7 +896,7 @@ msgstr "წვდომის დონე"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:911
 msgid "Edit EWS folder permissions…"
-msgstr ""
+msgstr "EWS საქაღალდის წვდომების ჩასწორება…"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:936
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:678
@@ -909,12 +933,12 @@ msgstr "არცერთი"
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1127
 msgctxt "Permissions"
 msgid "Free/Busy time"
-msgstr ""
+msgstr "თავისუფალი/დაკავებული დრო"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1132
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
-msgstr ""
+msgstr "თავისუფალი/დაკავებული დრო, თემა, მდებარეობა"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1138
 msgctxt "Permissions"
@@ -986,10 +1010,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "საქაღალდის წვდომების წაკითხვა. გთხოვთ, მოითმინეთ…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
 msgid "Unset on Server"
 msgstr ""
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
 msgid "Unset the “Out of Office” status"
 msgstr ""
 
@@ -1030,7 +1056,7 @@ msgstr "ელფოსტა"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:467
 msgid "Choose EWS user…"
-msgstr ""
+msgstr "აირჩიეთ EWS-ის მომხმარებელი…"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:490
 msgid "_Search:"
@@ -1146,7 +1172,7 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:353
 msgid "Fetch _URL"
-msgstr ""
+msgstr "_URL-ის გამოთხოვა"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:112
@@ -1160,11 +1186,11 @@ msgstr "_მომხმარებლის სახელი:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "_Host URL:"
-msgstr ""
+msgstr "_ჰოსტის URL:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:244
 msgid "OAB U_RL:"
-msgstr ""
+msgstr "OAB U_RL:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:258
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:144
@@ -1173,7 +1199,7 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:302
 msgid "S_earch…"
-msgstr ""
+msgstr "ძ_ებნა…"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:313
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:188
@@ -1198,7 +1224,7 @@ msgstr "დახმარება…"
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:220
 msgid "Application I_D:"
-msgstr ""
+msgstr "აპლიკაციის I_D:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:243
@@ -1280,11 +1306,11 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:775
 msgid "Host URL cannot be empty"
-msgstr ""
+msgstr "ჰოსტის URL ცარიელი ვერ იქნება"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:786
 msgid "OAB URL is not valid"
-msgstr ""
+msgstr "OAB URL არასწორია"
 
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:796
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:516
@@ -1294,7 +1320,7 @@ msgstr "მომხმარებლის სახელი ცარიე�
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:810
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:535
 msgid "Application ID cannot be empty"
-msgstr ""
+msgstr "აპლიკაციის ID ცარიელი ვერ იქნება"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:389
 msgctxt "PermissionsLevel"
@@ -1313,7 +1339,7 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:496
 msgid "Delegate permissions"
-msgstr ""
+msgstr "წვდომების დელეგაცია"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:514
 msgid "C_alendar"
@@ -1401,7 +1427,7 @@ msgstr "EWS-ის მორგება"
 
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:223
 msgid "Folder _Sizes"
-msgstr ""
+msgstr "_საქაღალდის ზომები"
 
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:234
 msgid "View the size of all Exchange folders"
@@ -1435,72 +1461,88 @@ msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:308
 msgid "Select ad_dress list:"
-msgstr ""
+msgstr "აირჩიეთ მისამართების _სია:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:332
 msgid "Fetch List"
-msgstr ""
+msgstr "სიის გამოთხოვა"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
 msgid "Out of Office"
 msgstr "ოფისიდან-გასულია"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
 msgid "Do _not send Out of Office replies"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
 msgid "_Send Out of Office replies"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
 msgid "_From:"
 msgstr "_გამგზავნი:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
 msgid "_To:"
-msgstr ""
+msgstr "_ვის:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
 msgid "I_nternal:"
-msgstr ""
+msgstr "_შიდა:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
 msgid "Message to be sent within the organization"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
 msgid "E_xternal:"
-msgstr ""
+msgstr "_გარე:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
 msgid "Message to be sent outside the organization"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
 msgid "Do not reply to senders outside the organization"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
 msgid "Reply only to known senders outside the organization"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
 msgid "Reply to any sender outside the organization"
 msgstr ""
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
 msgid "Retrieving “Out of Office” settings"
 msgstr ""
 
@@ -1553,6 +1595,7 @@ msgid "Failed to locate offline address books."
 msgstr ""
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr ""
 
@@ -1590,7 +1633,7 @@ msgstr ""
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2092
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:394
 msgid "Folder ID is not set"
-msgstr ""
+msgstr "საქაღალდის ID დაყენებული არაა"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2393
 msgid "Cannot save contact list into a Microsoft 365 address book"
@@ -1598,27 +1641,27 @@ msgstr ""
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2405
 msgid "Cannot modify organizational contact"
-msgstr ""
+msgstr "ორგანიზაციის კონტაქტის შეცვლა შეუძლებელია"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2407
 msgid "Cannot modify user contact"
-msgstr ""
+msgstr "მომხმარებლის კონტაქტის შეცვლა შეუძლებელია"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2409
 msgid "Cannot modify recent contact"
-msgstr ""
+msgstr "უახლესი კონტაქტის შეცვლა შეუძლებელია"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2520
 msgid "Cannot remove organizational contact"
-msgstr ""
+msgstr "ორგანიზაციის კონტაქტის წაშლა შეუძლებელია"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2522
 msgid "Cannot remove user contact"
-msgstr ""
+msgstr "მომხმარებლის კონტაქტის წაშლა შეუძლებელია"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2524
 msgid "Cannot remove recent contact"
-msgstr ""
+msgstr "უახლესი კონტაქტის წაშლა შეუძლებელია"
 
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
@@ -1683,64 +1726,69 @@ msgstr ""
 msgid "Failed to get inline attachment data"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:535
-#: ../src/Microsoft365/camel/camel-m365-folder.c:954
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1325
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1523
+#: ../src/Microsoft365/camel/camel-m365-folder.c:285
+#: ../src/Microsoft365/camel/camel-m365-folder.c:386
+#: ../src/Microsoft365/camel/camel-m365-folder.c:888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
 msgid "Invalid folder state (missing parent store)"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1829
+#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+msgid "Follow-up"
+msgstr ""
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1869
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1848
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1888
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:57
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
 msgid "For accessing Microsoft 365 server"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:141
+#: ../src/Microsoft365/camel/camel-m365-store.c:147
 #: ../src/Microsoft365/camel/camel-m365-transport.c:249
 msgid "Microsoft 365 server"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-store.c:149
 msgid "Mail receive via Microsoft 365"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1472
+#: ../src/Microsoft365/camel/camel-m365-store.c:204
+#: ../src/Microsoft365/common/e-m365-connection.c:1470
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:536
+#: ../src/Microsoft365/camel/camel-m365-store.c:579
 msgid "Look up Microsoft 365 categories"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:545
+#: ../src/Microsoft365/camel/camel-m365-store.c:588
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:710
+#: ../src/Microsoft365/camel/camel-m365-store.c:753
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr ""
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:953
-#: ../src/Microsoft365/camel/camel-m365-store.c:991
+#: ../src/Microsoft365/camel/camel-m365-store.c:996
+#: ../src/Microsoft365/camel/camel-m365-store.c:1034
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr ""
@@ -1754,13 +1802,13 @@ msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr ""
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:946
+#: ../src/Microsoft365/camel/camel-m365-utils.c:994
 msgid "Failed to re-encode parts to base64: "
 msgstr ""
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:13
 msgid "OAuth2 (Microsoft 365)"
-msgstr ""
+msgstr "OAuth2 (Microsoft 365)"
 
 #: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
 msgid ""
@@ -1772,35 +1820,35 @@ msgstr ""
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
-msgstr ""
+msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1113
+#: ../src/Microsoft365/common/e-m365-connection.c:1111
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1119
+#: ../src/Microsoft365/common/e-m365-connection.c:1117
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1244
-#: ../src/Microsoft365/common/e-m365-connection.c:1271
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1269
 msgid "Invalid data"
 msgstr "არასწორი მონაცემები"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1267
 msgid "Operation was cancelled"
 msgstr "ოპერაცია გაუქმდა"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1966
+#: ../src/Microsoft365/common/e-m365-connection.c:1964
 msgid "Failed to parse own Json data"
 msgstr ""
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5495
+#: ../src/Microsoft365/common/e-m365-connection.c:5493
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr ""
@@ -1815,7 +1863,7 @@ msgstr ""
 
 #: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
 msgid "Not shared"
-msgstr ""
+msgstr "გაზიარებული არაა"
 
 #: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
 msgid "Can view when I’m busy"
@@ -1935,6 +1983,11 @@ msgstr "მიმდინარეობს კალენდრის წვ�
 msgid "Failed to read permissions: "
 msgstr "ჩავარდა წაკითხვა წვდომისთვის: "
 
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#, c-format
+msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
+msgstr ""
+
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr ""
@@ -1954,6 +2007,11 @@ msgstr ""
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:328
 msgid "_Redirect URI:"
+msgstr "გადამისამა_რთების URI:"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#, c-format
+msgid "The reported error was “%s”."
 msgstr ""
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:411
