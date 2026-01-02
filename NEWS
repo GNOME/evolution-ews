@@ -1,3 +1,32 @@
+Evolution-EWS 3.59.1 2026-01-02
+-------------------------------
+
+Bug Fixes:
+	I#319 - Free/Busy calendar limited by server
+	I#321 - Camel: Implement CamelStore::get_inbox_folder()
+	eds-I#8 - Adapt to libebook API changes
+
+Miscellaneous:
+	Lower default connection timeout to 15 seconds
+	Adapt to libcamel API removals
+	EWS: Try to extract error information from "Internal Server Error" response
+	Calendar: Change Free/Busy calendar range in the calendar Properties
+	flatpak: Add gettext ACLOCAL workaround
+	Camel: Set IS_JUNK/IS_TRASH CamelFolder flags for Junk/Trash folders
+
+Translations:
+	Asier Saratsua Garmendia (eu)
+	Aurimas Černius (lt)
+	Danil Gashigullin (ru)
+	Ekaterine Papava (ka)
+	Emin Tufan Çetin (tr)
+	Juliano de Souza Camargo (pt_BR)
+	Martin (sl)
+	Piotr Drąg (pl)
+	Sabri Ünal (tr)
+	twlvnn kraftwerk (bg)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.58.0 2025-09-12
 -------------------------------
 
