@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-11-18 20:43+0000\n"
-"PO-Revision-Date: 2025-11-19 23:29+0200\n"
+"POT-Creation-Date: 2026-01-02 09:17+0000\n"
+"PO-Revision-Date: 2026-01-06 20:09+0200\n"
 "Last-Translator: Aurimas Černius <aurimas.cernius@mailo.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -165,27 +165,27 @@ msgstr "Nepavyksta sukurti podėlio kelio „%s“: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Nepavyko perkelti laiškų podėlio failo iš „%s“ į „%s“: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1822
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nepavyksta įkelti %s santraukos"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2317
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Atnaujinamas aplankas „%s“"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2510
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Negalima atlikti veiksmų aplanke esant atsijungus"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3294
+#: ../src/EWS/camel/camel-ews-folder.c:3310
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1778
 msgid "Apply message _filters to this folder"
 msgstr "Pritaikyti laiškų _filtrus šiam aplankui"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3306
+#: ../src/EWS/camel/camel-ews-folder.c:3322
 #: ../src/Microsoft365/camel/camel-m365-folder.c:1790
 msgid "Always check for _new mail in this folder"
 msgstr "Visada tikrinti tik _naujus laiškus šiame aplanke"
@@ -464,61 +464,64 @@ msgstr "Exchange serveris %s"
 msgid "Exchange service for %s on %s"
 msgstr "Exchange tarnyba %s %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1469
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+msgid "Could not locate Inbox folder"
+msgstr "Nepavyko rasti gaunamo pašto aplanko"
+
+#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Nepavyko rasti šiukšlinės aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1527
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Nepavyko rasti šlamšto aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3685
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Negalima prisiregistruoti prie EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3708
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nepavyksta prisiregistruoti prie aplanko „%s“, nėra prieinamo viešo aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3714
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas aplankas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3727
+#: ../src/EWS/camel/camel-ews-store.c:3723
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas aplanko ID"
 
-#: ../src/EWS/camel/camel-ews-store.c:3738
+#: ../src/EWS/camel/camel-ews-store.c:3734
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas viešas šakninis "
 "aplankas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3814
+#: ../src/EWS/camel/camel-ews-store.c:3810
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Negalima išsiregistruoti iš EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1846
-#: ../src/Microsoft365/camel/camel-m365-store.c:1859
+#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Šiam veiksmui užbaigti, reikia būti prisijungus"
 
-#: ../src/EWS/camel/camel-ews-store.c:3997
-#: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1982
-#: ../src/Microsoft365/camel/camel-m365-store.c:2023
+#: ../src/EWS/camel/camel-ews-store.c:3993
+#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr "Nuimama būsena „ne ofise“"
 
@@ -1818,12 +1821,12 @@ msgstr "Netinkama aplanko būsena (trūksta tėvinės saugyklos)"
 msgid "Follow-up"
 msgstr "Tęsinys"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1869
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Aplankas „%s“ neatitinka jokio žinomo aplanko"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1888
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nepavyksta įkelti „%s“ santraukos"
