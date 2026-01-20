@@ -19,6 +19,12 @@
 #define EC_ERROR_EX(_code, _msg) e_client_error_create (_code, _msg)
 #define ECC_ERROR_EX(_code, _msg) e_cal_client_error_create (_code, _msg)
 
+#if !ICAL_CHECK_VERSION(3, 99, 99)
+#define ICalPropertyClassenum ICalProperty_Class
+#define i_cal_duration_new_from_seconds i_cal_duration_new_from_int
+#define i_cal_duration_as_seconds i_cal_duration_as_int
+#endif
+
 static void
 ecb_m365_json_to_ical_recur_blob (JsonObject *m365_object,
 				  ETimezoneCache *timezone_cache,
@@ -700,7 +706,7 @@ ecb_m365_get_sensitivity (EM365Connection *cnc,
 			  ICalPropertyKind prop_kind)
 {
 	EM365SensitivityType value;
-	ICalProperty_Class cls = I_CAL_CLASS_NONE;
+	ICalPropertyClassenum cls = I_CAL_CLASS_NONE;
 
 	switch (i_cal_component_isa (inout_comp)) {
 	case I_CAL_VEVENT_COMPONENT:
@@ -734,7 +740,7 @@ ecb_m365_add_sensitivity (EM365Connection *cnc,
 			  ICalPropertyKind prop_kind,
 			  JsonBuilder *builder)
 {
-	ICalProperty_Class new_value = I_CAL_CLASS_NONE, old_value = I_CAL_CLASS_NONE;
+	ICalPropertyClassenum new_value = I_CAL_CLASS_NONE, old_value = I_CAL_CLASS_NONE;
 	ICalProperty *prop;
 
 	if (i_cal_component_isa (new_comp) == I_CAL_VTODO_COMPONENT)
@@ -1981,7 +1987,7 @@ ecb_m365_get_reminder (EM365Connection *cnc,
 			ECalComponentAlarmTrigger *trigger;
 			ICalDuration *duration;
 
-			duration = i_cal_duration_new_from_int (-60 * e_m365_event_get_reminder_minutes_before_start (m365_object));
+			duration = i_cal_duration_new_from_seconds (-60 * e_m365_event_get_reminder_minutes_before_start (m365_object));
 			trigger = e_cal_component_alarm_trigger_new_relative (E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START, duration);
 			g_object_unref (duration);
 
@@ -2091,7 +2097,7 @@ ecb_m365_add_reminder (EM365Connection *cnc,
 			if (success) {
 				new_duration = e_cal_component_alarm_trigger_get_duration (new_trigger);
 
-				success = new_duration && i_cal_duration_as_int (new_duration) <= 0;
+				success = new_duration && i_cal_duration_as_seconds (new_duration) <= 0;
 			}
 
 			if (!success) {
@@ -2135,7 +2141,7 @@ ecb_m365_add_reminder (EM365Connection *cnc,
 					case I_CAL_VEVENT_COMPONENT:
 						old_duration = e_cal_component_alarm_trigger_get_duration (old_trigger);
 
-						changed = !old_duration || i_cal_duration_as_int (new_duration) != i_cal_duration_as_int (old_duration);
+						changed = !old_duration || i_cal_duration_as_seconds (new_duration) != i_cal_duration_as_seconds (old_duration);
 						break;
 					case I_CAL_VTODO_COMPONENT:
 						old_absolute_time = e_cal_component_alarm_trigger_get_absolute_time (old_trigger);
@@ -2161,7 +2167,7 @@ ecb_m365_add_reminder (EM365Connection *cnc,
 			switch (kind) {
 			case I_CAL_VEVENT_COMPONENT:
 				e_m365_event_add_is_reminder_on (builder, TRUE);
-				e_m365_event_add_reminder_minutes_before_start (builder, i_cal_duration_as_int (new_duration) / -60);
+				e_m365_event_add_reminder_minutes_before_start (builder, i_cal_duration_as_seconds (new_duration) / -60);
 				break;
 			case I_CAL_VTODO_COMPONENT:
 				izone = i_cal_time_get_timezone (new_absolute_time);

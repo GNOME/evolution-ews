@@ -34,6 +34,12 @@
 
 #include "e-cal-backend-ews-utils.h"
 
+#if !ICAL_CHECK_VERSION(3, 99, 99)
+#define ICalPropertyClassenum ICalProperty_Class
+#define i_cal_duration_new_from_seconds i_cal_duration_new_from_int
+#define i_cal_duration_as_seconds i_cal_duration_as_int
+#endif
+
 /*
  * A bunch of global variables used to map the ICalTimezone to MSDN[0] format.
  * Also, some auxiliar functions to translate from one tz type to another.
@@ -319,7 +325,7 @@ ews_get_alarm (ECalComponent *comp)
 
 		trigger = e_cal_component_alarm_get_trigger (alarm);
 		if (trigger && e_cal_component_alarm_trigger_get_kind (trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START) {
-			dur_int = (i_cal_duration_as_int (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
+			dur_int = (i_cal_duration_as_seconds (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
 		}
 	}
 	e_cal_component_alarm_free (alarm);
@@ -354,7 +360,7 @@ ews_set_alarm (ESoapRequest *request,
 
 		trigger = e_cal_component_alarm_get_trigger (alarm);
 		if (trigger && e_cal_component_alarm_trigger_get_kind (trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START) {
-			dur_int = (i_cal_duration_as_int (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
+			dur_int = (i_cal_duration_as_seconds (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
 			e_ews_request_write_int_parameter (request, "ReminderMinutesBeforeStart", NULL, dur_int);
 			if (with_due_by) {
 				ICalTime *dtstart;
@@ -481,7 +487,7 @@ ewscal_add_timechange (ESoapRequest *request,
 
 		utcoffs = -i_cal_property_get_tzoffsetto (prop);
 		utcoffs -= baseoffs;
-		duration = i_cal_duration_new_from_int (utcoffs);
+		duration = i_cal_duration_new_from_seconds (utcoffs);
 		offset = i_cal_duration_as_ical_string (duration);
 		e_ews_request_write_string_parameter (request, "Offset", NULL, offset);
 
@@ -724,7 +730,7 @@ ewscal_set_meeting_timezone (ESoapRequest *request,
 	 * zones are offset from. It's redundant, but Exchange always sets it
 	 * to the offset of the Standard zone, and the Offset in the Standard
 	 * zone to zero. So try to avoid problems by doing the same. */
-	duration = i_cal_duration_new_from_int (std_utcoffs);
+	duration = i_cal_duration_new_from_seconds (std_utcoffs);
 	offset = i_cal_duration_as_ical_string (duration);
 	e_ews_request_write_string_parameter (request, "BaseOffset", NULL, offset);
 	g_clear_object (&duration);
@@ -1116,7 +1122,7 @@ convert_sensitivity_calcomp_to_xml (ESoapRequest *request,
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
-		ICalProperty_Class classify = i_cal_property_get_class (prop);
+		ICalPropertyClassenum classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
 			e_ews_request_write_string_parameter (request, "Sensitivity", NULL, "Normal");
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
@@ -1726,7 +1732,7 @@ convert_vevent_component_to_updatexml (ESoapRequest *request,
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
-		ICalProperty_Class classify = i_cal_property_get_class (prop);
+		ICalPropertyClassenum classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
 			convert_vevent_property_to_updatexml (request, "Sensitivity", "Normal", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
@@ -2103,7 +2109,7 @@ convert_vtodo_component_to_updatexml (ESoapRequest *request,
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
-		ICalProperty_Class classify = i_cal_property_get_class (prop);
+		ICalPropertyClassenum classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
 			convert_vtodo_property_to_updatexml (request, "Sensitivity", "Normal", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
@@ -2228,7 +2234,7 @@ convert_vjournal_component_to_updatexml (ESoapRequest *request,
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_CLASS_PROPERTY);
 	if (prop) {
-		ICalProperty_Class classify = i_cal_property_get_class (prop);
+		ICalPropertyClassenum classify = i_cal_property_get_class (prop);
 		if (classify == I_CAL_CLASS_PUBLIC) {
 			convert_vjournal_property_to_updatexml (request, "Sensitivity", "Normal", "item", NULL, NULL);
 		} else if (classify == I_CAL_CLASS_PRIVATE) {
@@ -2458,7 +2464,7 @@ e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
 					  ICalComponent *vcalendar,
 					  ICalComponent *comp,
 					  ICalPropertyKind prop_kind,
-					  ICalTime * (* get_func) (ICalProperty *prop))
+					  ECBEwsTimeGetFuncType get_func)
 {
 	ICalTime *dt = NULL;
 	ICalTimezone *zone;

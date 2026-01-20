@@ -48,6 +48,10 @@
 #define ECC_ERROR(_code) e_cal_client_error_create (_code, NULL)
 #define ECC_ERROR_EX(_code, _msg) e_cal_client_error_create (_code, _msg)
 
+#if !ICAL_CHECK_VERSION(3, 99, 99)
+#define ICalPropertyClassenum ICalProperty_Class
+#endif
+
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
 	GRecMutex cnc_lock;
@@ -376,9 +380,8 @@ ecb_ews_maybe_update_datetime (ETimezoneCache *timezone_cache,
 			       ICalComponent *vcomp,
 			       ICalComponent *icomp,
 			       ICalPropertyKind prop_kind,
-			       ICalTime * (* get_func) (ICalProperty *prop),
-			       void (* set_func) (ICalProperty *prop,
-						  ICalTime *v),
+			       ECBEwsTimeGetFuncType get_func,
+			       ECBEwsTimeSetFuncType set_func,
 			       time_t utc_value)
 {
 	ICalProperty *prop;
@@ -439,7 +442,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		ICalProperty *prop;
 		ICalTime *itt;
 		ICalPropertyStatus status = I_CAL_STATUS_NONE;
-		ICalProperty_Class class = I_CAL_CLASS_NONE;
+		ICalPropertyClassenum class = I_CAL_CLASS_NONE;
 		const gchar *ews_task_status, *sensitivity;
 		EwsImportance item_importance;
 		gint priority = 5;

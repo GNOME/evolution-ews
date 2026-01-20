@@ -62,11 +62,18 @@ gboolean e_cal_backend_ews_prepare_accept_item_request (ESoapRequest *request, g
 
 guint e_cal_backend_ews_rid_to_index (ICalTimezone *timezone, const gchar *rid, ICalComponent *comp, GError **error);
 
+#if ICAL_CHECK_VERSION(3, 99, 99)
+typedef ICalTime * (* ECBEwsTimeGetFuncType) (const ICalProperty *prop);
+typedef void (* ECBEwsTimeSetFuncType) (ICalProperty *prop, const ICalTime *v);
+#else
+typedef ICalTime * (* ECBEwsTimeGetFuncType) (ICalProperty *prop);
+typedef void (* ECBEwsTimeSetFuncType) (ICalProperty *prop, ICalTime *v);
+#endif
 ICalTime *	e_cal_backend_ews_get_datetime_with_zone	(ETimezoneCache *timezone_cache,
 								 ICalComponent *vcalendar,
 								 ICalComponent *comp,
 								 ICalPropertyKind prop_kind,
-								 ICalTime * (* get_func) (ICalProperty *prop));
+								 ECBEwsTimeGetFuncType get_func);
 
 G_END_DECLS
 
