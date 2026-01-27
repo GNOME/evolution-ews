@@ -24,7 +24,7 @@
 #define M365_LOCAL_CACHE_PATH "cur"
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0 */
-#define M365_FETCH_SUMMARY_PROPERTIES	"|size|" /* special prefix */ \
+#define M365_FETCH_SUMMARY_PROPERTIES	"|mailsummary|" /* special prefix */ \
 					"singleValueExtendedProperties," \
 					"bodyPreview," \
 					"categories," \
@@ -492,6 +492,7 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 	CamelM365MessageInfo *m365_mi;
 	EM365FollowupFlag *followup_flag;
 	guint32 flags = 0;
+	gint64 i64;
 	gboolean changed = FALSE;
 
 	g_return_val_if_fail (CAMEL_IS_M365_MESSAGE_INFO (mi), FALSE);
@@ -511,14 +512,16 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 	if (e_m365_mail_message_get_importance (mail) == E_M365_IMPORTANCE_HIGH)
 		flags |= CAMEL_MESSAGE_FLAGGED;
 
-	/* 2020-06-24 - cannot make it work, even with https://stackoverflow.com/questions/58205494/access-the-replied-forwarded-etc-state-from-rest */
-	/* CAMEL_MESSAGE_ANSWERED
-	CAMEL_MESSAGE_FORWARDED */
+	i64 = e_m365_json_get_integer_single_value_extended_property (mail, E_M365_PT_ICON_INDEX, 0);
+	if (i64 == 0x105)
+		flags |= CAMEL_MESSAGE_ANSWERED;
+	if (i64 == 0x106)
+		flags |= CAMEL_MESSAGE_FORWARDED;
 
 	if (camel_m365_message_info_set_server_flags (m365_mi, flags)) {
 		guint32 mask;
 
-		mask = CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_FLAGGED;
+		mask = CAMEL_MESSAGE_ATTACHMENTS | CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED;
 
 		camel_message_info_set_flags (mi, mask, flags);
 
@@ -528,8 +531,6 @@ m365_folder_update_message_info (CamelMessageInfo *mi,
 	changed = m365_folder_merge_server_user_flags (mi, mail) || changed;
 
 	if (!camel_message_info_get_size (mi)) {
-		gint64 i64;
-
 		i64 = e_m365_json_get_integer_single_value_extended_property (mail, E_M365_PT_MESSAGE_SIZE_NAME, 0);
 		if (i64 > 0) {
 			camel_message_info_set_size (mi, (guint32) i64);

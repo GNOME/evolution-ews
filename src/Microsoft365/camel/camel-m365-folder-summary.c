@@ -14,6 +14,8 @@
 #define LOCK(_summary) g_mutex_lock (&_summary->priv->property_lock)
 #define UNLOCK(_summary) g_mutex_unlock (&_summary->priv->property_lock)
 
+#define CAMEL_M365_FOLDER_SUMMARY_VERSION (3)
+
 struct _CamelM365FolderSummaryPrivate {
 	GMutex property_lock;
 	gchar *delta_link;
@@ -47,8 +49,8 @@ m365_folder_summary_header_load (CamelFolderSummary *summary,
 	   to not mark the summary dirty after load. */
 	LOCK (m365_summary);
 
-	if (m365_summary->priv->version < 2) {
-		/* the list of summary items to fetch changed for version 2,
+	if (m365_summary->priv->version < CAMEL_M365_FOLDER_SUMMARY_VERSION) {
+		/* the list of summary items to fetch changed for version 2 and 3,
 		   thus use a new delta link, to reflect it */
 		g_clear_pointer (&m365_summary->priv->delta_link, g_free);
 	} else if (g_strcmp0 (m365_summary->priv->delta_link, delta_link) != 0) {

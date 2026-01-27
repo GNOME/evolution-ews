@@ -55,6 +55,7 @@ G_BEGIN_DECLS
 
 #define E_M365_RECURRENCE_BLOB_NAME "Binary {00062002-0000-0000-c000-000000000046} Id 0x8216"
 #define E_M365_PT_MESSAGE_SIZE_NAME "Long 0xe08" /* PidTagMessageSize */
+#define E_M365_PT_ICON_INDEX "Integer 0x1080" /* PidTagIconIndex */
 
 typedef enum _EM365AttachmentDataType {
 	E_M365_ATTACHMENT_DATA_TYPE_NOT_SET,
@@ -351,6 +352,18 @@ gint64		e_m365_json_get_integer_single_value_extended_property
 							(JsonObject *object,
 							 const gchar *property_name,
 							 gint64 default_value);
+void		e_m365_json_begin_single_value_extended_properties
+							(JsonBuilder *builder);
+void		e_m365_json_end_single_value_extended_properties
+							(JsonBuilder *builder);
+void		e_m365_json_add_string_single_value_extended_property
+							(JsonBuilder *builder,
+							 const gchar *property_name,
+							 const gchar *value);
+void		e_m365_json_add_integer_single_value_extended_property
+							(JsonBuilder *builder,
+							 const gchar *property_name,
+							 gint64 value);
 
 EM365Date	e_m365_date_get				(JsonObject *object,
 							 const gchar *member_name);

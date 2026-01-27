@@ -671,6 +671,44 @@ e_m365_json_get_integer_single_value_extended_property (JsonObject *object,
 	return default_value;
 }
 
+void
+e_m365_json_begin_single_value_extended_properties (JsonBuilder *builder)
+{
+	e_m365_json_begin_array_member (builder, "singleValueExtendedProperties");
+}
+
+void
+e_m365_json_end_single_value_extended_properties (JsonBuilder *builder)
+{
+	e_m365_json_end_array_member (builder);
+}
+
+void
+e_m365_json_add_string_single_value_extended_property (JsonBuilder *builder,
+						       const gchar *property_id,
+						       const gchar *value)
+{
+	e_m365_json_begin_object_member (builder, NULL);
+	e_m365_json_add_nonempty_string_member (builder, "id", property_id);
+	e_m365_json_add_nonempty_string_member (builder, "value", value);
+	e_m365_json_end_object_member (builder);
+}
+
+void
+e_m365_json_add_integer_single_value_extended_property (JsonBuilder *builder,
+							const gchar *property_id,
+							gint64 value)
+{
+	gchar str_value[65];
+
+	g_warn_if_fail (g_snprintf (str_value, sizeof (str_value), "%" G_GINT64_FORMAT, value) < sizeof (str_value));
+
+	e_m365_json_begin_object_member (builder, NULL);
+	e_m365_json_add_nonempty_string_member (builder, "id", property_id);
+	e_m365_json_add_nonempty_string_member (builder, "value", str_value);
+	e_m365_json_end_object_member (builder);
+}
+
 EM365Date
 e_m365_date_get (JsonObject *object,
 		 const gchar *member_name)

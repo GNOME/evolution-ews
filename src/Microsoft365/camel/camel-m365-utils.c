@@ -7,6 +7,7 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "camel-m365-message-info.h"
 #include "camel-m365-utils.h"
 
 /* Unref with g_object_unref() when done with it */
@@ -793,6 +794,21 @@ camel_m365_utils_add_message_flags (JsonBuilder *builder,
 	}
 
 	e_m365_mail_message_end_flag (builder);
+
+	if ((flags & (CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED)) != 0 &&
+	    ((!CAMEL_IS_M365_MESSAGE_INFO (info)) ||
+	     (camel_m365_message_info_get_server_flags (CAMEL_M365_MESSAGE_INFO (info)) ^ (flags & (CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED))) != 0)) {
+		gint64 value = (flags & CAMEL_MESSAGE_SEEN) ? 0x100 : 0x101;
+
+		if ((flags & CAMEL_MESSAGE_ANSWERED) != 0)
+			value = 0x105;
+		if ((flags & CAMEL_MESSAGE_FORWARDED) != 0)
+			value = 0x106;
+
+		e_m365_json_begin_single_value_extended_properties (builder);
+		e_m365_json_add_integer_single_value_extended_property (builder, E_M365_PT_ICON_INDEX, value);
+		e_m365_json_end_single_value_extended_properties (builder);
+	}
 }
 
 static void
