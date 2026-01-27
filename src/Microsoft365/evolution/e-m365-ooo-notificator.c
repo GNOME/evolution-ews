@@ -61,8 +61,11 @@ e_m365_ooo_notificator_dismiss_cb (EM365OooNotificatorDispatcherData *data,
 				   EAlert *alert)
 {
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
-		camel_m365_store_unset_oof_settings_state (data->m365_store);
+	if (response_id == GTK_RESPONSE_ACCEPT) {
+		/* See https://gitlab.gnome.org/GNOME/evolution-ews/-/issues/323
+		camel_m365_store_unset_oof_settings_state (data->m365_store); */
+		e_show_uri (NULL, "https://outlook.office365.com/mail/options/accounts-category/automaticReply");
+	}
 
 	camel_m365_store_set_ooo_alert_state (data->m365_store, CAMEL_M365_STORE_OOO_ALERT_STATE_CLOSED);
 	g_hash_table_remove (data->self->alerts, data->m365_store);

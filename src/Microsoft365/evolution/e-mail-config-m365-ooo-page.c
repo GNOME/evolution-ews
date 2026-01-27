@@ -365,6 +365,7 @@ mail_config_m365_ooo_page_constructed (GObject *object)
 	GtkWidget *widget;
 	GtkWidget *container;
 	GtkWidget *main_box;
+	GtkWidget *widgets_box;
 	GtkSizeGroup *size_group;
 	GtkTextBuffer *text_buffer;
 	GSList *group = NULL;
@@ -379,6 +380,34 @@ mail_config_m365_ooo_page_constructed (GObject *object)
 	main_box = e_mail_config_activity_page_get_internal_box (E_MAIL_CONFIG_ACTIVITY_PAGE (self));
 	gtk_box_set_spacing (GTK_BOX (main_box), 12);
 
+	/* --- beginning of "disable Out of Office settings" changes --- */
+	/* Some users cannot log in due to MailboxSettings.ReadWrite scope, which these settings
+	   require, to be able to change them (company admins may require their consent for that scope).
+	   See https://gitlab.gnome.org/GNOME/evolution-ews/-/issues/323 */
+	widgets_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_set_visible (widgets_box, TRUE);
+	gtk_widget_set_sensitive (widgets_box, FALSE);
+	gtk_box_pack_end (GTK_BOX (main_box), widgets_box, FALSE, FALSE, 0);
+	widget = gtk_info_bar_new ();
+	g_object_set (widget,
+		"visible", TRUE,
+		"message-type", GTK_MESSAGE_INFO,
+		"revealed", TRUE,
+		"show-close-button", FALSE,
+		NULL);
+	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
+	gtk_widget_show_all (widget);
+	container = gtk_info_bar_get_content_area (GTK_INFO_BAR (widget));
+	widget = gtk_label_new (_("The Out of Office settings can be only seen here, use the web interface to change them."));
+	g_object_set (widget,
+		"visible", TRUE,
+		"wrap", TRUE,
+		"max-width-chars", 50,
+		"width-chars", 40,
+		NULL);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+	/* --- end of "disable Out of Office settings" changes --- */
+
 	size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
 	text = _("Out of Office");
@@ -386,13 +415,13 @@ mail_config_m365_ooo_page_constructed (GObject *object)
 	widget = gtk_label_new (markup);
 	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (widgets_box), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 	g_free (markup);
 
 	widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 	gtk_widget_set_margin_left (widget, 12);
-	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (widgets_box), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 
 	container = widget;
@@ -432,7 +461,7 @@ mail_config_m365_ooo_page_constructed (GObject *object)
 	widget = gtk_grid_new ();
 	gtk_grid_set_row_spacing (GTK_GRID (widget), 6);
 	gtk_grid_set_column_spacing (GTK_GRID (widget), 6);
-	gtk_box_pack_start (GTK_BOX (main_box), widget, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (widgets_box), widget, TRUE, TRUE, 0);
 	gtk_widget_show (widget);
 
 	e_binding_bind_property (
