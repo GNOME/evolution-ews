@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-12-12 11:26+0000\n"
-"PO-Revision-Date: 2025-12-12 22:53+0100\n"
+"POT-Creation-Date: 2026-01-27 12:35+0000\n"
+"PO-Revision-Date: 2026-01-27 15:16+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -71,33 +71,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Nastavljanje slike stika je spodletelo:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Prosto"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zasedeno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Poskusno"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
 msgid "Cannot determine EWS ItemId"
 msgstr "ItemId EWS ni mogoče določiti"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -105,11 +105,11 @@ msgstr ""
 "Srečanj, ki jih organizirajo drugi uporabniki v koledarju spletnih storitev "
 "Exchange ni mogoče ustvariti."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Spletno srečanje lahko ustvarite le v glavnem uporabniškem koledarju."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -128,7 +128,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Ni mogoče najti vira pomoči za Microsoft365 za koledar »%s«"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2348
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
 msgid "Invalid occurrence ID"
 msgstr "ID neveljavne pojavitve"
 
@@ -1065,12 +1065,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Poteka branje dovoljenj mape …"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Prekliči nastavitev na strežniku"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
 msgid "Unset the “Out of Office” status"
 msgstr "Prekliči nastavitev stanja »Izven pisarne«"
 
@@ -1549,13 +1549,13 @@ msgstr "Pridobi seznam"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1564,67 +1564,67 @@ msgstr ""
 "zunanjim stikom, ki vam pošljejo sporočilo."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "_Ne pošiljaj odgovore o odsotnosti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "Pošlji odzive _odsotnosti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Pošlji odzive odsotnosti le v obdobju:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "_Od:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "_Za:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "_Notranji:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Sporočilo za prejemnike znotraj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "_Zunanji:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Sporočilo za zunanje prejemnike"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Ne odgovarjaj pošiljateljem zunaj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr "Odgovarjaj le znanim pošiljateljem zunaj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Odgovori vsem pošiljateljem zunaj organizacije"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
 msgid "Retrieving “Out of Office” settings"
 msgstr "Pridobivanje nastavitev »Odsotnosti iz pisarne« ..."
 
@@ -1680,7 +1680,7 @@ msgid "Failed to locate offline address books."
 msgstr "Iskanje nepovezanih imenikov je spodletelo."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Ni mogoče pridobiti nastavitev za sporočila »odsotnosti«."
 
@@ -1770,53 +1770,53 @@ msgstr ""
 "Srečanj, ki jih organizirajo drugi uporabniki v koledarju Microsoft 365, ni "
 "mogoče ustvariti."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1763
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Koledar storitve Microsoft 365 ne more shraniti več kot eno ponovitev"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Koledar storitve Microsoft 365 ne more shraniti komponent z lastnostmi "
 "RDATE, EXDATE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Neznana pogostnost ponavljanja (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2065
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Koledar storitve Microsoft 365 ne more shraniti več kot enega opomnika za "
 "dogodek"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2098
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Dogodek v storitvi Microsoft 365 ima lahko pred začetkom dogodka le opomnik"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2111
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Opravilo storitve Microsoft 365 ima lahko le opomnik z absolutnim časom"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2463
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Opravilo okolja Microsoft 365 ne more imeti prilog."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2566
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Priponke ni mogoče shraniti z URI-jem »%s«"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2568
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
 msgid "Failed to read attachment URI"
 msgstr "Branje URI priponke je spodletelo"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2582
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
 msgid "Failed to get inline attachment data"
 msgstr "Podatkov o prilogah v vrstici ni bilo mogoče pridobiti"
 
@@ -2105,7 +2105,7 @@ msgstr "Poteka branje dovoljenj koledarja …"
 msgid "Failed to read permissions: "
 msgstr "Branje dovoljenj je spodletelo: "
 
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
 #, c-format
 msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
 msgstr "Na vašem računu Microsoft 365 »%s« je določeno stanje »Izven pisarne«."
@@ -2131,7 +2131,15 @@ msgstr "Privzeti najemnik je »%s«"
 msgid "_Redirect URI:"
 msgstr "_Preusmeritveni naslov URI:"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr ""
+"Nastavitve odsotnosti z dela so vidne samo tukaj, za njihovo spreminjanje "
+"uporabite spletni vmesnik."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
 #, c-format
 msgid "The reported error was “%s”."
 msgstr "Napaka v poročilu je »%s«."
