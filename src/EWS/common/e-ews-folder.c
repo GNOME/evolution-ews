@@ -761,6 +761,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			/* set also color for calendar-like sources */
 			if (folder_type != E_EWS_FOLDER_TYPE_CONTACTS) {
 				ESourceAlarms *alarms;
+				ESourceConflictSearch *conflict_search;
 				gchar *color_str;
 
 				color_str = e_ews_folder_utils_pick_color_spec (
@@ -771,6 +772,10 @@ e_ews_folder_utils_populate_esource (ESource *source,
 
 				alarms = e_source_get_extension (source, E_SOURCE_EXTENSION_ALARMS);
 				e_source_alarms_set_include_me (alarms, FALSE);
+
+				/* these are foreign folders, let's not use them for meeting conflict search by default */
+				conflict_search = e_source_get_extension (source, E_SOURCE_EXTENSION_CONFLICT_SEARCH);
+				e_source_conflict_search_set_include_me (conflict_search, FALSE);
 			}
 
 			res = TRUE;
