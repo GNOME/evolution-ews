@@ -1,3 +1,19 @@
+Evolution-EWS 3.59.2 2026-01-30
+-------------------------------
+
+Bug Fixes:
+	I#323 - m365: Disable Out of Office settings changes
+	I#326 - Disable free/busy calendars for meeting conflict lookup by default
+	eds-I#617 - Calendar: Prepare to support build with libical 4.x
+
+Miscellaneous:
+	m365: Camel: Read/write Answered/Forwarded message flags
+
+Translations:
+	Aurimas Aurimas Černius (lt)
+	Martin (sl)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.59.1 2026-01-02
 -------------------------------
 
