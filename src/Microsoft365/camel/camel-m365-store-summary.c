@@ -392,8 +392,8 @@ camel_m365_store_summary_rebuild_hashes (CamelM365StoreSummary *store_summary)
 				gchar *id_dup = g_strdup (id);
 				gchar *full_name = g_string_free (full_name_str, FALSE);
 
-				g_hash_table_insert (store_summary->priv->id_full_name_hash, id_dup, full_name);
-				g_hash_table_insert (store_summary->priv->full_name_id_hash, full_name, id_dup);
+				g_hash_table_replace (store_summary->priv->id_full_name_hash, id_dup, full_name);
+				g_hash_table_replace (store_summary->priv->full_name_id_hash, full_name, id_dup);
 			} else {
 				g_string_free (full_name_str, TRUE);
 			}
@@ -857,8 +857,8 @@ camel_m365_store_summary_set_folder_display_name (CamelM365StoreSummary *store_s
 
 					fixed_full_name = g_string_free (fixed_full_name_str, FALSE);
 
-					g_hash_table_insert (store_summary->priv->id_full_name_hash, ifnd->id, fixed_full_name);
-					g_hash_table_insert (store_summary->priv->full_name_id_hash, fixed_full_name, ifnd->id);
+					g_hash_table_replace (store_summary->priv->id_full_name_hash, ifnd->id, fixed_full_name);
+					g_hash_table_replace (store_summary->priv->full_name_id_hash, fixed_full_name, ifnd->id);
 
 					/* To not be freed by id_full_name_data_free() below */
 					ifnd->id = NULL;
@@ -892,8 +892,8 @@ camel_m365_store_summary_set_folder_display_name (CamelM365StoreSummary *store_s
 
 				id_copy = g_strdup (id);
 
-				g_hash_table_insert (store_summary->priv->id_full_name_hash, id_copy, new_full_name);
-				g_hash_table_insert (store_summary->priv->full_name_id_hash, new_full_name, id_copy);
+				g_hash_table_replace (store_summary->priv->id_full_name_hash, id_copy, new_full_name);
+				g_hash_table_replace (store_summary->priv->full_name_id_hash, new_full_name, id_copy);
 			}
 		}
 	}
@@ -1400,7 +1400,7 @@ camel_m365_store_summary_get_categories (CamelM365StoreSummary *store_summary)
 
 			cat = camel_m365_category_from_string (strv[ii]);
 			if (cat)
-				g_hash_table_insert (categories, cat->id, cat);
+				g_hash_table_replace (categories, cat->id, cat);
 		}
 
 		g_strfreev (strv);

@@ -122,8 +122,8 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 			g_free (id);
 			continue;
 		}
-		g_hash_table_insert (ews_summary->priv->fname_id_hash, fname, id);
-		g_hash_table_insert (ews_summary->priv->id_fname_hash, id, fname);
+		g_hash_table_replace (ews_summary->priv->fname_id_hash, fname, id);
+		g_hash_table_replace (ews_summary->priv->id_fname_hash, id, fname);
 	}
 
 	g_slist_free (folders);
@@ -333,7 +333,7 @@ ews_ss_hash_replace (CamelEwsStoreSummary *ews_summary,
 		}
 	}
 
-	g_hash_table_insert (ews_summary->priv->fname_id_hash, full_name, folder_id);
+	g_hash_table_replace (ews_summary->priv->fname_id_hash, full_name, folder_id);
 
 	/* Replace, not insert. The difference is that it frees the *old* folder_id
 	 * key, not the new one which we just inserted into fname_id_hash too. */
@@ -1112,7 +1112,7 @@ camel_ews_store_summary_get_categories (CamelEwsStoreSummary *ews_summary)
 
 			cat = camel_ews_category_from_string (strv[ii]);
 			if (cat)
-				g_hash_table_insert (categories, cat->guid, cat);
+				g_hash_table_replace (categories, cat->guid, cat);
 		}
 
 		g_strfreev (strv);

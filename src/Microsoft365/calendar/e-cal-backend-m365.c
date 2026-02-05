@@ -1562,7 +1562,7 @@ ecb_m365_receive_objects_sync (ECalBackendSync *sync_backend,
 				comps = g_hash_table_lookup (split_by_uid, uid);
 				comps = g_slist_prepend (comps, g_object_ref (subcomp));
 
-				g_hash_table_insert (split_by_uid, (gpointer) uid, comps);
+				g_hash_table_replace (split_by_uid, (gpointer) uid, comps);
 			}
 		}
 

@@ -480,7 +480,7 @@ m365_store_get_categories_cb (CamelSession *session,
 			cat = camel_m365_category_new (id, display_name, color);
 
 			if (cat)
-				g_hash_table_insert (new_categories, cat->id, cat);
+				g_hash_table_replace (new_categories, cat->id, cat);
 		}
 
 		g_slist_free_full (categories, (GDestroyNotify) json_object_unref);

@@ -1235,7 +1235,7 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 			continue;
 		}
 
-		g_hash_table_insert (oldies, di->user_id->primary_smtp, di);
+		g_hash_table_replace (oldies, di->user_id->primary_smtp, di);
 	}
 
 	for (iter = ews_page->priv->new_delegates; iter; iter = g_slist_next (iter)) {

@@ -619,7 +619,7 @@ add_permission_to_dialog (DialogData *dlg_data,
 
 	*p_n_rows = (*p_n_rows) + 1;
 
-	g_hash_table_insert (dlg_data->perms, perm_data->id, perm_data);
+	g_hash_table_replace (dlg_data->perms, perm_data->id, perm_data);
 }
 
 typedef struct _ShareData {

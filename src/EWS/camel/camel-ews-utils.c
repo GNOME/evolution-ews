@@ -1756,7 +1756,7 @@ camel_ews_utils_merge_category_list (CamelEwsStore *ews_store,
 
 							cat = camel_ews_category_new (guid, name, color_def);
 							if (cat)
-								g_hash_table_insert (new_categories, cat->guid, cat);
+								g_hash_table_replace (new_categories, cat->guid, cat);
 						}
 
 						g_free (guid);

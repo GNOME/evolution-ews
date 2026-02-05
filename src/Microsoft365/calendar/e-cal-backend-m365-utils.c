@@ -1129,7 +1129,7 @@ ecb_m365_extract_attendees (ICalComponent *comp,
 				if (!*out_hash)
 					*out_hash = g_hash_table_new_full (camel_strcase_hash, camel_strcase_equal, NULL, e_cal_component_attendee_free);
 
-				g_hash_table_insert (*out_hash, (gpointer) e_cal_component_attendee_get_value (attendee), attendee);
+				g_hash_table_replace (*out_hash, (gpointer) e_cal_component_attendee_get_value (attendee), attendee);
 			} else if (out_slist) {
 				*out_slist = g_slist_prepend (*out_slist, attendee);
 			} else {
