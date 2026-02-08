@@ -1,17 +1,17 @@
 # Swedish translation for evolution-ews.
-# Copyright © 2012-2025 Free Software Foundation, Inc.
+# Copyright © 2012-2026 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-ews package.
 # Daniel Nylander <po@danielnylander.se>, 2012.
 # Sebastian Rasmussen <sebras@gmail.com>, 2016.
 # Josef Andersson <josef.andersson@fripost.org>, 2016, 2017.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-09-04 07:50+0000\n"
-"PO-Revision-Date: 2025-09-06 16:44+0200\n"
+"POT-Creation-Date: 2026-01-29 09:26+0000\n"
+"PO-Revision-Date: 2026-02-08 12:27+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -19,21 +19,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:66
 #: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:71
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr "För att nå Exchange-servrar som använder Web Services"
 
-#: ../src/common/e-ews-common-utils.c:157
+#: ../src/common/e-ews-common-utils.c:116
 #, c-format
 msgid "Invalid folder URI “%s”"
 msgstr "Ogiltig mapp-URI ”%s”"
@@ -69,33 +69,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Misslyckades med att sätta kontaktbild:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2042
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Tillgänglig"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2045
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Upptagen"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2047
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
 msgctxt "FreeBusyType"
 msgid "Out of Office"
-msgstr "Ej på kontoret"
+msgstr "Inte på kontoret"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2049
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Preliminärt"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2630
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2904
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
 msgid "Cannot determine EWS ItemId"
 msgstr "Kan inte avgöra EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3201
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3875
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -103,11 +103,11 @@ msgstr ""
 "Kan inte skapa sammanträden som organiseras av andra användare i en Exchange "
 "Web Services-kalender."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3238
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Nätsammanträden kan endast skapas i användarens huvudkalender."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3863
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -125,7 +125,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Kan inte hitta Microsoft365-hjälpkälla för kalendern ”%s”"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2348
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
 msgid "Invalid occurrence ID"
 msgstr "Ogiltigt förekomst-ID"
 
@@ -164,105 +164,105 @@ msgstr "Kunde inte skapa cachesökväg ”%s”: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Misslyckades att flytta meddelandecachefil från ”%s” till ”%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1822
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunde inte läsa in sammanfattning för %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2317
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Uppdaterar mappen ”%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2510
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan inte utföra åtgärder på mappen i frånkopplat läge"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
+#: ../src/EWS/camel/camel-ews-folder.c:3310
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
 msgid "Apply message _filters to this folder"
 msgstr "Tillämpa meddelande_filter på denna mapp"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
+#: ../src/EWS/camel/camel-ews-folder.c:3322
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
 msgid "Always check for _new mail in this folder"
 msgstr "Leta alltid efter _ny e-post i denna mapp"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
-#: ../src/Microsoft365/camel/camel-m365-provider.c:24
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "Kontrollerar ny e-post"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
-#: ../src/Microsoft365/camel/camel-m365-provider.c:26
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "Le_ta efter nya meddelanden i alla mappar"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr "_Lyssna efter ändringsaviseringar från server"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
-#: ../src/Microsoft365/camel/camel-m365-provider.c:29
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "Alternativ"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
-#: ../src/Microsoft365/camel/camel-m365-provider.c:31
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Tillämpa filter för nya meddelanden i Inkorg på denna server"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
-#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "Kontrollera om nya meddelanden är s_kräppost"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
-#: ../src/Microsoft365/camel/camel-m365-provider.c:35
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Kontrollera endast I_nkorgsmappen efter skräppost"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
-#: ../src/Microsoft365/camel/camel-m365-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Synkroni_sera fjärrpost lokalt i alla mappar"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:44
 msgid "Show _Public Folders beside user folders"
 msgstr "Visa förutom användarmappar även _publika mappar"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
-#: ../src/Microsoft365/camel/camel-m365-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "Anslutning"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
-#: ../src/Microsoft365/camel/camel-m365-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Tidsgräns för anslutning (i sekunder) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
-#: ../src/Microsoft365/camel/camel-m365-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Antal samtidiga anslutninga_r att använda"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:55
 msgid "Override _User-Agent header value"
 msgstr "Åsidosätt rubrikvärde för _User-Agent"
 
-#: ../src/EWS/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:58
 msgid "Al_ways connect with HTTP/1"
 msgstr "Anslut _alltid med HTTP/1"
 
-#: ../src/EWS/camel/camel-ews-provider.c:79
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:80
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -270,11 +270,11 @@ msgstr ""
 "Detta alternativ kommer att ansluta till Exchange-servern med ett lösenord i "
 "klartext med NTLM-autentisering."
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "Grundläggande"
 
-#: ../src/EWS/camel/camel-ews-provider.c:88
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -282,11 +282,11 @@ msgstr ""
 "Detta alternativ kommer att ansluta till Exchange-servern med ett lösenord i "
 "klartext med Basic-autentisering."
 
-#: ../src/EWS/camel/camel-ews-provider.c:95
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:96
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -454,58 +454,61 @@ msgstr "Exchange server %s"
 msgid "Exchange service for %s on %s"
 msgstr "Exchange-tjänst för %s på %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1469
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+msgid "Could not locate Inbox folder"
+msgstr "Kunde inte hitta mappen Inkorg"
+
+#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Kunde inte hitta mappen Papperskorg"
 
-#: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1527
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Kunde inte hitta mappen Skräppost"
 
-#: ../src/EWS/camel/camel-ews-store.c:3685
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Kan inte prenumerera på EWS-mappar i frånkopplat läge"
 
-#: ../src/EWS/camel/camel-ews-store.c:3708
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Kan inte prenumerera på mappen ”%s”, ingen publik mapp tillgänglig"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3714
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Kan inte prenumerera på mappen ”%s”, mappen hittades inte"
 
-#: ../src/EWS/camel/camel-ews-store.c:3727
+#: ../src/EWS/camel/camel-ews-store.c:3723
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Kan inte prenumerera på mappen ”%s”, mapp-ID hittades inte"
 
-#: ../src/EWS/camel/camel-ews-store.c:3738
+#: ../src/EWS/camel/camel-ews-store.c:3734
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Kan inte prenumerera på mappen ”%s”, publik mapprot hittades inte"
 
-#: ../src/EWS/camel/camel-ews-store.c:3814
+#: ../src/EWS/camel/camel-ews-store.c:3810
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Kan inte avsluta prenumeration på EWS-mappar i frånkopplat läge"
 
-#: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1846
-#: ../src/Microsoft365/camel/camel-m365-store.c:1859
+#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Du måste vara ansluten för att slutföra denna åtgärd"
 
-#: ../src/EWS/camel/camel-ews-store.c:3997
-#: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1982
-#: ../src/Microsoft365/camel/camel-m365-store.c:2023
+#: ../src/EWS/camel/camel-ews-store.c:3993
+#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr "Stänger av status för ”Inte på kontoret”"
 
@@ -596,55 +599,60 @@ msgstr[1] ""
 msgid "Authentication failed"
 msgstr "Autentisering misslyckades"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to parse autodiscover response XML"
 msgstr "Misslyckades att tolka XML-svar från autodetektering"
 
-#: ../src/EWS/common/e-ews-connection.c:2458
+#: ../src/EWS/common/e-ews-connection.c:2503
 msgid "Failed to find <Autodiscover> element"
 msgstr "Misslyckades med att hitta <Autodiscover>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:2468
+#: ../src/EWS/common/e-ews-connection.c:2513
 msgid "Failed to find <Response> element"
 msgstr "Misslyckades med att hitta <Response>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:2478
+#: ../src/EWS/common/e-ews-connection.c:2523
 msgid "Failed to find <Account> element"
 msgstr "Misslyckades med att hitta <Account>-element"
 
-#: ../src/EWS/common/e-ews-connection.c:2523
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Kunde inte hitta <ASUrl> i svar för autodetektering"
 
-#: ../src/EWS/common/e-ews-connection.c:2599
+#: ../src/EWS/common/e-ews-connection.c:2644
 msgid "URL cannot be NULL"
 msgstr "URL kan inte vara NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3024
+#: ../src/EWS/common/e-ews-connection.c:3069
 msgid "Email address is missing a domain part"
 msgstr "E-postadress saknar en domändel"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3278
 msgid "Failed to parse oab XML"
 msgstr "Misslyckades med att tolka oab-XML"
 
-#: ../src/EWS/common/e-ews-connection.c:3271
+#: ../src/EWS/common/e-ews-connection.c:3316
 msgid "Failed to find <OAB> element\n"
 msgstr "Misslyckades att hitta <OAB>-element\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "Arbetar på annan plats"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8928
+#: ../src/EWS/common/e-ews-connection.c:8982
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9081
+#: ../src/EWS/common/e-ews-connection.c:9135
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9221
+#: ../src/EWS/common/e-ews-connection.c:9275
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Kräver åtminstone server med Microsoft Exchange 2007 SP1"
 
@@ -657,15 +665,15 @@ msgstr "Lösenord utgånget. Ändra lösenord på ”%s”."
 msgid "Password expired."
 msgstr "Lösenord utgånget."
 
-#: ../src/EWS/common/e-ews-folder.c:780
+#: ../src/EWS/common/e-ews-folder.c:785
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Kan inte lägga till mapp, mapptyp stöds ej"
 
-#: ../src/EWS/common/e-ews-folder.c:785
+#: ../src/EWS/common/e-ews-folder.c:790
 msgid "Cannot add folder, master source not found"
 msgstr "Kan inte lägga till mapp, huvudkälla inte funnen"
 
-#: ../src/EWS/common/e-ews-folder.c:825
+#: ../src/EWS/common/e-ews-folder.c:830
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
@@ -701,6 +709,18 @@ msgstr "_Hämta kontaktbilder"
 #: ../src/EWS/evolution/e-book-config-ews.c:101
 msgid "Tries to look up for user photo"
 msgstr "Försöker slå upp användarfoto"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr "Visa evenemang i tid före och efter i dag, i veckor"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "_Före:"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "_Efter:"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
@@ -1020,12 +1040,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Läser mapprättigheter, vänta…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Stäng av på servern"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
 msgid "Unset the “Out of Office” status"
 msgstr "Stäng av status ”Inte på kontoret”"
 
@@ -1500,13 +1520,13 @@ msgstr "Hämta lista"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Inte på kontoret"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1515,67 +1535,67 @@ msgstr ""
 "intern och extern person som skickar e-post till dig."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "Skicka _inte ”Inte på kontoret”-svar"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "_Skicka ”Inte på kontoret”-svar"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Skicka endast ”Inte på kontoret”-svar _under denna tidsperiod:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "_Från:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "_Till:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "I_ntern:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Meddelande ska skickas inom organisationen"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "E_xtern:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Meddelandet ska skickas utanför organisationen"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Svara inte till avsändare utanför organisationen"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr "Svara bara till kända avsändare utanför organisationen"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Svara till vilken avsändare utanför organisationen som helst"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
 msgid "Retrieving “Out of Office” settings"
 msgstr "Hämtar inställningar för ”Inte på kontoret”"
 
@@ -1629,7 +1649,7 @@ msgid "Failed to locate offline address books."
 msgstr "Misslyckades med att hitta frånkopplade adressböcker."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Misslyckades att hämta inställningar för ”Inte på kontoret”."
 
@@ -1719,82 +1739,82 @@ msgstr ""
 "Kan inte skapa sammanträden som organiseras av andra användare i en "
 "Microsoft 365-kalender."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1763
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365-kalender kan inte lagra mer än en upprepning"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Microsoft 365-kalender kan inte lagra komponent med RDATE- eller EXRULE-"
 "egenskaper"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Okänd upprepningsfrekvens (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2065
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr "Microsoft 365-kalender kan inte lagra mer än en evenemangspåminnelse"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2098
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365-evenemang kan endast ha en påminnelse före evenemangets start"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2111
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365-uppgift kan endast ha en påminnelse med absolut tid"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2463
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365-uppgift kan inte ha bilagor."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2566
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Kan inte lagra bilaga med URI ”%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2568
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
 msgid "Failed to read attachment URI"
 msgstr "Misslyckades med att läsa URI för bilaga"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2582
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
 msgid "Failed to get inline attachment data"
 msgstr "Misslyckades med att erhålla data för infogad bilaga"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:285
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:888
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
 msgid "Invalid folder state (missing parent store)"
 msgstr "Ogiltigt mapptillstånd (saknar överordnad lagring)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
 msgid "Follow-up"
 msgstr "Följ upp"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mappen ”%s” motsvarar ingen känd mapp"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Kunde inte läsa in sammanfattning för ”%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:56
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
 msgid "For accessing Microsoft 365 server"
 msgstr "För åtkomst till en Microsoft 365-server"
 
@@ -1843,7 +1863,7 @@ msgstr ""
 "Microsoft 365-servern kan inte skicka meddelande med flera avsändaradresser"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:994
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
 msgid "Failed to re-encode parts to base64: "
 msgstr "Misslyckades med att koda om delar till base64: "
 
@@ -2036,7 +2056,7 @@ msgstr "Läser kalenderrättigheter, vänta…"
 msgid "Failed to read permissions: "
 msgstr "Misslyckades med att läsa rättigheter: "
 
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
 #, c-format
 msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
 msgstr ""
@@ -2063,7 +2083,15 @@ msgstr "Standard-tenant är ”%s”"
 msgid "_Redirect URI:"
 msgstr "Omdi_rigering-URI:"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr ""
+"Inte på kontoret-inställningarna kan endast ses här, använd webbgränssnittet "
+"för att ändra dem."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
 #, c-format
 msgid "The reported error was “%s”."
 msgstr "Det rapporterade felet var ”%s”."
