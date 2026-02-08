@@ -5,15 +5,15 @@
 # Kaan Özdinçer <kaanozdincer@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2015, 2016.
 # Serdar Sağlam <teknomobil@yandex.com>, 2019.
-# Sabri Ünal <yakushabb@gmail.com>, 2019, 2022-2025.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2020-2025.
+# Sabri Ünal <yakushabb@gmail.com>, 2019, 2022-2026.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2020-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-11-18 12:59+0000\n"
-"PO-Revision-Date: 2025-11-29 08:00+0300\n"
+"POT-Creation-Date: 2026-01-29 09:26+0000\n"
+"PO-Revision-Date: 2026-02-08 08:00+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <takim@gnome.org.tr>\n"
 "Language: tr\n"
@@ -73,33 +73,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Kişi fotoğrafı ayarlanamadı:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Uygun"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Meşgul"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ofis Dışında"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Belirsiz"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
 msgid "Cannot determine EWS ItemId"
 msgstr "EWS ItemId belirlenemedi"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -107,11 +107,11 @@ msgstr ""
 "Exchange Web Hizmetleri takviminde diğer kullanıcılarca düzenlenen "
 "toplantılar oluşturulamaz."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Çevrim içi toplantı yalnızca ana kullanıcı Takviminde oluşturulabilir."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -128,7 +128,7 @@ msgstr "Sunucuya bağlanamıyor, sunucuda oturum açtığınızda eylemi yineley
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "%s takvimi için Microsoft 365 yardımcı kaynağı bulunamadı"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2348
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
 msgid "Invalid occurrence ID"
 msgstr "Geçersiz eşleşme kimliği"
 
@@ -167,28 +167,28 @@ msgstr "Önbellek dizini “%s” oluşturulamıyor: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "İleti önbellek dosyası “%s” konumundan “%s” konumuna taşınamadı: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1822
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s için özet yüklenemedi"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2317
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "“%s” klasörü tazeleniyor"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2510
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Çevrim dışı kipte klasörde eylemler gerçekleştirilemiyor"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
+#: ../src/EWS/camel/camel-ews-folder.c:3310
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
 msgid "Apply message _filters to this folder"
 msgstr "İleti _süzgeçlerini bu klasöre uygula"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
+#: ../src/EWS/camel/camel-ews-folder.c:3322
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
 msgid "Always check for _new mail in this folder"
 msgstr "Bu klasördeki _yeni postaları hep denetle"
 
@@ -459,58 +459,61 @@ msgstr "Exchange sunucu %s"
 msgid "Exchange service for %s on %s"
 msgstr "%2$s üzerinde %1$s için Exchange hizmeti"
 
-#: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1469
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+msgid "Could not locate Inbox folder"
+msgstr "Gelen Kutusu klasörü bulunamadı"
+
+#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Çöp klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1527
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Önemsiz klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3685
+#: ../src/EWS/camel/camel-ews-store.c:3681
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Çevrim dışı kipte EWS klasörlerine abone olunamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3708
+#: ../src/EWS/camel/camel-ews-store.c:3704
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "“%s” klasörüne abone olunamıyor, kullanılabilir bir açık klasör yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3714
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "“%s” klasörüne abone olunamıyor, klasör bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3727
+#: ../src/EWS/camel/camel-ews-store.c:3723
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "“%s” klasörüne abone olunamıyor, klasör kimliği bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3738
+#: ../src/EWS/camel/camel-ews-store.c:3734
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "“%s” klasörüne abone olunamıyor, genel klasör kökü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3814
+#: ../src/EWS/camel/camel-ews-store.c:3810
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Çevrip dışı kipte EWS klasörlerinden abonelik kaldırılamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1846
-#: ../src/Microsoft365/camel/camel-m365-store.c:1859
+#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Bu işlemi tamamlayabilmek için çevrim içi çalışmanız gerekiyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3997
-#: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1982
-#: ../src/Microsoft365/camel/camel-m365-store.c:2023
+#: ../src/EWS/camel/camel-ews-store.c:3993
+#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr "“Ofis Dışında” durumunu kaldır"
 
@@ -662,15 +665,15 @@ msgstr "Parolanın süresi doldu. Parolayı değiştir: “%s”."
 msgid "Password expired."
 msgstr "Parolanın süresi doldu."
 
-#: ../src/EWS/common/e-ews-folder.c:780
+#: ../src/EWS/common/e-ews-folder.c:785
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Klasör eklenemiyor, desteklenmeye klasör türü"
 
-#: ../src/EWS/common/e-ews-folder.c:785
+#: ../src/EWS/common/e-ews-folder.c:790
 msgid "Cannot add folder, master source not found"
 msgstr "Klasör eklenemiyor, ana kaynak bulunamadı"
 
-#: ../src/EWS/common/e-ews-folder.c:825
+#: ../src/EWS/common/e-ews-folder.c:830
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
@@ -1037,12 +1040,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Klasör izinleri okunuyor, lütfen bekleyiniz…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Sunucuda Belirlenmedi"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
 msgid "Unset the “Out of Office” status"
 msgstr "“Ofis Dışında” durumu ayarını kaldır"
 
@@ -1513,13 +1516,13 @@ msgstr "Listeyi Getir"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Ofis Dışı"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1528,67 +1531,67 @@ msgstr ""
 "bir kişiye kendiliğinden gönderilecektir."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "Ofis Dışı yanıtlarını gö_nderme"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "Ofis Dışı yanıtlarını _gönder"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Ofis Dışı yanıtlarını yalnızca _şu zaman aralığında gönder:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "_Kimden:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "_Kime:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "İ_ç:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Kurum içine gönderilecek ileti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "D_ış:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Kurum dışına gönderilecek ileti"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Kurum dışı gönderenlere yanıtlama"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr "Kurum dışı gönderenler arasında yalnızca tanıdık olanlara yanıtla"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Kurum dışı olan tüm gönderenlere yanıtla"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
 msgid "Retrieving “Out of Office” settings"
 msgstr "“Ofis Dışında“ ayarları alınıyor"
 
@@ -1641,7 +1644,7 @@ msgid "Failed to locate offline address books."
 msgstr "Çevrim dışı adres defteri bulunamadı."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "“Ofis Dışında” ayarları alınamadı."
 
@@ -1731,72 +1734,72 @@ msgstr ""
 "Microsoft 365 takviminde diğer kullanıcılarca düzenlenen toplantılar "
 "oluşturulamaz."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1763
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 takvimi, birden çok yinelemeyi depolayamaz"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Microsoft 365 takvimi RDATE ya da EXRULE özellikli bileşeni depolayamaz"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Bilinmeyen yineleme sıklığı (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2065
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr "Microsoft 365 takvimi birden çok olay anımsatıcı depolayamaz"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2098
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 olayı, yalnızca olay başlamadan önce anımsatıcı içerebilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2111
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 görevi, yalnızca mutlak zamanlı anımsatıcı içerebilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2463
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 görevi ek içeremez."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2566
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "“%s” URIʼli ek depolanamadı"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2568
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
 msgid "Failed to read attachment URI"
 msgstr "Ek URIʼsi okunamadı"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2582
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
 msgid "Failed to get inline attachment data"
 msgstr "Satır içi ek verisi alınamadı"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:285
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:888
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
 msgid "Invalid folder state (missing parent store)"
 msgstr "Geçersiz klasör durumu (eksik üst depolama)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
 msgid "Follow-up"
 msgstr "İzle"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "“%s” klasörü herhangi bir bilindik klasöre denk gelmiyor"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "“%s” için özet yüklenemedi"
@@ -1854,7 +1857,7 @@ msgstr ""
 "Microsoft 365 sunucusu, birden çok Gönderen adresi olan iletiyi gönderemiyor"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:994
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
 msgid "Failed to re-encode parts to base64: "
 msgstr "Parçalar base64ʼe yeniden kodlanamadı: "
 
@@ -2041,7 +2044,7 @@ msgstr "Takvim izinleri okunuyor, lütfen bekleyiniz…"
 msgid "Failed to read permissions: "
 msgstr "İzinler okunamadı: "
 
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
 #, c-format
 msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
 msgstr "Microsoft 365 “%s” hesabınız “Ofis Dışında” olarak ayarlanmış."
@@ -2067,7 +2070,15 @@ msgstr "Öntanımlı kiracı: “%s”"
 msgid "_Redirect URI:"
 msgstr "_Yönlendirme URIsi:"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr ""
+"Ofis Dışında ayarları yalnızca görüntülenebilir, değiştirmek için web "
+"arayüzünü kullanın."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
 #, c-format
 msgid "The reported error was “%s”."
 msgstr "“%s” hatası bildirildi."
