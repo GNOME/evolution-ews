@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2021-10-13 08:44+0000\n"
-"PO-Revision-Date: 2021-11-04 16:59+0100\n"
+"PO-Revision-Date: 2025-02-15 16:59+0100\n"
 "Last-Translator: maite guix <maite.guix@me.com>\n"
 "Language-Team: Catalan <info@softcatala.org>\n"
 "Language: ca\n"
@@ -646,7 +646,7 @@ msgstr "Obteniu _fotos de contacte"
 
 #: ../src/EWS/evolution/e-book-config-ews.c:102
 msgid "Tries to look up for user photo"
-msgstr "Tracta de cercar fofos d'usuari"
+msgstr "Tracta de cercar fotos d'usuari"
 
 #: ../src/EWS/evolution/e-ews-config-lookup.c:181
 msgid "Exchange Web Services autodiscovery"
@@ -688,7 +688,7 @@ msgstr "No es pot recuperar la informació de la mida de la carpeta"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:742
 msgid "Folder Sizes"
-msgstr "Mida de la carpeta"
+msgstr "Mides de la carpeta"
 
 #: ../src/EWS/evolution/e-ews-config-utils.c:745
 msgid "_Close"
@@ -769,7 +769,7 @@ msgstr "Editor"
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:96
 msgctxt "PermissionsLevel"
 msgid "Publishing Author"
-msgstr "Editor de la publicació"
+msgstr "Autor de la publicació"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:103
 msgctxt "PermissionsLevel"
@@ -935,12 +935,12 @@ msgstr "Altres"
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1217
 msgctxt "Permissions"
 msgid "Folder owner"
-msgstr "Carpetes pròpies"
+msgstr "Propietari de la carpeta"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1221
 msgctxt "Permissions"
 msgid "Folder contact"
-msgstr "Carpeta contactes"
+msgstr "Contacte de la carpeta"
 
 #: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1225
 msgctxt "Permissions"
@@ -1543,7 +1543,7 @@ msgstr "L'error fou «{0}»."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:3
 msgid "Failed to locate offline address books."
-msgstr "Errada en localitzar les llibertes d'adreces fora de línia."
+msgstr "Errada en localitzar les llibretes d'adreces fora de línia."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
 msgid "Failed to retrieve “Out of Office” settings."
