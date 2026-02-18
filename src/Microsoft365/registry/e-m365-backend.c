@@ -876,6 +876,7 @@ m365_backend_authenticate_sync (EBackend *backend,
 	EM365Connection *cnc;
 	ESourceAuthenticationResult result;
 	gboolean in_sync_folders = FALSE;
+	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_M365_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
 
@@ -891,7 +892,7 @@ m365_backend_authenticate_sync (EBackend *backend,
 		cnc, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
 
-	result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_UNKNOWN, NULL, NULL, out_certificate_pem, out_certificate_errors, cancellable, error);
+	result = e_m365_connection_authenticate_sync (cnc, NULL, E_M365_FOLDER_KIND_UNKNOWN, NULL, NULL, out_certificate_pem, out_certificate_errors, cancellable, &local_error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
@@ -901,9 +902,16 @@ m365_backend_authenticate_sync (EBackend *backend,
 	} else if (result == E_SOURCE_AUTHENTICATION_REJECTED &&
 		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
 		result = E_SOURCE_AUTHENTICATION_REQUIRED;
+	} else if (result == E_SOURCE_AUTHENTICATION_ERROR &&
+		   g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+		result = E_SOURCE_AUTHENTICATION_REQUIRED;
+		g_clear_error (&local_error);
 	}
 
 	g_clear_object (&cnc);
+
+	if (local_error)
+		g_propagate_error (error, g_steal_pointer (&local_error));
 
 	if (!in_sync_folders)
 		e_collection_backend_thaw_populate (E_COLLECTION_BACKEND (backend));

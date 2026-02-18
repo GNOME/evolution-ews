@@ -1553,6 +1553,9 @@ e_m365_connection_authenticate_sync (EM365Connection *cnc,
 			UNLOCK (cnc);
 
 			g_clear_error (&local_error);
+		} else if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+			result = E_SOURCE_AUTHENTICATION_REQUIRED;
+			g_clear_error (&local_error);
 		}
 
 		if (local_error) {

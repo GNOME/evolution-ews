@@ -1483,10 +1483,6 @@ ews_connect_sync (CamelService *service,
 		if (camel_ews_settings_get_listen_notifications (ews_settings))
 			camel_ews_store_listen_notifications_cb (ews_store, NULL, ews_settings);
 
-		camel_offline_store_set_online_sync (
-			CAMEL_OFFLINE_STORE (ews_store),
-			TRUE, cancellable, NULL);
-
 		connection = camel_ews_store_ref_connection (ews_store);
 		if (connection) {
 			g_signal_connect_swapped (
@@ -2222,7 +2218,8 @@ ews_authenticate_sync (CamelService *service,
 
 	if (local_error == NULL) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
-	} else if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED)) {
+	} else if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED) ||
+		   g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
 		g_clear_error (&local_error);
 		result = CAMEL_AUTHENTICATION_REJECTED;
 	} else {
@@ -2768,7 +2765,6 @@ ews_get_folder_info_sync (CamelStore *store,
 	}
 
 	if (!camel_service_connect_sync ((CamelService *) store, cancellable, error)) {
-		camel_offline_store_set_online_sync (CAMEL_OFFLINE_STORE (store), FALSE, NULL, NULL);
 		camel_ews_store_ensure_virtual_folders (ews_store);
 		g_mutex_unlock (&priv->get_finfo_lock);
 		return NULL;
