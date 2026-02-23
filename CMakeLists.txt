@@ -113,6 +113,8 @@ if(ENABLE_MAINTAINER_MODE)
 	set(BUILD_TESTING ON)
 endif(ENABLE_MAINTAINER_MODE)
 
+add_printable_option(WITH_EVOLUTION "Enable compilation of the Evolution parts" ON)
+
 # Setup compiler/linker flags
 setup_build_flags(${ENABLE_MAINTAINER_MODE})
 
@@ -131,9 +133,11 @@ pkg_check_modules(LIBEDATABOOK REQUIRED libedata-book-1.2>=${eds_minimum_version
 pkg_check_modules(LIBEDATACAL REQUIRED libedata-cal-2.0>=${eds_minimum_version})
 pkg_check_modules(LIBEDATASERVER REQUIRED libedataserver-1.2>=${eds_minimum_version})
 
-pkg_check_modules(EVOLUTION_SHELL REQUIRED evolution-shell-3.0>=${evo_minimum_version})
-pkg_check_modules(EVOLUTION_MAIL REQUIRED evolution-mail-3.0>=${evo_minimum_version})
-pkg_check_modules(EVOLUTION_CALENDAR REQUIRED evolution-calendar-3.0>=${evo_minimum_version})
+if(WITH_EVOLUTION)
+	pkg_check_modules(EVOLUTION_SHELL REQUIRED evolution-shell-3.0>=${evo_minimum_version})
+	pkg_check_modules(EVOLUTION_MAIL REQUIRED evolution-mail-3.0>=${evo_minimum_version})
+	pkg_check_modules(EVOLUTION_CALENDAR REQUIRED evolution-calendar-3.0>=${evo_minimum_version})
+endif(WITH_EVOLUTION)
 
 pkg_check_modules(GNOME_PLATFORM REQUIRED
 	glib-2.0>=${glib_minimum_version}
@@ -246,9 +250,11 @@ pkg_check_variable(ebook_backenddir libedata-book-1.2 backenddir)
 pkg_check_variable(ecal_backenddir libedata-cal-2.0 backenddir)
 pkg_check_variable(eds_moduledir libebackend-1.2 moduledir)
 pkg_check_variable(ewsdatadir evolution-data-server-1.2 privdatadir)
-pkg_check_variable(evo_privlibdir evolution-shell-3.0 privlibdir)
-pkg_check_variable(errordir evolution-shell-3.0 errordir)
-pkg_check_variable(evo_moduledir evolution-shell-3.0 moduledir)
+if(WITH_EVOLUTION)
+	pkg_check_variable(evo_privlibdir evolution-shell-3.0 privlibdir)
+	pkg_check_variable(errordir evolution-shell-3.0 errordir)
+	pkg_check_variable(evo_moduledir evolution-shell-3.0 moduledir)
+endif(WITH_EVOLUTION)
 
 add_printable_variable(FORCE_INSTALL_PREFIX "Whether to force install evolution-data-server and evolution files into the install prefix" OFF)
 if(FORCE_INSTALL_PREFIX)
@@ -259,9 +265,11 @@ if(FORCE_INSTALL_PREFIX)
 	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" eds_moduledir "${eds_moduledir}")
 	string(REGEX REPLACE "^${eds_prefix}" "${CMAKE_INSTALL_PREFIX}" ewsdatadir "${ewsdatadir}")
 
-	pkg_check_variable(evo_prefix evolution-shell-3.0 prefix)
-	string(REGEX REPLACE "^${evo_prefix}" "${CMAKE_INSTALL_PREFIX}" errordir "${errordir}")
-	string(REGEX REPLACE "^${evo_prefix}" "${CMAKE_INSTALL_PREFIX}" evo_moduledir "${evo_moduledir}")
+	if(WITH_EVOLUTION)
+		pkg_check_variable(evo_prefix evolution-shell-3.0 prefix)
+		string(REGEX REPLACE "^${evo_prefix}" "${CMAKE_INSTALL_PREFIX}" errordir "${errordir}")
+		string(REGEX REPLACE "^${evo_prefix}" "${CMAKE_INSTALL_PREFIX}" evo_moduledir "${evo_moduledir}")
+	endif(WITH_EVOLUTION)
 endif(FORCE_INSTALL_PREFIX)
 
 set(ewsdatadir "${ewsdatadir}/ews")
