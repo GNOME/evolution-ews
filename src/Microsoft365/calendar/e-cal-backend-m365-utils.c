@@ -2371,6 +2371,11 @@ ecb_m365_get_attachments (EM365Connection *cnc,
 					success = FALSE;
 				}
 			}
+
+			if (success)
+				camel_stream_close (content_stream, cancellable, NULL);
+
+			g_clear_object (&content_stream);
 		} else {
 			success = FALSE;
 		}
