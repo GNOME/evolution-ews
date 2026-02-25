@@ -6,35 +6,36 @@
 # Pierre Henry <pierrehenry73@yahoo.fr>, 2014.
 # Erwan Georget <dremor@dremor.info>, 2015.
 # Vincent Chatelain <vinchatl_gnome@proton.me>, 2024-2025.
+# Jean-Marc Tissières <jmetissieres@gmail.com>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-03-19 07:30+0000\n"
-"PO-Revision-Date: 2025-03-23 16:31+0100\n"
-"Last-Translator: Vincent Chatelain <vinchatl_gnome@proton.me>\n"
-"Language-Team: GNOME French Team <gnomefr@traduc.org>\n"
+"POT-Creation-Date: 2026-02-23 11:45+0000\n"
+"PO-Revision-Date: 2026-01-30 18:09+0100\n"
+"Last-Translator: Jean-Marc Tissières <jmetissieres@gmail.com>\n"
+"Language-Team: French <gnomefr@traduc.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Gtranslator 45.3\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/EWS/camel/camel-ews-provider.c:70
+#: ../src/EWS/camel/camel-ews-provider.c:66
 #: ../src/EWS/evolution/e-ews-config-lookup.c:221
 #: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/EWS/camel/camel-ews-provider.c:72
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Pour accéder aux serveurs Exchange en utilisant Web Services"
 
-#: ../src/common/e-ews-common-utils.c:157
+#: ../src/common/e-ews-common-utils.c:116
 #, c-format
 msgid "Invalid folder URI “%s”"
 msgstr "URI de dossier « %s » invalide"
@@ -71,33 +72,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Impossible d’attribuer la photo de contact :"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2076
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Temps libre"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2079
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Occupé"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2081
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Absent du bureau"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2083
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Provisoire"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2664
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2938
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
 msgid "Cannot determine EWS ItemId"
 msgstr "Impossible de déterminer l’itemID EWS"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3235
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3900
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -105,14 +106,14 @@ msgstr ""
 "Impossible de créer des réunions organisées par d’autres utilisateurs dans "
 "un agenda Exchange Web Services"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3272
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Une réunion en ligne ne peut être créée que dans l’agenda de l’utilisateur "
 "principal"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3888
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1651
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Impossible de trouver l’utilisateur « %s » parmi les participants"
@@ -131,33 +132,33 @@ msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr ""
 "Impossible de trouver la source d’aide Microsoft365 pour l’agenda « %s »"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2348
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
 msgid "Invalid occurrence ID"
 msgstr "Identifiant d’occurence invalide"
 
-#: ../src/EWS/camel/camel-ews-folder.c:364
+#: ../src/EWS/camel/camel-ews-folder.c:363
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Impossible d’ouvrir le fichier temporaire mimecontent !"
 
-#: ../src/EWS/camel/camel-ews-folder.c:372
+#: ../src/EWS/camel/camel-ews-folder.c:371
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Impossible de générer l’analyseur à partir de mimecontent !"
 
-#: ../src/EWS/camel/camel-ews-folder.c:381
+#: ../src/EWS/camel/camel-ews-folder.c:380
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Impossible d’analyser la requête de réunion mimecontent !"
 
-#: ../src/EWS/camel/camel-ews-folder.c:494
-#: ../src/EWS/camel/camel-ews-folder.c:707
+#: ../src/EWS/camel/camel-ews-folder.c:493
+#: ../src/EWS/camel/camel-ews-folder.c:706
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Impossible de créer le fichier cache"
 
-#: ../src/EWS/camel/camel-ews-folder.c:824
-#: ../src/EWS/camel/camel-ews-folder.c:968
+#: ../src/EWS/camel/camel-ews-folder.c:823
+#: ../src/EWS/camel/camel-ews-folder.c:967
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Impossible de créer le chemin du cache « %s » : %s"
@@ -165,114 +166,114 @@ msgstr "Impossible de créer le chemin du cache « %s » : %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:982
+#: ../src/EWS/camel/camel-ews-folder.c:981
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr ""
 "Impossible de déplacer du fichier cache des messages de « %s » vers « %s » : "
 "%s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1921
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Impossible de charger le résumé pour %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2398
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Actualisation du dossier « %s »"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2591
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Impossible de réaliser les actions sur le dossier en mode hors-ligne"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3264
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1739
+#: ../src/EWS/camel/camel-ews-folder.c:3310
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
 msgid "Apply message _filters to this folder"
 msgstr "Appliquer les _filtres de message à ce dossier"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3276
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1751
+#: ../src/EWS/camel/camel-ews-folder.c:3322
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
 msgid "Always check for _new mail in this folder"
 msgstr "Toujours rechercher de _nouveaux messages dans ce dossier"
 
-#: ../src/EWS/camel/camel-ews-provider.c:30
-#: ../src/Microsoft365/camel/camel-m365-provider.c:24
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "Recherche de nouveaux messages en cours"
 
-#: ../src/EWS/camel/camel-ews-provider.c:32
-#: ../src/Microsoft365/camel/camel-m365-provider.c:26
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "_Rechercher de nouveaux messages dans tous les dossiers"
 
-#: ../src/EWS/camel/camel-ews-provider.c:34
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr "É_couter les notifications de changement de serveur"
 
-#: ../src/EWS/camel/camel-ews-provider.c:37
-#: ../src/Microsoft365/camel/camel-m365-provider.c:29
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "Options"
 
-#: ../src/EWS/camel/camel-ews-provider.c:39
-#: ../src/Microsoft365/camel/camel-m365-provider.c:31
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "_Appliquer les filtres aux nouveaux messages dans la Boîte de réception sur "
 "ce serveur"
 
-#: ../src/EWS/camel/camel-ews-provider.c:41
-#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "Détecter les p_ourriels dans les nouveaux messages"
 
-#: ../src/EWS/camel/camel-ews-provider.c:43
-#: ../src/Microsoft365/camel/camel-m365-provider.c:35
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Détecter les pourriels seulement dans la _Boîte de réception"
 
-#: ../src/EWS/camel/camel-ews-provider.c:45
-#: ../src/Microsoft365/camel/camel-m365-provider.c:37
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "_Synchroniser le courriel à distance localement pour tous les dossiers"
 
-#: ../src/EWS/camel/camel-ews-provider.c:48
+#: ../src/EWS/camel/camel-ews-provider.c:44
 msgid "Show _Public Folders beside user folders"
 msgstr "Afficher les dossiers _publics à côté des dossiers utilisateur"
 
-#: ../src/EWS/camel/camel-ews-provider.c:51
-#: ../src/Microsoft365/camel/camel-m365-provider.c:41
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "Connexion"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/EWS/camel/camel-ews-provider.c:55
-#: ../src/Microsoft365/camel/camel-m365-provider.c:45
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Dé_lai de connexion (en secondes) %s"
 
-#: ../src/EWS/camel/camel-ews-provider.c:57
-#: ../src/Microsoft365/camel/camel-m365-provider.c:47
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
 msgid "Numbe_r of concurrent connections to use"
 msgstr "Nomb_re de connexions simultanées à utiliser"
 
-#: ../src/EWS/camel/camel-ews-provider.c:59
+#: ../src/EWS/camel/camel-ews-provider.c:55
 msgid "Override _User-Agent header value"
 msgstr "Écraser la valeur d’en-tête _User-Agent"
 
-#: ../src/EWS/camel/camel-ews-provider.c:62
+#: ../src/EWS/camel/camel-ews-provider.c:58
 msgid "Al_ways connect with HTTP/1"
 msgstr "Toujours se _connecter avec HTTP/1"
 
-#: ../src/EWS/camel/camel-ews-provider.c:87
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/EWS/camel/camel-ews-provider.c:89
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -280,11 +281,11 @@ msgstr ""
 "Cette option implique une connexion au serveur Exchange en utilisant un mot "
 "de passe en clair avec authentification NTLM."
 
-#: ../src/EWS/camel/camel-ews-provider.c:97
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "Basic"
 
-#: ../src/EWS/camel/camel-ews-provider.c:99
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -292,11 +293,11 @@ msgstr ""
 "Cette option implique une connexion au serveur Exchange en utilisant un mot "
 "de passe en clair avec authentification basique."
 
-#: ../src/EWS/camel/camel-ews-provider.c:107
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/EWS/camel/camel-ews-provider.c:109
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -305,7 +306,7 @@ msgstr ""
 "authentification Kerberos/GSSAPI."
 
 #: ../src/EWS/camel/camel-ews-store.c:313
-#: ../src/Microsoft365/camel/camel-m365-store.c:73
+#: ../src/Microsoft365/camel/camel-m365-store.c:79
 #, c-format
 msgid "Session has no storage path"
 msgstr "La session n’a pas de chemin de stockage"
@@ -332,6 +333,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
+#: ../src/Microsoft365/camel/camel-m365-store.c:516
+#: ../src/Microsoft365/camel/camel-m365-store.c:572
 msgid "Checking “Out of Office” settings"
 msgstr "Vérification des paramètres d’« Absent du bureau »"
 
@@ -340,7 +343,7 @@ msgid "Look up Exchange server categories"
 msgstr "Vérifier les catégories du serveur Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -349,47 +352,47 @@ msgstr[0] ""
 msgstr[1] ""
 "Le mot de passe expirera dans %d jours. Ouvrez « %s » pour le modifier."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Le mot de passe expirera dans un jour."
 msgstr[1] "Le mot de passe expirera dans %d jours."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Mise à jour de la structure des dossiers distants"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Mise à jour des dossiers distants"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:633
+#: ../src/EWS/camel/camel-ews-store.c:2334
+#: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Aucun dossier de ce type : %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Impossible de lister les dossiers EWS public en mode hors-ligne"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Impossible de trouver un dossier public EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:696
+#: ../src/EWS/camel/camel-ews-store.c:2865
+#: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Impossible de créer le dossier « %s », ce dossier existe déjà"
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Le dossier parent %s n’existe pas"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -397,131 +400,140 @@ msgstr ""
 "Impossible de créer un dossier sous « %s », ce dossier est utilisé seulement "
 "pour les dossiers des autres utilisateurs"
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Impossible de créer un dossier sous « %s », ce dossier est utilisé seulement "
 "pour les dossiers publics"
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:881
+#: ../src/EWS/camel/camel-ews-store.c:3007
+#: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Le dossier n’existe pas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Impossible de supprimer le dossier « %s », il est utilisé seulement pour les "
 "dossiers des autres utilisateurs"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Impossible de supprimer le dossier « %s », il est utilisé seulement pour les "
 "dossiers publics"
 
-#: ../src/EWS/camel/camel-ews-store.c:3191
-#: ../src/EWS/camel/camel-ews-store.c:3287
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Le dossier %s n’existe pas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3200
+#: ../src/EWS/camel/camel-ews-store.c:3219
+msgid "Cannot move a foreign folder"
+msgstr "Impossible de déplacer un dossier distant"
+
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Aucun enregistrement de clé de modification pour le dossier %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3243
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Impossible de renommer et déplacer un dossier simultanément"
 
-#: ../src/EWS/camel/camel-ews-store.c:3274
 #: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr ""
 "Impossible de trouver l’identifiant de dossier pour le dossier parent %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3287
-#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Boîte de réception"
 
-#: ../src/EWS/camel/camel-ews-store.c:3346
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serveur Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3349
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Service Exchange pour %s sur %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3393
-#: ../src/Microsoft365/camel/camel-m365-store.c:1423
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3436
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+msgid "Could not locate Inbox folder"
+msgstr "Impossible de localiser le dossier Boîte de réception"
+
+#: ../src/EWS/camel/camel-ews-store.c:3448
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Impossible de localiser le dossier Corbeille"
 
-#: ../src/EWS/camel/camel-ews-store.c:3453
-#: ../src/Microsoft365/camel/camel-m365-store.c:1481
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3485
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Impossible de localiser le dossier Pourriels"
 
-#: ../src/EWS/camel/camel-ews-store.c:3658
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Impossible de s’abonner à des dossiers EWS en mode hors-ligne"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Impossible de s’abonner au dossier « %s », aucun dossier public n’est "
 "disponible"
 
-#: ../src/EWS/camel/camel-ews-store.c:3691
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Impossible de s’abonner au dossier « %s », ce dossier est introuvable"
 
-#: ../src/EWS/camel/camel-ews-store.c:3700
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr ""
 "Impossible de s’abonner au dossier « %s », l’identifiant de dossier est "
 "introuvable"
 
-#: ../src/EWS/camel/camel-ews-store.c:3711
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "Impossible de s’abonner au dossier « %s », la racine du dossier public est "
 "introuvable"
 
-#: ../src/EWS/camel/camel-ews-store.c:3787
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Impossible de se désabonner de dossiers EWS en mode hors-ligne"
 
-#: ../src/EWS/camel/camel-ews-store.c:3898
-#: ../src/Microsoft365/camel/camel-m365-store.c:1756
-#: ../src/Microsoft365/camel/camel-m365-store.c:1769
+#: ../src/EWS/camel/camel-ews-store.c:3917
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Vous devez travailler en-ligne pour achever cette opération"
 
-#: ../src/EWS/camel/camel-ews-store.c:3970
-#: ../src/EWS/camel/camel-ews-store.c:4007
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr "Retrait de l’état « Absence du Bureau »"
 
@@ -566,8 +578,8 @@ msgstr "OAuth2 (Office365)"
 
 #: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
 msgid ""
-"This option will use an OAuth 2.0 access token to connect to the Office365."
-"com server"
+"This option will use an OAuth 2.0 access token to connect to the "
+"Office365.com server"
 msgstr ""
 "Cette option utilisera un jeton d’accès OAuth 2.0 pour se connecter au "
 "serveur Office365.com"
@@ -619,55 +631,61 @@ msgstr[1] ""
 msgid "Authentication failed"
 msgstr "Échec d’authentification"
 
-#: ../src/EWS/common/e-ews-connection.c:2452
+#: ../src/EWS/common/e-ews-connection.c:2497
 msgid "Failed to parse autodiscover response XML"
 msgstr "Impossible d’analyser la réponse d’autodécouverte XML"
 
-#: ../src/EWS/common/e-ews-connection.c:2458
+#: ../src/EWS/common/e-ews-connection.c:2503
 msgid "Failed to find <Autodiscover> element"
 msgstr "Impossible d’obtenir l’élément <Autodiscover>"
 
-#: ../src/EWS/common/e-ews-connection.c:2468
+#: ../src/EWS/common/e-ews-connection.c:2513
 msgid "Failed to find <Response> element"
 msgstr "Impossible d’obtenir l’élément <Response>"
 
-#: ../src/EWS/common/e-ews-connection.c:2478
+#: ../src/EWS/common/e-ews-connection.c:2523
 msgid "Failed to find <Account> element"
 msgstr "Impossible d’obtenir l’élément <Account>"
 
-#: ../src/EWS/common/e-ews-connection.c:2523
+#: ../src/EWS/common/e-ews-connection.c:2568
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Impossible d’obtenir <ASUrl> dans la réponse d’autodécouverte"
 
-#: ../src/EWS/common/e-ews-connection.c:2599
+#: ../src/EWS/common/e-ews-connection.c:2644
 msgid "URL cannot be NULL"
 msgstr "L’URL ne peut pas prendre pour valeur NULL"
 
-#: ../src/EWS/common/e-ews-connection.c:3024
+#: ../src/EWS/common/e-ews-connection.c:3069
 msgid "Email address is missing a domain part"
 msgstr "Il manque une partie domaine à l’adresse électronique"
 
-#: ../src/EWS/common/e-ews-connection.c:3233
+#: ../src/EWS/common/e-ews-connection.c:3278
 msgid "Failed to parse oab XML"
 msgstr "Impossible d’analyser oab XML"
 
-#: ../src/EWS/common/e-ews-connection.c:3271
+#: ../src/EWS/common/e-ews-connection.c:3316
 msgid "Failed to find <OAB> element\n"
 msgstr "Impossible d’obtenir l’élément <OAB>\n"
 
-#: ../src/EWS/common/e-ews-connection.c:8827
+# Dans le vocabulaire Microsoft, veut généralement dire en télétravail.
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "Travaille ailleurs"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
 msgid "Requires at least Microsoft Exchange 2010 SP1 server"
 msgstr "Nécessite au moins le serveur Microsoft Exchange 2010 SP1"
 
-#: ../src/EWS/common/e-ews-connection.c:8928
+#: ../src/EWS/common/e-ews-connection.c:8982
 msgid "Requires at least Microsoft Exchange 2013 server"
 msgstr "Nécessite au moins le serveur Microsoft Exchange 2013"
 
-#: ../src/EWS/common/e-ews-connection.c:9081
+#: ../src/EWS/common/e-ews-connection.c:9135
 msgid "Requires at least Microsoft Exchange 2010 server"
 msgstr "Nécessite au moins le serveur Microsoft Exchange 2010"
 
-#: ../src/EWS/common/e-ews-connection.c:9221
+#: ../src/EWS/common/e-ews-connection.c:9275
 msgid "Requires at least Microsoft Exchange 2007 SP1 server"
 msgstr "Nécessite au moins le serveur Microsoft Exchange 2007 SP1"
 
@@ -680,15 +698,15 @@ msgstr "Mot de passe expiré. Modifier le mot de passe sur « %s »."
 msgid "Password expired."
 msgstr "Mot de passe expiré."
 
-#: ../src/EWS/common/e-ews-folder.c:780
+#: ../src/EWS/common/e-ews-folder.c:785
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Impossible d’ajouter le dossier, type de dossier non pris en charge"
 
-#: ../src/EWS/common/e-ews-folder.c:785
+#: ../src/EWS/common/e-ews-folder.c:790
 msgid "Cannot add folder, master source not found"
 msgstr "Impossible d’ajouter le dossier, source maîtresse non trouvée"
 
-#: ../src/EWS/common/e-ews-folder.c:825
+#: ../src/EWS/common/e-ews-folder.c:830
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
@@ -725,6 +743,20 @@ msgstr "_Récupérer des photos de contact"
 #: ../src/EWS/evolution/e-book-config-ews.c:101
 msgid "Tries to look up for user photo"
 msgstr "Tente de rechercher la photo de l’utilisateur"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr ""
+"Afficher les évènements sous forme de période avant et après aujourd’hui, en "
+"semaines"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "A_vant :"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "_Après :"
 
 #: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
 #: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
@@ -817,7 +849,7 @@ msgstr "S’abonner à un dossier d’un autre utilisateur…"
 #: ../src/EWS/evolution/e-ews-config-utils.c:1532
 #: ../src/EWS/evolution/e-ews-config-utils.c:1563
 #: ../src/EWS/evolution/e-ews-config-utils.c:1594
-#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:188
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:187
 msgid "Permissions…"
 msgstr "Permissions…"
 
@@ -1048,10 +1080,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Lecture des permissions du dossier, veuillez patienter…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Retirer du serveur"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
 msgid "Unset the “Out of Office” status"
 msgstr "Retirer l’état « Absence du Bureau »"
 
@@ -1198,7 +1232,7 @@ msgstr "_Nom de dossier :"
 msgid "Include _subfolders"
 msgstr "Inclure des _sous-dossiers"
 
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:854
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:863
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr ""
@@ -1209,7 +1243,7 @@ msgstr ""
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:890
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:943
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
@@ -1537,10 +1571,13 @@ msgstr "Récupérer la liste"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Absent du bureau"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1549,56 +1586,69 @@ msgstr ""
 "personne interne et externe qui vous envoie un courriel."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "_Ne pas envoyer des réponses Absent du bureau"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "_Envoyer des réponses Absent du bureau"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "Envoyer des réponses Absent du bureau seulement _pendant cette période :"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "_De :"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "_À :"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "I_nterne :"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Message à envoyer à l’intérieur de l’organisation"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "E_xterne :"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Message à envoyer à l’extérieur de l’organisation"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Ne pas répondre aux expéditeurs à l’extérieur de l’organisation"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr ""
 "Répondre seulement aux expéditeurs connus à l’extérieur de l’organisation"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Répondre aux expéditeurs à l’extérieur de l’organisation"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
 msgid "Retrieving “Out of Office” settings"
 msgstr "Récupération des paramètres d’« Absent du bureau »"
 
@@ -1653,6 +1703,7 @@ msgid "Failed to locate offline address books."
 msgstr "Impossible de localiser les carnets d’adresses hors-ligne."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Impossible de récupérer les paramètres d’« Absent du bureau »."
 
@@ -1692,176 +1743,181 @@ msgstr ""
 "La source de données « %s » ne représente pas un dossier Exchange Web "
 "Services"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2083
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:389
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2092
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:394
 msgid "Folder ID is not set"
 msgstr "L’identifiant de dossier n’est pas défini"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2384
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2393
 msgid "Cannot save contact list into a Microsoft 365 address book"
 msgstr ""
 "Impossible d’enregistrer la liste de contacts dans un carnet d’adresses "
 "Microsoft 365"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2396
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2405
 msgid "Cannot modify organizational contact"
 msgstr "Impossible de modifier le contact organisationel"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2398
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2407
 msgid "Cannot modify user contact"
 msgstr "Impossible de modifier le contact utilisateur"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2400
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2409
 msgid "Cannot modify recent contact"
 msgstr "Impossible de modifier le contact récent"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2511
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2520
 msgid "Cannot remove organizational contact"
 msgstr "Impossible de supprimer le contact organisationel"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2513
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2522
 msgid "Cannot remove user contact"
 msgstr "Impossible de supprimer le contact utilisateur"
 
-#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2515
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2524
 msgid "Cannot remove recent contact"
 msgstr "Impossible de supprimer le contact récent"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:852
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:951
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
 msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Impossible de stocker l’instance détachée, parce que ce n’est pas pris en "
 "charge par Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1144
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1115
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr ""
 "Seuls les évènements simples peuvent être enregistrés dans un agenda "
 "Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1157
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1128
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Seuls les tâches simples peuvent être enregistrées dans un dossier de tâches "
 "Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1208
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1664
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1179
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1646
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
 "Impossible de créer des réunions organisées par d’autres utilisateurs dans "
 "un agenda Microsoft 365."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1763
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Un agenda Microsoft 365 ne peut pas enregistrer plus d’une récurrence"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Un agenda Microsoft 365 ne peut pas enregistrer un composant avec les "
 "propriétés RDATE ou EXRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Fréquence de récurrence inconnue (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2065
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Un agenda Microsoft 365 ne peut pas enregistrer plus d’un rappel d’évènement"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2098
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Un agenda Microsoft 365 ne peut avoir qu’un seul rappel avant le début de "
 "l’évènement"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2111
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Une tâche Microsoft 365 ne peut avoir qu’une rappel avec une date absolue"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2463
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2474
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Une tâche Microsoft 365 ne peut pas avoir de pièce jointe."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2566
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2577
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Impossible d’enregistrer la pièce jointe avec l’URI « %s »"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2568
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
 msgid "Failed to read attachment URI"
 msgstr "Impossible de lire la pièce jointe URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2582
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2593
 msgid "Failed to get inline attachment data"
 msgstr "Impossible de récupérer les données de pièce jointe incrustée"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:434
-#: ../src/Microsoft365/camel/camel-m365-folder.c:535
-#: ../src/Microsoft365/camel/camel-m365-folder.c:954
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1325
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1456
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1523
+#: ../src/Microsoft365/camel/camel-m365-folder.c:285
+#: ../src/Microsoft365/camel/camel-m365-folder.c:386
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
 msgid "Invalid folder state (missing parent store)"
 msgstr "État de dossier invalide (enregistrement parent manquant)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1829
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
+msgid "Follow-up"
+msgstr "Suivi"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Le dossier « %s » ne correspond à aucun dossier connu"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1848
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Impossible de charger le résumé pour « %s »"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:57
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
 msgid "For accessing Microsoft 365 server"
 msgstr "Pour accéder au serveur Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:141
+#: ../src/Microsoft365/camel/camel-m365-store.c:147
 #: ../src/Microsoft365/camel/camel-m365-transport.c:249
 msgid "Microsoft 365 server"
 msgstr "Serveur Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:143
+#: ../src/Microsoft365/camel/camel-m365-store.c:149
 msgid "Mail receive via Microsoft 365"
 msgstr "Courriel reçu par Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:198
-#: ../src/Microsoft365/common/e-m365-connection.c:1472
+#: ../src/Microsoft365/camel/camel-m365-store.c:204
+#: ../src/Microsoft365/common/e-m365-connection.c:1470
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "URI malformé : « %s »"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:536
+#: ../src/Microsoft365/camel/camel-m365-store.c:579
 msgid "Look up Microsoft 365 categories"
 msgstr "Rechercher les catégories Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:545
+#: ../src/Microsoft365/camel/camel-m365-store.c:588
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Impossible de créer la connexion"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:710
+#: ../src/Microsoft365/camel/camel-m365-store.c:753
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Le dossier parent « %s » n’existe pas"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:953
-#: ../src/Microsoft365/camel/camel-m365-store.c:991
+#: ../src/Microsoft365/camel/camel-m365-store.c:996
+#: ../src/Microsoft365/camel/camel-m365-store.c:1034
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Le dossier « %s » n’existe pas"
@@ -1877,7 +1933,7 @@ msgstr ""
 "adresses Expéditeur"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:944
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
 msgid "Failed to re-encode parts to base64: "
 msgstr "Impossible de recoder les pièces jointes en base64 : "
 
@@ -1899,7 +1955,7 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1113
+#: ../src/Microsoft365/common/e-m365-connection.c:1111
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1910,7 +1966,7 @@ msgstr[1] ""
 "Le serveur Microsoft 365 est occupé, attente avant nouvelle tentative (%d:"
 "%02d minutes)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1119
+#: ../src/Microsoft365/common/e-m365-connection.c:1117
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1921,21 +1977,21 @@ msgstr[1] ""
 "Le serveur Microsoft 365 est occupé, attente avant nouvelle tentative (%d "
 "secondes)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1244
-#: ../src/Microsoft365/common/e-m365-connection.c:1271
+#: ../src/Microsoft365/common/e-m365-connection.c:1242
+#: ../src/Microsoft365/common/e-m365-connection.c:1269
 msgid "Invalid data"
 msgstr "Données invalides"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1267
 msgid "Operation was cancelled"
 msgstr "L’opération a été annulée"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1966
+#: ../src/Microsoft365/common/e-m365-connection.c:1967
 msgid "Failed to parse own Json data"
 msgstr "Impossible d’analyser ses propres données Json"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5488
+#: ../src/Microsoft365/common/e-m365-connection.c:5496
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Impossible de trouver l’instance à « %s »"
@@ -1944,7 +2000,7 @@ msgstr "Impossible de trouver l’instance à « %s »"
 msgid "Maximum contacts to download"
 msgstr "Maximum de contacts à télécharger"
 
-#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:190
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:189
 msgid "Edit Microsoft 365 calendar permissions"
 msgstr "Modifier les permissions de l’agenda Microsoft 365"
 
@@ -2028,23 +2084,23 @@ msgstr "Enregistrement des nouvelles permissions, veuillez patienter…"
 msgid "Failed to save permission: "
 msgstr "Impossible d’enregistrer les permissions : "
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:847
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:890
 msgid "Edit calendar permissions…"
 msgstr "Modifier les permissions de l’agenda…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:850
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:893
 msgid "Cl_ose"
 msgstr "_Fermer"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:899
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:942
 msgid "_Cancel"
 msgstr "A_nnuler"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:939
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:982
 msgid "Calendar:"
 msgstr "Agenda :"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:973
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1016
 msgid ""
 "Choose sharing permissions for this calendar. You can add people from within "
 "the organization or outside of it. It can be changed any time."
@@ -2053,25 +2109,32 @@ msgstr ""
 "des personnes de l’organisation ou de l’extérieur. Cela peut être changé à "
 "tout moment."
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1012
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1055
 msgid "_Share"
 msgstr "_Partager"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1048
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1091
 msgid "Inside the organization"
 msgstr "Dans l’organisation"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1073
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1116
 msgid "Outside the organization"
 msgstr "À l’extérieur de l’organisation"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1102
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1145
 msgid "Reading calendar permissions, please wait…"
 msgstr "Lecture des permissions de l’agenda, veuillez patienter…"
 
-#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1103
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1146
 msgid "Failed to read permissions: "
 msgstr "Impossible de lire l’adresse les permissions : "
+
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
+#, c-format
+msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
+msgstr ""
+"L’état de votre compte Microsoft 365 « %s » est défini sur « Absent du "
+"bureau »."
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
 msgid "_Override Microsoft 365 OAuth2 settings"
@@ -2093,6 +2156,19 @@ msgstr "L’abonné par défaut est « %s »"
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:328
 msgid "_Redirect URI:"
 msgstr "_Rediriger l’URI :"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr ""
+"Les paramètres d’absence du bureau ne peuvent qu’être consultés, "
+"veuillez utiliser l’interface web pour les modifier."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
+#, c-format
+msgid "The reported error was “%s”."
+msgstr "L’erreur signalée était « %s »."
 
 #: ../src/Microsoft365/registry/e-m365-backend.c:411
 msgid "Organizational Contacts"
