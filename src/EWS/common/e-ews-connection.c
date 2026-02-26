@@ -175,7 +175,7 @@ e_ews_connection_create_soup_session (EEwsConnection *cnc)
 
 	session = g_object_new (E_TYPE_SOUP_SESSION,
 		"source", cnc->priv->source,
-		"timeout", 15,
+		"timeout", 30,
 		"max-conns", cnc->priv->concurrent_connections,
 		"max-conns-per-host", cnc->priv->concurrent_connections,
 		NULL);
@@ -3094,7 +3094,7 @@ e_ews_autodiscover_ws_url_sync (ESource *source,
 	 */
 	tmp_cnc = e_ews_connection_new_full (source, "https://autodiscover.domain", settings, FALSE);
 	ad.session = e_ews_connection_create_soup_session (tmp_cnc);
-	g_object_set (ad.session, "timeout", 15, NULL);
+	g_object_set (ad.session, "timeout", 30, NULL);
 	e_ews_connection_set_password (tmp_cnc, password);
 	e_soup_session_set_credentials (E_SOUP_SESSION (ad.session), tmp_cnc->priv->credentials);
 
