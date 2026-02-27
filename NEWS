@@ -1,3 +1,25 @@
+Evolution-EWS 3.59.3 2026-02-27
+-------------------------------
+
+Bug Fixes:
+	I#327 - Allow building without Evolution (Jan-Michael Brummer)
+	I#328 - m365: Event attachment stream not freed after download
+
+Miscellaneous:
+	Use GHashTable's `replace()` instead of `insert()` on some places
+	Correct responses for OAuth2 authentication failures
+	Increase default connection timeout to 30 seconds
+
+Translations:
+	Alan Mortensen (da)
+	Álvaro Burns (pt_BR)
+	Anders Jonsson (sv)
+	Balázs Úr (hu)
+	Jean-Marc TISSIERES (fr)
+	Jordi Mas (ca)
+	Sabri Ünal (tr)
+	twlvnn kraftwerk (bg)
+
 Evolution-EWS 3.59.2 2026-01-30
 -------------------------------
 
