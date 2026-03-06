@@ -13,13 +13,13 @@
 # Elhuyar Hizkuntza Zerbitzuak <itzulpenak@elhuyar.com>, 2014.
 # Edurne Labaka <elabaka@uzei.com>, 2015.
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014, 2015, 2017.
-# Asier Saratsua Garmendia <asiersarasua@ni.eus>, 2019, 2021, 2022, 2023, 2024, 2025.
+# Asier Saratsua Garmendia <asiersarasua@ni.eus>, 2019, 2021, 2022, 2023, 2024, 2025, 2026.
 #
 msgid ""
 msgstr "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2025-11-29 16:05+0000\n"
-"PO-Revision-Date: 2025-12-02 10:00+0100\n"
+"POT-Creation-Date: 2026-03-01 19:39+0000\n"
+"PO-Revision-Date: 2026-03-06 10:00+0100\n"
 "Last-Translator: Asier Saratsua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
@@ -75,43 +75,43 @@ msgstr "Ezin da kontaktuen zerrenda gorde; EWS Server 2010 bertsioa edo berriago
 msgid "Failed to set contact photo:"
 msgstr "Huts egin du kontaktuko argazkia ezartzeak:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Librea"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Lanpetuta"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Bulegotik kanpo"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Behin-behinekoa"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
 msgid "Cannot determine EWS ItemId"
 msgstr "Ezin da EWS ItemId-a zehaztu"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr "Ezin dira sortu beste erabiltzaile batzuek antolatutako bilerak Exchange Web Services egutegi batean."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Lineako bilerak erabiltzaileren egutegi nagusian soilik sortu daitezke."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -128,7 +128,7 @@ msgstr "Ezin da zerbitzariarekin konektatu, errepikatu ekintza zerbitzarian saio
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Ez da aurkitu Microsoft365 laguntzaren iturburua “%s” egutegirako"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2348
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
 msgid "Invalid occurrence ID"
 msgstr "Agerraldiaren ID baliogabea"
 
@@ -167,28 +167,28 @@ msgstr "Ezin izan da “%s” cache-bidea sortu: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Huts egin du mezuen cache-fitxategia “%s” kokalekutik “%s” kokalekura lekuz aldatzeak: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1822
+#: ../src/EWS/camel/camel-ews-folder.c:1823
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ezin izan da %s(r)en laburpena kargatu"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2317
+#: ../src/EWS/camel/camel-ews-folder.c:2333
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "”%s” karpeta freskatzen"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2510
+#: ../src/EWS/camel/camel-ews-folder.c:2526
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ezin da karpetan ekintzarik landu lineaz kanpo moduan"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3294
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
+#: ../src/EWS/camel/camel-ews-folder.c:3310
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
 msgid "Apply message _filters to this folder"
 msgstr "Aplikatu mezuen _iragazkiak karpeta honi"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3306
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
+#: ../src/EWS/camel/camel-ews-folder.c:3322
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
 msgid "Always check for _new mail in this folder"
 msgstr "Begiratu beti mezu _berriak dauden karpeta honetan"
 
@@ -329,177 +329,180 @@ msgid "Look up Exchange server categories"
 msgstr "Kontsultatu Exchange zerbitzariaren kategoriak"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Pasahitza egun %dean iraungiko da. Ireki “%s” hori aldatzeko."
 msgstr[1] "Pasahitza %d egunetan iraungiko da. Ireki “%s” hori aldatzeko."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Psahitza egun batean iraungiko da."
 msgstr[1] "Pasahitza %d egunetan iraungiko da."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Kanpoko karpeten egitura eguneratzen"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Kanpoko karpetak eguneratzen"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
+#: ../src/EWS/camel/camel-ews-store.c:2334
 #: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Karpeta ez dago: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Lineaz kanpo ezin dira EWS-ko karpeta publikoak zerrendatu"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Ezin da EWS-ko karpeta publikorik aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
+#: ../src/EWS/camel/camel-ews-store.c:2865
 #: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Ezin da “%s” karpeta sortu, badago lehendik"
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Ez dago %s karpeta gurasorik"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr "Ezin da karpetarik  sortu “%s” kokalekuan, beste erabiltzaile batzuen karpetentzat soilik erabiltzen da"
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Ezin da karpetarik  sortu “%s” kokalekuan, karpeta publikoentzat soilik erabiltzen da"
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
+#: ../src/EWS/camel/camel-ews-store.c:3007
 #: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Karpeta ez da existitzen"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr "Ezin da “%s” karpeta kendu, beste erabiltzaile batzuen karpetentzat soilik erabiltzen da"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Ezin da “%s” karpeta kendu, karpeta publikoentzat soilik erabiltzen da"
 
-#: ../src/EWS/camel/camel-ews-store.c:3187
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "%s karpeta ez da existitzen"
 
-#: ../src/EWS/camel/camel-ews-store.c:3223
+#: ../src/EWS/camel/camel-ews-store.c:3219
 msgid "Cannot move a foreign folder"
 msgstr "Ezin da kanpoko karpeta bat lekuz aldatu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3240
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ez dago %s karpetaren gako-aldaketaren erregistrorik"
 
-#: ../src/EWS/camel/camel-ews-store.c:3270
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ezin da aldi berean karpeta baten izena aldatu eta karpeta lekuz aldatu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3301
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Ezin da %s karpeta gurasoaren karpetaren IDa aurkitu"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Sarrerako ontzia"
 
-#: ../src/EWS/camel/camel-ews-store.c:3373
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "%s Exchange zerbitzaria"
 
-#: ../src/EWS/camel/camel-ews-store.c:3376
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange zerbitzua %s(e)rako %s(e)n"
 
-#: ../src/EWS/camel/camel-ews-store.c:3420
-#: ../src/Microsoft365/camel/camel-m365-store.c:1469
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3436
+#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+msgid "Could not locate Inbox folder"
+msgstr "Ezin izan da Sarrerako ontziaren karpeta aurkitu"
+
+#: ../src/EWS/camel/camel-ews-store.c:3448
+#: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Ezin izan da Zakarrontzia karpeta aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3480
-#: ../src/Microsoft365/camel/camel-m365-store.c:1527
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3485
+#: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Ezin izan da Baztergarria karpeta aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3685
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Ezin dira EWS-ko karpetak harpidetu lineaz kanpo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3708
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Ezin da “%s” karpetara harpidetu, ez dago karpeta publikorik erabilgarri"
 
-#: ../src/EWS/camel/camel-ews-store.c:3718
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Ezin da “%s” karpetara harpidetu, karpeta ez da aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3727
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Ezin da “%s” karpetara harpidetu, karpetaren IDa ez da aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3738
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Ezin da “%s” karpetara harpidetu, karpeta publikoaren erroa ez da aurkitu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3814
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Ezin da EWS karpeten harpidetza eten lineaz kanpo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3925
-#: ../src/Microsoft365/camel/camel-m365-store.c:1846
-#: ../src/Microsoft365/camel/camel-m365-store.c:1859
+#: ../src/EWS/camel/camel-ews-store.c:3917
+#: ../src/Microsoft365/camel/camel-m365-store.c:1852
+#: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Linean jardun behar duzu lanean eragiketa hau bukatzeko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3997
-#: ../src/EWS/camel/camel-ews-store.c:4034
-#: ../src/Microsoft365/camel/camel-m365-store.c:1982
-#: ../src/Microsoft365/camel/camel-m365-store.c:2023
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
+#: ../src/Microsoft365/camel/camel-m365-store.c:1988
+#: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
 msgstr "“Bulegotik kanpo” egoeraren ezarpena kentzen"
 
@@ -647,15 +650,15 @@ msgstr "Pasahitza iraungi da. Aldatu pasahitza hemen: “%s”."
 msgid "Password expired."
 msgstr "Pasahitza iraungi da."
 
-#: ../src/EWS/common/e-ews-folder.c:780
+#: ../src/EWS/common/e-ews-folder.c:785
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Ezin da karpeta gehitu, karpeta mota hori ez da onartzen"
 
-#: ../src/EWS/common/e-ews-folder.c:785
+#: ../src/EWS/common/e-ews-folder.c:790
 msgid "Cannot add folder, master source not found"
 msgstr "Ezin da karpeta gehitu, iturburu nagusia ez da aurkitu"
 
-#: ../src/EWS/common/e-ews-folder.c:825
+#: ../src/EWS/common/e-ews-folder.c:830
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
@@ -1020,12 +1023,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Karpeta-baimenak irakurtzen, itxaron…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Kendu zerbitzaritik"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
 msgid "Unset the “Out of Office” status"
 msgstr "Kendu ezarpena “Bulegotik kanpo” egoerari"
 
@@ -1480,80 +1483,80 @@ msgstr "Eskuratu zerrenda"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Bulegotik kanpo"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr "Behean adierazitako mezuak automatikoki bidaliko zaizkie mezu bat bidaltzen dizuten barruko eta kanpoko pertsona guztiei."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "_Ez bidali 'Bulegotik kanpo' erantzunik"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "_Bidali 'Bulegotik kanpo' erantzunak"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Bidali 'Bulegotik kanpo' erantzunak _soilik denbora-tarte honetan:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "H_emendik:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "Nor_i:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "B_arrukoa:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Mezua erakunde barruan bidaliko da"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "_Kanpokoa:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Mezua erakundetik kanpo bidaliko da"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Ez erantzun erakundetik kanpoko bidaltzaileei"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr "Erantzun erakundetik kanpoko bidaltzaile ezagunei soilik"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Erantzun erakundetik kanpoko edozein bidaltzaileri"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
 msgid "Retrieving “Out of Office” settings"
 msgstr "“Bulegotik kanpo” egoeraren ezarpenak atzitzen"
 
@@ -1606,7 +1609,7 @@ msgid "Failed to locate offline address books."
 msgstr "Huts egin du lineaz kanpoko helbide-liburuak bilatzean."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Huts egin du “Bulegotik kanpo” egoeraren ezarpenak atzitzeak"
 
@@ -1693,70 +1696,70 @@ msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr "Ezin dira beste erabiltzaile batzuek Micdrosoft 365 egutegi batean antolatutako bilerak sortu."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1763
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 egutegiak ezin du errepikapen bat baino gehiago biltegiratu"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr "Microsoft 365 egutegiak ezin du RDATE edo EXRULE propietateak dituen osagaia biltegiratu"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Errepikapen-maiztasun ezezaguna (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2065
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr "Microsoft 365 egutegiak ezin du gertaera-oroigarri bat baino gehiago biltegiratu"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2098
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr "Microsoft 365 gertaerak oroigarri bakar bat eduki dezake gertaeraren hasiera baino lehen"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2111
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 zereginak ordu absolutua duen oroigarri bakar bat eduki dezake"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2463
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2474
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 zereginak ezin ditu eranskinak eduki."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2566
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2577
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Ezin da gorde “%s” URIa duen eranskina"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2568
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
 msgid "Failed to read attachment URI"
 msgstr "Huts egin du eranskinaren URIa irakurtzeak"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2582
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2593
 msgid "Failed to get inline attachment data"
 msgstr "Huts egin du barneko eranskin-datuak eskuratzeak"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:285
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:888
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
 msgid "Invalid folder state (missing parent store)"
 msgstr "Karpeta-egoera baliogabea (biltegi gurasoa falta da)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
 msgid "Follow-up"
 msgstr "Jarraipena"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "“%s” karpeta ez da karpeta ezaguna"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ezin izan da “%s”(r)en laburpena kargatu"
@@ -1813,7 +1816,7 @@ msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Microsoft 365 zerbitzariak ezin du mezua bidali bidaltzaile-helbide bat baino gehiagorekin"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:994
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
 msgid "Failed to re-encode parts to base64: "
 msgstr "Huts egin du zatiak base64 oinarriarekin birkodetzeak: "
 
@@ -1856,12 +1859,12 @@ msgstr "Datu baliogabeak"
 msgid "Operation was cancelled"
 msgstr "Eragiketa bertan behera utzi da"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1964
+#: ../src/Microsoft365/common/e-m365-connection.c:1967
 msgid "Failed to parse own Json data"
 msgstr "Huts egin du JSON datu propioak analizatzeak"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5493
+#: ../src/Microsoft365/common/e-m365-connection.c:5496
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Ezin da instantzia aurkitu '%s' unean"
@@ -1996,7 +1999,7 @@ msgstr "Egutegi-baimenak irakurtzen, itxaron…"
 msgid "Failed to read permissions: "
 msgstr "Huts egin du baimenen irakurketak: "
 
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
 #, c-format
 msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
 msgstr "Zure Microsoft 365 kontuaren (“%s”) egoera “Bulegotik kanpo” da."
@@ -2022,7 +2025,13 @@ msgstr "Tenant lehenetsia “%s” da."
 msgid "_Redirect URI:"
 msgstr "_Berbideraketa URIa:"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr "Bulegotik kanpo egotearen ezarpenak hemen soilik ikus daitezke, erabili web-interfazea horiek aldatzeko."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
 #, c-format
 msgid "The reported error was “%s”."
 msgstr "Jakinarazitako errorea honakoa izan da: “%s”."
