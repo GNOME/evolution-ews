@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-01-02 09:17+0000\n"
-"PO-Revision-Date: 2026-01-06 20:09+0200\n"
+"POT-Creation-Date: 2026-03-10 13:33+0000\n"
+"PO-Revision-Date: 2026-03-11 17:03+0200\n"
 "Last-Translator: Aurimas Černius <aurimas.cernius@mailo.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -68,33 +68,33 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Nepavyko nustatyti kontakto nuotraukos:"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2084
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Laisvas"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2086
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Užsiėmęs"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2088
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ne biure"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2090
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Bandomasis"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2687
-#: ../src/EWS/calendar/e-cal-backend-ews.c:2961
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
 msgid "Cannot determine EWS ItemId"
 msgstr "Nepavyko nustatyti EWS ItemId"
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3258
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3962
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -102,13 +102,13 @@ msgstr ""
 "Exchange Web Services kalendoriuje negalima sukurti susitikimų, "
 "organizuojamų kitų naudotojų."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3295
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Internetinis susitikimas gali būti sukurtas tik pagrindinio naudotojo "
 "kalendoriuje."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3950
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -126,7 +126,7 @@ msgstr ""
 msgid "Cannot find Microsoft365 helper source for calendar “%s”"
 msgstr "Nepavyko rasti Microsoft365 pagalbos šaltinio kalendoriui „%s“"
 
-#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2348
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
 msgid "Invalid occurrence ID"
 msgstr "Netinkamas pasikartojimo ID"
 
@@ -181,12 +181,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Negalima atlikti veiksmų aplanke esant atsijungus"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
 msgid "Apply message _filters to this folder"
 msgstr "Pritaikyti laiškų _filtrus šiam aplankui"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3322
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
 msgid "Always check for _new mail in this folder"
 msgstr "Visada tikrinti tik _naujus laiškus šiame aplanke"
 
@@ -334,7 +334,7 @@ msgid "Look up Exchange server categories"
 msgstr "Peržiūrėti Exchange serverio kategorijas"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -345,7 +345,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Slaptažodžio galiojimas baigsis už %d dienų. Jam pakeisti atverkite „%s“."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
@@ -353,40 +353,40 @@ msgstr[0] "Slaptažodžio galiojimas baigsis už %d dienos."
 msgstr[1] "Slaptažodžio galiojimas baigsis už %d dienų."
 msgstr[2] "Slaptažodžio galiojimas baigsis už %d dienų."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Atnaujinama išorinio aplanko struktūra"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Atnaujinami išoriniai aplankai"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
+#: ../src/EWS/camel/camel-ews-store.c:2334
 #: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nėra tokio aplanko: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Negalima išvardinti EWS viešų aplankų atsijungus"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Nevyksta rasti jokių EWS viešų aplankų"
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
+#: ../src/EWS/camel/camel-ews-store.c:2865
 #: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Negalima sukurti aplanko „%s“, toks aplankas jau yra"
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nėra tėvinio aplanko %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -394,132 +394,132 @@ msgstr ""
 "Negalima sukurti aplanko „%s“ viduje, jis naudojamas tik kitų naudotojų "
 "aplankams"
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Negalima sukurti aplanko „%s“ viduje, jis naudojamas tik viešiesiems "
 "aplankams"
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
+#: ../src/EWS/camel/camel-ews-store.c:3007
 #: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Tokio aplanko nėra"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Negalima pašalinti „%s“ aplanko, jis naudojamas tik kitų naudotojų aplankams"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Negalima pašalinti aplanko „%s“, jis naudojamas tik viešiesiems aplankams"
 
-#: ../src/EWS/camel/camel-ews-store.c:3187
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Aplanko %s nėra"
 
-#: ../src/EWS/camel/camel-ews-store.c:3223
+#: ../src/EWS/camel/camel-ews-store.c:3219
 msgid "Cannot move a foreign folder"
 msgstr "Negalima perkelti išorinio aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3240
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nėra pakeitimo raktinio įrašo aplankui %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3270
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Negalima pervadinti ir perkelti aplanko tuo pat metu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3301
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nepavyksta rasti aplanko ID tėviniam aplankui %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Gautieji"
 
-#: ../src/EWS/camel/camel-ews-store.c:3373
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange serveris %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3376
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange tarnyba %s %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/EWS/camel/camel-ews-store.c:3436
 #: ../src/Microsoft365/camel/camel-m365-store.c:1494
 msgid "Could not locate Inbox folder"
 msgstr "Nepavyko rasti gaunamo pašto aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/EWS/camel/camel-ews-store.c:3448
 #: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Nepavyko rasti šiukšlinės aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/EWS/camel/camel-ews-store.c:3485
 #: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Nepavyko rasti šlamšto aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Negalima prisiregistruoti prie EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nepavyksta prisiregistruoti prie aplanko „%s“, nėra prieinamo viešo aplanko"
 
-#: ../src/EWS/camel/camel-ews-store.c:3714
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas aplankas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3723
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas aplanko ID"
 
-#: ../src/EWS/camel/camel-ews-store.c:3734
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas viešas šakninis "
 "aplankas"
 
-#: ../src/EWS/camel/camel-ews-store.c:3810
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Negalima išsiregistruoti iš EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/EWS/camel/camel-ews-store.c:3917
 #: ../src/Microsoft365/camel/camel-m365-store.c:1852
 #: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Šiam veiksmui užbaigti, reikia būti prisijungus"
 
-#: ../src/EWS/camel/camel-ews-store.c:3993
-#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
 #: ../src/Microsoft365/camel/camel-m365-store.c:1988
 #: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
@@ -686,15 +686,15 @@ msgstr "Baigėsi slaptažodžio galiojimas. Pakeiskite slaptažodį „%s“."
 msgid "Password expired."
 msgstr "Baigėsi slaptažodžio galiojimas."
 
-#: ../src/EWS/common/e-ews-folder.c:780
+#: ../src/EWS/common/e-ews-folder.c:785
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nepavyksta pridėti aplanko, nepalaikomas aplanko tipas"
 
-#: ../src/EWS/common/e-ews-folder.c:785
+#: ../src/EWS/common/e-ews-folder.c:790
 msgid "Cannot add folder, master source not found"
 msgstr "Nepavyksta pridėti aplanko, pagrindinis šaltinis nerastas"
 
-#: ../src/EWS/common/e-ews-folder.c:825
+#: ../src/EWS/common/e-ews-folder.c:830
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
@@ -1061,12 +1061,12 @@ msgid "Reading folder permissions, please wait…"
 msgstr "Skaitomi aplanko leidimai, palaukite…"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:133
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Atstatyti serveryje"
 
 #: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:134
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
 msgid "Unset the “Out of Office” status"
 msgstr "Atstatyti „ne ofise“ būseną"
 
@@ -1537,13 +1537,13 @@ msgstr "Parsiųsti sąrašą"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:804
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Ne ofise"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:400
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1552,67 +1552,67 @@ msgstr ""
 "išoriniam asmeniui, kuris atsiunčia jums laišką."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "_Nesiųsti „ne ofise“ atsakymų"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:418
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "_Siųsti „ne ofise“ atsakymus"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:426
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Siųsti „ne ofise“ atsakymus tik šiuo _laikotarpiu:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:446
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "_Nuo:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:471
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "_Gavėjas:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:496
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "_Vidinis:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:505
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Laiškas bus siunčiamas organizacijos viduje"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:533
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "Iš_orinis:"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Laiškas bus siunčiamas už organizacijos ribų"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:549
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Neatsakyti siuntėjams už organizacijos ribų"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:552
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr "Atsakyti žinomiems siuntėjams už organizacijos ribų"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:555
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Atsakyti visiems siuntėjams už organizacijos ribų"
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:872
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
 msgid "Retrieving “Out of Office” settings"
 msgstr "Gaunami „ne ofise“ nustatymai"
 
@@ -1666,7 +1666,7 @@ msgid "Failed to locate offline address books."
 msgstr "Nepavyko rasti atsijungimo veiksenos adresų knygų."
 
 #: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:736
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Nepavyko gauti „ne ofise“ nustatymų."
 
@@ -1756,77 +1756,77 @@ msgstr ""
 "Microsoft 365 kalendoriuje negalima sukurti susitikimų, organizuojamų kitų "
 "naudotojų."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1763
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr ""
 "Microsoft 365 kalendorius negali įrašyti daugiau nei vieno pasikartojimo"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Microsoft 365 kalendorius negali įrašyti komponentų su RDATE arba EXRULE "
 "savybėmis"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1911
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Nežinomas pasikartojimo dažnis (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2065
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Microsoft 365 kalendorius negali įrašyti daugiau nei vieno priminimo apie "
 "įvykį"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2098
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 įvykis gali turėti tik vieną priminimą prie įvykio pradžią"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2111
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Microsoft 365 užduotis gali turėti tik vieną priminimą su absoliučiu laiku"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2463
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2474
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 užduotis negali turėti priedų."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2566
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2577
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Nepavyko įrašyti priedo su URI „%s“"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2568
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
 msgid "Failed to read attachment URI"
 msgstr "Nepavyko perskaityti priedo URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2582
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2593
 msgid "Failed to get inline attachment data"
 msgstr "Nepavyko gauti įterptinio priedo duomenų"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:285
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:888
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
 msgid "Invalid folder state (missing parent store)"
 msgstr "Netinkama aplanko būsena (trūksta tėvinės saugyklos)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
 msgid "Follow-up"
 msgstr "Tęsinys"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1869
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Aplankas „%s“ neatitinka jokio žinomo aplanko"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Nepavyksta įkelti „%s“ santraukos"
@@ -1884,7 +1884,7 @@ msgstr ""
 "Microsoft 365 serveris negali siųsti laiško su keliais siuntėjo adresais"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:994
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
 msgid "Failed to re-encode parts to base64: "
 msgstr "Nepavyko perkoduoti dalių kaip base64: "
 
@@ -1943,12 +1943,12 @@ msgstr "Netinkami duomenys"
 msgid "Operation was cancelled"
 msgstr "Veiksmo atsisakyta"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1964
+#: ../src/Microsoft365/common/e-m365-connection.c:1967
 msgid "Failed to parse own Json data"
 msgstr "Nepavyko perskaityti savų JSON duomenų"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5493
+#: ../src/Microsoft365/common/e-m365-connection.c:5496
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Nepavyko rasti vieneto adresu „%s“"
@@ -2085,7 +2085,7 @@ msgstr "Skaitomi kalendoriaus leidimai, palaukite…"
 msgid "Failed to read permissions: "
 msgstr "Nepavyko perskaityti leidimų: "
 
-#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:125
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
 #, c-format
 msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
 msgstr "Jūsų Microsoft 365 paskyra „%s“ turi nustatytą būseną „ne ofise“."
@@ -2111,7 +2111,15 @@ msgstr "Numatytoji įmonė yra „%s“"
 msgid "_Redirect URI:"
 msgstr "_Nukreipimo URI:"
 
-#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:732
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr ""
+"Ne biure nuostatas čia galima tik matyti, naudokite internetinę sąsają joms "
+"pakeisti."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
 #, c-format
 msgid "The reported error was “%s”."
 msgstr "Pranešta klaida „%s“."
