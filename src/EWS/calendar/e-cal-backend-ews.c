@@ -3663,8 +3663,7 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 {
 	CamelMimeMessage *message;
 	CamelContentType *mime_type;
-	CamelMultipart *multi;
-	CamelMimePart *text_part, *vcal_part;
+	CamelMimePart *vcal_part;
 	gchar *ical_str;
 	ICalComponent *vcal, *vevent, *vtz;
 	ICalProperty *prop;
@@ -3709,9 +3708,6 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 
 	g_clear_object (&dt);
 
-	text_part = camel_mime_part_new ();
-	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
-
 	vcal_part = camel_mime_part_new ();
 	mime_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (vcal_part));
 	camel_content_type_set_param (mime_type, "charset", "utf-8");
@@ -3720,21 +3716,32 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 	camel_mime_part_set_content (vcal_part, ical_str, strlen (ical_str), "text/calendar; method=CANCEL");
 	g_free (ical_str);
 
-	multi = camel_multipart_new ();
-	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multi), "multipart/alternative");
-	camel_multipart_add_part (multi, text_part);
-	camel_multipart_set_boundary (multi, NULL);
-	camel_multipart_add_part (multi, vcal_part);
-	g_object_unref (text_part);
-	g_object_unref (vcal_part);
-
 	message = camel_mime_message_new ();
 	camel_mime_message_set_subject (message, subject);
 	camel_mime_message_set_from (message, CAMEL_INTERNET_ADDRESS (from));
 	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipients);
 
-	camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) multi);
-	g_object_unref (multi);
+	if (body && *body) {
+		CamelMultipart *multi;
+		CamelMimePart *text_part = NULL;
+
+		text_part = camel_mime_part_new ();
+		camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
+
+		multi = camel_multipart_new ();
+		camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multi), "multipart/alternative");
+		camel_multipart_add_part (multi, text_part);
+		camel_multipart_set_boundary (multi, NULL);
+		camel_multipart_add_part (multi, vcal_part);
+		g_object_unref (text_part);
+
+		camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) multi);
+		g_object_unref (multi);
+	} else {
+		camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) vcal_part);
+	}
+
+	g_object_unref (vcal_part);
 
 	success = camel_ews_utils_create_mime_message (cbews->priv->cnc, "SendAndSaveCopy", NULL, message, NULL, from, NULL, NULL, NULL, cancellable, error);
 
