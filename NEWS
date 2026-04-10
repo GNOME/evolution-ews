@@ -1,3 +1,13 @@
+Evolution-EWS 3.60.1 2026-04-10
+-------------------------------
+
+Bug Fixes:
+	I#332 - Calendar: Crash when cancelling meeting with empty notice
+
+Translations:
+	Kristjan ESPERANTO (eo)
+	Марко Костић (sr)
+
 Evolution-EWS 3.60.0 2026-03-13
 -------------------------------
 
