@@ -1279,6 +1279,8 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 		if (need_retry) {
 			success = FALSE;
 			g_clear_error (error);
+
+			g_signal_emit_by_name (message, "restarted");
 		}
 	}
 
