@@ -123,7 +123,7 @@ ews_populate_string_list (EContact *contact,
 	GList *l_values = NULL;
 
 	for (sl = sl_values; sl != NULL; sl = g_slist_next (sl)) {
-		const gchar *val = (gchar *) sl_values->data;
+		const gchar *val = (gchar *) sl->data;
 		l_values = g_list_prepend (l_values, g_strdup (val));
 	}
 
@@ -425,7 +425,17 @@ ews_oab_read_upto (GInputStream *is,
 	while (1) {
 		gsize len;
 		gsize bytes_read;
-		gchar *c = g_malloc0 (size);
+		gchar *c;
+
+		/* Prevent unbounded memory growth from malformed input */
+		if (str->len > 1024 * 1024 * 1024) {
+			g_set_error_literal (error, EOD_ERROR, 1, "OAB string exceeds maximum allowed size");
+			g_string_free (str, TRUE);
+
+			return NULL;
+		}
+
+		c = g_malloc0 (size);
 
 		if (!g_input_stream_read_all (is, c, size, &bytes_read,
 					      cancellable, error)) {
@@ -760,7 +770,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod, GInputStream *stream,
 			break;
 		}
 		default:
-			g_error ("%s: Cannot decode property 0x%x", G_STRFUNC, prop_id);
+			g_warning ("%s: Cannot decode property 0x%x", G_STRFUNC, prop_id);
 			break;
 	}
 
