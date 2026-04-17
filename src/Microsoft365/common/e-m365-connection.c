@@ -1697,8 +1697,12 @@ e_m365_connection_construct_uri (EM365Connection *cnc,
 	}
 
 	if (id && *id) {
+		gchar *encoded_id;
+
+		encoded_id = g_uri_escape_string (id, NULL, FALSE);
 		g_string_append_c (uri, '/');
-		g_string_append (uri, id);
+		g_string_append (uri, encoded_id);
+		g_free (encoded_id);
 	}
 
 	if (path && *path) {
