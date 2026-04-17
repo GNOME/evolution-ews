@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-01-27 12:35+0000\n"
-"PO-Revision-Date: 2026-01-27 15:16+0100\n"
+"POT-Creation-Date: 2026-04-17 09:42+0000\n"
+"PO-Revision-Date: 2026-04-17 15:47+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -97,7 +97,7 @@ msgid "Cannot determine EWS ItemId"
 msgstr "ItemId EWS ni mogoče določiti"
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3261
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -109,7 +109,7 @@ msgstr ""
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Spletno srečanje lahko ustvarite le v glavnem uporabniškem koledarju."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -183,12 +183,12 @@ msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanja na mapi v načinu brez povezave"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1778
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
 msgid "Apply message _filters to this folder"
 msgstr "Uve_ljavi filtre sporočil v tej mapi"
 
 #: ../src/EWS/camel/camel-ews-folder.c:3322
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1790
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
 msgid "Always check for _new mail in this folder"
 msgstr "Vedno preveri, ali je v tej mapi _nova pošta"
 
@@ -336,7 +336,7 @@ msgid "Look up Exchange server categories"
 msgstr "Iskanje kategorij strežnika Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -345,7 +345,7 @@ msgstr[1] "Geslo poteče v %d dnevu. Odprite »%s«, da ga spremenite."
 msgstr[2] "Geslo poteče v %d dneh. Odprite »%s«, da ga spremenite."
 msgstr[3] "Geslo poteče v %d dneh. Odprite »%s«, da ga spremenite."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
@@ -354,40 +354,40 @@ msgstr[1] "Geslo poteče v %d dnevu."
 msgstr[2] "Geslo poteče v %d dneh."
 msgstr[3] "Geslo poteče v %d dneh."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Posodabljanje tuje strukture map"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Posodabljanje tujih map"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
+#: ../src/EWS/camel/camel-ews-store.c:2334
 #: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče izpisati javnih map EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Javnih map EWS ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
+#: ../src/EWS/camel/camel-ews-store.c:2865
 #: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Mape »%s« ni mogoče ustvariti, ker že obstaja."
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nadrejena mapa %s ne obstaja"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -395,126 +395,126 @@ msgstr ""
 "Mape pod »%s« ni mogoče ustvariti, uporablja se le za mape drugih "
 "uporabnikov."
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Mape pod »%s« ni mogoče ustvariti, saj se uporablja le za javne mape."
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
+#: ../src/EWS/camel/camel-ews-store.c:3007
 #: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Mape »%s« ni mogoče odstraniti, uporablja se le za mape drugih uporabnikov."
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Mape »%s« ni mogoče odstraniti, saj se uporablja le za javne mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3187
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne obstaja."
 
-#: ../src/EWS/camel/camel-ews-store.c:3223
+#: ../src/EWS/camel/camel-ews-store.c:3219
 msgid "Cannot move a foreign folder"
 msgstr "Ni mogoče premakniti tuje mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3240
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ni zapisa ključa za mapo %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3270
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ni mogoče hkrati preimenovati in premakniti mape"
 
-#: ../src/EWS/camel/camel-ews-store.c:3301
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Ni mogoče najti ID mape za nadrejeno mapo %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Prejeto"
 
-#: ../src/EWS/camel/camel-ews-store.c:3373
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Strežnik Exchange %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3376
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/EWS/camel/camel-ews-store.c:3436
 #: ../src/Microsoft365/camel/camel-m365-store.c:1494
 msgid "Could not locate Inbox folder"
 msgstr "Mape dohodne pošte ni možno najti"
 
-#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/EWS/camel/camel-ews-store.c:3448
 #: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Mape Smeti ni mogoče najti"
 
-#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/EWS/camel/camel-ews-store.c:3485
 #: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Mape za vsiljeno pošto ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave se ni mogoče naročiti na mape EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker ustrezne javne mape ni na voljo"
 
-#: ../src/EWS/camel/camel-ews-store.c:3714
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3723
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, ker ID mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3734
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Na mapo »%s« ni mogoče naročiti, korena javne mape ni mogoče najti."
 
-#: ../src/EWS/camel/camel-ews-store.c:3810
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče preklicati naročil na mape EWS"
 
-#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/EWS/camel/camel-ews-store.c:3917
 #: ../src/Microsoft365/camel/camel-m365-store.c:1852
 #: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 
-#: ../src/EWS/camel/camel-ews-store.c:3993
-#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
 #: ../src/Microsoft365/camel/camel-m365-store.c:1988
 #: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
@@ -689,15 +689,15 @@ msgstr "Geslo je preteklo. Spremeniti ga je mogoče v »%s«."
 msgid "Password expired."
 msgstr "Geslo je poteklo."
 
-#: ../src/EWS/common/e-ews-folder.c:780
+#: ../src/EWS/common/e-ews-folder.c:785
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Mape ni mogoče dodati, ker vrsta mape ni podprta"
 
-#: ../src/EWS/common/e-ews-folder.c:785
+#: ../src/EWS/common/e-ews-folder.c:790
 msgid "Cannot add folder, master source not found"
 msgstr "Mape ni mogoče dodati, ker izvornega vira ni mogoče najti"
 
-#: ../src/EWS/common/e-ews-folder.c:825
+#: ../src/EWS/common/e-ews-folder.c:830
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
@@ -1802,44 +1802,44 @@ msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Opravilo storitve Microsoft 365 ima lahko le opomnik z absolutnim časom"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2474
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Opravilo okolja Microsoft 365 ne more imeti prilog."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2577
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Priponke ni mogoče shraniti z URI-jem »%s«"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
 msgid "Failed to read attachment URI"
 msgstr "Branje URI priponke je spodletelo"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2593
 msgid "Failed to get inline attachment data"
 msgstr "Podatkov o prilogah v vrstici ni bilo mogoče pridobiti"
 
 #: ../src/Microsoft365/camel/camel-m365-folder.c:285
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:888
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1290
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1421
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1488
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1570
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
 msgid "Invalid folder state (missing parent store)"
 msgstr "Neveljavno stanje mape (manjkajoča nadrejena shramba)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:554
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
 msgid "Follow-up"
 msgstr "Nadaljevanje"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1869
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mapa »%s« ne ustreza nobeni znani mapi"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
 #, c-format
 msgid "Could not load summary for “%s”"
 msgstr "Ni mogoče naložiti povzetka za »%s«"
@@ -1862,7 +1862,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Prejemanje pošte prek okolja Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1470
+#: ../src/Microsoft365/common/e-m365-connection.c:1502
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Nepravilno oblikovan naslov URI: »%s«"
@@ -1898,7 +1898,7 @@ msgstr ""
 "pošiljateljev"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:994
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
 msgid "Failed to re-encode parts to base64: "
 msgstr "Delov ni bilo mogoče znova kodirati v base64: "
 
@@ -1920,7 +1920,13 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1111
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr ""
+"Strežnik je vrnil URL z nepričakovanim gostiteljem »%s«, pričakovano je »%s«"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1141
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1937,7 +1943,7 @@ msgstr[3] ""
 "Strežnik Microsoft 365 je zaseden, poskus povezovanja bo ponovljen čez %d:"
 "%02d minute."
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1117
+#: ../src/Microsoft365/common/e-m365-connection.c:1147
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1954,21 +1960,21 @@ msgstr[3] ""
 "Strežnik Microsoft 365 je zaseden, poskus povezovanja bo ponovljen čez %d "
 "sekunde."
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1272
+#: ../src/Microsoft365/common/e-m365-connection.c:1299
 msgid "Invalid data"
 msgstr "Neveljavni podatki"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1267
+#: ../src/Microsoft365/common/e-m365-connection.c:1297
 msgid "Operation was cancelled"
 msgstr "Opravilo je bilo preklicano"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1964
+#: ../src/Microsoft365/common/e-m365-connection.c:2003
 msgid "Failed to parse own Json data"
 msgstr "Razčlenjevanje lastnih podatkov Json je spodletelo"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5493
+#: ../src/Microsoft365/common/e-m365-connection.c:5532
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Primerka ni mogoče najti pri »%s«"
