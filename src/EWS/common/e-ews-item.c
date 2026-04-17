@@ -2365,7 +2365,13 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 			g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, g_strerror (errno));
 		}
 
-		filename = g_build_filename (dirname, name, NULL);
+		/* Sanitize the filename to prevent path traversal from
+		 * server-controlled attachment names */
+		{
+			gchar *basename = g_path_get_basename (name);
+			filename = g_build_filename (dirname, basename, NULL);
+			g_free (basename);
+		}
 		if (g_rename (tmpfilename, filename) != 0) {
 			g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n",
 					tmpfilename, filename, g_strerror (errno));
