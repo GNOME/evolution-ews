@@ -174,6 +174,16 @@ ews_oab_decompress_full (const gchar *filename, const gchar *output_filename,
 		/* note the file offset */
 		offset = ftell (input);
 
+		/* Sanity-check sizes to prevent integer overflows and
+		 * decompression bombs (max 1 GB decompressed) */
+		if (lzx_b->ucomp_size == 0 || lzx_b->ucomp_size > (1024 * 1024 * 1024)) {
+			g_set_error (&err, g_quark_from_string ("lzx"), 1,
+				     "invalid uncompressed block size: %u", lzx_b->ucomp_size);
+			g_free (lzx_b);
+			ret = FALSE;
+			goto exit;
+		}
+
 		/* lzx_b points to 1, write it directly to file */
 		if (lzx_b->flags == 0) {
 			gchar *buffer = g_malloc0 (lzx_b->ucomp_size);
@@ -209,9 +219,11 @@ ews_oab_decompress_full (const gchar *filename, const gchar *output_filename,
 			}
 			if (ews_lzxd_decompress (lzs, lzx_b->ucomp_size) != LZX_ERR_OK) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
+				ews_lzxd_free (lzs);
 				ret = FALSE;
 				goto exit;
 			}
+			ews_lzxd_free (lzs);
 		}
 
 		/* Set the fp to beggining of next block. This is a HACK, looks like decompress reads beyond the block.
@@ -219,6 +231,13 @@ ews_oab_decompress_full (const gchar *filename, const gchar *output_filename,
 		offset += lzx_b->comp_size;
 		fseek (input, offset, SEEK_SET);
 
+		/* Check for integer overflow in accumulated size */
+		if (lzx_b->ucomp_size > G_MAXUINT - total_decomp_size) {
+			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompressed size overflow");
+			g_free (lzx_b);
+			ret = FALSE;
+			goto exit;
+		}
 		total_decomp_size += lzx_b->ucomp_size;
 		g_free (lzx_b);
 	} while (total_decomp_size < lzx_h->target_size);
@@ -399,6 +418,16 @@ ews_oab_decompress_patch (const gchar *filename, const gchar *orig_filename,
 		/* note the file offset */
 		offset = ftell(input);
 
+		/* Sanity-check sizes to prevent integer overflows and
+		 * decompression bombs (max 1 GB decompressed) */
+		if (lzx_b->target_size == 0 || lzx_b->target_size > (1024 * 1024 * 1024)) {
+			g_set_error (&err, g_quark_from_string ("lzx"), 1,
+				     "invalid target block size: %u", lzx_b->target_size);
+			g_free (lzx_b);
+			ret = FALSE;
+			goto exit;
+		}
+
 		/* The window size should be the smallest power of two
 		   between 2^17 and 2^25 that is greater than or equal
 		   to the sum of the size of the reference data
@@ -421,20 +450,30 @@ ews_oab_decompress_patch (const gchar *filename, const gchar *orig_filename,
 		}
 		if (ews_lzxd_set_reference_data(lzs, orig_input, lzx_b->source_size)) {
 			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_set_reference_data)");
+			ews_lzxd_free (lzs);
 			ret = FALSE;
 			goto exit;
 		}
 		if (ews_lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
 			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
+			ews_lzxd_free (lzs);
 			ret = FALSE;
 			goto exit;
 		}
+		ews_lzxd_free (lzs);
 
 		/* Set the fp to beggining of next block. This is a HACK, looks like decompress reads beyond the block.
 		 * Since we can identify the next block start from block header, we just reset the offset */
 		offset += lzx_b->patch_size;
 		fseek (input, offset, SEEK_SET);
 
+		/* Check for integer overflow in accumulated size */
+		if (lzx_b->target_size > G_MAXUINT - total_decomp_size) {
+			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompressed size overflow");
+			g_free (lzx_b);
+			ret = FALSE;
+			goto exit;
+		}
 		total_decomp_size += lzx_b->target_size;
 		g_free (lzx_b);
 	} while (total_decomp_size < lzx_h->target_size);
