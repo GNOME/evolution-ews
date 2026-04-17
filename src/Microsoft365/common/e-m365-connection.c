@@ -21,6 +21,36 @@
 
 #define M365_HOSTNAME "graph.microsoft.com"
 #define M365_RETRY_IO_ERROR_SECONDS 3
+
+/* Validate that a server-provided URL (nextLink, deltaLink) points to
+ * the expected Graph API host, to prevent SSRF with credential forwarding. */
+static gboolean
+m365_validate_server_url (const gchar *url,
+			  GError **error)
+{
+	GUri *uri;
+	const gchar *host;
+	gboolean valid = FALSE;
+
+	if (!url || !*url)
+		return FALSE;
+
+	uri = g_uri_parse (url, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+	if (!uri)
+		return FALSE;
+
+	host = g_uri_get_host (uri);
+	valid = host && g_ascii_strcasecmp (host, M365_HOSTNAME) == 0;
+
+	if (!valid)
+		g_set_error (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED,
+			     _("Server returned URL with unexpected host '%s', expected '%s'"),
+			     host ? host : "(null)", M365_HOSTNAME);
+
+	g_uri_unref (uri);
+
+	return valid;
+}
 #define X_EVO_M365_DATA "X-EVO-M365-DATA"
 
 #define ORG_CONTACTS_PROPS "addresses,companyName,department,displayName,givenName,id,jobTitle,mail,mailNickname,phones,proxyAddresses,surname"
@@ -1221,18 +1251,18 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 					success = response_func && response_func (cnc, message, input_stream, node, func_user_data, &next_link, cancellable, error);
 
 					if (success && next_link && *next_link) {
-						GUri *uri;
+						if (m365_validate_server_url (next_link, error)) {
+							GUri *uri;
 
-						uri = g_uri_parse (next_link, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+							uri = g_uri_parse (next_link, SOUP_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
 
-						/* Check whether the server returned correct nextLink URI */
-						g_warn_if_fail (uri != NULL);
-
-						if (uri) {
-							need_retry = TRUE;
-
-							soup_message_set_uri (message, uri);
-							g_uri_unref (uri);
+							if (uri) {
+								need_retry = TRUE;
+								soup_message_set_uri (message, uri);
+								g_uri_unref (uri);
+							}
+						} else {
+							success = FALSE;
 						}
 					}
 
@@ -2274,7 +2304,7 @@ e_m365_connection_get_folders_delta_sync (EM365Connection *cnc,
 	g_return_val_if_fail (out_delta_link != NULL, FALSE);
 	g_return_val_if_fail (func != NULL, FALSE);
 
-	if (delta_link)
+	if (delta_link && m365_validate_server_url (delta_link, NULL))
 		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
@@ -2651,7 +2681,7 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 	g_return_val_if_fail (out_delta_link != NULL, FALSE);
 	g_return_val_if_fail (func != NULL, FALSE);
 
-	if (delta_link)
+	if (delta_link && m365_validate_server_url (delta_link, NULL))
 		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 
 	if (!message) {
@@ -6302,7 +6332,7 @@ e_m365_connection_get_task_lists_delta_sync (EM365Connection *cnc,
 	g_return_val_if_fail (out_delta_link != NULL, FALSE);
 	g_return_val_if_fail (func != NULL, FALSE);
 
-	if (delta_link) {
+	if (delta_link && m365_validate_server_url (delta_link, NULL)) {
 		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 	} else {
 		gchar *uri;
@@ -6754,7 +6784,7 @@ e_m365_connection_get_tasks_delta_sync (EM365Connection *cnc,
 	g_return_val_if_fail (out_delta_link != NULL, FALSE);
 	g_return_val_if_fail (func != NULL, FALSE);
 
-	if (delta_link) {
+	if (delta_link && m365_validate_server_url (delta_link, NULL)) {
 		message = m365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, CSM_DEFAULT, NULL);
 	} else {
 		gchar *uri;
