@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-01-29 09:26+0000\n"
+"POT-Creation-Date: 2026-04-17 17:18+0000\n"
 "PO-Revision-Date: 2026-02-08 08:00+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <takim@gnome.org.tr>\n"
@@ -99,7 +99,7 @@ msgid "Cannot determine EWS ItemId"
 msgstr "EWS ItemId belirlenemedi"
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3261
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -111,7 +111,7 @@ msgstr ""
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Çevrim içi toplantı yalnızca ana kullanıcı Takviminde oluşturulabilir."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -335,53 +335,53 @@ msgid "Look up Exchange server categories"
 msgstr "Exchange sunucusu kategorilerine bak"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] ""
 "Parola %d gün içinde sona erecek. Değiştirmek için “%s” konumunu açın."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Parola %d gün içinde sona erecek."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Yabancı klasör yapısını güncelle"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Yabancı klasörleri güncelle"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
+#: ../src/EWS/camel/camel-ews-store.c:2334
 #: ../src/Microsoft365/camel/camel-m365-store.c:676
 #, c-format
 msgid "No such folder: %s"
 msgstr "Böyle bir klasör yok: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Çevrim dışı kipte, EWS açık klasörleri listelenemez"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Herhangi bir EWS açık klasörü bulunamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
+#: ../src/EWS/camel/camel-ews-store.c:2865
 #: ../src/Microsoft365/camel/camel-m365-store.c:739
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "“%s” klasörü oluşturulamadı, klasör zaten var"
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "%s üst klasörü yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -389,129 +389,129 @@ msgstr ""
 "“%s” altına bir klasör oluşturulamıyor, yalnızca diğer kullanıcıların "
 "klasörleri için kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "“%s” altına bir klasör oluşturulamıyor, yalnızca açık klasörler için "
 "kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
+#: ../src/EWS/camel/camel-ews-store.c:3007
 #: ../src/Microsoft365/camel/camel-m365-store.c:924
 #, c-format
 msgid "Folder does not exist"
 msgstr "Klasör yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "“%s” klasörü silinemiyor, yalnızca diğer kullanıcıların klasörleri için "
 "kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "“%s” klasörü silinemiyor, yalnızca açık klasörler için kullanılıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3187
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "%s klasörü yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3223
+#: ../src/EWS/camel/camel-ews-store.c:3219
 msgid "Cannot move a foreign folder"
 msgstr "Yabancı klasör taşınamaz"
 
-#: ../src/EWS/camel/camel-ews-store.c:3240
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "%s klasörü için değişim anahtarı kaydı yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3270
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Bir klasörü aynı anda hem yeniden adlandırıp hem de taşıyamazsınız"
 
-#: ../src/EWS/camel/camel-ews-store.c:3301
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "%s üst klasörü için klasörü kimliği bulunamıyor"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Gelen Kutusu"
 
-#: ../src/EWS/camel/camel-ews-store.c:3373
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange sunucu %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3376
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%2$s üzerinde %1$s için Exchange hizmeti"
 
-#: ../src/EWS/camel/camel-ews-store.c:3440
+#: ../src/EWS/camel/camel-ews-store.c:3436
 #: ../src/Microsoft365/camel/camel-m365-store.c:1494
 msgid "Could not locate Inbox folder"
 msgstr "Gelen Kutusu klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3452
+#: ../src/EWS/camel/camel-ews-store.c:3448
 #: ../src/Microsoft365/camel/camel-m365-store.c:1506
 msgid "Could not locate Trash folder"
 msgstr "Çöp klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3489
+#: ../src/EWS/camel/camel-ews-store.c:3485
 #: ../src/Microsoft365/camel/camel-m365-store.c:1544
 msgid "Could not locate Junk folder"
 msgstr "Önemsiz klasörü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Çevrim dışı kipte EWS klasörlerine abone olunamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "“%s” klasörüne abone olunamıyor, kullanılabilir bir açık klasör yok"
 
-#: ../src/EWS/camel/camel-ews-store.c:3714
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "“%s” klasörüne abone olunamıyor, klasör bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3723
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "“%s” klasörüne abone olunamıyor, klasör kimliği bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3734
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "“%s” klasörüne abone olunamıyor, genel klasör kökü bulunamadı"
 
-#: ../src/EWS/camel/camel-ews-store.c:3810
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Çevrip dışı kipte EWS klasörlerinden abonelik kaldırılamıyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3921
+#: ../src/EWS/camel/camel-ews-store.c:3917
 #: ../src/Microsoft365/camel/camel-m365-store.c:1852
 #: ../src/Microsoft365/camel/camel-m365-store.c:1865
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Bu işlemi tamamlayabilmek için çevrim içi çalışmanız gerekiyor"
 
-#: ../src/EWS/camel/camel-ews-store.c:3993
-#: ../src/EWS/camel/camel-ews-store.c:4030
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
 #: ../src/Microsoft365/camel/camel-m365-store.c:1988
 #: ../src/Microsoft365/camel/camel-m365-store.c:2029
 msgid "Unsetting the “Out of Office” status"
@@ -1431,7 +1431,7 @@ msgstr ""
 "Temsilciler ögeleri kendilerine gönderebilir, konuşma istekleri için "
 "oluşturma ve yanıtlamayı sağlayabilirler. send-on-behalf-of izinleri dışında "
 "tüm klasör izinlerine sahip olmak için pencereyi kapatın, klasöre sağ "
-"tıklayın, İzinler 'e tıklayın ve oradaki seçeneği değiştirin."
+"tıklayın, İzinler’e tıklayın ve oradaki seçeneği değiştirin."
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1075
 msgid ""
@@ -1762,21 +1762,21 @@ msgstr ""
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 görevi, yalnızca mutlak zamanlı anımsatıcı içerebilir"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2474
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 görevi ek içeremez."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2577
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "“%s” URIʼli ek depolanamadı"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
 msgid "Failed to read attachment URI"
 msgstr "Ek URIʼsi okunamadı"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2593
 msgid "Failed to get inline attachment data"
 msgstr "Satır içi ek verisi alınamadı"
 
@@ -1822,7 +1822,7 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Microsoft 365 aracılığıyla posta al"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1470
+#: ../src/Microsoft365/common/e-m365-connection.c:1502
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Bozuk URI: “%s”"
@@ -1879,35 +1879,40 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1111
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr "Sunucu beklenmedik '%s' ana makinesiyle URL döndürdü, '%s' beklendi"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1141
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Microsoft 365 sunucusu meşgul, yeniden deneme bekleniyor (%d:%02d dakika)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1117
+#: ../src/Microsoft365/common/e-m365-connection.c:1147
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Microsoft 365 sunucusu meşgul, yeniden deneme bekleniyor (%d saniye)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1272
+#: ../src/Microsoft365/common/e-m365-connection.c:1299
 msgid "Invalid data"
 msgstr "Geçersiz veri"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1267
+#: ../src/Microsoft365/common/e-m365-connection.c:1297
 msgid "Operation was cancelled"
 msgstr "İşlem iptal edildi"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1964
+#: ../src/Microsoft365/common/e-m365-connection.c:2003
 msgid "Failed to parse own Json data"
 msgstr "Kendi Json verisi ayrıştırılamadı"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5493
+#: ../src/Microsoft365/common/e-m365-connection.c:5532
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "'%s' adresinde örnek bulunamadı"
