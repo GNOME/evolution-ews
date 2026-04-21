@@ -966,6 +966,9 @@ m365_connection_extract_error (JsonNode *node,
 	} else if (g_strcmp0 (code, "ErrorInvalidIdMalformed") == 0) {
 		domain = E_M365_ERROR;
 		status_code = E_M365_ERROR_ID_MALFORMED;
+	} else if (g_strcmp0 (code, "ErrorAccessDenied") == 0) {
+		domain = E_M365_ERROR;
+		status_code = E_M365_ERROR_ACCESS_DENIED;
 	} else if (g_strcmp0 (code, "SyncStateNotFound") == 0) {
 		domain = E_M365_ERROR;
 		status_code = E_M365_ERROR_SYNC_STATE_NOT_FOUND;

@@ -7,6 +7,8 @@
 
 #include <mail/e-mail-config-notebook.h>
 
+#include "common/camel-m365-settings.h"
+
 #include "e-mail-config-m365-ooo-page.h"
 #include "e-mail-config-m365-notebook.h"
 
@@ -20,6 +22,33 @@ static EMailConfigNotebook *
 mail_config_m365_notebook_get_extensible (EMailConfigM365Notebook *self)
 {
 	return E_MAIL_CONFIG_NOTEBOOK (e_extension_get_extensible (E_EXTENSION (self)));
+}
+
+static gboolean
+mail_config_m365_notebook_is_shared_mailbox (ESource *collection_source)
+{
+	CamelSettings *settings;
+	CamelM365Settings *m365_settings;
+	ESourceCamel *extension;
+	const gchar *extension_name;
+	const gchar *impersonate_user;
+
+	extension_name = e_source_camel_get_extension_name ("Microsoft365");
+	extension = e_source_get_extension (collection_source, extension_name);
+
+	settings = e_source_camel_get_settings (extension);
+
+	if (!settings || !CAMEL_IS_M365_SETTINGS (settings))
+		return FALSE;
+
+	m365_settings = CAMEL_M365_SETTINGS (settings);
+
+	if (!camel_m365_settings_get_use_impersonation (m365_settings))
+		return FALSE;
+
+	impersonate_user = camel_m365_settings_get_impersonate_user (m365_settings);
+
+	return impersonate_user && *impersonate_user;
 }
 
 static void
@@ -53,7 +82,7 @@ mail_config_m365_notebook_constructed (GObject *object)
 	backend_ext = e_source_get_extension (account_source, extension_name);
 	backend_name = e_source_backend_get_backend_name (backend_ext);
 
-	if (g_strcmp0 (backend_name, "microsoft365") == 0) {
+	if (g_strcmp0 (backend_name, "microsoft365") == 0 && !mail_config_m365_notebook_is_shared_mailbox (collection_source)) {
 		EMailConfigPage *page;
 
 		page = e_mail_config_m365_ooo_page_new (registry, account_source, identity_source, collection_source);
