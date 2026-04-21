@@ -508,6 +508,7 @@ m365_update_has_ooo_set (CamelSession *session,
 	CamelM365Store *self = user_data;
 	EM365AutomaticRepliesSetting *setting = NULL;
 	EM365Connection *cnc;
+	GError *local_error = NULL;
 
 	cnc = camel_m365_store_ref_connection (self);
 	if (!cnc)
@@ -515,13 +516,44 @@ m365_update_has_ooo_set (CamelSession *session,
 
 	camel_operation_push_message (cancellable, _("Checking “Out of Office” settings"));
 
-	if (e_m365_connection_get_automatic_replies_setting_sync (cnc, NULL,  &setting, cancellable, error) && setting) {
+	if (e_m365_connection_get_automatic_replies_setting_sync (cnc, NULL,  &setting, cancellable, &local_error) && setting) {
 		camel_m365_store_set_has_ooo_set (self, e_m365_automatic_replies_setting_get_status (setting) == E_M365_AUTOMATIC_REPLIES_STATUS_ALWAYS_ENABLED);
 		g_clear_pointer (&setting, json_object_unref);
 	}
 
+	/* This can be returned for shared mailboxes */
+	if (g_error_matches (local_error, E_M365_ERROR, E_M365_ERROR_ACCESS_DENIED))
+		g_clear_error (&local_error);
+	else if (local_error)
+		g_propagate_error (error, local_error);
+
 	camel_operation_pop_message (cancellable);
 	g_clear_object (&cnc);
+}
+
+static gboolean
+m365_store_is_shared_mailbox (CamelM365Store *self)
+{
+	CamelSettings *settings;
+	gboolean is_shared = FALSE;
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (self));
+
+	if (CAMEL_IS_M365_SETTINGS (settings)) {
+		CamelM365Settings *m365_settings = CAMEL_M365_SETTINGS (settings);
+
+		if (camel_m365_settings_get_use_impersonation (m365_settings)) {
+			const gchar *impersonate_user;
+
+			impersonate_user = camel_m365_settings_get_impersonate_user (m365_settings);
+
+			is_shared = impersonate_user && *impersonate_user;
+		}
+	}
+
+	g_clear_object (&settings);
+
+	return is_shared;
 }
 
 static gboolean
@@ -567,7 +599,7 @@ m365_store_connect_sync (CamelService *service,
 
 			state = camel_m365_store_get_ooo_alert_state (m365_store);
 
-			if (state == CAMEL_M365_STORE_OOO_ALERT_STATE_UNKNOWN) {
+			if (state == CAMEL_M365_STORE_OOO_ALERT_STATE_UNKNOWN && !m365_store_is_shared_mailbox (m365_store)) {
 				camel_session_submit_job (
 					session, _("Checking “Out of Office” settings"),
 					m365_update_has_ooo_set,
