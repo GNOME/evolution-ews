@@ -83,7 +83,7 @@ ecb_m365_convert_error_to_client_error (GError **perror)
 static const gchar *
 ecb_m365_get_component_from_extra (const gchar *extra)
 {
-	gchar *enter;
+	const gchar *enter;
 
 	if (!extra)
 		return NULL;
