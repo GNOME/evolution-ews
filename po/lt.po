@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-03-10 13:33+0000\n"
-"PO-Revision-Date: 2026-03-11 17:03+0200\n"
+"POT-Creation-Date: 2026-04-28 07:43+0000\n"
+"PO-Revision-Date: 2026-05-04 22:49+0300\n"
 "Last-Translator: Aurimas Černius <aurimas.cernius@mailo.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "(n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:66
@@ -94,7 +94,7 @@ msgid "Cannot determine EWS ItemId"
 msgstr "Nepavyko nustatyti EWS ItemId"
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3261
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -108,7 +108,7 @@ msgstr ""
 "Internetinis susitikimas gali būti sukurtas tik pagrindinio naudotojo "
 "kalendoriuje."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
 #: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
 #, c-format
 msgid "Cannot find user “%s” between attendees"
@@ -324,8 +324,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
-#: ../src/Microsoft365/camel/camel-m365-store.c:516
-#: ../src/Microsoft365/camel/camel-m365-store.c:572
+#: ../src/Microsoft365/camel/camel-m365-store.c:517
+#: ../src/Microsoft365/camel/camel-m365-store.c:604
 msgid "Checking “Out of Office” settings"
 msgstr "Tikrinami „Ne ofise“ nustatymai"
 
@@ -362,7 +362,7 @@ msgid "Updating foreign folders"
 msgstr "Atnaujinami išoriniai aplankai"
 
 #: ../src/EWS/camel/camel-ews-store.c:2334
-#: ../src/Microsoft365/camel/camel-m365-store.c:676
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nėra tokio aplanko: %s"
@@ -376,7 +376,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Nevyksta rasti jokių EWS viešų aplankų"
 
 #: ../src/EWS/camel/camel-ews-store.c:2865
-#: ../src/Microsoft365/camel/camel-m365-store.c:739
+#: ../src/Microsoft365/camel/camel-m365-store.c:771
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Negalima sukurti aplanko „%s“, toks aplankas jau yra"
@@ -402,7 +402,7 @@ msgstr ""
 "aplankams"
 
 #: ../src/EWS/camel/camel-ews-store.c:3007
-#: ../src/Microsoft365/camel/camel-m365-store.c:924
+#: ../src/Microsoft365/camel/camel-m365-store.c:956
 #, c-format
 msgid "Folder does not exist"
 msgstr "Tokio aplanko nėra"
@@ -465,17 +465,17 @@ msgid "Exchange service for %s on %s"
 msgstr "Exchange tarnyba %s %s"
 
 #: ../src/EWS/camel/camel-ews-store.c:3436
-#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+#: ../src/Microsoft365/camel/camel-m365-store.c:1526
 msgid "Could not locate Inbox folder"
 msgstr "Nepavyko rasti gaunamo pašto aplanko"
 
 #: ../src/EWS/camel/camel-ews-store.c:3448
-#: ../src/Microsoft365/camel/camel-m365-store.c:1506
+#: ../src/Microsoft365/camel/camel-m365-store.c:1538
 msgid "Could not locate Trash folder"
 msgstr "Nepavyko rasti šiukšlinės aplanko"
 
 #: ../src/EWS/camel/camel-ews-store.c:3485
-#: ../src/Microsoft365/camel/camel-m365-store.c:1544
+#: ../src/Microsoft365/camel/camel-m365-store.c:1576
 msgid "Could not locate Junk folder"
 msgstr "Nepavyko rasti šlamšto aplanko"
 
@@ -512,16 +512,16 @@ msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Negalima išsiregistruoti iš EWS aplankų atsijungimo veiksenoje"
 
 #: ../src/EWS/camel/camel-ews-store.c:3917
-#: ../src/Microsoft365/camel/camel-m365-store.c:1852
-#: ../src/Microsoft365/camel/camel-m365-store.c:1865
+#: ../src/Microsoft365/camel/camel-m365-store.c:1884
+#: ../src/Microsoft365/camel/camel-m365-store.c:1897
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Šiam veiksmui užbaigti, reikia būti prisijungus"
 
 #: ../src/EWS/camel/camel-ews-store.c:3989
 #: ../src/EWS/camel/camel-ews-store.c:4026
-#: ../src/Microsoft365/camel/camel-m365-store.c:1988
-#: ../src/Microsoft365/camel/camel-m365-store.c:2029
+#: ../src/Microsoft365/camel/camel-m365-store.c:2020
+#: ../src/Microsoft365/camel/camel-m365-store.c:2061
 msgid "Unsetting the “Out of Office” status"
 msgstr "Nuimama būsena „ne ofise“"
 
@@ -1849,27 +1849,27 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Laiškų galimas per Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1470
+#: ../src/Microsoft365/common/e-m365-connection.c:1505
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Blogai suformuotas URI: „%s“"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:579
+#: ../src/Microsoft365/camel/camel-m365-store.c:611
 msgid "Look up Microsoft 365 categories"
 msgstr "Peržiūrėti Microsoft 365 kategorijas"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:588
+#: ../src/Microsoft365/camel/camel-m365-store.c:620
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Nepavyko sukurti ryšio"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:753
+#: ../src/Microsoft365/camel/camel-m365-store.c:785
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Nėra tėvinio aplanko „%s“"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:996
-#: ../src/Microsoft365/camel/camel-m365-store.c:1034
+#: ../src/Microsoft365/camel/camel-m365-store.c:1028
+#: ../src/Microsoft365/camel/camel-m365-store.c:1066
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Aplanko „%s“ nėra"
@@ -1906,7 +1906,12 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1111
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr "Serveris grąžino URL su netikėtu serveriu „%s“, tikėtasi „%s“"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1144
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1920,7 +1925,7 @@ msgstr[2] ""
 "Microsoft 365 serveris yra užsiėmęs, laukiama pakartotiniam bandymui (%d:"
 "%02d minučių)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1117
+#: ../src/Microsoft365/common/e-m365-connection.c:1150
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1934,21 +1939,21 @@ msgstr[2] ""
 "Microsoft 365 serveris yra užsiėmęs, laukiama pakartotiniam bandymui (%d "
 "sekundžių)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1275
+#: ../src/Microsoft365/common/e-m365-connection.c:1302
 msgid "Invalid data"
 msgstr "Netinkami duomenys"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1267
+#: ../src/Microsoft365/common/e-m365-connection.c:1300
 msgid "Operation was cancelled"
 msgstr "Veiksmo atsisakyta"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1967
+#: ../src/Microsoft365/common/e-m365-connection.c:2006
 msgid "Failed to parse own Json data"
 msgstr "Nepavyko perskaityti savų JSON duomenų"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5496
+#: ../src/Microsoft365/common/e-m365-connection.c:5535
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Nepavyko rasti vieneto adresu „%s“"
