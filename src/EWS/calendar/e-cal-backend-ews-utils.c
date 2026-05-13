@@ -37,7 +37,7 @@
 #if !ICAL_CHECK_VERSION(3, 99, 99)
 #define ICalPropertyClassenum ICalProperty_Class
 #define i_cal_duration_new_from_seconds i_cal_duration_new_from_int
-#define i_cal_duration_as_seconds i_cal_duration_as_int
+#define i_cal_duration_as_utc_seconds i_cal_duration_as_int
 #endif
 
 /*
@@ -325,7 +325,7 @@ ews_get_alarm (ECalComponent *comp)
 
 		trigger = e_cal_component_alarm_get_trigger (alarm);
 		if (trigger && e_cal_component_alarm_trigger_get_kind (trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START) {
-			dur_int = (i_cal_duration_as_seconds (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
+			dur_int = (i_cal_duration_as_utc_seconds (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
 		}
 	}
 	e_cal_component_alarm_free (alarm);
@@ -360,7 +360,7 @@ ews_set_alarm (ESoapRequest *request,
 
 		trigger = e_cal_component_alarm_get_trigger (alarm);
 		if (trigger && e_cal_component_alarm_trigger_get_kind (trigger) == E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START) {
-			dur_int = (i_cal_duration_as_seconds (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
+			dur_int = (i_cal_duration_as_utc_seconds (e_cal_component_alarm_trigger_get_duration (trigger)) / SECS_IN_MINUTE) * -1;
 			e_ews_request_write_int_parameter (request, "ReminderMinutesBeforeStart", NULL, dur_int);
 			if (with_due_by) {
 				ICalTime *dtstart;
