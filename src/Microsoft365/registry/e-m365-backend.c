@@ -26,6 +26,7 @@ struct _EM365BackendPrivate {
 	gboolean need_update_folders;
 
 	gulong source_changed_id;
+	gulong oauth2_support_handler_id;
 };
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EM365Backend, e_m365_backend, E_TYPE_COLLECTION_BACKEND, 0,
@@ -53,6 +54,20 @@ m365_backend_claim_old_resources (ECollectionBackend *backend)
 }
 
 static void m365_backend_populate (ECollectionBackend *backend);
+
+static void
+m365_backend_oauth2_support_ready_cb (GObject *source,
+				      GParamSpec *pspec,
+				      EM365Backend *m365_backend)
+{
+	if (m365_backend->priv->oauth2_support_handler_id) {
+		g_signal_handler_disconnect (source, m365_backend->priv->oauth2_support_handler_id);
+		m365_backend->priv->oauth2_support_handler_id = 0;
+	}
+
+	if (e_backend_get_online (E_BACKEND (m365_backend)))
+		e_backend_schedule_authenticate (E_BACKEND (m365_backend), NULL);
+}
 
 static void
 m365_backend_source_changed_cb (ESource *source,
@@ -96,8 +111,35 @@ m365_backend_populate (ECollectionBackend *collection_backend)
 
 	m365_backend_claim_old_resources (collection_backend);
 
-	if (e_backend_get_online (backend))
-		e_backend_schedule_authenticate (backend, NULL);
+	if (e_backend_get_online (backend)) {
+		gboolean is_external = FALSE;
+
+		if (e_source_has_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+			ESourceAuthentication *auth_extension;
+
+			auth_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
+			is_external = e_source_authentication_get_is_external (auth_extension);
+		}
+
+		/* For GOA-managed sources, oauth2_support is set asynchronously. If it hasn't
+		   been set yet, wait for it before scheduling authentication to avoid a spurious
+		   "does not support OAuth 2.0 authentication" error. */
+		if (is_external && E_IS_SERVER_SIDE_SOURCE (source)) {
+			EOAuth2Support *oauth2_support;
+
+			oauth2_support = e_server_side_source_ref_oauth2_support (E_SERVER_SIDE_SOURCE (source));
+			if (oauth2_support) {
+				g_clear_object (&oauth2_support);
+				e_backend_schedule_authenticate (backend, NULL);
+			} else if (!m365_backend->priv->oauth2_support_handler_id) {
+				m365_backend->priv->oauth2_support_handler_id = g_signal_connect (
+					source, "notify::oauth2-support",
+					G_CALLBACK (m365_backend_oauth2_support_ready_cb), m365_backend);
+			}
+		} else {
+			e_backend_schedule_authenticate (backend, NULL);
+		}
+	}
 
 	e_collection_backend_thaw_populate (collection_backend);
 }
@@ -955,6 +997,11 @@ m365_backend_dispose (GObject *object)
 	if (source && m365_backend->priv->source_changed_id) {
 		g_signal_handler_disconnect (source, m365_backend->priv->source_changed_id);
 		m365_backend->priv->source_changed_id = 0;
+	}
+
+	if (source && m365_backend->priv->oauth2_support_handler_id) {
+		g_signal_handler_disconnect (source, m365_backend->priv->oauth2_support_handler_id);
+		m365_backend->priv->oauth2_support_handler_id = 0;
 	}
 
 	/* Chain up to parent's method. */
