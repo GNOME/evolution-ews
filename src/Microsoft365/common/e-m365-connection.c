@@ -1544,8 +1544,8 @@ e_m365_connection_authenticate_sync (EM365Connection *cnc,
 		} else if (e_soup_session_get_ssl_error_details (E_SOUP_SESSION (cnc->priv->soup_session), out_certificate_pem, out_certificate_errors)) {
 			result = E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED;
 		} else if (g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
-			   /* Returned by the OAuth2 service when the token cannot be refreshed */
-			   g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CONNECTION_REFUSED)) {
+			   g_error_matches (local_error, E_OAUTH2_SERVICE_ERROR, E_OAUTH2_SERVICE_ERROR_TOKEN_EXPIRED) ||
+			   g_error_matches (local_error, E_OAUTH2_SERVICE_ERROR, E_OAUTH2_SERVICE_ERROR_REFRESH_FAILED)) {
 			LOCK (cnc);
 
 			if (cnc->priv->impersonate_user) {
