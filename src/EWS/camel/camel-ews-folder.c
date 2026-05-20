@@ -2650,6 +2650,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			CamelMessageInfo *info;
 			CamelMessageInfo *clone;
 			const EwsId *id;
+			gchar *tmp_fname, *cur_fname, *dirname;
 
 			if (e_ews_item_get_item_type (l->data) == E_EWS_ITEM_TYPE_ERROR) {
 				if (!local_error)
@@ -2664,8 +2665,11 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			if (message == NULL)
 				continue;
 
+			/* Write to "tmp" first; rename to "cur" only after the write
+			   completes, so an interrupted copy never leaves a truncated
+			   "cur" file that would be treated as a valid cached message. */
 			stream = ews_data_cache_add (
-				CAMEL_EWS_FOLDER (destination)->cache, "cur", id->id, NULL);
+				CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
 			if (stream == NULL) {
 				g_object_unref (message);
 
@@ -2675,13 +2679,31 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			camel_data_wrapper_write_to_stream_sync (
 				CAMEL_DATA_WRAPPER (message), stream, cancellable, NULL);
 
+			g_clear_object (&stream);
+
 			info = camel_folder_summary_get (camel_folder_get_folder_summary (source), uids->pdata[i]);
 			if (info == NULL) {
-				g_object_unref (stream);
+				ews_data_cache_remove (CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
 				g_object_unref (message);
 
 				continue;
 			}
+
+			tmp_fname = ews_data_cache_get_filename (CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
+			cur_fname = ews_data_cache_get_filename (CAMEL_EWS_FOLDER (destination)->cache, "cur", id->id, NULL);
+			dirname = g_path_get_dirname (cur_fname);
+			g_mkdir_with_parents (dirname, 0700);
+			g_free (dirname);
+
+			if (g_rename (tmp_fname, cur_fname) != 0) {
+				gint errsv = errno;
+				g_warning ("%s: Failed to rename '%s' to '%s': %s",
+					G_STRFUNC, tmp_fname, cur_fname, g_strerror (errsv));
+			}
+
+			ews_data_cache_remove (CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
+			g_free (tmp_fname);
+			g_free (cur_fname);
 
 			clone = camel_message_info_clone (info, NULL);
 
@@ -2690,7 +2712,6 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 			g_clear_object (&clone);
 			g_clear_object (&info);
-			g_object_unref (stream);
 			g_object_unref (message);
 		}
 

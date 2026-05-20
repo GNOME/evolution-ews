@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include <glib/gi18n-lib.h>
+#include <glib/gstdio.h>
 
 #include "e-ews-common-utils.h"
 
@@ -83,31 +84,6 @@ m365_folder_cache_new_checksum (const gchar *id)
 	g_checksum_update (checksum, (const guchar *) id, strlen (id));
 
 	return checksum;
-}
-
-static CamelStream *
-m365_folder_cache_add (CamelM365Folder *m365_folder,
-		       const gchar *id,
-		       GError **error)
-{
-	GIOStream *base_stream;
-	CamelStream *stream = NULL;
-	GChecksum *checksum;
-
-	checksum = m365_folder_cache_new_checksum (id);
-
-	LOCK_CACHE (m365_folder);
-	base_stream = camel_data_cache_add (m365_folder->priv->cache, M365_LOCAL_CACHE_PATH, g_checksum_get_string (checksum), error);
-	UNLOCK_CACHE (m365_folder);
-
-	g_checksum_free (checksum);
-
-	if (base_stream) {
-		stream = camel_stream_new (base_stream);
-		g_object_unref (base_stream);
-	}
-
-	return stream;
 }
 
 static gint
@@ -324,7 +300,22 @@ m365_folder_get_message_sync (CamelFolder *folder,
 	g_mutex_unlock (&m365_folder->priv->get_message_lock);
 
 	if (success && !message) {
-		cache_stream = m365_folder_cache_add (m365_folder, uid, error);
+		GChecksum *checksum;
+		GIOStream *base_stream;
+		gchar *tmp_filename, *cur_filename;
+
+		/* Write to "tmp" first; rename to "cur" only on success so an
+		   interrupted download never leaves a truncated "cur" file. */
+		checksum = m365_folder_cache_new_checksum (uid);
+
+		LOCK_CACHE (m365_folder);
+		base_stream = camel_data_cache_add (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), error);
+		tmp_filename = camel_data_cache_get_filename (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum));
+		cur_filename = camel_data_cache_get_filename (m365_folder->priv->cache, M365_LOCAL_CACHE_PATH, g_checksum_get_string (checksum));
+		UNLOCK_CACHE (m365_folder);
+
+		cache_stream = base_stream != NULL ? camel_stream_new (base_stream) : NULL;
+		g_clear_object (&base_stream);
 
 		success = cache_stream != NULL;
 
@@ -343,13 +334,35 @@ m365_folder_get_message_sync (CamelFolder *folder,
 			success = FALSE;
 		}
 
-		if (success) {
-			/* First free the cache stream, thus the follwing call opens a new instance,
-			   which is rewinded at the beginning of the stream. */
-			g_clear_object (&cache_stream);
+		/* Close the write stream before committing so the rename is safe
+		   on all platforms and all data is flushed to disk. */
+		g_clear_object (&cache_stream);
 
-			message = m365_folder_get_message_from_cache (m365_folder, uid, cancellable, error);
+		if (success) {
+			gchar *dirname;
+			gint saved_errno;
+
+			dirname = g_path_get_dirname (cur_filename);
+			g_mkdir_with_parents (dirname, 0700);
+			g_free (dirname);
+
+			if (g_rename (tmp_filename, cur_filename) == 0) {
+				camel_data_cache_remove (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), NULL);
+				message = m365_folder_get_message_from_cache (m365_folder, uid, cancellable, error);
+			} else {
+				saved_errno = errno;
+				camel_data_cache_remove (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), NULL);
+				g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+					"Failed to store message '%s': %s", uid, g_strerror (saved_errno));
+				success = FALSE;
+			}
+		} else {
+			camel_data_cache_remove (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), NULL);
 		}
+
+		g_checksum_free (checksum);
+		g_free (tmp_filename);
+		g_free (cur_filename);
 	}
 
 	g_clear_object (&cache_stream);
