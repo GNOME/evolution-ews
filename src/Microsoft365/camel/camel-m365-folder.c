@@ -302,20 +302,14 @@ m365_folder_get_message_sync (CamelFolder *folder,
 	if (success && !message) {
 		GChecksum *checksum;
 		GIOStream *base_stream;
-		gchar *tmp_filename, *cur_filename;
 
-		/* Write to "tmp" first; rename to "cur" only on success so an
-		   interrupted download never leaves a truncated "cur" file. */
 		checksum = m365_folder_cache_new_checksum (uid);
 
 		LOCK_CACHE (m365_folder);
-		base_stream = camel_data_cache_add (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), error);
-		tmp_filename = camel_data_cache_get_filename (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum));
-		cur_filename = camel_data_cache_get_filename (m365_folder->priv->cache, M365_LOCAL_CACHE_PATH, g_checksum_get_string (checksum));
+		base_stream = camel_data_cache_add_atomic (m365_folder->priv->cache, M365_LOCAL_CACHE_PATH, g_checksum_get_string (checksum), error);
 		UNLOCK_CACHE (m365_folder);
 
 		cache_stream = base_stream != NULL ? camel_stream_new (base_stream) : NULL;
-		g_clear_object (&base_stream);
 
 		success = cache_stream != NULL;
 
@@ -339,30 +333,20 @@ m365_folder_get_message_sync (CamelFolder *folder,
 		g_clear_object (&cache_stream);
 
 		if (success) {
-			gchar *dirname;
-			gint saved_errno;
+			GIOStream *committed;
 
-			dirname = g_path_get_dirname (cur_filename);
-			g_mkdir_with_parents (dirname, 0700);
-			g_free (dirname);
-
-			if (g_rename (tmp_filename, cur_filename) == 0) {
-				camel_data_cache_remove (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), NULL);
+			committed = camel_data_cache_commit_atomic (m365_folder->priv->cache, g_steal_pointer (&base_stream), error);
+			if (committed != NULL) {
+				g_clear_object (&committed);
 				message = m365_folder_get_message_from_cache (m365_folder, uid, cancellable, error);
 			} else {
-				saved_errno = errno;
-				camel_data_cache_remove (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), NULL);
-				g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-					_("Failed to store message '%s': %s"), uid, g_strerror (saved_errno));
 				success = FALSE;
 			}
 		} else {
-			camel_data_cache_remove (m365_folder->priv->cache, "tmp", g_checksum_get_string (checksum), NULL);
+			camel_data_cache_discard_atomic (m365_folder->priv->cache, g_steal_pointer (&base_stream));
 		}
 
 		g_checksum_free (checksum);
-		g_free (tmp_filename);
-		g_free (cur_filename);
 	}
 
 	g_clear_object (&cache_stream);

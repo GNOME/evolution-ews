@@ -178,27 +178,20 @@ ews_get_filename (CamelFolder *folder,
 	return filename;
 }
 
-static CamelStream *
-ews_data_cache_add (CamelDataCache *cdc,
-		    const gchar *path,
-		    const gchar *key,
-		    GError **error)
+static GIOStream *
+ews_data_cache_add_atomic (CamelDataCache *cdc,
+			   const gchar *key,
+			   GError **error)
 {
-	GIOStream *base_stream;
-	CamelStream *stream = NULL;
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
+	GIOStream *base_stream;
 
 	g_checksum_update (sha, (guchar *) key, strlen (key));
-	base_stream = camel_data_cache_add (
-		cdc, path, g_checksum_get_string (sha), error);
+	base_stream = camel_data_cache_add_atomic (
+		cdc, "cur", g_checksum_get_string (sha), error);
 	g_checksum_free (sha);
 
-	if (base_stream != NULL) {
-		stream = camel_stream_new (base_stream);
-		g_object_unref (base_stream);
-	}
-
-	return stream;
+	return base_stream;
 }
 
 static gint
@@ -2650,7 +2643,8 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			CamelMessageInfo *info;
 			CamelMessageInfo *clone;
 			const EwsId *id;
-			gchar *tmp_fname, *cur_fname, *dirname;
+			GIOStream *base_stream;
+			GIOStream *committed;
 
 			if (e_ews_item_get_item_type (l->data) == E_EWS_ITEM_TYPE_ERROR) {
 				if (!local_error)
@@ -2665,45 +2659,26 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			if (message == NULL)
 				continue;
 
-			/* Write to "tmp" first; rename to "cur" only after the write
-			   completes, so an interrupted copy never leaves a truncated
-			   "cur" file that would be treated as a valid cached message. */
-			stream = ews_data_cache_add (
-				CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
-			if (stream == NULL) {
-				g_object_unref (message);
-
+			base_stream = ews_data_cache_add_atomic (CAMEL_EWS_FOLDER (destination)->cache, id->id, NULL);
+			if (base_stream == NULL) {
+				g_clear_object (&message);
 				continue;
 			}
 
+			stream = camel_stream_new (base_stream);
 			camel_data_wrapper_write_to_stream_sync (
 				CAMEL_DATA_WRAPPER (message), stream, cancellable, NULL);
-
 			g_clear_object (&stream);
 
 			info = camel_folder_summary_get (camel_folder_get_folder_summary (source), uids->pdata[i]);
 			if (info == NULL) {
-				ews_data_cache_remove (CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
-				g_object_unref (message);
-
+				camel_data_cache_discard_atomic (CAMEL_EWS_FOLDER (destination)->cache, g_steal_pointer (&base_stream));
+				g_clear_object (&message);
 				continue;
 			}
 
-			tmp_fname = ews_data_cache_get_filename (CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
-			cur_fname = ews_data_cache_get_filename (CAMEL_EWS_FOLDER (destination)->cache, "cur", id->id, NULL);
-			dirname = g_path_get_dirname (cur_fname);
-			g_mkdir_with_parents (dirname, 0700);
-			g_free (dirname);
-
-			if (g_rename (tmp_fname, cur_fname) != 0) {
-				gint errsv = errno;
-				g_warning ("%s: Failed to rename '%s' to '%s': %s",
-					G_STRFUNC, tmp_fname, cur_fname, g_strerror (errsv));
-			}
-
-			ews_data_cache_remove (CAMEL_EWS_FOLDER (destination)->cache, "tmp", id->id, NULL);
-			g_free (tmp_fname);
-			g_free (cur_fname);
+			committed = camel_data_cache_commit_atomic (CAMEL_EWS_FOLDER (destination)->cache, g_steal_pointer (&base_stream), NULL);
+			g_clear_object (&committed);
 
 			clone = camel_message_info_clone (info, NULL);
 
