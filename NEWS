@@ -1,3 +1,16 @@
+Evolution-EWS 3.60.2 2026-05-22
+-------------------------------
+
+Bug Fixes:
+	I#333 - m365: Skip Out of Office check for shared mailboxes
+	I#335 - m365: GOA account can delay OAuth2 support addition
+	evo-I#3302 - Truncated file stored in the (mail) cache
+
+Miscellaneous:
+	e-m365-connection: Ensure soup message body is filled on retry
+	Calendar: Use icaldurationtype_as_utc_seconds() for libical 4.x
+	OAuth2: Uses its own error domain
+
 Evolution-EWS 3.60.1 2026-04-10
 -------------------------------
 
