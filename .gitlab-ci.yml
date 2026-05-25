@@ -34,7 +34,7 @@ fedora:
     - git clone --depth=1 --branch $BASE_BRANCH https://gitlab.gnome.org/GNOME/evolution.git
     - cd $DEPS/evolution-data-server
     - mkdir _build && cd _build
-    - cmake -G "Ninja" \
+    - cmake -G "Ninja"
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=$PREFIX
             -DENABLE_GOA=ON
@@ -52,7 +52,7 @@ fedora:
     - ninja install
     - cd $DEPS/evolution
     - mkdir _build && cd _build
-    - cmake -G "Ninja" \
+    - cmake -G "Ninja"
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=$PREFIX
             -DENABLE_GTK_DOC=OFF
@@ -64,7 +64,7 @@ fedora:
     - ninja install
     - cd $SOURCE
     - mkdir _build && cd _build
-    - cmake -G "Ninja" \
+    - cmake -G "Ninja"
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=$PREFIX
             ..
