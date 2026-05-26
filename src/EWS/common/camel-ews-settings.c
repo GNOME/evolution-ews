@@ -579,7 +579,7 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"check-all",
 			"Check All",
 			"Check all folders for new messages",
-			FALSE,
+			TRUE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
