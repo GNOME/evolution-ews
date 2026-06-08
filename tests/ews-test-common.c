@@ -106,10 +106,6 @@ ews_test_init (gint argc,
 	GList *fake_hostnames = NULL;
 	GList *fake_server_uris = NULL;
 
-#if !GLIB_CHECK_VERSION (2, 35, 0)
-	g_type_init ();
-#endif
-
 	/* Parse the custom options */
 	for (i = 1; i < argc; i++) {
 		if (g_strcmp0 ("--no-interactive", argv[i]) == 0 || g_strcmp0 ("-i", argv[i]) == 0) {
