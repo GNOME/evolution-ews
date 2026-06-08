@@ -362,10 +362,12 @@ ecb_m365_add_date_time_zone (EM365Connection *cnc,
 		const gchar *wzone = NULL;
 		time_t tt;
 
-		if (new_tzid)
+		if (new_value && i_cal_time_is_utc (new_value))
+			izone = i_cal_timezone_get_utc_timezone ();
+		else if (new_tzid)
 			izone = e_timezone_cache_get_timezone (timezone_cache, new_tzid);
 
-		if (!new_tzid || !*new_tzid || !izone)
+		if (!izone)
 			izone = e_ews_common_utils_get_configured_icaltimezone ();
 
 		if (izone)
