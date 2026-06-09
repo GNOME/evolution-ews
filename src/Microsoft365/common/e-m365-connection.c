@@ -2715,6 +2715,11 @@ e_m365_connection_get_objects_delta_sync (EM365Connection *cnc,
 			kind_str = "mailFolders";
 			kind_path_str = "messages";
 			break;
+		case E_M365_FOLDER_KIND_CALENDAR:
+			g_return_val_if_fail (folder_id != NULL, FALSE);
+			kind_str = "calendars";
+			kind_path_str = "events";
+			break;
 		default:
 			g_warn_if_reached ();
 			break;

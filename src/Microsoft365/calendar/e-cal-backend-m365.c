@@ -435,6 +435,47 @@ ecb_m365_gather_ids_cb (ECalCache *cal_cache,
 	return TRUE;
 }
 
+typedef struct {
+	ECalBackendM365 *cbm365;
+	GPtrArray *ids;
+	GSList **out_removed_objects;
+} CalDeltaData;
+
+static gboolean
+ecb_m365_get_events_delta_cb (EM365Connection *cnc,
+			      const GSList *results,
+			      gpointer user_data,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	CalDeltaData *cdd = user_data;
+	GSList *link;
+
+	g_return_val_if_fail (cdd != NULL, FALSE);
+
+	for (link = (GSList *) results; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+		JsonObject *event = link->data;
+		const gchar *id;
+
+		if (!event)
+			continue;
+
+		id = e_m365_event_get_id (event);
+
+		if (!id)
+			continue;
+
+		if (e_m365_delta_is_removed_object (event)) {
+			*(cdd->out_removed_objects) = g_slist_prepend (*(cdd->out_removed_objects),
+				e_cal_meta_backend_info_new (id, NULL, NULL, NULL));
+		} else {
+			g_ptr_array_add (cdd->ids, g_strdup (id));
+		}
+	}
+
+	return TRUE;
+}
+
 static gboolean
 ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 			   const gchar *last_sync_tag,
@@ -449,25 +490,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 {
 	ECalBackendM365 *cbm365;
 	ECalCache *cal_cache;
-	GSList *items = NULL, *link;
-	GHashTable *left_known_ids;
-	GHashTableIter iter;
-	gpointer key;
-	gboolean full_read;
 	gboolean success = TRUE;
-	gboolean (* list_items_func) (EM365Connection *cnc,
-				      const gchar *user_override,
-				      const gchar *group_id,
-				      const gchar *calendar_id,
-				      const gchar *prefer_outlook_timezone,
-				      const gchar *select,
-				      const gchar *filter,
-				      GSList **out_items,
-				      GCancellable *cancellable,
-				      GError **error);
-	const gchar *(* get_id_func) (JsonObject *item);
-	const gchar *(* get_change_key_func) (JsonObject *item);
-	const gchar *select_props = "id,changeKey";
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_M365 (meta_backend), FALSE);
 	g_return_val_if_fail (out_new_sync_tag != NULL, FALSE);
@@ -475,23 +498,6 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	g_return_val_if_fail (out_created_objects != NULL, FALSE);
 	g_return_val_if_fail (out_modified_objects != NULL, FALSE);
 	g_return_val_if_fail (out_removed_objects != NULL, FALSE);
-
-	switch (e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend))) {
-	case I_CAL_VEVENT_COMPONENT:
-		list_items_func = e_m365_connection_list_events_sync;
-		get_id_func = e_m365_event_get_id;
-		get_change_key_func = e_m365_event_get_change_key;
-		break;
-	case I_CAL_VTODO_COMPONENT:
-		list_items_func = e_m365_connection_list_tasks_sync;
-		get_id_func = e_m365_task_get_id;
-		get_change_key_func = e_m365_task_get_last_modified_as_string;
-		select_props = NULL;
-		break;
-	default:
-		g_warn_if_reached ();
-		return FALSE;
-	}
 
 	*out_created_objects = NULL;
 	*out_modified_objects = NULL;
@@ -502,89 +508,157 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
 	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
 
-	left_known_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	e_cal_cache_search_with_callback (cal_cache, "#t", ecb_m365_gather_ids_cb, left_known_ids, cancellable, NULL);
-
 	LOCK (cbm365);
 
-	full_read = !select_props || !e_cache_get_count (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, cancellable, NULL);
+	if (e_cal_backend_get_kind (E_CAL_BACKEND (meta_backend)) == I_CAL_VEVENT_COMPONENT) {
+		/* Use delta sync for calendar events */
+		CalDeltaData cdd;
+		GError *local_error = NULL;
 
-	success = list_items_func (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, NULL,
-		full_read ? NULL : select_props, NULL, &items, cancellable, error);
+		cdd.cbm365 = cbm365;
+		cdd.ids = g_ptr_array_new_with_free_func (g_free);
+		cdd.out_removed_objects = out_removed_objects;
 
-	if (success) {
-		GSList *new_ids = NULL; /* const gchar *, borrowed from 'items' objects */
-		GSList *changed_ids = NULL; /* const gchar *, borrowed from 'items' objects */
+		success = e_m365_connection_get_objects_delta_sync (cbm365->priv->cnc, NULL,
+			E_M365_FOLDER_KIND_CALENDAR, cbm365->priv->folder_id, "id", last_sync_tag, 0,
+			ecb_m365_get_events_delta_cb, &cdd,
+			out_new_sync_tag, cancellable, &local_error);
 
-		for (link = items; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
-			JsonObject *item = link->data;
-			const gchar *id, *change_key;
-			gchar *extra = NULL;
+		if (e_m365_connection_util_delta_token_failed (local_error)) {
+			/* Delta token expired/invalid - clear cache and do full sync */
+			GSList *known_uids = NULL, *link;
 
-			if (!item)
-				continue;
+			g_clear_error (&local_error);
 
-			id = get_id_func (item);
-			change_key = get_change_key_func (item);
+			if (e_cache_get_uids (E_CACHE (cal_cache), E_CACHE_INCLUDE_DELETED, &known_uids, NULL, cancellable, NULL)) {
+				for (link = known_uids; link; link = g_slist_next (link)) {
+					const gchar *uid = link->data;
 
-			if (id)
-				g_hash_table_remove (left_known_ids, id);
-
-			if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
-				const gchar *saved_change_key = NULL;
-
-				ecb_m365_split_extra (extra, &saved_change_key, NULL);
-
-				if (g_strcmp0 (saved_change_key, change_key) == 0) {
-					g_free (extra);
-					continue;
-				} else if (full_read) {
-					ECalMetaBackendInfo *nfo;
-
-					nfo = ecb_m365_json_to_ical_nfo (cbm365, item, cancellable, NULL);
-
-					if (nfo)
-						*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
-				} else {
-					changed_ids = g_slist_prepend (changed_ids, (gpointer) id);
+					if (uid) {
+						*out_removed_objects = g_slist_prepend (*out_removed_objects,
+							e_cal_meta_backend_info_new (uid, NULL, NULL, NULL));
+					}
 				}
-
-				g_free (extra);
-			} else if (full_read) {
-				ECalMetaBackendInfo *nfo;
-
-				nfo = ecb_m365_json_to_ical_nfo (cbm365, item, cancellable, NULL);
-
-				if (nfo)
-					*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
-			} else {
-				new_ids = g_slist_prepend (new_ids, (gpointer) id);
 			}
+
+			g_slist_free_full (known_uids, g_free);
+			g_ptr_array_set_size (cdd.ids, 0);
+
+			success = e_m365_connection_get_objects_delta_sync (cbm365->priv->cnc, NULL,
+				E_M365_FOLDER_KIND_CALENDAR, cbm365->priv->folder_id, "id", NULL, 0,
+				ecb_m365_get_events_delta_cb, &cdd,
+				out_new_sync_tag, cancellable, &local_error);
 		}
 
-		if (new_ids) {
-			new_ids = g_slist_reverse (new_ids);
-			success = ecb_m365_download_changes_locked (cbm365, new_ids, out_created_objects, cancellable, error);
+		if (local_error)
+			g_propagate_error (error, local_error);
+
+		if (success && cdd.ids->len) {
+			GSList *created_ids = NULL, *modified_ids = NULL;
+			guint ii;
+
+			/* Determine which are new vs modified by checking the cache */
+			for (ii = 0; ii < cdd.ids->len; ii++) {
+				const gchar *id = g_ptr_array_index (cdd.ids, ii);
+				gchar *extra = NULL;
+
+				if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
+					modified_ids = g_slist_prepend (modified_ids, (gpointer) id);
+					g_free (extra);
+				} else {
+					created_ids = g_slist_prepend (created_ids, (gpointer) id);
+				}
+			}
+
+			if (created_ids) {
+				created_ids = g_slist_reverse (created_ids);
+				success = ecb_m365_download_changes_locked (cbm365, created_ids, out_created_objects, cancellable, error);
+			}
+
+			if (success && modified_ids) {
+				modified_ids = g_slist_reverse (modified_ids);
+				success = ecb_m365_download_changes_locked (cbm365, modified_ids, out_modified_objects, cancellable, error);
+			}
+
+			g_slist_free (created_ids);
+			g_slist_free (modified_ids);
 		}
 
-		if (success && changed_ids) {
-			changed_ids = g_slist_reverse (changed_ids);
-			success = ecb_m365_download_changes_locked (cbm365, changed_ids, out_modified_objects, cancellable, error);
+		g_ptr_array_unref (cdd.ids);
+	} else {
+		/* Tasks: use the old list-all-and-compare approach (no delta support) */
+		GSList *items = NULL, *link;
+		GHashTable *left_known_ids;
+		GHashTableIter iter;
+		gpointer key;
+
+		left_known_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+		e_cal_cache_search_with_callback (cal_cache, "#t", ecb_m365_gather_ids_cb, left_known_ids, cancellable, NULL);
+
+		success = e_m365_connection_list_tasks_sync (cbm365->priv->cnc, NULL, cbm365->priv->group_id, cbm365->priv->folder_id, NULL,
+			NULL, NULL, &items, cancellable, error);
+
+		if (success) {
+			GSList *new_ids = NULL;
+			GSList *changed_ids = NULL;
+
+			for (link = items; link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+				JsonObject *item = link->data;
+				const gchar *id, *change_key;
+				gchar *extra = NULL;
+
+				if (!item)
+					continue;
+
+				id = e_m365_task_get_id (item);
+				change_key = e_m365_task_get_last_modified_as_string (item);
+
+				if (id)
+					g_hash_table_remove (left_known_ids, id);
+
+				if (e_cal_cache_get_component_extra (cal_cache, id, NULL, &extra, cancellable, NULL)) {
+					const gchar *saved_change_key = NULL;
+
+					ecb_m365_split_extra (extra, &saved_change_key, NULL);
+
+					if (g_strcmp0 (saved_change_key, change_key) == 0) {
+						g_free (extra);
+						continue;
+					}
+
+					changed_ids = g_slist_prepend (changed_ids, (gpointer) id);
+					g_free (extra);
+				} else {
+					new_ids = g_slist_prepend (new_ids, (gpointer) id);
+				}
+			}
+
+			if (new_ids) {
+				new_ids = g_slist_reverse (new_ids);
+				success = ecb_m365_download_changes_locked (cbm365, new_ids, out_created_objects, cancellable, error);
+			}
+
+			if (success && changed_ids) {
+				changed_ids = g_slist_reverse (changed_ids);
+				success = ecb_m365_download_changes_locked (cbm365, changed_ids, out_modified_objects, cancellable, error);
+			}
+
+			g_slist_free (new_ids);
+			g_slist_free (changed_ids);
 		}
 
-		g_slist_free (new_ids);
-		g_slist_free (changed_ids);
-	}
+		g_slist_free_full (items, (GDestroyNotify) json_object_unref);
 
-	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
+		g_hash_table_iter_init (&iter, left_known_ids);
+		while (g_hash_table_iter_next (&iter, &key, NULL)) {
+			ECalMetaBackendInfo *nfo;
+			const gchar *uid = key;
 
-	g_hash_table_iter_init (&iter, left_known_ids);
-	while (g_hash_table_iter_next (&iter, &key, NULL)) {
-		ECalMetaBackendInfo *nfo;
-		const gchar *uid = key;
+			nfo = e_cal_meta_backend_info_new (uid, NULL, NULL, NULL);
+			*out_removed_objects = g_slist_prepend (*out_removed_objects, nfo);
+		}
 
-		nfo = e_cal_meta_backend_info_new (uid, NULL, NULL, NULL);
-		*out_removed_objects = g_slist_prepend (*out_removed_objects, nfo);
+		g_hash_table_destroy (left_known_ids);
 	}
 
 	UNLOCK (cbm365);
@@ -592,7 +666,6 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 	ecb_m365_convert_error_to_client_error (error);
 	ecb_m365_maybe_disconnect_sync (cbm365, error, cancellable);
 
-	g_hash_table_destroy (left_known_ids);
 	g_clear_object (&cal_cache);
 
 	return success;
