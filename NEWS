@@ -1,3 +1,45 @@
+Evolution-EWS 3.61.1 2026-06-26
+-------------------------------
+
+Bug Fixes:
+	I#332 - Calendar: Crash when cancelling meeting with empty notice
+	I#333 - m365: Skip Out of Office check for shared mailboxes
+	I#335 - m365: GOA account can delay OAuth2 support addition
+	I#338 - m365: Event time in UTC incorrectly changes to local timezone
+	M!15 - ews-test-common: remove GLIB_CHECK_VERSION(2,35,0) (Дилян Палаузов)
+	M!16 - m365: Use delta sync for calendar events (David Woodhouse)
+	eds-I#643 - Camel: Clean up provider conf entries definitions
+	evo-I#3302 - Truncated file stored in the (mail) cache
+
+Miscellaneous:
+	e-m365-connection: Ensure soup message body is filled on retry
+	m365: Validate host of server-provided nextLink and deltaLink URLs
+	ews: Fix path traversal in attachment filename from server
+	lzxd: Add bounds checks in lzxd_read_lens() to prevent buffer overrun
+	oab: Fix integer overflows, memory leaks, and decompression bombs
+	oab-decoder: Fix crash on unknown properties, string list bug, and DoS
+	m365: URI-escape id parameter in construct_uri to prevent path injection
+	e-cal-backend-m365: Fix a compiler warning
+	Calendar: Use icaldurationtype_as_utc_seconds() for libical 4.x
+	Make CMAKE_BUILD_TYPE enumeration for cmake-gui (Дилян Палаузов)
+	OAuth2: Uses its own error domain
+	Convert to CamelDataCache atomic write API
+	CI: Remove extra backslash in cmake invocations
+	build: Add CAMEL_LDFLAGS into oab-decode-test
+	Use "--output-on-failure" for ctest in "make test"
+
+Translations:
+	Anders Jonsson (eo)
+	Aurimas Aurimas Černius (lt)
+	Christian Kirbach (de)
+	Ekaterine Papava (ka)
+	Emin Tufan Çetin (tr)
+	Juliano de Souza Camargo (pt_BR)
+	Kristjan ESPERANTO (eo)
+	Марко Костић (sr)
+	Martin (sl)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.60.0 2026-03-13
 -------------------------------
 
