@@ -1877,16 +1877,6 @@ camel_m365_folder_new (CamelStore *store,
 	m365_folder = CAMEL_M365_FOLDER (folder);
 	m365_folder->priv->id = folder_id;
 
-	folder_summary = camel_m365_folder_summary_new (folder);
-
-	if (!folder_summary) {
-		g_object_unref (folder);
-		g_set_error (
-			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Could not load summary for “%s”"), full_name);
-		return NULL;
-	}
-
 	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
 
 	g_object_get (
@@ -1900,6 +1890,39 @@ camel_m365_folder_new (CamelStore *store,
 		NULL);
 
 	g_clear_object (&settings);
+
+	if (m365_folder_has_inbox_type (m365_store, full_name)) {
+		if (filter_inbox)
+			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		if (filter_junk)
+			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
+	} else {
+		if (camel_m365_folder_get_apply_filters (m365_folder))
+			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		if (filter_junk && !filter_junk_inbox)
+			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
+	}
+
+	if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
+		add_folder_flags |= CAMEL_FOLDER_IS_JUNK;
+
+	if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
+		add_folder_flags |= CAMEL_FOLDER_IS_TRASH;
+
+	if (add_folder_flags)
+		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
+
+	folder_summary = camel_m365_folder_summary_new (folder);
+
+	if (!folder_summary) {
+		g_object_unref (folder);
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Could not load summary for “%s”"), full_name);
+		return NULL;
+	}
 
 	camel_folder_take_folder_summary (folder, folder_summary);
 
@@ -1936,29 +1959,6 @@ camel_m365_folder_new (CamelStore *store,
 	camel_binding_bind_property (store, "online",
 		m365_folder->priv->cache, "expire-enabled",
 		G_BINDING_SYNC_CREATE);
-
-	if (m365_folder_has_inbox_type (m365_store, full_name)) {
-		if (filter_inbox)
-			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
-
-		if (filter_junk)
-			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
-	} else {
-		if (camel_m365_folder_get_apply_filters (m365_folder))
-			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
-
-		if (filter_junk && !filter_junk_inbox)
-			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
-	}
-
-	if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_JUNK)
-		add_folder_flags |= CAMEL_FOLDER_IS_JUNK;
-
-	if ((store_folder_flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH)
-		add_folder_flags |= CAMEL_FOLDER_IS_TRASH;
-
-	if (add_folder_flags)
-		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
 
 	camel_m365_store_connect_folder_summary (m365_store, folder_summary);
 
