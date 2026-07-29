@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-49\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-03-01 19:39+0000\n"
-"PO-Revision-Date: 2026-03-09 16:11+0500\n"
+"POT-Creation-Date: 2026-07-10 12:45+0000\n"
+"PO-Revision-Date: 2026-07-29 13:07+0500\n"
 "Last-Translator: Baurzhan Muftakhidinov <baurthefirst@gmail.com>\n"
 "Language-Team: Kazakh <Kazakh>\n"
 "Language: kk\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:66
@@ -93,7 +93,7 @@ msgid "Cannot determine EWS ItemId"
 msgstr "EWS ItemId анықтау мүмкін емес"
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3261
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -106,15 +106,16 @@ msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Онлайн жиналысты тек пайдаланушының негізгі күнтізбесінде құруға болады."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1706
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Қатысушылар арасынан «%s» пайдаланушысы табылмады"
 
 #: ../src/EWS/calendar/e-cal-backend-ews-m365.c:39
 msgid ""
-"Cannot connect to the server, repeat the action once you login to the server."
+"Cannot connect to the server, repeat the action once you login to the "
+"server."
 msgstr "Серверге қосылу мүмкін емес, серверге кірген соң әрекетті қайталаңыз."
 
 #. Translators: The '%s' is replaced with a UID of the collection source
@@ -127,29 +128,29 @@ msgstr "«%s» күнтізбесі үшін Microsoft365 көмекші көз�
 msgid "Invalid occurrence ID"
 msgstr "Оқиға идентификаторы қате"
 
-#: ../src/EWS/camel/camel-ews-folder.c:363
+#: ../src/EWS/camel/camel-ews-folder.c:356
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Mimecontent уақытша файлын ашу мүмкін емес!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:371
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Mimecontent ішінен анализаторды жасау мүмкін емес!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:380
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Жиналыс сұранысының mimecontent мазмұнын талдау мүмкін емес!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:493
-#: ../src/EWS/camel/camel-ews-folder.c:706
+#: ../src/EWS/camel/camel-ews-folder.c:486
+#: ../src/EWS/camel/camel-ews-folder.c:699
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Кэш файлын жасау мүмкін емес"
 
-#: ../src/EWS/camel/camel-ews-folder.c:823
-#: ../src/EWS/camel/camel-ews-folder.c:967
+#: ../src/EWS/camel/camel-ews-folder.c:816
+#: ../src/EWS/camel/camel-ews-folder.c:960
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "«%s» кэш жолын жасау мүмкін емес: %s"
@@ -157,34 +158,35 @@ msgstr "«%s» кэш жолын жасау мүмкін емес: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:981
+#: ../src/EWS/camel/camel-ews-folder.c:974
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr ""
 "Хабарлама кэш файлын «%s» орнынан «%s» орнына жылжыту сәтсіз аяқталды: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1823
+#: ../src/EWS/camel/camel-ews-folder.c:1863
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1923
 #, c-format
-msgid "Could not load summary for %s"
-msgstr "%s үшін жиынтықты жүктеу мүмкін болмады"
+msgid "Could not load summary for “%s”"
+msgstr "«%s» үшін жиынтықты жүктеу мүмкін болмады"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2333
+#: ../src/EWS/camel/camel-ews-folder.c:2326
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "«%s» бумасы жаңартылуда"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2526
+#: ../src/EWS/camel/camel-ews-folder.c:2519
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Автономды режимде бумада әрекеттерді орындау мүмкін емес"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
+#: ../src/EWS/camel/camel-ews-folder.c:3306
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1776
 msgid "Apply message _filters to this folder"
 msgstr "Осы бумаға хабарлама _сүзгілерін іске асыру"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3322
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
+#: ../src/EWS/camel/camel-ews-folder.c:3318
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1788
 msgid "Always check for _new mail in this folder"
 msgstr "Осы бумада әрқашан _жаңа поштаны тексеру"
 
@@ -278,8 +280,8 @@ msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 msgstr ""
-"Бұл опция Exchange серверіне Basic аутентификациясы бар ашық мәтіндік пароль "
-"арқылы қосылады."
+"Бұл опция Exchange серверіне Basic аутентификациясы бар ашық мәтіндік "
+"пароль арқылы қосылады."
 
 #: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
@@ -300,9 +302,9 @@ msgid "Session has no storage path"
 msgstr "Сессияның сақтау жолы жоқ"
 
 #. Translators: This composes a "Public Folders" folder name for case when
-#. * user has such in his store already. The %s is replaced with "Public Folders",
+#. * user has such in his store already. The %s is replaced with "Public
+#. Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
-#.
 #: ../src/EWS/camel/camel-ews-store.c:350
 #, c-format
 msgctxt "PublicFolders"
@@ -310,9 +312,9 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #. Translators: This composes a "Foreign Folders" folder name for case when
-#. * user has such in his store already. The %s is replaced with "Foreign Folders",
+#. * user has such in his store already. The %s is replaced with "Foreign
+#. Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
-#.
 #: ../src/EWS/camel/camel-ews-store.c:503
 #, c-format
 msgctxt "ForeignFolders"
@@ -321,8 +323,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
-#: ../src/Microsoft365/camel/camel-m365-store.c:516
-#: ../src/Microsoft365/camel/camel-m365-store.c:572
+#: ../src/Microsoft365/camel/camel-m365-store.c:517
+#: ../src/Microsoft365/camel/camel-m365-store.c:604
 msgid "Checking “Out of Office” settings"
 msgstr "«Кеңседен тыс» баптаулары тексерілуде"
 
@@ -353,7 +355,7 @@ msgid "Updating foreign folders"
 msgstr "Сыртқы бумалар жаңартылуда"
 
 #: ../src/EWS/camel/camel-ews-store.c:2334
-#: ../src/Microsoft365/camel/camel-m365-store.c:676
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "No such folder: %s"
 msgstr "Мұндай бума жоқ: %s"
@@ -367,7 +369,7 @@ msgid "Cannot find any EWS public folders"
 msgstr "Ешбір EWS ортақ бумасы табылмады"
 
 #: ../src/EWS/camel/camel-ews-store.c:2865
-#: ../src/Microsoft365/camel/camel-m365-store.c:739
+#: ../src/Microsoft365/camel/camel-m365-store.c:771
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "«%s» бумасын жасау мүмкін емес, бума қазірдің өзінде бар"
@@ -382,8 +384,8 @@ msgstr "«%s» аталық бумасы жоқ"
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
-"«%s» астында бума жасау мүмкін емес, ол тек басқа пайдаланушылардың бумалары "
-"үшін қолданылады"
+"«%s» астында бума жасау мүмкін емес, ол тек басқа пайдаланушылардың "
+"бумалары үшін қолданылады"
 
 #: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
@@ -392,7 +394,7 @@ msgstr ""
 "«%s» астында бума жасау мүмкін емес, ол тек ортақ бумалар үшін қолданылады"
 
 #: ../src/EWS/camel/camel-ews-store.c:3007
-#: ../src/Microsoft365/camel/camel-m365-store.c:924
+#: ../src/Microsoft365/camel/camel-m365-store.c:956
 #, c-format
 msgid "Folder does not exist"
 msgstr "Бума жоқ"
@@ -401,8 +403,8 @@ msgstr "Бума жоқ"
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
-"«%s» бумасын өшіру мүмкін емес, ол тек басқа пайдаланушылардың бумалары үшін "
-"қолданылады"
+"«%s» бумасын өшіру мүмкін емес, ол тек басқа пайдаланушылардың бумалары "
+"үшін қолданылады"
 
 #: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
@@ -455,17 +457,17 @@ msgid "Exchange service for %s on %s"
 msgstr "%s үшін %s серверіндегі Exchange қызметі"
 
 #: ../src/EWS/camel/camel-ews-store.c:3436
-#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+#: ../src/Microsoft365/camel/camel-m365-store.c:1526
 msgid "Could not locate Inbox folder"
 msgstr "Кіріс бумасын табу мүмкін болмады"
 
 #: ../src/EWS/camel/camel-ews-store.c:3448
-#: ../src/Microsoft365/camel/camel-m365-store.c:1506
+#: ../src/Microsoft365/camel/camel-m365-store.c:1538
 msgid "Could not locate Trash folder"
 msgstr "Қоқыс шелегі бумасын табу мүмкін болмады"
 
 #: ../src/EWS/camel/camel-ews-store.c:3485
-#: ../src/Microsoft365/camel/camel-m365-store.c:1544
+#: ../src/Microsoft365/camel/camel-m365-store.c:1576
 msgid "Could not locate Junk folder"
 msgstr "Қоқыс бумасын табу мүмкін болмады"
 
@@ -499,16 +501,16 @@ msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Автономды режимде EWS бумаларынан жазылуды тоқтату мүмкін емес"
 
 #: ../src/EWS/camel/camel-ews-store.c:3917
-#: ../src/Microsoft365/camel/camel-m365-store.c:1852
-#: ../src/Microsoft365/camel/camel-m365-store.c:1865
+#: ../src/Microsoft365/camel/camel-m365-store.c:1884
+#: ../src/Microsoft365/camel/camel-m365-store.c:1897
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Бұл операцияны аяқтау үшін желіде жұмыс істеуіңіз керек"
 
 #: ../src/EWS/camel/camel-ews-store.c:3989
 #: ../src/EWS/camel/camel-ews-store.c:4026
-#: ../src/Microsoft365/camel/camel-m365-store.c:1988
-#: ../src/Microsoft365/camel/camel-m365-store.c:2029
+#: ../src/Microsoft365/camel/camel-m365-store.c:2020
+#: ../src/Microsoft365/camel/camel-m365-store.c:2061
 msgid "Unsetting the “Out of Office” status"
 msgstr "«Кеңседен тыс» күйін алып тастау"
 
@@ -674,7 +676,8 @@ msgstr "Буманы қосу мүмкін емес, негізгі дерекк
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Буманы қосу мүмкін емес, бума «%s» ретінде қазірдің өзінде бар"
 
-#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#. Translators: This is a user-visible string, display name of an OAuth2
+#. service.
 #: ../src/EWS/common/e-oauth2-service-office365.c:157
 msgctxt "OAuth2Service"
 msgid "Office365"
@@ -1065,7 +1068,8 @@ msgstr[0] "%d пайдаланушы табылды"
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
-msgstr[0] "100-ден астам пайдаланушы табылды, бірақ тек алғашқы %d көрсетілуде"
+msgstr[0] ""
+"100-ден астам пайдаланушы табылды, бірақ тек алғашқы %d көрсетілуде"
 
 #: ../src/EWS/evolution/e-ews-search-user.c:346
 #: ../src/EWS/evolution/e-ews-search-user.c:533
@@ -1088,9 +1092,9 @@ msgstr "EWS пайдаланушысын таңдау…"
 msgid "_Search:"
 msgstr "І_здеу:"
 
-#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. Translators: The '%s' is replaced with user name, to whom the foreign
+#. mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
-#.
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:95
 #, c-format
 msgctxt "ForeignFolder"
@@ -1103,7 +1107,8 @@ msgstr ""
 "Тіркелгі автономды режимде болғанда сыртқы буманың қолжетімділігін тексеру "
 "мүмкін емес"
 
-#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#. Translators: This is used as a calendar name; it constructs "User Name -
+#. Availability" string shown in UI
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:325
 msgid "Availability"
 msgstr "Қолжетімділік"
@@ -1187,7 +1192,6 @@ msgstr "«%s» пайдаланушы аты екіұшты, оны нақтыр
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
-#.
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:943
 #, c-format
 msgctxt "ForeignFolder"
@@ -1265,23 +1269,32 @@ msgstr "Ешбір бастапқы қолданба идентификатор�
 msgid "Default application ID is “%s”"
 msgstr "Бастапқы қолданба идентификаторы: «%s»"
 
-#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a
+#. company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a
+#. company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:248
 msgid "_Tenant ID:"
 msgstr "_Тенент идентификаторы:"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in an Office 365 world. Same for 'common', it's a
+#. default URL path.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
 msgid "Default tenant ID is “common“"
 msgstr "Бастапқы тенент идентификаторы — «common»"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:411
 #, c-format
 msgid "Default tenant ID is “%s”"
@@ -1324,8 +1337,8 @@ msgstr "Ре_сурс URI-і:"
 #: ../src/EWS/evolution/e-mail-config-ews-backend.c:515
 #, c-format
 msgid ""
-"Default resource URI is derived from the Host URL, or it can eventually fall "
-"back to “%s”."
+"Default resource URI is derived from the Host URL, or it can eventually "
+"fall back to “%s”."
 msgstr ""
 "Бастапқы ресурс URI-і хост URL-інен алынады немесе соңында «%s» мәніне "
 "оралуы мүмкін."
@@ -1440,7 +1453,8 @@ msgstr ""
 "Маған жолданған жиналыс сұраныстарын және мен ұйымдастырушы болған жиналыс "
 "сұраныстарына жауаптарды келесіге жеткізу:"
 
-#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner
+#. label
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1086
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
@@ -1482,9 +1496,9 @@ msgstr "Синхрондау таңбаларын та_стау"
 msgid ""
 "Folders can sometimes get out of synchronization, for example after a long "
 "time not being connected to the server. By resetting the synchronization "
-"tags the folders are updated completely. This does not cause download of any "
-"already locally stored messages. The change will take effect the next time "
-"the folders are refreshed."
+"tags the folders are updated completely. This does not cause download of "
+"any already locally stored messages. The change will take effect the next "
+"time the folders are refreshed."
 msgstr ""
 "Бумалар кейде синхрондаудан шығып кетуі мүмкін, мысалы, серверге ұзақ уақыт "
 "қосылмаған жағдайда. Синхрондау таңбаларын тастау арқылы бумалар толығымен "
@@ -1523,11 +1537,11 @@ msgstr "Кеңседен тыс"
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
 #: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
-"The messages specified below will be automatically sent to each internal and "
-"external person who sends a mail to you."
+"The messages specified below will be automatically sent to each internal "
+"and external person who sends a mail to you."
 msgstr ""
-"Төменде көрсетілген хабарламалар сізге пошта жіберген әрбір ішкі және сыртқы "
-"тұлғаға автоматты түрде жіберіледі."
+"Төменде көрсетілген хабарламалар сізге пошта жіберген әрбір ішкі және "
+"сыртқы тұлғаға автоматты түрде жіберіледі."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
 #: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
@@ -1594,13 +1608,16 @@ msgstr "Ұйымнан тыс кез келген жіберушіге жауа�
 msgid "Retrieving “Out of Office” settings"
 msgstr "«Кеңседен тыс» баптаулары алынуда"
 
-#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#. Translators: the first %s is replaced with a user name, the second %s is
+#. replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:109
 #, c-format
-msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgid ""
+"%s (%s) has invited you to view his or her Microsoft Exchange calendar."
 msgstr "%s (%s) сізді өзінің Microsoft Exchange күнтізбесін қарауға шақырды."
 
-#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#. Translators: the first %s is replaced with a user name, the second %s is
+#. replaced with an email address of that user
 #: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:112
 #, c-format
 msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
@@ -1669,9 +1686,10 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "«{0}» пайдаланушысының бумасына сәтті жазылды."
 
 #: ../src/EWS/registry/e-ews-backend.c:1044
-#: ../src/Microsoft365/registry/e-m365-backend.c:728
+#: ../src/Microsoft365/registry/e-m365-backend.c:770
 #, c-format
-msgid "Could not determine a suitable folder class for a new folder named “%s”"
+msgid ""
+"Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "«%s» деп аталатын жаңа бума үшін қолайлы бума класын анықтау мүмкін болмады"
 
@@ -1713,102 +1731,99 @@ msgstr "Пайдаланушы контактісін өшіру мүмкін е
 msgid "Cannot remove recent contact"
 msgstr "Соңғы контактіні өшіру мүмкін емес"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
-msgid "Cannot store detached instances, because not supported in Microsoft 365"
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:930
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1029
+msgid ""
+"Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Бөлектелген даналарды сақтау мүмкін емес, себебі Microsoft 365-те бұған "
 "қолдау көрсетілмейді"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1115
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1188
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Microsoft 365 күнтізбесіне тек қарапайым оқиғаларды сақтауға болады"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1128
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1201
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr ""
 "Microsoft 365 тапсырма бумасына тек қарапайым тапсырмаларды сақтауға болады"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1179
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1646
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1252
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1719
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
 "Microsoft 365 күнтізбесінде басқа пайдаланушылар ұйымдастырған жиналыстарды "
 "құру мүмкін емес."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1771
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 күнтізбесі бірден көп қайталануды сақтай алмайды"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1779
 msgid ""
-"Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
+"Microsoft 365 calendar cannot store component with RDATE or EXRULE "
+"properties"
 msgstr ""
 "Microsoft 365 күнтізбесі RDATE немесе EXRULE қасиеттері бар компонентті "
 "сақтай алмайды"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1919
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Қайталану жиілігі белгісіз (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2073
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Microsoft 365 күнтізбесі бірден көп оқиға туралы ескертуді сақтай алмайды"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2106
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 оқиғасында тек оқиға басталғанға дейінгі ескерту болуы мүмкін"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2119
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr ""
 "Microsoft 365 тапсырмасында тек абсолютті уақыты бар ескерту болуы мүмкін"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2474
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2476
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 тапсырмасында тіркемелер болуы мүмкін емес."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2577
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "«%s» URI-і бар тіркемені сақтау мүмкін емес"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2579
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2581
 msgid "Failed to read attachment URI"
 msgstr "Тіркеме URI-ін оқу сәтсіз аяқталды"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2593
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2595
 msgid "Failed to get inline attachment data"
 msgstr "Кірістірілген тіркеме деректерін алу сәтсіз аяқталды"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:285
-#: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:889
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
+#: ../src/Microsoft365/camel/camel-m365-folder.c:261
+#: ../src/Microsoft365/camel/camel-m365-folder.c:383
+#: ../src/Microsoft365/camel/camel-m365-folder.c:886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1288
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1419
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1486
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1568
 msgid "Invalid folder state (missing parent store)"
 msgstr "Бума күйі қате (аталық қойма жоқ)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:555
+#: ../src/Microsoft365/camel/camel-m365-folder.c:552
 msgid "Follow-up"
 msgstr "Бақылау"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "«%s» бумасы ешбір белгілі бумаға сәйкес келмейді"
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
-#, c-format
-msgid "Could not load summary for “%s”"
-msgstr "«%s» үшін жиынтықты жүктеу мүмкін болмады"
 
 #: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
@@ -1828,27 +1843,27 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Поштаны Microsoft 365 арқылы алу"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1470
+#: ../src/Microsoft365/common/e-m365-connection.c:1505
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "URI қате: «%s»"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:579
+#: ../src/Microsoft365/camel/camel-m365-store.c:611
 msgid "Look up Microsoft 365 categories"
 msgstr "Microsoft 365 санаттарын қарау"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:588
+#: ../src/Microsoft365/camel/camel-m365-store.c:620
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Қосылымды жасау сәтсіз аяқталды"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:753
+#: ../src/Microsoft365/camel/camel-m365-store.c:785
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "«%s» аталық бумасы жоқ"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:996
-#: ../src/Microsoft365/camel/camel-m365-store.c:1034
+#: ../src/Microsoft365/camel/camel-m365-store.c:1028
+#: ../src/Microsoft365/camel/camel-m365-store.c:1066
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "«%s» бумасы жоқ"
@@ -1879,39 +1894,49 @@ msgstr ""
 "Бұл опция Microsoft 365 серверіне қосылу үшін OAuth 2.0 қол жеткізу токенін "
 "пайдаланады"
 
-#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#. Translators: This is a user-visible string, display name of an OAuth2
+#. service.
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
 msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1111
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr ""
+"Сервер күтпеген «%s» хосты бар URL адресін қайтарды, «%s» хосты күтілген "
+"болатын"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1144
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
-msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
+msgid_plural ""
+"Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] "Microsoft 365 сервері бос емес, қайталауды күтуде (%d:%02d минут)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1117
+#: ../src/Microsoft365/common/e-m365-connection.c:1150
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Microsoft 365 сервері бос емес, қайталауды күтуде (%d секунд)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1275
+#: ../src/Microsoft365/common/e-m365-connection.c:1302
 msgid "Invalid data"
 msgstr "Деректер қате"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1267
+#: ../src/Microsoft365/common/e-m365-connection.c:1300
 msgid "Operation was cancelled"
 msgstr "Операциядан бас тартылды"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1967
+#: ../src/Microsoft365/common/e-m365-connection.c:2006
 msgid "Failed to parse own Json data"
 msgstr "Жеке Json деректерін талдау сәтсіз аяқталды"
 
-#. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5496
+#. Translators: the '%s' is replaced with the date/time, which the instance
+#. was looked up for
+#: ../src/Microsoft365/common/e-m365-connection.c:5540
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "«%s» мекенжайынан дана табылмады"
@@ -1952,7 +1977,8 @@ msgstr "Жеке оқиғаларсыз делегат"
 msgid "Delegate with private events"
 msgstr "Жеке оқиғалары бар делегат"
 
-#. Translators: It's for custom permission setting, like some not known what it is precisely
+#. Translators: It's for custom permission setting, like some not known what
+#. it is precisely
 #: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:259
 msgid "Custom"
 msgstr "Таңдау бойынша"
@@ -2022,8 +2048,8 @@ msgstr "Күнтізбе:"
 
 #: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1016
 msgid ""
-"Choose sharing permissions for this calendar. You can add people from within "
-"the organization or outside of it. It can be changed any time."
+"Choose sharing permissions for this calendar. You can add people from "
+"within the organization or outside of it. It can be changed any time."
 msgstr ""
 "Осы күнтізбе үшін бөлісу рұқсаттарын таңдаңыз. Сіз ұйым ішіндегі немесе "
 "сыртындағы адамдарды қоса аласыз. Оны кез келген уақытта өзгертуге болады."
@@ -2058,14 +2084,19 @@ msgstr ""
 msgid "_Override Microsoft 365 OAuth2 settings"
 msgstr "Microsoft 365 OAuth2 баптауларын қайта а_нықтау"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in a Microsoft 365 world. Same for 'common', it's a
+#. default URL path.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:273
 msgid "Default tenant is “common“"
 msgstr "Бастапқы тенент — «common»"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a
+#. company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here:
+#. https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:276
 #, c-format
 msgid "Default tenant is “%s”"
@@ -2088,19 +2119,23 @@ msgstr ""
 msgid "The reported error was “%s”."
 msgstr "Хабарланған қате: «%s»."
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:411
+#: ../src/Microsoft365/registry/e-m365-backend.c:453
 msgid "Organizational Contacts"
 msgstr "Ұйымдық контактілер"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:418
+#: ../src/Microsoft365/registry/e-m365-backend.c:460
 msgid "Organizational Users"
 msgstr "Ұйымдық пайдаланушылар"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:425
+#: ../src/Microsoft365/registry/e-m365-backend.c:467
 msgid "Recent Contacts"
 msgstr "Соңғы контактілер"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:819
+#: ../src/Microsoft365/registry/e-m365-backend.c:861
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "«%s» дереккөзі Microsoft 365 бумасы болып табылмайды"
+
+#, c-format
+#~ msgid "Could not load summary for %s"
+#~ msgstr "%s үшін жиынтықты жүктеу мүмкін болмады"
