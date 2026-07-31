@@ -45,7 +45,7 @@ e_ms_oapxbc_util_get_prt_sso_cookie_sync (EOAuth2Service *service,
 		}
 		return NULL;
 	}
-	accounts = e_ms_oapxbc_get_accounts_sync (app, cancellable, &local_error);
+	accounts = e_ms_oapxbc_get_accounts_sync (app, redirect_uri, cancellable, &local_error);
 	if (!accounts) {
 		if (local_error) {
 			g_prefix_error (&local_error, "%s", _("Failed to get accounts: "));
