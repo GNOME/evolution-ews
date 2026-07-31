@@ -1,3 +1,13 @@
+Evolution-EWS 3.61.2 2026-07-31
+-------------------------------
+
+Miscellaneous:
+	Camel: Reorder when a new folder flags are set and folder summary created
+	e-ms-oapxbc-util: Adapt to recent API changes in e-ms-oapxbc
+
+Translations:
+	Baurzhan Muftakhidinov (kk)
+
 Evolution-EWS 3.61.1 2026-06-26
 -------------------------------
 
