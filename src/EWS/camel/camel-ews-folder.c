@@ -2314,6 +2314,11 @@ ews_refresh_info_sync (CamelFolder *folder,
 	if (!cnc) {
 		g_free (id);
 		g_warn_if_reached ();
+
+		g_mutex_lock (&priv->state_lock);
+		priv->refreshing = FALSE;
+		g_mutex_unlock (&priv->state_lock);
+
 		return FALSE;
 	}
 
