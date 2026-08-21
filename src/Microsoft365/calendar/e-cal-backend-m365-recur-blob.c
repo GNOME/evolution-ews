@@ -49,11 +49,16 @@
 		off += blen; \
 	} G_STMT_END
 
-/* Unserialization helper: dereference and increment pointer. */
+/* Unserialization helper: dereference and increment pointer.
+   The value is read with memcpy(), because 'off' is not guaranteed
+   to be aligned to sizeof (valtype), thus a direct pointer cast and
+   dereference would be an unaligned access. */
 #define GBA_DEREF_OFFSET(arr, off, lval, valtype) \
 	G_STMT_START { \
+		valtype _gba_deref_val; \
 		g_return_val_if_fail ((off >= 0 && arr->len - off >= sizeof (valtype)), FALSE); \
-		lval = *((valtype*)(arr->data+off)); \
+		memcpy (&_gba_deref_val, arr->data + off, sizeof (valtype)); \
+		lval = _gba_deref_val; \
 		off += sizeof (valtype); \
 	} G_STMT_END
 

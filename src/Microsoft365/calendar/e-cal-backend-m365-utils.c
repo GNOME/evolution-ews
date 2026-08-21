@@ -184,7 +184,7 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 	ICalTimezone *tz;
 	ICalTime *itt;
 	time_t tt;
-	const gchar *tzid, *zone;
+	const gchar *tzid, *zone, *ical_tzid;
 	gboolean use_user_timezone = FALSE;
 	gboolean is_date;
 
@@ -233,7 +233,7 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 	} else {
 		zone = e_m365_date_time_get_time_zone (value);
 
-		if (zone && *zone)
+		if (zone && *zone && g_strcmp0 (zone, "UTC") != 0)
 			zone = e_m365_tz_utils_get_ical_equivalent (zone);
 
 		tz = zone && *zone ? e_timezone_cache_get_timezone (timezone_cache, zone) : NULL;
@@ -250,14 +250,22 @@ ecb_m365_get_date_time_zone (EM365Connection *cnc,
 	i_cal_time_set_timezone (itt, tz);
 
 	if (!is_date) {
-		tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
+		if (g_strcmp0 (tzid, "UTC") == 0) {
+			ical_tzid = "UTC";
+		} else {
+			ical_tzid = e_m365_tz_utils_get_ical_equivalent (tzid);
 
-		if (!tzid)
-			tzid = "UTC";
+			if (!ical_tzid) {
+				ical_tzid = e_m365_tz_utils_get_msdn_equivalent (tzid);
 
-		tz = e_timezone_cache_get_timezone (timezone_cache, tzid);
+				if (ical_tzid)
+					ical_tzid = e_m365_tz_utils_get_ical_equivalent (ical_tzid);
+			}
+		}
 
-		if (tz && !is_date)
+		tz = e_timezone_cache_get_timezone (timezone_cache, ical_tzid ? ical_tzid : tzid);
+
+		if (tz)
 			i_cal_time_convert_to_zone_inplace (itt, tz);
 	}
 
