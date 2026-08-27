@@ -676,6 +676,7 @@ camel_m365_utils_add_message_flags (JsonBuilder *builder,
 {
 	const gchar *follow_up;
 	guint32 flags = 0;
+	gboolean important = FALSE;
 
 	if (info) {
 		const CamelNamedFlags *user_flags;
@@ -727,25 +728,25 @@ camel_m365_utils_add_message_flags (JsonBuilder *builder,
 		e_m365_mail_message_end_categories (builder);
 	}
 
-	if (message && !(flags & CAMEL_MESSAGE_FLAGGED)) {
+	if (message) {
 		CamelMedium *medium = CAMEL_MEDIUM (message);
 		const gchar *value;
 
 		value = camel_medium_get_header (medium, "X-Priority");
 
 		if (g_strcmp0 (value, "1") == 0) {
-			flags |= CAMEL_MESSAGE_FLAGGED;
-		} else {
 			value = camel_medium_get_header (medium, "Importance");
 
 			if (value && g_ascii_strcasecmp (value, "High") == 0)
-				flags |= CAMEL_MESSAGE_FLAGGED;
+				important = TRUE;
 		}
+
+		value = camel_medium_get_header (medium, "X-Message-Flag");
+		if (value)
+			flags |= CAMEL_MESSAGE_FLAGGED;
 	}
 
-	e_m365_mail_message_add_importance (builder,
-		(flags & CAMEL_MESSAGE_FLAGGED) != 0 ? E_M365_IMPORTANCE_HIGH : E_M365_IMPORTANCE_NORMAL);
-
+	e_m365_mail_message_add_importance (builder, important ? E_M365_IMPORTANCE_HIGH : E_M365_IMPORTANCE_NORMAL);
 	e_m365_mail_message_add_is_read (builder, (flags & CAMEL_MESSAGE_SEEN) != 0);
 
 	follow_up = camel_message_info_get_user_tag (info, "follow-up");
