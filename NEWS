@@ -1,3 +1,19 @@
+Evolution-EWS 3.61.3 2026-08-28
+-------------------------------
+
+Bug Fixes:
+	I#342 - m365: Mail: Flagged and priority indicators are mixed (Jan-Michael Brummer)
+	I#344 - Stuck on stream read after proxy error response (504)
+	I#346 - m365: Incorrect timezone used with recurring events
+
+Miscellaneous:
+	SetupBuildFlags.cmake: Add `-Wunused-function`
+	Update windowsZones.xml to 2021a version
+
+Translations:
+	Anders Jonsson (sv)
+	Guillaume Bernard (fr)
+
 Evolution-EWS 3.61.2 2026-07-31
 -------------------------------
 
