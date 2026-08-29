@@ -61,11 +61,12 @@ struct _CamelEwsFolderPrivate {
 	GRecMutex cache_lock;	/* for locking the cache object */
 
 	/* For syncronizing refresh_info/sync_changes */
-	gboolean refreshing;
-	gboolean fetch_pending;
 	GMutex state_lock;
 	GCond fetch_cond;
 	GHashTable *fetching_uids;
+
+	EEwsCoalesceGate sync_changes_gate;
+	EEwsCoalesceGate refresh_gate;
 
 	gboolean apply_filters;
 	gboolean check_folder;
@@ -1582,10 +1583,10 @@ ews_move_to_special_folder (CamelFolder *folder,
 }
 
 static gboolean
-ews_synchronize_sync (CamelFolder *folder,
-                      gboolean expunge,
-                      GCancellable *cancellable,
-                      GError **error)
+ews_synchronize_sync_real (CamelFolder *folder,
+			   gboolean expunge,
+			   GCancellable *cancellable,
+			   GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelFolderSummary *folder_summary;
@@ -1709,6 +1710,30 @@ ews_synchronize_sync (CamelFolder *folder,
 
 	if (local_error)
 		g_propagate_error (error, local_error);
+
+	return success;
+}
+
+static gboolean
+ews_synchronize_sync (CamelFolder *folder,
+		      gboolean expunge,
+		      GCancellable *cancellable,
+		      GError **error)
+{
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (folder);
+	gboolean success = TRUE;
+
+	if (!e_ews_coalesce_gate_try_enter (&ews_folder->priv->sync_changes_gate))
+		return TRUE;
+
+	do {
+		success = ews_synchronize_sync_real (folder, expunge, cancellable, error);
+
+		if (!success || g_cancellable_is_cancelled (cancellable)) {
+			e_ews_coalesce_gate_leave (&ews_folder->priv->sync_changes_gate, TRUE);
+			break;
+		}
+	} while (e_ews_coalesce_gate_leave (&ews_folder->priv->sync_changes_gate, FALSE));
 
 	return success;
 }
@@ -2248,14 +2273,13 @@ ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
 }
 
 static gboolean
-ews_refresh_info_sync (CamelFolder *folder,
-                       GCancellable *cancellable,
-                       GError **error)
+ews_refresh_info_sync_real (CamelFolder *folder,
+			    GCancellable *cancellable,
+			    GError **error)
 {
 	CamelFolderChangeInfo *change_info;
 	CamelFolderSummary *folder_summary;
 	CamelEwsFolder *ews_folder;
-	CamelEwsFolderPrivate *priv;
 	GHashTable *updating_summary_uids = NULL;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
@@ -2272,7 +2296,6 @@ ews_refresh_info_sync (CamelFolder *folder,
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
 	ews_folder = (CamelEwsFolder *) folder;
-	priv = ews_folder->priv;
 
 	id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, full_name);
 
@@ -2299,25 +2322,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 		return FALSE;
 	}
 
-	g_mutex_lock (&priv->state_lock);
-
-	if (priv->refreshing) {
-		g_free (id);
-		g_mutex_unlock (&priv->state_lock);
-		return TRUE;
-	}
-
-	priv->refreshing = TRUE;
-	g_mutex_unlock (&priv->state_lock);
-
 	cnc = camel_ews_store_ref_connection (ews_store);
 	if (!cnc) {
 		g_free (id);
 		g_warn_if_reached ();
-
-		g_mutex_lock (&priv->state_lock);
-		priv->refreshing = FALSE;
-		g_mutex_unlock (&priv->state_lock);
 
 		return FALSE;
 	}
@@ -2471,16 +2479,35 @@ ews_refresh_info_sync (CamelFolder *folder,
 	if (local_error)
 		g_propagate_error (error, local_error);
 
-	g_mutex_lock (&priv->state_lock);
-	priv->refreshing = FALSE;
-	g_mutex_unlock (&priv->state_lock);
-
 	g_clear_object (&settings);
 	g_object_unref (cnc);
 	g_free (sync_state);
 	g_free (id);
 
 	return !local_error;
+}
+
+static gboolean
+ews_refresh_info_sync (CamelFolder *folder,
+		       GCancellable *cancellable,
+		       GError **error)
+{
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (folder);
+	gboolean success = TRUE;
+
+	if (!e_ews_coalesce_gate_try_enter (&ews_folder->priv->refresh_gate))
+		return TRUE;
+
+	do {
+		success = ews_refresh_info_sync_real (folder, cancellable, error);
+
+		if (!success || g_cancellable_is_cancelled (cancellable)) {
+			e_ews_coalesce_gate_leave (&ews_folder->priv->refresh_gate, TRUE);
+			break;
+		}
+	} while (e_ews_coalesce_gate_leave (&ews_folder->priv->refresh_gate, FALSE));
+
+	return success;
 }
 
 static gboolean
@@ -3228,6 +3255,8 @@ ews_folder_finalize (GObject *object)
 	g_rec_mutex_clear (&ews_folder->priv->cache_lock);
 	g_hash_table_destroy (ews_folder->priv->fetching_uids);
 	g_cond_clear (&ews_folder->priv->fetch_cond);
+	e_ews_coalesce_gate_clear (&ews_folder->priv->sync_changes_gate);
+	e_ews_coalesce_gate_clear (&ews_folder->priv->refresh_gate);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->finalize (object);
@@ -3338,8 +3367,8 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 
 	g_mutex_init (&ews_folder->priv->state_lock);
 	g_rec_mutex_init (&ews_folder->priv->cache_lock);
-
-	ews_folder->priv->refreshing = FALSE;
+	e_ews_coalesce_gate_init (&ews_folder->priv->sync_changes_gate);
+	e_ews_coalesce_gate_init (&ews_folder->priv->refresh_gate);
 
 	g_cond_init (&ews_folder->priv->fetch_cond);
 	ews_folder->priv->fetching_uids = g_hash_table_new (g_str_hash, g_str_equal);

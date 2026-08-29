@@ -28,6 +28,17 @@ gboolean	e_ews_common_utils_gsettings_schema_exists	(const gchar *schema_id);
 GHashTable *	e_ews_common_utils_dup_mail_addresses		(ESourceRegistry *registry,
 								 ESource *child_source,
 								 gchar **inout_user_email);
+typedef struct _EEwsCoalesceGate {
+	GMutex lock;
+	gboolean running;
+	gboolean pending;
+} EEwsCoalesceGate;
+
+void		e_ews_coalesce_gate_init			(EEwsCoalesceGate *gate);
+void		e_ews_coalesce_gate_clear			(EEwsCoalesceGate *gate);
+gboolean	e_ews_coalesce_gate_try_enter			(EEwsCoalesceGate *gate);
+gboolean	e_ews_coalesce_gate_leave			(EEwsCoalesceGate *gate,
+								 gboolean aborted);
 
 G_END_DECLS
 

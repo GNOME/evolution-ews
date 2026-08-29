@@ -534,3 +534,59 @@ e_ews_common_utils_dup_mail_addresses (ESourceRegistry *registry,
 
 	return aliases;
 }
+
+void
+e_ews_coalesce_gate_init (EEwsCoalesceGate *gate)
+{
+	g_mutex_init (&gate->lock);
+	gate->running = FALSE;
+	gate->pending = FALSE;
+}
+
+void
+e_ews_coalesce_gate_clear (EEwsCoalesceGate *gate)
+{
+	g_mutex_clear (&gate->lock);
+}
+
+/* Become the single active run, or coalesce. Returns TRUE if the caller is now
+ * the active run (must pair with e_ews_coalesce_gate_leave()); FALSE if a run is
+ * already active.
+ */
+gboolean
+e_ews_coalesce_gate_try_enter (EEwsCoalesceGate *gate)
+{
+	gboolean entered;
+
+	g_mutex_lock (&gate->lock);
+	entered = !gate->running;
+	if (gate->running) {
+		gate->pending = TRUE;
+	} else {
+		gate->running = TRUE;
+		gate->pending = FALSE;
+	}
+	g_mutex_unlock (&gate->lock);
+
+	return entered;
+}
+
+/* End one pass. Returns TRUE if the caller should loop for another pass because
+ * a trigger arrived while it ran (and the pass succeeded); FALSE to release the
+ * gate. Pass "aborted" TRUE to unconditionally stop
+ */
+gboolean
+e_ews_coalesce_gate_leave (EEwsCoalesceGate *gate,
+			   gboolean aborted)
+{
+	gboolean again;
+
+	g_mutex_lock (&gate->lock);
+	again = gate->pending && !aborted;
+	gate->pending = FALSE;
+	if (!again)
+		gate->running = FALSE;
+	g_mutex_unlock (&gate->lock);
+
+	return again;
+}

@@ -59,6 +59,9 @@ struct _CamelM365FolderPrivate {
 	GCond get_message_cond;
 	GHashTable *get_message_hash; /* borrowed gchar *uid ~> NULL */
 
+	EEwsCoalesceGate sync_changes_gate;
+	EEwsCoalesceGate refresh_gate;
+
 	gboolean apply_filters;
 	gboolean check_folder;
 };
@@ -861,9 +864,9 @@ m365_folder_got_summary_messages_cb (EM365Connection *cnc,
 }
 
 static gboolean
-m365_folder_refresh_info_sync (CamelFolder *folder,
-			       GCancellable *cancellable,
-			       GError **error)
+m365_folder_refresh_info_sync_real (CamelFolder *folder,
+				    GCancellable *cancellable,
+				    GError **error)
 {
 	CamelM365Folder *m365_folder;
 	CamelM365FolderSummary *m365_folder_summary;
@@ -978,6 +981,30 @@ m365_folder_refresh_info_sync (CamelFolder *folder,
 
 	return success;
 }
+
+static gboolean
+m365_folder_refresh_info_sync (CamelFolder *folder,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	CamelM365Folder *m365_folder = CAMEL_M365_FOLDER (folder);
+	gboolean success = TRUE;
+
+	if (!e_ews_coalesce_gate_try_enter (&m365_folder->priv->refresh_gate))
+		return TRUE;
+
+	do {
+		success = m365_folder_refresh_info_sync_real (folder, cancellable, error);
+
+		if (!success || g_cancellable_is_cancelled (cancellable)) {
+			e_ews_coalesce_gate_leave (&m365_folder->priv->refresh_gate, TRUE);
+			break;
+		}
+	} while (e_ews_coalesce_gate_leave (&m365_folder->priv->refresh_gate, FALSE));
+
+	return success;
+}
+
 
 static gboolean
 m365_folder_copy_move_to_folder_sync (CamelFolder *folder,
@@ -1265,10 +1292,10 @@ m365_ignore_item_not_found (GError **inout_error,
 }
 
 static gboolean
-m365_folder_synchronize_sync (CamelFolder *folder,
-			      gboolean expunge,
-			      GCancellable *cancellable,
-			      GError **error)
+m365_folder_synchronize_sync_real (CamelFolder *folder,
+				   gboolean expunge,
+				   GCancellable *cancellable,
+				   GError **error)
 {
 	CamelM365Store *m365_store;
 	CamelStore *parent_store;
@@ -1394,6 +1421,30 @@ m365_folder_synchronize_sync (CamelFolder *folder,
 		camel_m365_store_maybe_disconnect (m365_store, local_error);
 		g_propagate_error (error, local_error);
 	}
+
+	return success;
+}
+
+static gboolean
+m365_folder_synchronize_sync (CamelFolder *folder,
+			      gboolean expunge,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	CamelM365Folder *m365_folder = CAMEL_M365_FOLDER (folder);
+	gboolean success = TRUE;
+
+	if (!e_ews_coalesce_gate_try_enter (&m365_folder->priv->sync_changes_gate))
+		return TRUE;
+
+	do {
+		success = m365_folder_synchronize_sync_real (folder, expunge, cancellable, error);
+
+		if (!success || g_cancellable_is_cancelled (cancellable)) {
+			e_ews_coalesce_gate_leave (&m365_folder->priv->sync_changes_gate, TRUE);
+			break;
+		}
+	} while (e_ews_coalesce_gate_leave (&m365_folder->priv->sync_changes_gate, FALSE));
 
 	return success;
 }
@@ -1728,6 +1779,8 @@ m365_folder_finalize (GObject *object)
 	g_rec_mutex_clear (&m365_folder->priv->cache_lock);
 	g_mutex_clear (&m365_folder->priv->get_message_lock);
 	g_cond_clear (&m365_folder->priv->get_message_cond);
+	e_ews_coalesce_gate_clear (&m365_folder->priv->sync_changes_gate);
+	e_ews_coalesce_gate_clear (&m365_folder->priv->refresh_gate);
 
 	g_hash_table_destroy (m365_folder->priv->get_message_hash);
 
@@ -1802,6 +1855,8 @@ camel_m365_folder_init (CamelM365Folder *m365_folder)
 	g_rec_mutex_init (&m365_folder->priv->cache_lock);
 	g_mutex_init (&m365_folder->priv->get_message_lock);
 	g_cond_init (&m365_folder->priv->get_message_cond);
+	e_ews_coalesce_gate_init (&m365_folder->priv->sync_changes_gate);
+	e_ews_coalesce_gate_init (&m365_folder->priv->refresh_gate);
 
 	m365_folder->priv->get_message_hash = g_hash_table_new (g_str_hash, g_str_equal);
 
