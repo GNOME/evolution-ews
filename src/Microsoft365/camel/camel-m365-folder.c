@@ -1756,12 +1756,6 @@ static void
 m365_folder_dispose (GObject *object)
 {
 	CamelM365Folder *m365_folder = CAMEL_M365_FOLDER (object);
-	CamelFolderSummary *summary;
-
-	summary = camel_folder_get_folder_summary (CAMEL_FOLDER (m365_folder));
-
-	if (summary)
-		m365_folder_save_summary (m365_folder);
 
 	LOCK_CACHE (m365_folder);
 	g_clear_object (&m365_folder->priv->cache);

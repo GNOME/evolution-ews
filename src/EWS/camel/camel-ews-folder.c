@@ -3228,12 +3228,8 @@ ews_folder_dispose (GObject *object)
 	CamelFolderSummary *summary;
 
 	summary = camel_folder_get_folder_summary (CAMEL_FOLDER (ews_folder));
-	if (summary) {
+	if (summary)
 		g_signal_handlers_disconnect_by_func (summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
-
-		/* save changes, if there are any unsaved */
-		camel_folder_summary_save (summary, NULL);
-	}
 
 	if (ews_folder->cache != NULL) {
 		g_object_unref (ews_folder->cache);
