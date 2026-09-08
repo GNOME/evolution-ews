@@ -2,7 +2,7 @@
 # Copyright (C) 2022 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 # Joe Hansen <joedalton2@yahoo.dk>, 2011, 2012, 2013, 2017, 2018.
-# Alan Mortensen <alanmortensen.am@gmail.com>, 2018, 2020, 2022-24, 2026.
+# Alan Mortensen <over.tackiness223@passinbox.com>, 2018, 2020, 2022-24, 2026.
 #
 # inbox -> indbakke (taget fra evolution-filen)
 # junk -> spam (taget fra evolution-filen)
@@ -22,10 +22,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-02-15 11:14+0000\n"
-"PO-Revision-Date: 2026-02-18 17:31+0100\n"
-"Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
-"Language-Team: Dansk-gruppen <dansk@dansk-gruppen.dk>\n"
+"POT-Creation-Date: 2026-08-25 05:58+0000\n"
+"PO-Revision-Date: 2026-08-25 19:34+0200\n"
+"Last-Translator: Alan Mortensen <over.tackiness223@passinbox.com>\n"
+"Language-Team: Dansk-gruppen <danskgruppen@groups.io>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -108,20 +108,20 @@ msgid "Cannot determine EWS ItemId"
 msgstr "Kan ikke bestemme EWS-elementID"
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3261
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
 msgstr ""
-"Kan ikke oprette møder arrangeret af andre brugere i en Exchange Web Services-"
-"kalender."
+"Kan ikke oprette møder arrangeret af andre brugere i en Exchange Web "
+"Services-kalender."
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3298
 msgid "Online meeting can be created only in the main user Calendar."
 msgstr "Onlinemøde kan kun oprettes i hovedbrugerkalenderen."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1706
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan ikke finde brugeren “%s” mellem deltagerne"
@@ -143,29 +143,29 @@ msgstr "Kan ikke finde Microsoft365-hjælpekilde til kalenderen “%s”"
 msgid "Invalid occurrence ID"
 msgstr "Ugyldig hændelses-ID"
 
-#: ../src/EWS/camel/camel-ews-folder.c:363
+#: ../src/EWS/camel/camel-ews-folder.c:356
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Kan ikke åbne midlertidig fil for MIME-indhold (mimecontent)!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:371
+#: ../src/EWS/camel/camel-ews-folder.c:364
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Kan ikke oprette fortolker fra MIME-indhold (mimecontent)!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:380
+#: ../src/EWS/camel/camel-ews-folder.c:373
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Kan ikke fortolke mødeanmodning fra MIME-indhold (mimecontent)!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:493
-#: ../src/EWS/camel/camel-ews-folder.c:706
+#: ../src/EWS/camel/camel-ews-folder.c:486
+#: ../src/EWS/camel/camel-ews-folder.c:699
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Kan ikke oprette cachefil"
 
-#: ../src/EWS/camel/camel-ews-folder.c:823
-#: ../src/EWS/camel/camel-ews-folder.c:967
+#: ../src/EWS/camel/camel-ews-folder.c:816
+#: ../src/EWS/camel/camel-ews-folder.c:960
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Kan ikke oprette cachestien “%s”: %s"
@@ -173,33 +173,34 @@ msgstr "Kan ikke oprette cachestien “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:981
+#: ../src/EWS/camel/camel-ews-folder.c:974
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Kunne ikke flytte beskedcachefilen fra “%s” til “%s”: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1823
+#: ../src/EWS/camel/camel-ews-folder.c:1863
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1923
 #, c-format
-msgid "Could not load summary for %s"
-msgstr "Kunne ikke indlæse referat for %s"
+msgid "Could not load summary for “%s”"
+msgstr "Kunne ikke indlæse referat for “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2333
+#: ../src/EWS/camel/camel-ews-folder.c:2331
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Opdaterer mappen “%s”"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2526
+#: ../src/EWS/camel/camel-ews-folder.c:2524
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan ikke udføre handlinger på mappen i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
+#: ../src/EWS/camel/camel-ews-folder.c:3311
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1776
 msgid "Apply message _filters to this folder"
 msgstr "Anvend besked_filtre i denne mappe"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3322
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
+#: ../src/EWS/camel/camel-ews-folder.c:3323
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1788
 msgid "Always check for _new mail in this folder"
 msgstr "Se altid efter _ny post i denne mappe"
 
@@ -336,8 +337,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
-#: ../src/Microsoft365/camel/camel-m365-store.c:516
-#: ../src/Microsoft365/camel/camel-m365-store.c:572
+#: ../src/Microsoft365/camel/camel-m365-store.c:517
+#: ../src/Microsoft365/camel/camel-m365-store.c:604
 msgid "Checking “Out of Office” settings"
 msgstr "Kontrollerer indstillinger for “Ikke på kontoret”"
 
@@ -346,54 +347,54 @@ msgid "Look up Exchange server categories"
 msgstr "Slå Exchange-serverkategorier op"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Adgangskoden udløber om %d dag. Åbn “%s” for at ændre det."
 msgstr[1] "Adgangskoden udløber om %d dage. Åbn “%s” for at ændre det."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Adgangskoden udløber om en dag."
 msgstr[1] "Adgangskoden udløber om %d dage."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Opdaterer fremmed mappestruktur"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Opdaterer fremmede mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:676
+#: ../src/EWS/camel/camel-ews-store.c:2334
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ingen sådan mappe: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Kan ikke vise offentlige EWS-mapper i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Kan ikke finde offentlige EWS-mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:739
+#: ../src/EWS/camel/camel-ews-store.c:2865
+#: ../src/Microsoft365/camel/camel-m365-store.c:771
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Kan ikke oprette mappen “%s”. Mappen findes allerede"
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Overmappe %s findes ikke"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -401,130 +402,130 @@ msgstr ""
 "Kan ikke oprette mappen under “%s”. Den bruges kun for mapper til andre "
 "brugere"
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Kan ikke oprette mappen under “%s”. Den bruges kun for offentlige mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:924
+#: ../src/EWS/camel/camel-ews-store.c:3007
+#: ../src/Microsoft365/camel/camel-m365-store.c:956
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mappe findes ikke"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Kan ikke fjerne mappen “%s”. Den bruges kun for mapper til andre brugere"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Kan ikke fjerne mappen “%s”. Den bruges kun for offentlige mapper"
 
-#: ../src/EWS/camel/camel-ews-store.c:3187
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mappen %s findes ikke"
 
-#: ../src/EWS/camel/camel-ews-store.c:3223
+#: ../src/EWS/camel/camel-ews-store.c:3219
 msgid "Cannot move a foreign folder"
 msgstr "Kan ikke flytte en fremmed mappe"
 
-#: ../src/EWS/camel/camel-ews-store.c:3240
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ingen change-nøglepost for mappe %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3270
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Kan ikke både omdøbe og flytte en mappe på samme tid"
 
-#: ../src/EWS/camel/camel-ews-store.c:3301
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Kan ikke finde mappe-ID for overmappe %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Indbakke"
 
-#: ../src/EWS/camel/camel-ews-store.c:3373
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchangeserver %s"
 
 # på eller den?
-#: ../src/EWS/camel/camel-ews-store.c:3376
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchangetjeneste for %s på %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3440
-#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+#: ../src/EWS/camel/camel-ews-store.c:3436
+#: ../src/Microsoft365/camel/camel-m365-store.c:1526
 msgid "Could not locate Inbox folder"
 msgstr "Kunne ikke finde indbakkemappen"
 
-#: ../src/EWS/camel/camel-ews-store.c:3452
-#: ../src/Microsoft365/camel/camel-m365-store.c:1506
+#: ../src/EWS/camel/camel-ews-store.c:3448
+#: ../src/Microsoft365/camel/camel-m365-store.c:1538
 msgid "Could not locate Trash folder"
 msgstr "Kunne ikke finde papirkurvens mappe"
 
-#: ../src/EWS/camel/camel-ews-store.c:3489
-#: ../src/Microsoft365/camel/camel-m365-store.c:1544
+#: ../src/EWS/camel/camel-ews-store.c:3485
+#: ../src/Microsoft365/camel/camel-m365-store.c:1576
 msgid "Could not locate Junk folder"
 msgstr "Kunne ikke finde mappe for spam"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Kan ikke abonnere på EWS-mapper i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Kan ikke abonnere på mappen “%s”, ingen offentlig mappe tilgængelig"
 
-#: ../src/EWS/camel/camel-ews-store.c:3714
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Kan ikke abonnere på mappen “%s”: mappen blev ikke fundet"
 
-#: ../src/EWS/camel/camel-ews-store.c:3723
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr "Kan ikke abonnere på mappen “%s”: mappe-id blev ikke fundet"
 
-#: ../src/EWS/camel/camel-ews-store.c:3734
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr "Kan ikke abonnere på mappen “%s”: offentlig rodmappe blev ikke fundet"
 
-#: ../src/EWS/camel/camel-ews-store.c:3810
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Kan ikke fjerne abonnement for EWS-mapper i frakoblet tilstand"
 
-#: ../src/EWS/camel/camel-ews-store.c:3921
-#: ../src/Microsoft365/camel/camel-m365-store.c:1852
-#: ../src/Microsoft365/camel/camel-m365-store.c:1865
+#: ../src/EWS/camel/camel-ews-store.c:3917
+#: ../src/Microsoft365/camel/camel-m365-store.c:1884
+#: ../src/Microsoft365/camel/camel-m365-store.c:1897
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Du skal være på nettet for at fuldføre denne handling"
 
-#: ../src/EWS/camel/camel-ews-store.c:3993
-#: ../src/EWS/camel/camel-ews-store.c:4030
-#: ../src/Microsoft365/camel/camel-m365-store.c:1988
-#: ../src/Microsoft365/camel/camel-m365-store.c:2029
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
+#: ../src/Microsoft365/camel/camel-m365-store.c:2020
+#: ../src/Microsoft365/camel/camel-m365-store.c:2061
 msgid "Unsetting the “Out of Office” status"
 msgstr "Nulstil status for “Ikke på kontoret”"
 
@@ -1125,7 +1126,8 @@ msgstr "Postkasse — %s"
 
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:263
 msgid "Cannot test foreign folder availability when the account is offline"
-msgstr "Kan ikke teste tilgængelighed for fremmed mappe, når kontoen er offline"
+msgstr ""
+"Kan ikke teste tilgængelighed for fremmed mappe, når kontoen er offline"
 
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:325
@@ -1136,8 +1138,8 @@ msgstr "Tilgængelighed"
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:95
 #, c-format
 msgid ""
-"Folder “%s” not found. Either it does not exist or you do not have permission "
-"to access it."
+"Folder “%s” not found. Either it does not exist or you do not have "
+"permission to access it."
 msgstr ""
 "Mappen “%s” blev ikke fundet. Enten findes den ikke, eller du har ikke "
 "rettigheder til at tilgå den."
@@ -1445,10 +1447,10 @@ msgstr "Delegerede"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1024
 msgid ""
-"Delegates can send items on your behalf, including creating and responding to "
-"meeting requests. If you want to grant folder permissions without giving send-"
-"on-behalf-of permissions, close this dialog box, right-click the folder, "
-"click Permissions and change the options there."
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
 msgstr ""
 "Delegerede kan sende punkter på dine vegne, inklusive oprettelse og svar på "
 "mødeforespørgsler. Hvis du ønsker at tildele mapperettigheder uden at give "
@@ -1508,15 +1510,16 @@ msgstr "_Nulstil synkroniseringsmærker"
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:256
 msgid ""
 "Folders can sometimes get out of synchronization, for example after a long "
-"time not being connected to the server. By resetting the synchronization tags "
-"the folders are updated completely. This does not cause download of any "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
 "already locally stored messages. The change will take effect the next time "
 "the folders are refreshed."
 msgstr ""
 "Det kan ske, at mapper ikke længere er synkroniserede, f.eks. efter i lang "
 "tid ikke at have været forbundet til serveren. Ved at nulstille "
-"synkroniseringsmærkerne opdateres mapperne helt. Lokalt gemte beskeder hentes "
-"ikke igen. Ændringen vil træde i kraft, næste gange mapperne genopfriskes."
+"synkroniseringsmærkerne opdateres mapperne helt. Lokalt gemte beskeder "
+"hentes ikke igen. Ændringen vil træde i kraft, næste gange mapperne "
+"genopfriskes."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:203
 msgid "Locating offline address books"
@@ -1696,10 +1699,11 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Mappe tilhørende brugeren “{0}” er blevet tilmeldt."
 
 #: ../src/EWS/registry/e-ews-backend.c:1044
-#: ../src/Microsoft365/registry/e-m365-backend.c:728
+#: ../src/Microsoft365/registry/e-m365-backend.c:770
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
-msgstr "Kunne ikke bestemme en egnet mappeklasse for en ny mappe navngivet “%s”"
+msgstr ""
+"Kunne ikke bestemme en egnet mappeklasse for en ny mappe navngivet “%s”"
 
 #: ../src/EWS/registry/e-ews-backend.c:1132
 #, c-format
@@ -1739,100 +1743,96 @@ msgstr "Kan ikke fjerne brugerkontaktperson"
 msgid "Cannot remove recent contact"
 msgstr "Kan ikke fjerne nylig kontaktperson"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:930
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1029
 msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr ""
 "Kan ikke gemme løsrevne forekomster, fordi de ikke understøttes i Microsoft "
 "365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1115
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1188
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Kan kun gemme enkle begivenheder i Microsoft 365-kalender"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1128
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1201
 msgid "Can store only simple tasks into Microsoft 365 task folder"
 msgstr "Kan kun gemme enkle opgaver i Microsoft 365-opgavemappen"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1179
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1646
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1252
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1719
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
 "Kan ikke oprette møder arrangeret af andre brugere i en Microsoft 365-"
 "kalender."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1779
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365-kalender kan ikke gemme mere end en gentagelse"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1787
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Microsoft 365-kalender kan ikke gemme komponent med RDATE- eller EXRULE-"
 "egenskaber"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1927
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Ukendt gentagelseshyppighed (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2081
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
-msgstr "Microsoft 365-kalender kan ikke gemme mere end en begivenhedspåmindelse"
+msgstr ""
+"Microsoft 365-kalender kan ikke gemme mere end en begivenhedspåmindelse"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2114
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365-begivenhed kan kun have en påmindelse før, begivenheden finder "
 "sted"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2127
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365-opgave kan kun have en påmindelse i absolut tid"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2484
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365-opgave kan ikke have vedhæftninger."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2587
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Kan ikke gemme vedhæftninger med URI'en “%s”"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2589
 msgid "Failed to read attachment URI"
 msgstr "Kunne ikke læse vedhæftningens URI"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2603
 msgid "Failed to get inline attachment data"
 msgstr "Kunne ikke hente data fra inkluderet vedhæftning"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:285
-#: ../src/Microsoft365/camel/camel-m365-folder.c:386
-#: ../src/Microsoft365/camel/camel-m365-folder.c:889
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
+#: ../src/Microsoft365/camel/camel-m365-folder.c:261
+#: ../src/Microsoft365/camel/camel-m365-folder.c:383
+#: ../src/Microsoft365/camel/camel-m365-folder.c:886
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1288
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1419
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1486
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1568
 msgid "Invalid folder state (missing parent store)"
 msgstr "Ugyldig mappetilstand (manglende ophavslager)"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:555
+#: ../src/Microsoft365/camel/camel-m365-folder.c:552
 msgid "Follow-up"
 msgstr "Opfølgning"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1867
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Mappen “%s” svarer ikke til en kendt mappe"
-
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
-#, c-format
-msgid "Could not load summary for “%s”"
-msgstr "Kunne ikke indlæse referat for “%s”"
 
 #: ../src/Microsoft365/camel/camel-m365-provider.c:51
 msgid "Microsoft 365"
@@ -1852,27 +1852,27 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Modtagelse af mail via Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1470
+#: ../src/Microsoft365/common/e-m365-connection.c:1505
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Forkert udformet URI “%s”"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:579
+#: ../src/Microsoft365/camel/camel-m365-store.c:611
 msgid "Look up Microsoft 365 categories"
 msgstr "Slå Microsoft 365-kategorier op"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:588
+#: ../src/Microsoft365/camel/camel-m365-store.c:620
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Kunne ikke oprette forbindelse"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:753
+#: ../src/Microsoft365/camel/camel-m365-store.c:785
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Overmappen “%s” findes ikke"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:996
-#: ../src/Microsoft365/camel/camel-m365-store.c:1034
+#: ../src/Microsoft365/camel/camel-m365-store.c:1028
+#: ../src/Microsoft365/camel/camel-m365-store.c:1066
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Mappen “%s” findes ikke"
@@ -1908,7 +1908,13 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1111
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr ""
+"Serveren returnerede en URL med en uventet vært “%s”; der forventedes “%s”"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1144
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1918,7 +1924,7 @@ msgstr[1] ""
 "Microsoft 365-serveren er optaget. Venter på at forsøge igen (%d:%02d "
 "minutter)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1117
+#: ../src/Microsoft365/common/e-m365-connection.c:1150
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
@@ -1927,21 +1933,21 @@ msgstr[0] ""
 msgstr[1] ""
 "Microsoft 365-serveren er optaget. Venter på at forsøge igen (%d sekunder)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1275
+#: ../src/Microsoft365/common/e-m365-connection.c:1302
 msgid "Invalid data"
 msgstr "Ugyldige data"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1267
+#: ../src/Microsoft365/common/e-m365-connection.c:1300
 msgid "Operation was cancelled"
 msgstr "Handlingen blev afbrudt"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1964
+#: ../src/Microsoft365/common/e-m365-connection.c:2006
 msgid "Failed to parse own Json data"
 msgstr "Kunne ikke fortolke egne Json-data"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5493
+#: ../src/Microsoft365/common/e-m365-connection.c:5540
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Kan ikke finde forekomst til tiden “%s”"
@@ -2119,22 +2125,26 @@ msgstr ""
 msgid "The reported error was “%s”."
 msgstr "Den rapporterede fejl var “%s”."
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:411
+#: ../src/Microsoft365/registry/e-m365-backend.c:453
 msgid "Organizational Contacts"
 msgstr "Organisatoriske kontaktpersoner"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:418
+#: ../src/Microsoft365/registry/e-m365-backend.c:460
 msgid "Organizational Users"
 msgstr "Organisatoriske brugere"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:425
+#: ../src/Microsoft365/registry/e-m365-backend.c:467
 msgid "Recent Contacts"
 msgstr "Nylige kontaktpersoner"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:819
+#: ../src/Microsoft365/registry/e-m365-backend.c:861
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Datakilden “%s” repræsenterer ikke en Microsoft 365-mappe"
+
+#, c-format
+#~ msgid "Could not load summary for %s"
+#~ msgstr "Kunne ikke indlæse referat for %s"
 
 #~ msgid "Cannot find “Deleted Items” folder"
 #~ msgstr "Kan ikke finde mappen “Slettede elementer”"
@@ -2145,8 +2155,8 @@ msgstr "Datakilden “%s” repræsenterer ikke en Microsoft 365-mappe"
 #~ "Microsoft 365 folders."
 #~ msgstr ""
 #~ "Kan ikke tilføje beskeder til en Microsoft 365-konto fra en anden konto. "
-#~ "Kun beskeder fra den samme konto kan flyttes mellem/kopieres til Microsoft "
-#~ "365-mapperne."
+#~ "Kun beskeder fra den samme konto kan flyttes mellem/kopieres til "
+#~ "Microsoft 365-mapperne."
 
 #, c-format
 #~ msgid "URL “%s” is not valid"
