@@ -1,3 +1,16 @@
+Evolution-EWS 3.62.0 2026-09-11
+-------------------------------
+
+Bug Fixes:
+	M!18 - Add a per-folder coalescing gate for sync and refresh (Benjamin Herrenschmidt)
+	M!19 - camel: Do not save the folder summary in the subclass dispose (David Woodhouse)
+
+Translations:
+	Alan Mortensen (da)
+	Balázs Úr (hu)
+	Jiri Eischmann (cs)
+	Kjartan Maraas (nb)
+
 Evolution-EWS 3.61.3 2026-08-28
 -------------------------------
 
