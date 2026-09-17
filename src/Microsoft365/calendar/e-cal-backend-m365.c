@@ -27,6 +27,12 @@
 #define ECC_ERROR(_code) e_cal_client_error_create (_code, NULL)
 #define ECC_ERROR_EX(_code, _msg) e_cal_client_error_create (_code, _msg)
 
+/* Graph clamps 'Prefer: odata.maxpagesize' to 50 for the events delta
+ * endpoint. Without the preference the server-chosen first page of the
+ * initial (tokenless) enumeration can exceed the gateway timeout on
+ * large calendars, failing every initial sync with 504. */
+#define EVENTS_DELTA_MAX_PAGE_SIZE 50
+
 #define LOCK(_cb) g_rec_mutex_lock (&_cb->priv->property_lock)
 #define UNLOCK(_cb) g_rec_mutex_unlock (&_cb->priv->property_lock)
 
@@ -520,7 +526,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 		cdd.out_removed_objects = out_removed_objects;
 
 		success = e_m365_connection_get_objects_delta_sync (cbm365->priv->cnc, NULL,
-			E_M365_FOLDER_KIND_CALENDAR, cbm365->priv->folder_id, "id", last_sync_tag, 0,
+			E_M365_FOLDER_KIND_CALENDAR, cbm365->priv->folder_id, "id", last_sync_tag, EVENTS_DELTA_MAX_PAGE_SIZE,
 			ecb_m365_get_events_delta_cb, &cdd,
 			out_new_sync_tag, cancellable, &local_error);
 
@@ -545,7 +551,7 @@ ecb_m365_get_changes_sync (ECalMetaBackend *meta_backend,
 			g_ptr_array_set_size (cdd.ids, 0);
 
 			success = e_m365_connection_get_objects_delta_sync (cbm365->priv->cnc, NULL,
-				E_M365_FOLDER_KIND_CALENDAR, cbm365->priv->folder_id, "id", NULL, 0,
+				E_M365_FOLDER_KIND_CALENDAR, cbm365->priv->folder_id, "id", NULL, EVENTS_DELTA_MAX_PAGE_SIZE,
 				ecb_m365_get_events_delta_cb, &cdd,
 				out_new_sync_tag, cancellable, &local_error);
 		}
