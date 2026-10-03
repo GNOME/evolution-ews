@@ -7,10 +7,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews gnome-3-8\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-03-21 08:23+0000\n"
-"PO-Revision-Date: 2016-03-21 19:34+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
+"POT-Creation-Date: 2026-09-30 12:34+0000\n"
+"PO-Revision-Date: 2026-10-03 22:09+0300\n"
 "Last-Translator: Tom Tryfonidis <tomtryf@gmail.com>\n"
 "Language-Team: team@gnome.gr\n"
 "Language: el\n"
@@ -21,166 +20,246 @@ msgstr ""
 "X-Generator: Poedit 1.8.7\n"
 "X-Project-Style: gnome\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/EWS/camel/camel-ews-provider.c:66
+#: ../src/EWS/evolution/e-ews-config-lookup.c:221
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:118
 msgid "Exchange Web Services"
 msgstr "Υπηρεσίες ιστού Exchange"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/EWS/camel/camel-ews-provider.c:67
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Για πρόσβαση διακομιστών Exchange χρησιμοποιώντας υπηρεσίες ιστού"
 
-#: ../src/addressbook/e-book-backend-ews.c:1460
-msgid "The backend does not support bulk additions"
-msgstr "Το σύστημα υποστήριξης δεν υποστηρίζει μαζικές προσθήκες"
+#: ../src/common/e-ews-common-utils.c:116
+#, c-format
+msgid "Invalid folder URI “%s”"
+msgstr "Μη έγκυρο URI φακέλου «%s»"
 
-#: ../src/addressbook/e-book-backend-ews.c:1499
-#: ../src/addressbook/e-book-backend-ews.c:1866
+#: ../src/common/e-ms-oapxbc-util.c:43
+msgid "Failed to create MS OAPXBC app: "
+msgstr "Αποτυχία δημιουργίας εφαρμογής MS OAPXBC: "
+
+#: ../src/common/e-ms-oapxbc-util.c:51
+msgid "Failed to get accounts: "
+msgstr "Αποτυχία λήψης λογαριασμών: "
+
+#: ../src/common/e-ms-oapxbc-util.c:78
+#, c-format
+msgid "No account found for user '%s'"
+msgstr "Δεν βρέθηκε λογαριασμός για τον χρήστη «%s»"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:2883
+msgid "Fetching contact photos…"
+msgstr "Ανάκτηση φωτογραφιών επαφής…"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4068
+msgid "Failed to update GAL:"
+msgstr "Αποτυχία ενημέρωσης του GAL:"
+
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4235
 msgid ""
-"Cannot save contact list, it's only supported on EWS Server 2010 or later"
-msgstr ""
-"Αδυναμία αποθήκευσης της λίστας επαφών, υποστηρίζεται μόνο σε διακομιστή EWS "
-"2010 ή νεότερη έκδοση"
+"Cannot save contact list, it’s only supported on EWS Server 2010 or later"
+msgstr "Αδυναμία αποθήκευσης της λίστας επαφών, υποστηρίζεται μόνο σε διακομιστή EWS 2010 ή νεότερο"
 
-#: ../src/addressbook/e-book-backend-ews.c:1825
-msgid "The backend does not support bulk modifications"
-msgstr "Το σύστημα υποστήριξης δεν υποστηρίζει μαζικές τροποποιήσεις"
+#: ../src/EWS/addressbook/e-book-backend-ews.c:4333
+msgid "Failed to set contact photo:"
+msgstr "Αποτυχία ορισμού φωτογραφίας επαφής:"
 
-#: ../src/addressbook/e-book-backend-ews.c:2037
-msgid "Wait till syncing is done"
-msgstr "Περιμένετε μέχρι την ολοκλήρωση του συγχρονισμού"
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2087
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Διαθέσιμος"
 
-#: ../src/addressbook/e-book-backend-ews.c:2520
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2089
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Απασχολημένος"
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2091
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "Εκτός γραφείου"
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2093
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Προσωρινός"
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2690
+#: ../src/EWS/calendar/e-cal-backend-ews.c:2964
+msgid "Cannot determine EWS ItemId"
+msgstr "Αδυναμία προσδιορισμού του EWS ItemId"
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3261
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
+msgid ""
+"Cannot create meetings organized by other users in an Exchange Web Services "
+"calendar."
+msgstr "Αδυναμία δημιουργίας συναντήσεων που οργανώνονται από άλλους χρήστες σε ημερολόγιο Υπηρεσιών Ιστού Exchange (EWS)."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3298
+msgid "Online meeting can be created only in the main user Calendar."
+msgstr "Μια διαδικτυακή συνάντηση μπορεί να δημιουργηθεί μόνο στο κύριο ημερολόγιο του χρήστη."
+
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1712
 #, c-format
-msgid "Processing contacts in %s %d%% completed... "
-msgstr "Ολοκληρώθηκε η επεξεργασία των επαφών στο %s %d%%... "
+msgid "Cannot find user “%s” between attendees"
+msgstr "Αδυναμία εύρεσης του χρήστη «%s» μεταξύ των συμμετεχόντων"
 
-#: ../src/addressbook/e-book-backend-ews.c:3132
-msgid "Syncing contacts..."
-msgstr "Συγχρονισμός επαφών..."
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:39
+msgid ""
+"Cannot connect to the server, repeat the action once you login to the server."
+msgstr "Αδυναμία σύνδεσης στον διακομιστή, επαναλάβετε την ενέργεια μόλις συνδεθείτε στον διακομιστή."
 
-#: ../src/addressbook/e-book-backend-ews.c:3317
-#: ../src/configuration/e-ews-search-user.c:365
-msgid "Searching..."
-msgstr "Αναζήτηση..."
-
-#: ../src/addressbook/e-book-backend-ews.c:4267
-msgid "Requested to delete an unrelated cursor"
-msgstr "Ζητήθηκε η διαγραφή ενός άσχετου δρομέα"
-
-#: ../src/calendar/e-cal-backend-ews.c:1317
-msgid "EWS does not support bulk removals"
-msgstr "Το EWS δεν υποστηρίζει μαζικές αφαιρέσεις"
-
-#: ../src/calendar/e-cal-backend-ews.c:1495
-msgid "Unknown error"
-msgstr "Άγνωστο σφάλμα"
-
-#: ../src/calendar/e-cal-backend-ews.c:1739
-msgid "EWS does not support bulk additions"
-msgstr "Το EWS δεν υποστηρίζει μαζικές προσθήκες"
-
-#: ../src/calendar/e-cal-backend-ews.c:1944
-msgid "EWS does not support bulk modifications"
-msgstr "Το EWS δεν υποστηρίζει μαζικές τροποποιήσεις"
-
-#: ../src/calendar/e-cal-backend-ews.c:2370
+#. Translators: The '%s' is replaced with a UID of the collection source
+#: ../src/EWS/calendar/e-cal-backend-ews-m365.c:147
 #, c-format
-msgid "Cannot find user '%s' between attendees"
-msgstr "Αδύνατη η εύρεση του χρήστη '%s' μεταξύ παρευρισκομένων"
+msgid "Cannot find Microsoft365 helper source for calendar “%s”"
+msgstr "Αδυναμία εύρεσης βοηθητικής πηγής Microsoft365 για το ημερολόγιο «%s»"
 
-#: ../src/camel/camel-ews-folder.c:377
+#: ../src/EWS/calendar/e-cal-backend-ews-utils.c:2354
+msgid "Invalid occurrence ID"
+msgstr "Μη έγκυρο αναγνωριστικό εμφάνισης"
+
+#: ../src/EWS/camel/camel-ews-folder.c:357
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Αδύνατο το άνοιγμα περιεχομένου mime του προσωρινού αρχείου!"
 
-#: ../src/camel/camel-ews-folder.c:385
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Αδύνατη η δημιουργία αναλυτή από περιεχόμενο mime!"
 
-#: ../src/camel/camel-ews-folder.c:394
+#: ../src/EWS/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Αδύνατη η ανάλυση αιτήματος συγκέντρωσης του περιεχομένου mime!"
 
-#: ../src/camel/camel-ews-folder.c:453
+#: ../src/EWS/camel/camel-ews-folder.c:487
+#: ../src/EWS/camel/camel-ews-folder.c:700
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Αδύνατη η δημιουργία αρχείου κρυφής μνήμης"
 
-#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
+#: ../src/EWS/camel/camel-ews-folder.c:817
+#: ../src/EWS/camel/camel-ews-folder.c:961
 #, c-format
-msgid "Unable to create cache path '%s': %s"
-msgstr "Αδύνατη η δημιουργία διαδρομής κρυφής μνήμης '%s': %s"
+msgid "Unable to create cache path “%s”: %s"
+msgstr "Αδυναμία δημιουργίας διαδρομής κρυφής μνήμης «%s»: %s"
 
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:663
+#: ../src/EWS/camel/camel-ews-folder.c:975
 #, c-format
-msgid "Failed to move message cache file from '%s' to '%s': %s"
-msgstr ""
-"Αποτυχία μετακίνησης μηνύματος αρχείου κρυφής μνήμης από το '%s' στο '%s': %s"
+msgid "Failed to move message cache file from “%s” to “%s”: %s"
+msgstr "Αποτυχία μετακίνησης αρχείου κρυφής μνήμης μηνυμάτων από «%s» σε «%s»: %s"
 
-#: ../src/camel/camel-ews-folder.c:1404
+#: ../src/EWS/camel/camel-ews-folder.c:1888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1972
 #, c-format
-msgid "Could not load summary for %s"
-msgstr "Αδύνατη η φόρτωση περίληψης για το %s"
+msgid "Could not load summary for “%s”"
+msgstr "Αδυναμία φόρτωσης σύνοψης για το «%s»"
 
-#: ../src/camel/camel-ews-folder.c:1943
+#: ../src/EWS/camel/camel-ews-folder.c:2339
 #, c-format
-msgid "Cant perform actions on the folder while in offline mode"
-msgstr "Αδύνατη η εκτέλεση ενεργειών στον φάκελο όσο είναι εκτός σύνδεσης"
+msgid "Refreshing folder “%s”"
+msgstr "Ανανέωση φακέλου «%s»"
 
-#: ../src/camel/camel-ews-provider.c:47
+#: ../src/EWS/camel/camel-ews-folder.c:2551
+#, c-format
+msgid "Cannot perform actions on the folder while in offline mode"
+msgstr "Αδυναμία εκτέλεσης ενεργειών στον φάκελο όσο βρίσκεστε σε λειτουργία χωρίς σύνδεση"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3336
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1823
+msgid "Apply message _filters to this folder"
+msgstr "Εφαρμογή _φίλτρων μηνυμάτων σε αυτόν τον φάκελο"
+
+#: ../src/EWS/camel/camel-ews-folder.c:3348
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1835
+msgid "Always check for _new mail in this folder"
+msgstr "Πάντα έλεγχος για _νέα αλληλογραφία σε αυτόν τον φάκελο"
+
+#: ../src/EWS/camel/camel-ews-provider.c:26
+#: ../src/Microsoft365/camel/camel-m365-provider.c:20
 msgid "Checking for new mail"
 msgstr "Έλεγχος για νέα αλληλογραφία"
 
-#: ../src/camel/camel-ews-provider.c:49
+#: ../src/EWS/camel/camel-ews-provider.c:28
+#: ../src/Microsoft365/camel/camel-m365-provider.c:22
 msgid "C_heck for new messages in all folders"
 msgstr "Έ_λεγχος για νέα μηνύματα σε όλους τους φακέλους"
 
-#: ../src/camel/camel-ews-provider.c:51
+#: ../src/EWS/camel/camel-ews-provider.c:30
 msgid "_Listen for server change notifications"
 msgstr "Παρακολούθηση για ειδοποιήσεις αλλαγής του διακομιστή"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/EWS/camel/camel-ews-provider.c:33
+#: ../src/Microsoft365/camel/camel-m365-provider.c:25
 msgid "Options"
 msgstr "Επιλογές"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/EWS/camel/camel-ews-provider.c:35
+#: ../src/Microsoft365/camel/camel-m365-provider.c:27
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "_Εφαρμογή φίλτρων στα εισερχόμενα των νέων μηνυμάτων σε αυτόν τον διακομιστή"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/EWS/camel/camel-ews-provider.c:37
+#: ../src/Microsoft365/camel/camel-m365-provider.c:29
 msgid "Check new messages for _Junk contents"
 msgstr "Έλεγχος νέων μηνυμάτων για _ανεπιθύμητα περιεχόμενα"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/EWS/camel/camel-ews-provider.c:39
+#: ../src/Microsoft365/camel/camel-m365-provider.c:31
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Έλεγχος για ανεπιθύμητα μηνύματα μόνο στον φάκελο Ε_ΙΣΕΡΧΟΜΕΝΩΝ"
 
-#: ../src/camel/camel-ews-provider.c:62
-msgid "Automatically synchroni_ze remote mail locally"
-msgstr "Αυτόματος συγ_χρονισμός απομακρυσμένης αλληλογραφίας τοπικά"
+#: ../src/EWS/camel/camel-ews-provider.c:41
+#: ../src/Microsoft365/camel/camel-m365-provider.c:33
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Συγχρονι_σμός απομακρυσμένης αλληλογραφίας τοπικά σε όλους τους φακέλους"
 
-#: ../src/camel/camel-ews-provider.c:65
+#: ../src/EWS/camel/camel-ews-provider.c:44
+msgid "Show _Public Folders beside user folders"
+msgstr "Εμφάνιση _δημόσιων φακέλων δίπλα στους φακέλους χρήστη"
+
+#: ../src/EWS/camel/camel-ews-provider.c:47
+#: ../src/Microsoft365/camel/camel-m365-provider.c:37
 msgid "Connection"
 msgstr "Σύνδεση"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:69
+#: ../src/EWS/camel/camel-ews-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:41
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Λήξη χρόνου σύνδεσης (σε δευτερόλεπτα) %s"
 
-#: ../src/camel/camel-ews-provider.c:94
+#: ../src/EWS/camel/camel-ews-provider.c:53
+#: ../src/Microsoft365/camel/camel-m365-provider.c:43
+msgid "Numbe_r of concurrent connections to use"
+msgstr "Αριθ_μός ταυτόχρονων συνδέσεων προς χρήση"
+
+#: ../src/EWS/camel/camel-ews-provider.c:55
+msgid "Override _User-Agent header value"
+msgstr "Παράκαμψη τιμής κεφαλίδας _User-Agent"
+
+#: ../src/EWS/camel/camel-ews-provider.c:58
+msgid "Al_ways connect with HTTP/1"
+msgstr "Πά_ντα σύνδεση με HTTP/1"
+
+#: ../src/EWS/camel/camel-ews-provider.c:75
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/EWS/camel/camel-ews-provider.c:76
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -188,11 +267,11 @@ msgstr ""
 "Με αυτήν την επιλογή θα συνδεθείτε με τον διακομιστή Exchange "
 "χρησιμοποιώντας ένα κωδικό πρόσβασης κειμένου με πιστοποίηση NTLM."
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/EWS/camel/camel-ews-provider.c:83
 msgid "Basic"
 msgstr "Βασικά"
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/EWS/camel/camel-ews-provider.c:84
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -200,11 +279,11 @@ msgstr ""
 "Με αυτήν την επιλογή θα συνδεθείτε με τον διακομιστή Exchange "
 "χρησιμοποιώντας ένα κωδικό πρόσβασης απλού κειμένου με βασική πιστοποίηση."
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/EWS/camel/camel-ews-provider.c:91
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/EWS/camel/camel-ews-provider.c:92
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -212,513 +291,770 @@ msgstr ""
 "Με αυτήν την επιλογή θα συνδεθείτε με τον διακομιστή Exchange "
 "χρησιμοποιώντας μια πιστοποίηση Kerberos/GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:332
+#: ../src/EWS/camel/camel-ews-store.c:313
+#: ../src/Microsoft365/camel/camel-m365-store.c:79
 #, c-format
 msgid "Session has no storage path"
 msgstr "Η συνεδρία δεν έχει διαδρομή αποθήκευσης"
 
-#: ../src/camel/camel-ews-store.c:369
+#. Translators: This composes a "Public Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Public Folders",
+#. * the %d with counter, thus it composes name like "Public Folders_1"
+#.
+#: ../src/EWS/camel/camel-ews-store.c:350
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:498
+#. Translators: This composes a "Foreign Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Foreign Folders",
+#. * the %d with counter, thus it composes name like "Foreign Folders_1"
+#.
+#: ../src/EWS/camel/camel-ews-store.c:503
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1247
-msgid "Checking \"Out of Office\" settings"
-msgstr "Έλεγχος ρυθμίσεων \"Εκτός γραφείου\""
+#: ../src/EWS/camel/camel-ews-store.c:645
+#: ../src/EWS/camel/camel-ews-store.c:1469
+#: ../src/Microsoft365/camel/camel-m365-store.c:517
+#: ../src/Microsoft365/camel/camel-m365-store.c:604
+msgid "Checking “Out of Office” settings"
+msgstr "Έλεγχος ρυθμίσεων «Εκτός γραφείου»"
 
-#: ../src/camel/camel-ews-store.c:1495
+#: ../src/EWS/camel/camel-ews-store.c:1475
+msgid "Look up Exchange server categories"
+msgstr "Αναζήτηση κατηγοριών διακομιστή Exchange"
+
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/EWS/camel/camel-ews-store.c:1547
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "Ο κωδικός πρόσβασης θα λήξει σε %d ημέρα. Ανοίξτε το «%s» για να τον αλλάξετε."
+msgstr[1] "Ο κωδικός πρόσβασης θα λήξει σε %d ημέρες. Ανοίξτε το «%s» για να τον αλλάξετε."
+
+#: ../src/EWS/camel/camel-ews-store.c:1553
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Ο κωδικός πρόσβασης θα λήξει σε μία ημέρα."
+msgstr[1] "Ο κωδικός πρόσβασης θα λήξει σε %d ημέρες."
+
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Ενημέρωση δομής ξένου φακέλου"
 
-#: ../src/camel/camel-ews-store.c:1631
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Ενημέρωση ξένων φακέλων"
 
-#: ../src/camel/camel-ews-store.c:2005
+#: ../src/EWS/camel/camel-ews-store.c:2334
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "No such folder: %s"
 msgstr "Δεν υπάρχει τέτοιος φάκελος: %s"
 
-#: ../src/camel/camel-ews-store.c:2300
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Αδύνατη η εμφάνιση δημόσιων φακέλων EWS σε λειτουργία εκτός σύνδεσης"
 
-#: ../src/camel/camel-ews-store.c:2373
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Αδύνατη η εύρεση οποιωνδήποτε δημόσιων φακέλων"
 
-#: ../src/camel/camel-ews-store.c:2482
+#: ../src/EWS/camel/camel-ews-store.c:2865
+#: ../src/Microsoft365/camel/camel-m365-store.c:771
 #, c-format
-msgid "Cannot create folder '%s', folder already exists"
-msgstr "Αδύνατη η δημιουργία του φακέλου '%s', ο φάκελος υπάρχει ήδη"
+msgid "Cannot create folder “%s”, folder already exists"
+msgstr "Αδυναμία δημιουργίας φακέλου «%s», ο φάκελος υπάρχει ήδη"
 
-#: ../src/camel/camel-ews-store.c:2497
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Ο γονικός φάκελος %s δεν υπάρχει"
 
-#: ../src/camel/camel-ews-store.c:2507
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
-"Cannot create folder under '%s', it is used for folders of other users only"
-msgstr ""
-"Αδύνατη η δημιουργία φακέλου κάτω από τον '%s', χρησιμοποιείται μόνο για "
-"φακέλους άλλων χρηστών"
+"Cannot create folder under “%s”, it is used for folders of other users only"
+msgstr "Αδυναμία δημιουργίας φακέλου κάτω από το «%s», χρησιμοποιείται μόνο για φακέλους άλλων χρηστών"
 
-#: ../src/camel/camel-ews-store.c:2517
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
-msgid "Cannot create folder under '%s', it is used for public folders only"
-msgstr ""
-"Αδύνατη η δημιουργία φακέλου κάτω από τον '%s', χρησιμοποιείται μόνο για "
-"δημόσιους φακέλους"
+msgid "Cannot create folder under “%s”, it is used for public folders only"
+msgstr "Αδυναμία δημιουργίας φακέλου κάτω από το «%s», χρησιμοποιείται μόνο για δημόσιους φακέλους"
 
-#: ../src/camel/camel-ews-store.c:2621
+#: ../src/EWS/camel/camel-ews-store.c:3007
+#: ../src/Microsoft365/camel/camel-m365-store.c:956
 #, c-format
 msgid "Folder does not exist"
 msgstr "Ο φάκελος δεν υπάρχει"
 
-#: ../src/camel/camel-ews-store.c:2631
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
-msgid "Cannot remove folder '%s', it is used for folders of other users only"
-msgstr ""
-"Αδύνατη η αφαίρεση του φακέλου '%s', χρησιμοποιείται μόνο για φακέλους άλλων "
-"χρηστών"
+msgid "Cannot remove folder “%s”, it is used for folders of other users only"
+msgstr "Αδυναμία αφαίρεσης του φακέλου «%s», χρησιμοποιείται μόνο για φακέλους άλλων χρηστών"
 
-#: ../src/camel/camel-ews-store.c:2642
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
-msgid "Cannot remove folder '%s', it is used for public folders only"
-msgstr ""
-"Αδύνατη η αφαίρεση του φακέλου '%s', χρησιμοποιείται μόνο για δημόσιους "
-"φακέλους"
+msgid "Cannot remove folder “%s”, it is used for public folders only"
+msgstr "Αδυναμία αφαίρεσης του φακέλου «%s», χρησιμοποιείται μόνο για δημόσιους φακέλους"
 
-#: ../src/camel/camel-ews-store.c:2798
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Ο φάκελος %s δεν υπάρχει"
 
-#: ../src/camel/camel-ews-store.c:2808
+#: ../src/EWS/camel/camel-ews-store.c:3219
+msgid "Cannot move a foreign folder"
+msgstr "Αδυναμία μετακίνησης ξένου φακέλου"
+
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Καμία εγγραφή κλειδιού αλλαγής για τον φάκελο %s"
 
-#: ../src/camel/camel-ews-store.c:2850
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Αδύνατη η ταυτόχρονη μετονομασία και μετακίνηση ενός φακέλου"
 
-#: ../src/camel/camel-ews-store.c:2886
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Αδύνατη η εύρεση αναγνωριστικού φακέλου για τον γονικό φάκελο %s"
 
-#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:164
+#. convert well-known names to their non-localized form
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
+msgid "Inbox"
+msgstr "Εισερχόμενα"
+
+#: ../src/EWS/camel/camel-ews-store.c:3369
+#: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Διακομιστής Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2939
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Υπηρεσία Exchange για τον %s σε %s"
 
-#: ../src/camel/camel-ews-store.c:2983
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3436
+#: ../src/Microsoft365/camel/camel-m365-store.c:1526
+msgid "Could not locate Inbox folder"
+msgstr "Αδυναμία εντοπισμού του φακέλου Εισερχομένων"
+
+#: ../src/EWS/camel/camel-ews-store.c:3448
+#: ../src/Microsoft365/camel/camel-m365-store.c:1538
 msgid "Could not locate Trash folder"
 msgstr "Αδύνατος ο εντοπισμός του φακέλου απορριμμάτων"
 
-#: ../src/camel/camel-ews-store.c:3043
-#, c-format
+#: ../src/EWS/camel/camel-ews-store.c:3485
+#: ../src/Microsoft365/camel/camel-m365-store.c:1576
 msgid "Could not locate Junk folder"
 msgstr "Αδύνατος ο εντοπισμός του φακέλου ανεπιθύμητων"
 
-#: ../src/camel/camel-ews-store.c:3233
+#: ../src/EWS/camel/camel-ews-store.c:3677
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Αδύνατη η εγγραφή σε φακέλους EWS σε λειτουργία εκτός σύνδεσης"
 
-#: ../src/camel/camel-ews-store.c:3256
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
-msgid "Cannot subscribe folder '%s', no public folder available"
-msgstr ""
-"Αδύνατη η εγγραφή σε φάκελο '%s', δεν υπάρχει διαθέσιμος δημόσιος φάκελος"
+msgid "Cannot subscribe folder “%s”, no public folder available"
+msgstr "Αδυναμία εγγραφής στον φάκελο «%s», δεν υπάρχει διαθέσιμος δημόσιος φάκελος"
 
-#: ../src/camel/camel-ews-store.c:3266
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
-msgid "Cannot subscribe folder '%s', folder not found"
-msgstr "Αδύνατη η εγγραφή σε φάκελο '%s', ο φάκελος δεν βρέθηκε"
+msgid "Cannot subscribe folder “%s”, folder not found"
+msgstr "Αδυναμία εγγραφής στον φάκελο «%s», ο φάκελος δεν βρέθηκε"
 
-#: ../src/camel/camel-ews-store.c:3357
+#: ../src/EWS/camel/camel-ews-store.c:3719
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder ID not found"
+msgstr "Αδυναμία εγγραφής στον φάκελο «%s», το ID του φακέλου δεν βρέθηκε"
+
+#: ../src/EWS/camel/camel-ews-store.c:3730
+#, c-format
+msgid "Cannot subscribe folder “%s”, public folder root not found"
+msgstr "Αδυναμία εγγραφής στον φάκελο «%s», η ρίζα δημόσιων φακέλων δεν βρέθηκε"
+
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Αδύνατη η απεγγραφή φακέλων EWS σε λειτουργία εκτός σύνδεσης"
 
-#: ../src/camel/camel-ews-store.c:3474
+#: ../src/EWS/camel/camel-ews-store.c:3917
+#: ../src/Microsoft365/camel/camel-m365-store.c:1884
+#: ../src/Microsoft365/camel/camel-m365-store.c:1897
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr ""
 "Πρέπει να είστε συνδεμένοι στο δίκτυο για να ολοκληρωθεί αυτή η διαδικασία"
 
-#: ../src/camel/camel-ews-store.c:3518 ../src/camel/camel-ews-store.c:3555
-msgid "Unsetting the \"Out of Office\" status"
-msgstr "Αναίρεση κατάστασης \"Εκτός γραφείου\""
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
+#: ../src/Microsoft365/camel/camel-m365-store.c:2020
+#: ../src/Microsoft365/camel/camel-m365-store.c:2061
+msgid "Unsetting the “Out of Office” status"
+msgstr "Αναίρεση της κατάστασης «Εκτός γραφείου»"
 
-#: ../src/camel/camel-ews-transport.c:167
+#: ../src/EWS/camel/camel-ews-store.h:39
+msgid "Foreign Folders"
+msgstr "Ξένοι φάκελοι"
+
+#: ../src/EWS/camel/camel-ews-store.h:41
+msgid "Public Folders"
+msgstr "Δημόσιοι φάκελοι"
+
+#: ../src/EWS/camel/camel-ews-transport.c:295
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Παράδοση αλληλογραφίας Exchange μέσω %s"
 
-#: ../src/camel/camel-ews-transport.c:216
+#: ../src/EWS/camel/camel-ews-transport.c:344
+#: ../src/Microsoft365/camel/camel-m365-transport.c:282
 msgid "Cannot send message with no From address"
 msgstr "Αδύνατη η αποστολή μηνύματος χωρίς διεύθυνση αποστολέα"
 
-#: ../src/camel/camel-ews-transport.c:222
+#: ../src/EWS/camel/camel-ews-transport.c:350
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "Ο διακομιστής Exchange δεν μπορεί να στείλει μήνυμα με πολλαπλές διευθύνσεις "
 "αποστολέα"
 
-#: ../src/camel/camel-ews-transport.c:233
+#: ../src/EWS/camel/camel-ews-transport.c:360
+#: ../src/Microsoft365/camel/camel-m365-transport.c:297
 msgid "Failed to read From address"
 msgstr "Αποτυχία ανάγνωσης διεύθυνσης αποστολέα"
 
-#: ../src/camel/camel-ews-transport.c:245
-#, c-format
-msgid ""
-"Exchange server cannot send message as '%s', when the account was configured "
-"for address '%s'"
-msgstr ""
-"Ο διακομιστής Exchange δεν μπορεί να στείλει μήνυμα ως '%s', όταν ο "
-"λογαριασμός ρυθμίστηκε για τη διεύθυνση '%s'"
-
-#: ../src/camel/camel-ews-transport.c:259
+#: ../src/EWS/camel/camel-ews-transport.c:370
+#: ../src/Microsoft365/camel/camel-m365-transport.c:307
 #, c-format
 msgid "Service not connected"
 msgstr "Ασύνδετη υπηρεσία"
 
-#: ../src/collection/e-ews-backend.c:421
-#: ../src/configuration/e-mail-config-ews-gal.c:276
-msgid "Global Address List"
-msgstr "Καθολική λίστα διευθύνσεων"
+#: ../src/EWS/common/camel-sasl-xoauth2-office365.c:13
+msgid "OAuth2 (Office365)"
+msgstr "OAuth2 (Office365)"
 
-#: ../src/collection/e-ews-backend.c:857
+#: ../src/EWS/common/camel-sasl-xoauth2-office365.c:14
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the "
+"Office365.com server"
+msgstr "Αυτή η επιλογή θα χρησιμοποιήσει ένα διακριτικό πρόσβασης OAuth 2.0 για σύνδεση στον διακομιστή Office365.com"
+
+#: ../src/EWS/common/e-ews-calendar-utils.c:1311
 #, c-format
-msgid "Could not determine a suitable folder class for a new folder named '%s'"
-msgstr ""
-"Αδύνατος ο προσδιορισμός μιας κατάλληλης κλάσης φακέλου για έναν νέο φάκελο "
-"με όνομα '%s'"
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr "Αδυναμία αποθήκευσης αυτής της επανάληψης. Αλλάξτε την σε απλή μεμονωμένη ημερήσια, εβδομαδιαία, μηνιαία ή ετήσια επανάληψη χωρίς εξαιρέσεις και με ημερομηνία έναρξης."
 
-#: ../src/collection/e-ews-backend.c:945
+#: ../src/EWS/common/e-ews-camel-common.c:386
 #, c-format
-msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgid "CreateItem call failed to return ID for new message"
 msgstr ""
-"Τα πηγαία δεδομένα '%s' δεν αντιπροσωπεύουν έναν φάκελο υπηρεσιών ιστού "
-"Exchange"
+"Η κλήση CreateItem απέτυχε να επιστρέψει το αναγνωριστικό για νέο μήνυμα"
 
-#: ../src/configuration/e-ews-config-utils.c:570
+#: ../src/EWS/common/e-ews-connection.c:348
+#, c-format
+msgid "No response: %s"
+msgstr "Χωρίς απάντηση: %s"
+
+#: ../src/EWS/common/e-ews-connection.c:515
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] "Ο διακομιστής Exchange είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d:%02d λεπτό)"
+msgstr[1] "Ο διακομιστής Exchange είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d:%02d λεπτά)"
+
+#: ../src/EWS/common/e-ews-connection.c:521
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] "Ο διακομιστής Exchange είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d δευτερόλεπτο)"
+msgstr[1] "Ο διακομιστής Exchange είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d δευτερόλεπτα)"
+
+#: ../src/EWS/common/e-ews-connection.c:650
+msgid "Authentication failed"
+msgstr "Αποτυχία πιστοποίησης"
+
+#: ../src/EWS/common/e-ews-connection.c:2497
+msgid "Failed to parse autodiscover response XML"
+msgstr "Αποτυχία ανάλυσης απάντησης αυτόματης εύρεσης XML"
+
+#: ../src/EWS/common/e-ews-connection.c:2503
+msgid "Failed to find <Autodiscover> element"
+msgstr "Αποτυχία εύρεσης στοιχείου <Autodiscover>"
+
+#: ../src/EWS/common/e-ews-connection.c:2513
+msgid "Failed to find <Response> element"
+msgstr "Αποτυχία εύρεσης στοιχείου <Response>"
+
+#: ../src/EWS/common/e-ews-connection.c:2523
+msgid "Failed to find <Account> element"
+msgstr "Αποτυχία εύρεσης στοιχείου <Account>"
+
+#: ../src/EWS/common/e-ews-connection.c:2568
+msgid "Failed to find <ASUrl> in autodiscover response"
+msgstr "Αποτυχία εύρεσης του <ASUrl> στην απόκριση αυτόματου εντοπισμού"
+
+#: ../src/EWS/common/e-ews-connection.c:2644
+msgid "URL cannot be NULL"
+msgstr "Η διεύθυνση δεν μπορεί να είναι NULL"
+
+#: ../src/EWS/common/e-ews-connection.c:3069
+msgid "Email address is missing a domain part"
+msgstr "Στη διεύθυνση ηλ. αλληλογραφίας λείπει ένα τμήμα τομέα"
+
+#: ../src/EWS/common/e-ews-connection.c:3278
+msgid "Failed to parse oab XML"
+msgstr "Αποτυχία ανάλυσης oab XML"
+
+#: ../src/EWS/common/e-ews-connection.c:3316
+msgid "Failed to find <OAB> element\n"
+msgstr "Αποτυχία εύρεσης στοιχείου <OAB>\n"
+
+#: ../src/EWS/common/e-ews-connection.c:6601
+msgctxt "FreeBusyType"
+msgid "Working elsewhere"
+msgstr "Εργασία αλλού"
+
+#: ../src/EWS/common/e-ews-connection.c:8881
+msgid "Requires at least Microsoft Exchange 2010 SP1 server"
+msgstr "Απαιτείται τουλάχιστον διακομιστής Microsoft Exchange 2010 SP1"
+
+#: ../src/EWS/common/e-ews-connection.c:8982
+msgid "Requires at least Microsoft Exchange 2013 server"
+msgstr "Απαιτείται τουλάχιστον διακομιστής Microsoft Exchange 2013"
+
+#: ../src/EWS/common/e-ews-connection.c:9135
+msgid "Requires at least Microsoft Exchange 2010 server"
+msgstr "Απαιτείται τουλάχιστον διακομιστής Microsoft Exchange 2010"
+
+#: ../src/EWS/common/e-ews-connection.c:9275
+msgid "Requires at least Microsoft Exchange 2007 SP1 server"
+msgstr "Απαιτείται τουλάχιστον διακομιστής Microsoft Exchange 2007 SP1"
+
+#: ../src/EWS/common/e-ews-connection-utils.c:205
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Ο κωδικός πρόσβασης έληξε. Αλλάξτε τον κωδικό πρόσβασης στο «%s»."
+
+#: ../src/EWS/common/e-ews-connection-utils.c:208
+msgid "Password expired."
+msgstr "Ο κωδικός πρόσβασης έληξε."
+
+#: ../src/EWS/common/e-ews-folder.c:785
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Αδύνατη η προσθήκη φακέλου, ανυποστήρικτος τύπος φακέλου"
+
+#: ../src/EWS/common/e-ews-folder.c:790
+msgid "Cannot add folder, master source not found"
+msgstr "Αδύνατη η προσθήκη φακέλου, η κύρια πηγή δεν βρέθηκε"
+
+#: ../src/EWS/common/e-ews-folder.c:830
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:85
+#, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "Αδυναμία προσθήκης φακέλου, ο φάκελος υπάρχει ήδη ως «%s»"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/EWS/common/e-oauth2-service-office365.c:157
+msgctxt "OAuth2Service"
+msgid "Office365"
+msgstr "Office365"
+
+#: ../src/EWS/common/e-oauth2-service-office365.c:480
+#, c-format
+msgid "Failed to acquire PRT SSO cookie: %s"
+msgstr "Αποτυχία λήψης cookie PRT SSO: %s"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:87
+msgid "Use only _primary contact email address"
+msgstr "Χρήση μόνο της _κύριας διεύθυνσης ηλ. αλληλογραφίας της επαφής"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:88
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr "Όταν είναι επιλεγμένο, οι επαφές που αναζητούνται στην ηλεκτρονική Καθολική Λίστα Διευθύνσεων (GAL) θα περιέχουν μόνο την κύρια διεύθυνση ηλ. αλληλογραφίας"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:100
+msgid "_Fetch contact photos"
+msgstr "_Ανάκτηση φωτογραφιών επαφών"
+
+#: ../src/EWS/evolution/e-book-config-ews.c:101
+msgid "Tries to look up for user photo"
+msgstr "Προσπαθεί να αναζητήσει φωτογραφία χρήστη"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:72
+msgid "Show events in time before and after today, in weeks"
+msgstr "Εμφάνιση συμβάντων σε χρονικό διάστημα πριν και μετά από σήμερα, σε εβδομάδες"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:75
+msgid "_Before:"
+msgstr "_Πριν:"
+
+#: ../src/EWS/evolution/e-cal-config-ews.c:94
+msgid "_After:"
+msgstr "_Μετά:"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:246
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:209
+msgid "Online Meeting"
+msgstr "Διαδικτυακή συνάντηση"
+
+#: ../src/EWS/evolution/e-ews-comp-editor-extension.c:248
+#: ../src/Microsoft365/evolution/e-m365-comp-editor-extension.c:211
+msgid "Create the meeting as an online meeting in the main user calendar"
+msgstr "Δημιουργία της συνάντησης ως διαδικτυακής συνάντησης στο κύριο ημερολόγιο του χρήστη"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:181
+msgid "Exchange Web Services autodiscovery"
+msgstr "Αυτόματος εντοπισμός Υπηρεσιών Ιστού Exchange"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:206
+#, c-format
+msgid "User: %s"
+msgstr "Χρήστης: %s"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:211
+#, c-format
+msgid "Host URL: %s"
+msgstr "URL κεντρικού υπολογιστή: %s"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:215
+#, c-format
+msgid "OAB URL: %s"
+msgstr "URL OAB: %s"
+
+#: ../src/EWS/evolution/e-ews-config-lookup.c:312
+#, c-format
+msgid "Requires password to continue."
+msgstr "Απαιτείται κωδικός πρόσβασης για να συνεχίσετε."
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:558
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:87
 msgid "Folder"
 msgstr "Φάκελος"
 
-#: ../src/configuration/e-ews-config-utils.c:580
+#: ../src/EWS/evolution/e-ews-config-utils.c:568
 msgid "Size"
 msgstr "Μέγεθος"
 
-#: ../src/configuration/e-ews-config-utils.c:618
-#: ../src/configuration/e-ews-config-utils.c:623
+#: ../src/EWS/evolution/e-ews-config-utils.c:606
+#: ../src/EWS/evolution/e-ews-config-utils.c:611
 msgid "Unable to retrieve folder size information"
 msgstr "Αδύνατη η ανάκτηση πληροφοριών μέγεθος του φακέλου"
 
-#: ../src/configuration/e-ews-config-utils.c:743
+#: ../src/EWS/evolution/e-ews-config-utils.c:740
 msgid "Folder Sizes"
 msgstr "Μεγέθη αρχείων"
 
-#: ../src/configuration/e-ews-config-utils.c:746
+#: ../src/EWS/evolution/e-ews-config-utils.c:743
 msgid "_Close"
 msgstr "_Κλείσιμο"
 
-#: ../src/configuration/e-ews-config-utils.c:760
+#: ../src/EWS/evolution/e-ews-config-utils.c:757
 msgid "Fetching folder list…"
 msgstr "Ανάκτηση λίστας φακέλων ..."
 
-#: ../src/configuration/e-ews-config-utils.c:913
+#: ../src/EWS/evolution/e-ews-config-utils.c:822
+#: ../src/EWS/evolution/e-ews-config-utils.c:831
+#: ../src/EWS/evolution/e-ews-config-utils.c:840
+#: ../src/EWS/evolution/e-ews-config-utils.c:849
+#: ../src/EWS/evolution/e-ews-config-utils.c:858
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:657
+msgid "Subscribe to folder of other EWS user…"
+msgstr "Εγγραφή σε φάκελο άλλου χρήστη EWS…"
+
+#: ../src/EWS/evolution/e-ews-config-utils.c:1051
 #, c-format
-msgid "Cannot edit permissions of folder '%s', choose other folder."
-msgstr ""
-"Αδύνατη η επεξεργασία δικαιωμάτων του φακέλου '%s', επιλέξτε άλλον φάκελο."
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr "Αδυναμία επεξεργασίας δικαιωμάτων του φακέλου «%s», επιλέξτε άλλον φάκελο."
 
-#: ../src/configuration/e-ews-config-utils.c:990
-msgid "Folder Sizes..."
-msgstr "Μεγέθη φακέλων..."
+#: ../src/EWS/evolution/e-ews-config-utils.c:1132
+msgid "Folder Sizes…"
+msgstr "Μεγέθη φακέλων…"
 
-#: ../src/configuration/e-ews-config-utils.c:997
-msgid "Subscribe to folder of other user..."
-msgstr "Εγγραφείτε στον φάκελο του άλλου χρήστη..."
+#: ../src/EWS/evolution/e-ews-config-utils.c:1139
+msgid "Subscribe to folder of other user…"
+msgstr "Εγγραφή σε φάκελο άλλου χρήστη…"
 
-#: ../src/configuration/e-ews-config-utils.c:1006
-#: ../src/configuration/e-ews-config-utils.c:1310
-#: ../src/configuration/e-ews-config-utils.c:1341
-#: ../src/configuration/e-ews-config-utils.c:1372
-#: ../src/configuration/e-ews-config-utils.c:1403
-msgid "Permissions..."
-msgstr "Δικαιώματα..."
+#: ../src/EWS/evolution/e-ews-config-utils.c:1148
+#: ../src/EWS/evolution/e-ews-config-utils.c:1501
+#: ../src/EWS/evolution/e-ews-config-utils.c:1532
+#: ../src/EWS/evolution/e-ews-config-utils.c:1563
+#: ../src/EWS/evolution/e-ews-config-utils.c:1594
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:187
+msgid "Permissions…"
+msgstr "Δικαιώματα…"
 
-#: ../src/configuration/e-ews-config-utils.c:1008
+#: ../src/EWS/evolution/e-ews-config-utils.c:1150
 msgid "Edit EWS folder permissions"
 msgstr "Επεξεργασία των δικαιωμάτων φακέλου EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1312
+#: ../src/EWS/evolution/e-ews-config-utils.c:1503
 msgid "Edit EWS calendar permissions"
 msgstr "Επεξεργασία των δικαιωμάτων ημερολογίου EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1343
+#: ../src/EWS/evolution/e-ews-config-utils.c:1534
 msgid "Edit EWS tasks permissions"
 msgstr "Επεξεργασία των δικαιωμάτων εργασιών EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1374
+#: ../src/EWS/evolution/e-ews-config-utils.c:1565
 msgid "Edit EWS memos permissions"
 msgstr "Επεξεργασία των δικαιωμάτων υπενθυμίσεων EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1405
+#: ../src/EWS/evolution/e-ews-config-utils.c:1596
 msgid "Edit EWS contacts permissions"
 msgstr "Επεξεργασία των δικαιωμάτων επαφών EWS"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:67
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:388
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Κανένα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:68
 msgctxt "PermissionsLevel"
 msgid "Owner"
 msgstr "Κάτοχος"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:78
 msgctxt "PermissionsLevel"
 msgid "Publishing Editor"
 msgstr "Εκδότης δημοσιεύσεων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:87
 msgctxt "PermissionsLevel"
 msgid "Editor"
 msgstr "Εκδότης"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:95
 msgctxt "PermissionsLevel"
 msgid "Publishing Author"
 msgstr "Συντάκτης δημοσιεύσεων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:102
 msgctxt "PermissionsLevel"
 msgid "Author"
 msgstr "Συντάκτης"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:108
 msgctxt "PermissionsLevel"
 msgid "Nonediting Author"
 msgstr "Συντάκτης χωρίς δικαιώματα επεξεργασίας"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:113
 msgctxt "PermissionsLevel"
 msgid "Reviewer"
 msgstr "Ελεγκτής"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:116
 msgctxt "PermissionsLevel"
 msgid "Contributor"
 msgstr "Συντελεστής"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:119
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time"
 msgstr "Διαθεσιμότητα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:121
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time, subject, location"
 msgstr "Διαθεσιμότητα, θέμα, τοποθεσία"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:441
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:123
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:411
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Προσαρμογή"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:267
-msgid "Writing folder permissions, please wait..."
-msgstr "Εγγραφή δικαιωμάτων φακέλου, παρακαλούμε περιμένετε..."
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:247
+msgid "Writing folder permissions, please wait…"
+msgstr "Εγγραφή δικαιωμάτων φακέλου, παρακαλούμε περιμένετε…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:761
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Ανώνυμος"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:764
 msgctxt "User"
 msgid "Default"
 msgstr "Προεπιλεγμένος"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:770
 msgctxt "User"
 msgid "Unknown"
 msgstr "Άγνωστος"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:867
-#: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:853
+#: ../src/EWS/evolution/e-ews-search-user.c:424
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:967
 msgid "Name"
 msgstr "Όνομα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:859
 msgid "Permission level"
 msgstr "Επίπεδο δικαιωμάτων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:925
-msgid "Edit EWS folder permissions..."
-msgstr "Επεξεργασία των δικαιωμάτων φακέλου EWS..."
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:911
+msgid "Edit EWS folder permissions…"
+msgstr "Επεξεργασία δικαιωμάτων φακέλου EWS…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:950
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:638
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:936
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:678
 msgid "Account:"
 msgstr "Λογαριασμός:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:964
 msgid "Folder name:"
 msgstr "Όνομα φακέλου:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:988
 msgid "Folder ID:"
 msgstr "Αναγνωριστικό φακέλου:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1053
 msgid "Permissions"
 msgstr "Δικαιώματα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1075
 msgid "Permi_ssion level:"
 msgstr "Ε_πίπεδο δικαιωμάτων:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1109
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Ανάγνωση"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1121
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1188
 msgctxt "Permissions"
 msgid "None"
 msgstr "Καμία"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1127
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Διαθεσιμότητα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1132
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Διαθεσιμότητα, θέμα, τοποθεσία"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1138
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Πλήρεις λεπτομέρειες"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Εγγραφή"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1156
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Δημιουργία στοιχείων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1160
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Δημιουργία υποφακέλων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1164
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Επεξεργασία ιδιοκτησιών"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Επεξεργασία όλων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1176
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Διαγραφή στοιχείων"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1193
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Ιδιοκτησία"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1198
 msgctxt "Permissions"
 msgid "All"
 msgstr "Όλα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1204
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Άλλα"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1216
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Ιδιοκτήτης φακέλου"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1220
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Επαφή φακέλου"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1224
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Ορατός φάκελος"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
-msgid "Reading folder permissions, please wait..."
-msgstr "Ανάγνωση δικαιωμάτων φακέλου, παρακαλούμε περιμένετε..."
+#: ../src/EWS/evolution/e-ews-edit-folder-permissions.c:1297
+msgid "Reading folder permissions, please wait…"
+msgstr "Ανάγνωση δικαιωμάτων φακέλου, παρακαλούμε περιμένετε…"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:184
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:149
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:136
 msgid "Unset on Server"
 msgstr "Αναίρεση στον διακομιστή"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:185
-msgid "Unset the \"Out of Office\" status"
-msgstr "Αναίρεση κατάστασης \"Εκτός γραφείου\""
+#: ../src/EWS/evolution/e-ews-ooo-notificator.c:150
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:137
+msgid "Unset the “Out of Office” status"
+msgstr "Αναίρεση της κατάστασης «Εκτός γραφείου»"
 
-#: ../src/configuration/e-ews-search-user.c:208
+#: ../src/EWS/evolution/e-ews-search-user.c:197
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
 msgstr[0] "Δεν βρέθηκαν χρήστες, μόνο μία επαφή"
 msgstr[1] "Δεν βρέθηκαν χρήστες, μόνο %d επαφές"
 
-#: ../src/configuration/e-ews-search-user.c:213
+#: ../src/EWS/evolution/e-ews-search-user.c:202
 msgid "No users found"
 msgstr "Δε βρέθηκαν χρήστες"
 
-#: ../src/configuration/e-ews-search-user.c:217
+#: ../src/EWS/evolution/e-ews-search-user.c:206
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "Βρέθηκε ένας χρήστης"
 msgstr[1] "Βρέθηκαν %d χρήστες"
 
-#: ../src/configuration/e-ews-search-user.c:223
+#: ../src/EWS/evolution/e-ews-search-user.c:212
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
@@ -727,251 +1063,353 @@ msgstr[0] ""
 msgstr[1] ""
 "Βρέθηκαν περισσότεροι από 100 χρήστες, αλλά εμφανίζονται μόνο οι πρώτοι %d"
 
-#: ../src/configuration/e-ews-search-user.c:357
-#: ../src/configuration/e-ews-search-user.c:540
+#: ../src/EWS/evolution/e-ews-search-user.c:346
+#: ../src/EWS/evolution/e-ews-search-user.c:533
 msgid "Search for a user"
 msgstr "Αναζήτηση χρήστη"
 
-#: ../src/configuration/e-ews-search-user.c:437
+#: ../src/EWS/evolution/e-ews-search-user.c:355
+msgid "Searching…"
+msgstr "Αναζήτηση…"
+
+#: ../src/EWS/evolution/e-ews-search-user.c:430
 msgid "E-mail"
 msgstr "Ηλεκτρονικό ταχυδρομείο"
 
-#: ../src/configuration/e-ews-search-user.c:474
-msgid "Choose EWS user..."
-msgstr "Επιλέξτε χρήστη EWS..."
+#: ../src/EWS/evolution/e-ews-search-user.c:467
+msgid "Choose EWS user…"
+msgstr "Επιλογή χρήστη EWS…"
 
-#: ../src/configuration/e-ews-search-user.c:497
+#: ../src/EWS/evolution/e-ews-search-user.c:490
 msgid "_Search:"
 msgstr "_Αναζήτηση:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:750
-#, c-format
-msgid "Cannot add folder, folder already exists as '%s'"
-msgstr "Αδύνατη η προσθήκη φακέλου, ο φάκελος υπάρχει ήδη ως '%s'"
-
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. * Example result: "Mailbox - John Smith"
+#. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:95
 #, c-format
 msgctxt "ForeignFolder"
-msgid "Mailbox - %s"
-msgstr "Γραμματοκιβώτιο του - %s"
+msgid "Mailbox — %s"
+msgstr "Γραμματοκιβώτιο — %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
-msgid "Cannot test foreign folder availability while in offline mode"
-msgstr ""
-"Αδύνατη η δοκιμή διαθεσιμότητας ξένου φακέλου όσο είναι σε λειτουργία εκτός "
-"σύνδεσης"
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:263
+msgid "Cannot test foreign folder availability when the account is offline"
+msgstr "Αδυναμία δοκιμής διαθεσιμότητας ξένου φακέλου όσο ο λογαριασμός είναι εκτός σύνδεσης"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
-#, c-format
-msgid "User '%s' was not found on the server"
-msgstr "Ο χρήστης '%s' δεν βρέθηκε στον διακομιστή"
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:325
+msgid "Availability"
+msgstr "Διαθεσιμότητα"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
-#, c-format
-msgid "User name '%s' is ambiguous, specify it more precisely, please"
-msgstr ""
-"Το όνομα χρήστη '%s' είναι ασαφές, ορίστε το με περισσότερη ακρίβεια, "
-"παρακαλούμε"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:358
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:343
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:95
 #, c-format
 msgid ""
-"Folder '%s' not found. Either it does not exist or you do not have "
+"Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
-msgstr ""
-"Ο φάκελος '%s' δεν βρέθηκε. Είτε δεν υπάρχει ή δεν έχετε το δικαίωμα "
-"πρόσβασης του."
+msgstr "Ο φάκελος «%s» δεν βρέθηκε. Είτε δεν υπάρχει είτε δεν έχετε δικαίωμα πρόσβασης σε αυτόν."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:376
-msgid "Cannot add folder, cannot determine folder's type"
-msgstr ""
-"Αδύνατη η προσθήκη φακέλου, δεν μπορεί να προσδιοριστεί ο τύπος του φακέλου"
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:362
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:79
+msgid "Cannot add folder, cannot determine folder’s type"
+msgstr "Αδυναμία προσθήκης φακέλου, δεν είναι δυνατός ο προσδιορισμός του τύπου φακέλου"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:476
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:759
+msgid "Contacts"
+msgstr "Επαφές"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:478
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:760
+msgid "Calendar"
+msgstr "Ημερολόγιο"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:480
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:761
+msgid "Free/Busy as Calendar"
+msgstr "Διαθεσιμότητα ως ημερολόγιο"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:482
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:762
+msgid "Memos"
+msgstr "Υπενθυμίσεις"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:484
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:763
+msgid "Tasks"
+msgstr "Εργασίες"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:501
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr "Έλεγχος διαθεσιμότητας του φακέλου «%s» του χρήστη «%s», παρακαλούμε περιμένετε…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:540
+msgid "Cannot search for user when the account is offline"
+msgstr "Αδυναμία αναζήτησης χρήστη όταν ο λογαριασμός είναι χωρίς σύνδεση"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:703
+msgid "User"
+msgstr "Χρήστης"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:710
+msgid "_User:"
+msgstr "_Χρήστης:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:725
+msgid "C_hoose…"
+msgstr "Επι_λογή…"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:741
+msgid "_Folder name:"
+msgstr "Όνομα _φακέλου:"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:772
+msgid "Include _subfolders"
+msgstr "_Να περιλαμβάνονται οι υποφάκελοι"
+
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:863
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "Το όνομα χρήστη «%s» είναι διφορούμενο, παρακαλούμε προσδιορίστε το με μεγαλύτερη ακρίβεια"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
-#. * Example result: "John Smith - Calendar"
+#. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:421
+#: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:943
 #, c-format
 msgctxt "ForeignFolder"
-msgid "%s - %s"
-msgstr "%s - %s"
+msgid "%s — %s"
+msgstr "%s — %s"
 
-#. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
-msgid "Inbox"
-msgstr "Εισερχόμενα"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
-msgid "Contacts"
-msgstr "Επαφές"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
-msgid "Calendar"
-msgstr "Ημερολόγιο"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
-msgid "Memos"
-msgstr "Υπενθυμίσεις"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:523
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:727
-msgid "Tasks"
-msgstr "Εργασίες"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:540
-#, c-format
-msgid "Testing availability of folder '%s' of user '%s', please wait..."
-msgstr ""
-"Έλεγχος διαθεσιμότητας του φακέλου '%s' του χρήστη '%s', παρακαλούμε "
-"περιμένετε..."
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:617
-msgid "Subscribe to folder of other EWS user..."
-msgstr "Εγγραφείτε στον φάκελο του άλλου χρήστη EWS..."
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:668
-msgid "User"
-msgstr "Χρήστης"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:675
-msgid "_User:"
-msgstr "_Χρήστης:"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:690
-msgid "C_hoose..."
-msgstr "Επι_λογή..."
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
-msgid "_Folder name:"
-msgstr "Όνομα _φακέλου:"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:736
-msgid "Include _subfolders"
-msgstr "_Να περιλαμβάνονται οι υποφάκελοι"
-
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:214
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:260
 msgid "Querying Autodiscover service"
 msgstr "Ερώτημα υπηρεσίας αυτόματης εύρεσης"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:311
+#: ../src/EWS/evolution/e-mail-config-ews-autodiscover.c:353
 msgid "Fetch _URL"
 msgstr "Ανάκτηση διεύ_θυνσης"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:140
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:193
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:112
 msgid "Configuration"
 msgstr "Διαμόρφωση"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:158
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:211
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:130
 msgid "User_name:"
 msgstr "Ό_νομα χρήστη:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:172
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:225
 msgid "_Host URL:"
 msgstr "Διεύθυνση κεντρικού _υπολογιστή:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:191
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:244
 msgid "OAB U_RL:"
 msgstr "Δ_ιεύθυνση OAB:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:205
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:258
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:144
 msgid "Open _Mailbox of other user"
 msgstr "Άνοιγμα _γραμματοκιβωτίου του άλλου χρήστη"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:239
-msgid "S_earch..."
-msgstr "­Α_ναζήτηση..."
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:302
+msgid "S_earch…"
+msgstr "Ανα_ζήτηση…"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:250
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:313
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:188
 msgid "Authentication"
 msgstr "Πιστοποίηση"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:390
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:337
+msgid "Use _protocol version 2.0 (for school and organization accounts)"
+msgstr "Χρήση έκδοσης _πρωτοκόλλου 2.0 (για σχολικούς και οργανωτικούς λογαριασμούς)"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:344
+msgid "_Override Office365 OAuth2 settings"
+msgstr "_Παράκαμψη ρυθμίσεων OAuth2 του Office365"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:348
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:426
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:213
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:291
+msgid "Help…"
+msgstr "Βοήθεια…"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:355
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:220
+msgid "Application I_D:"
+msgstr "I_D εφαρμογής:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:378
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:243
+msgid "There is not set any default application ID"
+msgstr "Δεν έχει οριστεί προεπιλεγμένο αναγνωριστικό εφαρμογής"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:379
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:244
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "Το προεπιλεγμένο αναγνωριστικό εφαρμογής είναι «%s»"
+
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#. Translators: 'Tenant ID' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:383
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:248
+msgid "_Tenant ID:"
+msgstr "ID _μισθωτή (Tenant):"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:408
+msgid "Default tenant ID is “common“"
+msgstr "Το προεπιλεγμένο ID μισθωτή είναι «common»"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:411
+#, c-format
+msgid "Default tenant ID is “%s”"
+msgstr "Το προεπιλεγμένο ID μισθωτή είναι «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:416
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:281
+msgid "_Advanced Settings"
+msgstr "_Προχωρημένες ρυθμίσεις"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:434
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:299
+msgid "_Endpoint host:"
+msgstr "Κεντρικός υπολογιστής _τελικού σημείου:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:457
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:460
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:322
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:325
+#, c-format
+msgid "Default endpoint host is “%s”"
+msgstr "Ο προεπιλεγμένος κεντρικός υπολογιστής τελικού σημείου είναι «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:463
+msgid "Red_irect URI:"
+msgstr "URI ανα_κατεύθυνσης:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:486
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:489
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:351
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:354
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "Το προεπιλεγμένο URI ανακατεύθυνσης είναι «%s»"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:492
+msgid "Re_source URI:"
+msgstr "URI _πόρου:"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:515
+#, c-format
+msgid ""
+"Default resource URI is derived from the Host URL, or it can eventually fall "
+"back to “%s”."
+msgstr "Το προεπιλεγμένο URI πόρου προέρχεται από το URL του κεντρικού υπολογιστή ή μπορεί τελικά να καταλήξει στο «%s»."
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:771
+msgid "Host URL is not valid"
+msgstr "Το URL κεντρικού υπολογιστή δεν είναι έγκυρο"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:775
 msgid "Host URL cannot be empty"
 msgstr "Η διεύθυνση κεντρικού υπολογιστή δεν μπορεί να είναι NULL"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:395
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:786
+msgid "OAB URL is not valid"
+msgstr "Το URL OAB δεν είναι έγκυρο"
+
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:796
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:516
 msgid "User name cannot be empty"
 msgstr "Το όνομα χρήστη δεν μπορεί να είναι κενό"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
+#: ../src/EWS/evolution/e-mail-config-ews-backend.c:810
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:535
+msgid "Application ID cannot be empty"
+msgstr "Το αναγνωριστικό εφαρμογής δεν μπορεί να είναι κενό"
+
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:389
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Ελεγκτής (μπορεί να διαβάσει στοιχεία)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:420
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:390
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Συντάκτης (μπορεί να διαβάσει και να δημιουργήσει στοιχεία)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:421
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:391
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr ""
 "Εκδότης (μπορεί να διαβάσει, να δημιουργήσει και να τροποποιήσει στοιχεία)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:526
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:496
 msgid "Delegate permissions"
 msgstr "Δικαιώματα αντιπροσώπου"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:544
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:514
 msgid "C_alendar"
 msgstr "Η_μερολόγιο"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:547
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:517
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "Ο _αντιπρόσωπος δέχεται αντίγραφα της συγκέντρωσης - σχετικά μηνύματα "
 "στάλθηκαν σε μένα"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:552
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:522
 msgid "_Tasks"
 msgstr "_Εργασίες"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:555
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:525
 msgid "_Inbox"
 msgstr "Ε_ισερχόμενα"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:558
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:528
 msgid "C_ontacts"
 msgstr "Επα_φές"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:561
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:531
 msgid "_Notes"
 msgstr "_Σημειώσεις"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:564
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:534
 msgid "_Journal"
 msgstr "Ημε_ρολόγιο"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:567
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:537
 #, c-format
-msgid "Delegate '%s' has the following permissions"
-msgstr "Ο αντιπρόσωπος '%s' έχει τα ακόλουθα δικαιώματα"
+msgid "Delegate “%s” has the following permissions"
+msgstr "Ο αντιπρόσωπος «%s» έχει τα ακόλουθα δικαιώματα"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:585
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:555
 msgid "Delegate can see my _private items"
 msgstr "Ο αντιπρόσωπος μπορεί να δει τα _ιδιωτικά μου στοιχεία"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:907
-msgid "Retrieving current user permissions, please wait..."
-msgstr "Ανάκτηση τρεχόντων δικαιωμάτων χρήστη, παρακαλούμε περιμένετε..."
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:877
+msgid "Retrieving current user permissions, please wait…"
+msgstr "Ανάκτηση δικαιωμάτων τρέχοντος χρήστη, παρακαλούμε περιμένετε…"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1027
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1647
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1000
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1547
 msgid "Delegates"
 msgstr "Αντιπρόσωποι"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1051
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1024
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -984,7 +1422,7 @@ msgstr ""
 "αποστολής ως αντιπροσώπου, κλείστε αυτό το πλαίσιο διαλόγου, κάντε δεξί κλικ "
 "στον φάκελο, πατήστε δικαιώματα και αλλάξτε τις επιλογές εκεί."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1101
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1075
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -993,7 +1431,7 @@ msgstr ""
 "αιτήματα συνάντησης όπου είμαι ο οργανωτής:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1086
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -1002,53 +1440,74 @@ msgstr ""
 "συγκέντρωσης\n"
 "και απαντήσεις σε μένα (συνιστάται)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1118
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1093
 msgid "My d_elegates only"
 msgstr "Μόνο οι α_ντιπρόσωποι μου"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1125
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1100
 msgid "My delegates a_nd me"
 msgstr "Οι αντιπρόσωποι μου _και εγώ"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1719
-msgid "Retrieving \"Delegates\" settings"
-msgstr "Ανάκτηση ρυθμίσεων \"Αντιπροσώπων\""
+#: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1619
+msgid "Retrieving “Delegates” settings"
+msgstr "Ανάκτηση ρυθμίσεων «Αντιπροσώπων»"
 
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:216
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:330
 msgid "EWS Settings"
 msgstr "Ρυθμίσεις EWS"
 
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
-msgid "View the size of all Exchange folders"
-msgstr "Δείτε το μέγεθος όλων των φακέλων Exchange"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:223
 msgid "Folder _Sizes"
 msgstr "_Μεγέθη φακέλων"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:224
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:234
+msgid "View the size of all Exchange folders"
+msgstr "Δείτε το μέγεθος όλων των φακέλων Exchange"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:245
+msgid "_Reset Synchronization Tags"
+msgstr "_Επαναφορά ετικετών συγχρονισμού"
+
+#: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:256
+msgid ""
+"Folders can sometimes get out of synchronization, for example after a long "
+"time not being connected to the server. By resetting the synchronization "
+"tags the folders are updated completely. This does not cause download of any "
+"already locally stored messages. The change will take effect the next time "
+"the folders are refreshed."
+msgstr "Οι φάκελοι μπορούν μερικές φορές να αποσυγχρονιστούν, για παράδειγμα μετά από μεγάλο διάστημα μη σύνδεσης στον διακομιστή. Επαναφέροντας τις ετικέτες συγχρονισμού, οι φάκελοι ενημερώνονται πλήρως. Αυτό δεν προκαλεί τη λήψη μηνυμάτων που είναι ήδη αποθηκευμένα τοπικά. Η αλλαγή θα τεθεί σε ισχύ την επόμενη φορά που θα ανανεωθούν οι φάκελοι."
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:203
 msgid "Locating offline address books"
 msgstr "Εντοπισμός βιβλίων διευθύνσεων εκτός σύνδεσης"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:303
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:255
+#: ../src/EWS/registry/e-ews-backend.c:504
+msgid "Global Address List"
+msgstr "Καθολική λίστα διευθύνσεων"
+
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:282
 msgid "Cache o_ffline address book"
 msgstr "Απόκρυψη βιβλίου διευθύνσεων _εκτός σύνδεσης"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:329
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:308
 msgid "Select ad_dress list:"
 msgstr "Επιλογή λίστας _διεύθυνσης:"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:353
+#: ../src/EWS/evolution/e-mail-config-ews-gal.c:332
 msgid "Fetch List"
 msgstr "Ανάκτηση λίστας"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:931
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:368
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:903
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:413
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:833
 msgid "Out of Office"
 msgstr "Εκτός γραφείου"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:384
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:429
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1056,162 +1515,619 @@ msgstr ""
 "Τα παρακάτω συγκεκριμένα μηνύματα θα αποσταλούν αυτόματα σε κάθε εσωτερικό "
 "και εξωτερικό άτομο που στέλνει μια αλληλογραφία σε σας."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
 msgid "Do _not send Out of Office replies"
 msgstr "Μην _στέλνετε απαντήσεις εκτός γραφείου"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:402
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:447
 msgid "_Send Out of Office replies"
 msgstr "Να _στέλνετε απαντήσεις εκτός γραφείου"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:410
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:455
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "Να στέλνετε απαντήσεις εκτός γραφείου μόνο κατά τη _διάρκεια αυτού του "
 "χρόνου:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:430
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:475
 msgid "_From:"
 msgstr "Α_πό:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:455
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:500
 msgid "_To:"
 msgstr "Πρ_ος:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:480
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:525
 msgid "I_nternal:"
 msgstr "Ε_σωτερικός:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:489
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:534
 msgid "Message to be sent within the organization"
 msgstr "Αποστολή μηνύματος μες τον οργανισμό"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:517
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:562
 msgid "E_xternal:"
 msgstr "Ε_ξωτερικός:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:525
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:570
 msgid "Message to be sent outside the organization"
 msgstr "Αποστολή μηνύματος έξω από τον οργανισμό"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:535
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:578
 msgid "Do not reply to senders outside the organization"
 msgstr "Χωρίς απαντήσεις για αποστολείς έξω από τον οργανισμό"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:538
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:581
 msgid "Reply only to known senders outside the organization"
 msgstr "Απάντηση μόνο σε γνωστούς αποστολείς έξω από τον οργανισμό"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:541
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:584
 msgid "Reply to any sender outside the organization"
 msgstr "Απάντηση σε οποιονδήποτε αποστολέα έξω από τον οργανισμό"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1003
-msgid "Retrieving \"Out of Office\" settings"
-msgstr "Ανάκτηση ρυθμίσεων \"Εκτός γραφείου\""
+#: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:975
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:901
+msgid "Retrieving “Out of Office” settings"
+msgstr "Ανάκτηση ρυθμίσεων «Εκτός γραφείου»"
 
-#: ../src/configuration/module-ews-configuration.error.xml.h:1
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:109
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange calendar."
+msgstr "Ο/Η %s (%s) σας προσκάλεσε να προβάλετε το ημερολόγιό του/της Microsoft Exchange."
+
+#. Translators: the first %s is replaced with a user name, the second %s is replaced with an email address of that user
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:112
+#, c-format
+msgid "%s (%s) has invited you to view his or her Microsoft Exchange folder."
+msgstr "Ο/Η %s (%s) σας προσκάλεσε να προβάλετε τον φάκελό του/της Microsoft Exchange."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:122
+msgid "Click the Subscribe button to add it to Evolution."
+msgstr "Κάντε κλικ στο κουμπί Εγγραφή για να το προσθέσετε στο Evolution."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:124
+msgid "Subscribe"
+msgstr "Εγγραφή"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:133
+msgid "Failed to extract sharing information from provided data."
+msgstr "Αποτυχία εξαγωγής πληροφοριών κοινής χρήσης από τα παρεχόμενα δεδομένα."
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:202
+msgid "EWS Sharing Metadata"
+msgstr "Μεταδεδομένα κοινής χρήσης EWS"
+
+#: ../src/EWS/evolution/e-mail-formatter-ews-sharing-metadata.c:203
+msgid "Display part as EWS sharing metadata"
+msgstr "Εμφάνιση τμήματος ως μεταδεδομένα κοινής χρήσης EWS"
+
+#: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:159
+msgid "Subscribing EWS folder…"
+msgstr "Εγγραφή σε φάκελο EWS…"
+
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
 msgstr "Αποτυχία ερωτήματος αυτόματης εύρεσης."
 
-#: ../src/configuration/module-ews-configuration.error.xml.h:2
-msgid "The reported error was &quot;{0}&quot;."
-msgstr "Το σφάλμα που αναφέρθηκε ήταν &quot;{0}&quot;."
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:2
+msgid "The reported error was “{0}”."
+msgstr "Το σφάλμα που αναφέρθηκε ήταν «{0}»."
 
-#: ../src/configuration/module-ews-configuration.error.xml.h:3
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:3
 msgid "Failed to locate offline address books."
 msgstr "Αποτυχία εντοπισμού βιβλίων διευθύνσεων εκτός σύνδεσης."
 
-#: ../src/configuration/module-ews-configuration.error.xml.h:4
-msgid "Failed to retrieve &quot;Out of Office&quot; settings."
-msgstr "Αποτυχία ανάκτησης ρυθμίσεων &quot;Εκτός γραφείου&quot;."
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:4
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:765
+msgid "Failed to retrieve “Out of Office” settings."
+msgstr "Αποτυχία ανάκτησης ρυθμίσεων «Εκτός γραφείου»."
 
-#: ../src/configuration/module-ews-configuration.error.xml.h:5
-msgid "Failed to retrieve &quot;Delegates&quot; settings."
-msgstr "Αποτυχία ανάκτησης ρυθμίσεων &quot;Αντιπροσώπων&quot;."
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve “Delegates” settings."
+msgstr "Αποτυχία ανάκτησης ρυθμίσεων «Αντιπροσώπων»."
 
-#: ../src/configuration/module-ews-configuration.error.xml.h:6
-msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
-msgstr ""
-"Ο λογαριασμός Exchange \"{0}\" έχει την κατάσταση ορισμένη ως \"Εκτός "
-"γραφείου\"."
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
+msgstr "Ο λογαριασμός Exchange «{0}» έχει ορισμένη την κατάσταση ως «Εκτός γραφείου»."
 
-#: ../src/server/e-ews-connection.c:720
-msgid "Operation Cancelled"
-msgstr "Ακύρωση λειτουργίας"
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:7
+msgid "Failed to subscribe user folder."
+msgstr "Αποτυχία εγγραφής στον φάκελο χρήστη."
 
-#: ../src/server/e-ews-connection.c:790
-msgid "Authentication failed"
-msgstr "Αποτυχία πιστοποίησης"
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:8
+msgid "Folder had been subscribed."
+msgstr "Έγινε εγγραφή στον φάκελο."
 
-#: ../src/server/e-ews-connection.c:811
+#: ../src/EWS/evolution/module-ews-configuration.error.xml.h:9
+msgid "Folder of user “{0}” had been subscribed successfully."
+msgstr "Έγινε επιτυχής εγγραφή στον φάκελο του χρήστη «{0}»."
+
+#: ../src/EWS/registry/e-ews-backend.c:1044
+#: ../src/Microsoft365/registry/e-m365-backend.c:770
 #, c-format
-msgid "No response: %s"
-msgstr "Χωρίς απάντηση: %s"
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
+msgstr "Αδυναμία προσδιορισμού κατάλληλης κλάσης φακέλου για έναν νέο φάκελο με όνομα «%s»"
 
-#: ../src/server/e-ews-connection.c:2519
+#: ../src/EWS/registry/e-ews-backend.c:1132
 #, c-format
-msgid "Failed to parse autodiscover response XML"
-msgstr "Αποτυχία ανάλυσης απάντησης αυτόματης εύρεσης XML"
+msgid "Data source “%s” does not represent an Exchange Web Services folder"
+msgstr "Η πηγή δεδομένων «%s» δεν αντιπροσωπεύει φάκελο Υπηρεσιών Ιστού Exchange (EWS)"
 
-#: ../src/server/e-ews-connection.c:2526
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2092
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:400
+msgid "Folder ID is not set"
+msgstr "Το αναγνωριστικό (ID) φακέλου δεν έχει οριστεί"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2393
+msgid "Cannot save contact list into a Microsoft 365 address book"
+msgstr "Αδυναμία αποθήκευσης λίστας επαφών σε βιβλίο διευθύνσεων Microsoft 365"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2405
+msgid "Cannot modify organizational contact"
+msgstr "Αδυναμία τροποποίησης οργανωτικής επαφής"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2407
+msgid "Cannot modify user contact"
+msgstr "Αδυναμία τροποποίησης επαφής χρήστη"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2409
+msgid "Cannot modify recent contact"
+msgstr "Αδυναμία τροποποίησης πρόσφατης επαφής"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2520
+msgid "Cannot remove organizational contact"
+msgstr "Αδυναμία αφαίρεσης οργανωτικής επαφής"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2522
+msgid "Cannot remove user contact"
+msgstr "Αδυναμία αφαίρεσης επαφής χρήστη"
+
+#: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2524
+msgid "Cannot remove recent contact"
+msgstr "Αδυναμία αφαίρεσης πρόσφατης επαφής"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:936
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1035
+msgid "Cannot store detached instances, because not supported in Microsoft 365"
+msgstr "Αδυναμία αποθήκευσης αποσπασμένων εμφανίσεων, επειδή δεν υποστηρίζονται στο Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1194
+msgid "Can store only simple events into Microsoft 365 calendar"
+msgstr "Μπορούν να αποθηκευτούν μόνο απλά συμβάντα στο ημερολόγιο Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1207
+msgid "Can store only simple tasks into Microsoft 365 task folder"
+msgstr "Μπορούν να αποθηκευτούν μόνο απλές εργασίες στον φάκελο εργασιών Microsoft 365"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1258
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1725
+msgid ""
+"Cannot create meetings organized by other users in a Microsoft 365 calendar."
+msgstr "Αδυναμία δημιουργίας συναντήσεων που οργανώνονται από άλλους χρήστες σε ένα ημερολόγιο Microsoft 365."
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1779
+msgid "Microsoft 365 calendar cannot store more than one recurrence"
+msgstr "Το ημερολόγιο Microsoft 365 δεν μπορεί να αποθηκεύσει περισσότερες από μία επαναλήψεις"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1787
+msgid ""
+"Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
+msgstr "Το ημερολόγιο Microsoft 365 δεν μπορεί να αποθηκεύσει στοιχείο με ιδιότητες RDATE ή EXRULE"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1927
 #, c-format
-msgid "Failed to find <Autodiscover> element"
-msgstr "Αποτυχία εύρεσης στοιχείου <Autodiscover>"
+msgid "Unknown recurrence frequency (%d)"
+msgstr "Άγνωστη συχνότητα επανάληψης (%d)"
 
-#: ../src/server/e-ews-connection.c:2537
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2081
+msgid "Microsoft 365 calendar cannot store more than one event reminder"
+msgstr "Το ημερολόγιο Microsoft 365 δεν μπορεί να αποθηκεύσει περισσότερες από μία υπενθυμίσεις συμβάντος"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2114
+msgid "Microsoft 365 event can have only a reminder before event start"
+msgstr "Ένα συμβάν Microsoft 365 μπορεί να έχει μόνο υπενθύμιση πριν από την έναρξη του συμβάντος"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2127
+msgid "Microsoft 365 task can have only a reminder with absolute time"
+msgstr "Μια εργασία Microsoft 365 μπορεί να έχει μόνο υπενθύμιση με απόλυτη ώρα"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2484
 #, c-format
-msgid "Failed to find <Response> element"
-msgstr "Αποτυχία εύρεσης στοιχείου <Response>"
+msgid "Microsoft 365 task cannot have attachments."
+msgstr "Μια εργασία Microsoft 365 δεν μπορεί να έχει συνημμένα."
 
-#: ../src/server/e-ews-connection.c:2548
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2587
 #, c-format
-msgid "Failed to find <Account> element"
-msgstr "Αποτυχία εύρεσης στοιχείου <Account>"
+msgid "Cannot store attachment with URI “%s”"
+msgstr "Αδυναμία αποθήκευσης συνημμένου με URI «%s»"
 
-#: ../src/server/e-ews-connection.c:2573
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2589
+msgid "Failed to read attachment URI"
+msgstr "Αποτυχία ανάγνωσης URI συνημμένου"
+
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2603
+msgid "Failed to get inline attachment data"
+msgstr "Αποτυχία λήψης ενσωματωμένων δεδομένων συνημμένου"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:264
+#: ../src/Microsoft365/camel/camel-m365-folder.c:386
+#: ../src/Microsoft365/camel/camel-m365-folder.c:889
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1315
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1470
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1537
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1619
+msgid "Invalid folder state (missing parent store)"
+msgstr "Μη έγκυρη κατάσταση φακέλου (λείπει ο γονικός χώρος αποθήκευσης)"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:555
+msgid "Follow-up"
+msgstr "Παρακολούθηση"
+
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1916
 #, c-format
-msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr "Αποτυχία εύρεσης <ASUrl> και <OABUrl> σε απόκριση αυτόματης εύρεσης"
+msgid "Folder “%s” doesn't correspond to any known folder"
+msgstr "Ο φάκελος «%s» δεν αντιστοιχεί σε κανέναν γνωστό φάκελο"
 
-#: ../src/server/e-ews-connection.c:2663
-msgid "URL cannot be NULL"
-msgstr "Η διεύθυνση δεν μπορεί να είναι NULL"
+#: ../src/Microsoft365/camel/camel-m365-provider.c:51
+msgid "Microsoft 365"
+msgstr "Microsoft 365"
 
-#: ../src/server/e-ews-connection.c:2671
+#: ../src/Microsoft365/camel/camel-m365-provider.c:52
+msgid "For accessing Microsoft 365 server"
+msgstr "Για πρόσβαση στον διακομιστή Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:147
+#: ../src/Microsoft365/camel/camel-m365-transport.c:249
+msgid "Microsoft 365 server"
+msgstr "Διακομιστής Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:149
+msgid "Mail receive via Microsoft 365"
+msgstr "Λήψη αλληλογραφίας μέσω Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:204
+#: ../src/Microsoft365/common/e-m365-connection.c:1505
 #, c-format
-msgid "URL '%s' is not valid"
-msgstr "Η διεύθυνση '%s' δεν είναι έγκυρη"
+msgid "Malformed URI: “%s”"
+msgstr "Κακοδιαμορφωμένο URI: «%s»"
 
-#: ../src/server/e-ews-connection.c:2763
-msgid "Email address is missing a domain part"
-msgstr "Στη διεύθυνση ηλ. αλληλογραφίας λείπει ένα τμήμα τομέα"
+#: ../src/Microsoft365/camel/camel-m365-store.c:611
+msgid "Look up Microsoft 365 categories"
+msgstr "Αναζήτηση κατηγοριών Microsoft 365"
 
-#: ../src/server/e-ews-connection.c:3085
-msgid "Failed to parse oab XML"
-msgstr "Αποτυχία ανάλυσης oab XML"
+#: ../src/Microsoft365/camel/camel-m365-store.c:620
+#: ../src/Microsoft365/camel/camel-m365-transport.c:175
+msgid "Failed to create connection"
+msgstr "Αποτυχία δημιουργίας σύνδεσης"
 
-#: ../src/server/e-ews-connection.c:3093
-msgid "Failed to find <OAB> element\n"
-msgstr "Αποτυχία εύρεσης στοιχείου <OAB>\n"
-
-#: ../src/server/e-ews-connection.c:4347
-msgid "No items found"
-msgstr "Δε βρέθηκαν στοιχεία"
-
-#: ../src/server/e-ews-folder.c:705
-msgid "Cannot add folder, unsupported folder type"
-msgstr "Αδύνατη η προσθήκη φακέλου, ανυποστήρικτος τύπος φακέλου"
-
-#: ../src/server/e-ews-folder.c:710
-msgid "Cannot add folder, master source not found"
-msgstr "Αδύνατη η προσθήκη φακέλου, η κύρια πηγή δεν βρέθηκε"
-
-#: ../src/utils/ews-camel-common.c:361
+#: ../src/Microsoft365/camel/camel-m365-store.c:785
 #, c-format
-msgid "CreateItem call failed to return ID for new message"
-msgstr ""
-"Η κλήση CreateItem απέτυχε να επιστρέψει το αναγνωριστικό για νέο μήνυμα"
+msgid "Parent folder “%s” does not exist"
+msgstr "Ο γονικός φάκελος «%s» δεν υπάρχει"
+
+#: ../src/Microsoft365/camel/camel-m365-store.c:1028
+#: ../src/Microsoft365/camel/camel-m365-store.c:1066
+#, c-format
+msgid "Folder “%s” does not exist"
+msgstr "Ο φάκελος «%s» δεν υπάρχει"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:251
+msgid "Mail delivery via Microsoft 365"
+msgstr "Παράδοση αλληλογραφίας μέσω Microsoft 365"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:288
+msgid "Microsoft 365 server cannot send message with multiple From addresses"
+msgstr "Ο διακομιστής Microsoft 365 δεν μπορεί να στείλει μήνυμα με πολλαπλές διευθύνσεις αποστολέα"
+
+#: ../src/Microsoft365/camel/camel-m365-transport.c:315
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1011
+msgid "Failed to re-encode parts to base64: "
+msgstr "Αποτυχία επανακωδικοποίησης τμημάτων σε base64: "
+
+#: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:13
+msgid "OAuth2 (Microsoft 365)"
+msgstr "OAuth2 (Microsoft 365)"
+
+#: ../src/Microsoft365/common/camel-sasl-xoauth2-microsoft365.c:14
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Microsoft "
+"365 server"
+msgstr "Αυτή η επιλογή θα χρησιμοποιήσει ένα διακριτικό πρόσβασης OAuth 2.0 για σύνδεση στον διακομιστή Microsoft 365"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
+msgctxt "OAuth2Service"
+msgid "Microsoft365"
+msgstr "Microsoft365"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr "Ο διακομιστής επέστρεψε URL με μη αναμενόμενο κεντρικό υπολογιστή «%s», αναμενόταν «%s»"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1144
+#, c-format
+msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] "Ο διακομιστής Microsoft 365 είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d:%02d λεπτό)"
+msgstr[1] "Ο διακομιστής Microsoft 365 είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d:%02d λεπτά)"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1150
+#, c-format
+msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
+msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
+msgstr[0] "Ο διακομιστής Microsoft 365 είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d δευτερόλεπτο)"
+msgstr[1] "Ο διακομιστής Microsoft 365 είναι απασχολημένος, αναμονή για νέα προσπάθεια (%d δευτερόλεπτα)"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1275
+#: ../src/Microsoft365/common/e-m365-connection.c:1302
+msgid "Invalid data"
+msgstr "Μη έγκυρα δεδομένα"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1300
+msgid "Operation was cancelled"
+msgstr "Η λειτουργία ακυρώθηκε"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:2006
+msgid "Failed to parse own Json data"
+msgstr "Αποτυχία ανάλυσης των δεδομένων Json"
+
+#. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
+#: ../src/Microsoft365/common/e-m365-connection.c:5540
+#, c-format
+msgid "Cannot find instance at '%s'"
+msgstr "Αδυναμία εύρεσης εμφάνισης στο «%s»"
+
+#: ../src/Microsoft365/evolution/e-book-config-m365.c:64
+msgid "Maximum contacts to download"
+msgstr "Μέγιστος αριθμός επαφών προς λήψη"
+
+#: ../src/Microsoft365/evolution/e-m365-config-ui-extension.c:189
+msgid "Edit Microsoft 365 calendar permissions"
+msgstr "Επεξεργασία δικαιωμάτων ημερολογίου Microsoft 365"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:251
+msgid "Not shared"
+msgstr "Χωρίς κοινή χρήση"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:252
+msgid "Can view when I’m busy"
+msgstr "Μπορεί να δει πότε είμαι απασχολημένος"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:253
+msgid "Can view titles and locations"
+msgstr "Μπορεί να δει τίτλους και τοποθεσίες"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:254
+msgid "Can view all details"
+msgstr "Μπορεί να δει όλες τις λεπτομέρειες"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:255
+msgid "Can edit"
+msgstr "Μπορεί να επεξεργαστεί"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:256
+msgid "Delegate without private events"
+msgstr "Αντιπρόσωπος χωρίς ιδιωτικά συμβάντα"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:257
+msgid "Delegate with private events"
+msgstr "Αντιπρόσωπος με ιδιωτικά συμβάντα"
+
+#. Translators: It's for custom permission setting, like some not known what it is precisely
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:259
+msgid "Custom"
+msgstr "Προσαρμοσμένο"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:283
+msgid "Unknown permission"
+msgstr "Άγνωστο δικαίωμα"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:353
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:418
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:655
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:755
+msgid "Cannot create connection object."
+msgstr "Αδυναμία δημιουργίας αντικειμένου σύνδεσης."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:382
+msgid "Updating permission, please wait…"
+msgstr "Ενημέρωση δικαιώματος, παρακαλούμε περιμένετε…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:383
+msgid "Failed to update permission: "
+msgstr "Αποτυχία ενημέρωσης δικαιώματος: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:474
+msgid "Removing permission, please wait…"
+msgstr "Αφαίρεση δικαιώματος, παρακαλούμε περιμένετε…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:475
+msgid "Failed to remove permission: "
+msgstr "Αποτυχία αφαίρεσης δικαιώματος: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:575
+msgid "People in the Organization"
+msgstr "Άτομα στον οργανισμό"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:609
+msgid "Remove permission"
+msgstr "Αφαίρεση δικαιώματος"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:668
+msgid "No valid email address found."
+msgstr "Δεν βρέθηκε έγκυρη διεύθυνση ηλεκτρονικής αλληλογραφίας."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:724
+msgid "Saving new permission, please wait…"
+msgstr "Αποθήκευση νέου δικαιώματος, παρακαλούμε περιμένετε…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:725
+msgid "Failed to save permission: "
+msgstr "Αποτυχία αποθήκευσης δικαιώματος: "
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:890
+msgid "Edit calendar permissions…"
+msgstr "Επεξεργασία δικαιωμάτων ημερολογίου…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:893
+msgid "Cl_ose"
+msgstr "Κλεί_σιμο"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:942
+msgid "_Cancel"
+msgstr "_Ακύρωση"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:982
+msgid "Calendar:"
+msgstr "Ημερολόγιο:"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1016
+msgid ""
+"Choose sharing permissions for this calendar. You can add people from within "
+"the organization or outside of it. It can be changed any time."
+msgstr "Επιλέξτε δικαιώματα κοινής χρήσης για αυτό το ημερολόγιο. Μπορείτε να προσθέσετε άτομα εντός ή εκτός του οργανισμού. Μπορεί να αλλάξει ανά πάσα στιγμή."
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1055
+msgid "_Share"
+msgstr "_Κοινή χρήση"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1091
+msgid "Inside the organization"
+msgstr "Εντός του οργανισμού"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1116
+msgid "Outside the organization"
+msgstr "Εκτός του οργανισμού"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1145
+msgid "Reading calendar permissions, please wait…"
+msgstr "Ανάγνωση δικαιωμάτων ημερολογίου, παρακαλούμε περιμένετε…"
+
+#: ../src/Microsoft365/evolution/e-m365-edit-calendar-permissions.c:1146
+msgid "Failed to read permissions: "
+msgstr "Αποτυχία ανάγνωσης δικαιωμάτων: "
+
+#: ../src/Microsoft365/evolution/e-m365-ooo-notificator.c:128
+#, c-format
+msgid "Your Microsoft 365 account “%s” has the status set as “Out of Office”."
+msgstr "Ο λογαριασμός Microsoft 365 «%s» έχει ορισμένη την κατάσταση ως «Εκτός γραφείου»."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:209
+msgid "_Override Microsoft 365 OAuth2 settings"
+msgstr "_Παράκαμψη ρυθμίσεων OAuth2 του Microsoft 365"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:273
+msgid "Default tenant is “common“"
+msgstr "Ο προεπιλεγμένος μισθωτής (tenant) είναι «common»"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in a Microsoft 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:276
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Ο προεπιλεγμένος μισθωτής (tenant) είναι «%s»"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-backend.c:328
+msgid "_Redirect URI:"
+msgstr "URI _ανακατεύθυνσης:"
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:401
+msgid ""
+"The Out of Office settings can be only seen here, use the web interface to "
+"change them."
+msgstr "Οι ρυθμίσεις «Εκτός γραφείου» μπορούν μόνο να προβληθούν εδώ, χρησιμοποιήστε τη διεπαφή ιστού για να τις αλλάξετε."
+
+#: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
+#, c-format
+msgid "The reported error was “%s”."
+msgstr "Το σφάλμα που αναφέρθηκε ήταν «%s»."
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:453
+msgid "Organizational Contacts"
+msgstr "Οργανωτικές επαφές"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:460
+msgid "Organizational Users"
+msgstr "Οργανωτικοί χρήστες"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:467
+msgid "Recent Contacts"
+msgstr "Πρόσφατες επαφές"
+
+#: ../src/Microsoft365/registry/e-m365-backend.c:861
+#, c-format
+msgid "Data source “%s” does not represent a Microsoft 365 folder"
+msgstr "Η πηγή δεδομένων «%s» δεν αντιπροσωπεύει φάκελο Microsoft 365"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Το σύστημα υποστήριξης δεν υποστηρίζει μαζικές προσθήκες"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Το σύστημα υποστήριξης δεν υποστηρίζει μαζικές τροποποιήσεις"
+
+#~ msgid "Wait till syncing is done"
+#~ msgstr "Περιμένετε μέχρι την ολοκλήρωση του συγχρονισμού"
+
+#, c-format
+#~ msgid "Processing contacts in %s %d%% completed... "
+#~ msgstr "Ολοκληρώθηκε η επεξεργασία των επαφών στο %s %d%%... "
+
+#~ msgid "Syncing contacts..."
+#~ msgstr "Συγχρονισμός επαφών..."
+
+#~ msgid "Requested to delete an unrelated cursor"
+#~ msgstr "Ζητήθηκε η διαγραφή ενός άσχετου δρομέα"
+
+#~ msgid "EWS does not support bulk removals"
+#~ msgstr "Το EWS δεν υποστηρίζει μαζικές αφαιρέσεις"
+
+#~ msgid "EWS does not support bulk additions"
+#~ msgstr "Το EWS δεν υποστηρίζει μαζικές προσθήκες"
+
+#~ msgid "EWS does not support bulk modifications"
+#~ msgstr "Το EWS δεν υποστηρίζει μαζικές τροποποιήσεις"
+
+#, c-format
+#~ msgid ""
+#~ "Exchange server cannot send message as '%s', when the account was "
+#~ "configured for address '%s'"
+#~ msgstr ""
+#~ "Ο διακομιστής Exchange δεν μπορεί να στείλει μήνυμα ως '%s', όταν ο "
+#~ "λογαριασμός ρυθμίστηκε για τη διεύθυνση '%s'"
+
+#~ msgid "Folder Sizes..."
+#~ msgstr "Μεγέθη φακέλων..."
+
+#~ msgid "Permissions..."
+#~ msgstr "Δικαιώματα..."
+
+#~ msgid "Edit EWS folder permissions..."
+#~ msgstr "Επεξεργασία των δικαιωμάτων φακέλου EWS..."
+
+#, c-format
+#~ msgid "User '%s' was not found on the server"
+#~ msgstr "Ο χρήστης '%s' δεν βρέθηκε στον διακομιστή"
+
+#, c-format
+#~ msgctxt "ForeignFolder"
+#~ msgid "%s - %s"
+#~ msgstr "%s - %s"
 
 #~ msgid "Authentication password not available"
 #~ msgstr "Ο κωδικός πιστοποίησης δεν είναι διαθέσιμος"
