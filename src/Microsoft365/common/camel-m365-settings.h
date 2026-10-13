@@ -68,6 +68,18 @@ gchar *		camel_m365_settings_dup_impersonate_user
 void		camel_m365_settings_set_impersonate_user
 						(CamelM365Settings *settings,
 						 const gchar *impersonate_user);
+gboolean	camel_m365_settings_get_override_user_agent
+						(CamelM365Settings *settings);
+void		camel_m365_settings_set_override_user_agent
+						(CamelM365Settings *settings,
+						 gboolean override_user_agent);
+const gchar *	camel_m365_settings_get_user_agent
+						(CamelM365Settings *settings);
+gchar *		camel_m365_settings_dup_user_agent
+						(CamelM365Settings *settings);
+void		camel_m365_settings_set_user_agent
+						(CamelM365Settings *settings,
+						 const gchar *user_agent);
 gboolean	camel_m365_settings_get_check_all
 						(CamelM365Settings *settings);
 void		camel_m365_settings_set_check_all

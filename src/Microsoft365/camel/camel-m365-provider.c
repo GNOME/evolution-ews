@@ -41,6 +41,9 @@ static CamelProviderConfEntry m365_conf_entries[] = {
 	  N_("Connection _timeout (in seconds) %s") },
 	{ CAMEL_PROVIDER_CONF_CHECKSPIN, "concurrent-connections", NULL,
 	  N_("Numbe_r of concurrent connections to use") },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "override-user-agent", NULL,
+	  N_("Override _User-Agent header value") },
+	{ CAMEL_PROVIDER_CONF_ENTRY, "user-agent", "override-user-agent", "" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_END }

@@ -17,9 +17,11 @@ struct _CamelM365SettingsPrivate {
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
 	gboolean override_oauth2;
+	gboolean override_user_agent;
 	guint timeout;
 	guint concurrent_connections;
 	gchar *impersonate_user;
+	gchar *user_agent;
 	gchar *email;
 	gchar *oauth2_tenant;
 	gchar *oauth2_client_id;
@@ -41,6 +43,8 @@ enum {
 	PROP_USER,
 	PROP_USE_IMPERSONATION,
 	PROP_IMPERSONATE_USER,
+	PROP_OVERRIDE_USER_AGENT,
+	PROP_USER_AGENT,
 	PROP_OVERRIDE_OAUTH2,
 	PROP_OAUTH2_TENANT,
 	PROP_OAUTH2_CLIENT_ID,
@@ -128,6 +132,18 @@ m365_settings_set_property (GObject *object,
 
 		case PROP_IMPERSONATE_USER:
 			camel_m365_settings_set_impersonate_user (
+				CAMEL_M365_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_OVERRIDE_USER_AGENT:
+			camel_m365_settings_set_override_user_agent (
+				CAMEL_M365_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_USER_AGENT:
+			camel_m365_settings_set_user_agent (
 				CAMEL_M365_SETTINGS (object),
 				g_value_get_string (value));
 			return;
@@ -263,6 +279,20 @@ m365_settings_get_property (GObject *object,
 				CAMEL_M365_SETTINGS (object)));
 			return;
 
+		case PROP_OVERRIDE_USER_AGENT:
+			g_value_set_boolean (
+				value,
+				camel_m365_settings_get_override_user_agent (
+				CAMEL_M365_SETTINGS (object)));
+			return;
+
+		case PROP_USER_AGENT:
+			g_value_take_string (
+				value,
+				camel_m365_settings_dup_user_agent (
+				CAMEL_M365_SETTINGS (object)));
+			return;
+
 		case PROP_OVERRIDE_OAUTH2:
 			g_value_set_boolean (
 				value,
@@ -317,6 +347,7 @@ m365_settings_finalize (GObject *object)
 	g_mutex_clear (&m365_settings->priv->property_lock);
 
 	g_free (m365_settings->priv->email);
+	g_free (m365_settings->priv->user_agent);
 	g_free (m365_settings->priv->oauth2_tenant);
 	g_free (m365_settings->priv->oauth2_client_id);
 	g_free (m365_settings->priv->oauth2_redirect_uri);
@@ -446,6 +477,30 @@ camel_m365_settings_class_init (CamelM365SettingsClass *class)
 			"Impersonate User",
 			"Impersonate User",
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OVERRIDE_USER_AGENT,
+		g_param_spec_boolean (
+			"override-user-agent",
+			"Override User Agent",
+			"Whether to override User-Agent header",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USER_AGENT,
+		g_param_spec_string (
+			"user-agent",
+			"User Agent",
+			"User-Agent header value to use, if override-user-agent is set to TRUE",
+			"Microsoft Office/14.0 (Windows NT ,5.1; Microsoft Outlook 14.0.4734; Pro)",
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -653,6 +708,75 @@ camel_m365_settings_set_impersonate_user (CamelM365Settings *settings,
 	camel_m365_settings_unlock (settings);
 
 	g_object_notify (G_OBJECT (settings), "impersonate-user");
+}
+
+gboolean
+camel_m365_settings_get_override_user_agent (CamelM365Settings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), FALSE);
+
+	return settings->priv->override_user_agent;
+}
+
+void
+camel_m365_settings_set_override_user_agent (CamelM365Settings *settings,
+					     gboolean override_user_agent)
+{
+	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
+
+	if ((settings->priv->override_user_agent ? 1 : 0) == (override_user_agent ? 1 : 0))
+		return;
+
+	settings->priv->override_user_agent = override_user_agent;
+
+	g_object_notify (G_OBJECT (settings), "override-user-agent");
+}
+
+const gchar *
+camel_m365_settings_get_user_agent (CamelM365Settings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
+
+	return settings->priv->user_agent;
+}
+
+gchar *
+camel_m365_settings_dup_user_agent (CamelM365Settings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_M365_SETTINGS (settings), NULL);
+
+	camel_m365_settings_lock (settings);
+
+	protected = camel_m365_settings_get_user_agent (settings);
+	duplicate = g_strdup (protected);
+
+	camel_m365_settings_unlock (settings);
+
+	return duplicate;
+}
+
+void
+camel_m365_settings_set_user_agent (CamelM365Settings *settings,
+				    const gchar *user_agent)
+{
+	g_return_if_fail (CAMEL_IS_M365_SETTINGS (settings));
+
+	camel_m365_settings_lock (settings);
+
+	if (g_strcmp0 (settings->priv->user_agent, user_agent) == 0) {
+		camel_m365_settings_unlock (settings);
+		return;
+	}
+
+	g_free (settings->priv->user_agent);
+	settings->priv->user_agent = e_util_strdup_strip (user_agent);
+
+	camel_m365_settings_unlock (settings);
+
+	g_object_notify (G_OBJECT (settings), "user-agent");
 }
 
 gboolean

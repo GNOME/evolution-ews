@@ -499,6 +499,26 @@ eos_office365_dup_credentials_prompter_cookies_sync (EOAuth2Service *service,
 	return cookies;
 }
 
+static gchar *
+eos_office365_dup_credentials_user_agent (EOAuth2Service *service,
+					  ESource *source)
+{
+	CamelEwsSettings *ews_settings;
+	gchar *user_agent = NULL;
+
+	g_return_val_if_fail (E_IS_OAUTH2_SERVICE_OFFICE365 (service), NULL);
+
+	ews_settings = eos_office365_get_camel_settings (source);
+	if (ews_settings && camel_ews_settings_get_override_user_agent (ews_settings)) {
+		user_agent = camel_ews_settings_dup_user_agent (ews_settings);
+
+		if (user_agent && !*user_agent)
+			g_clear_pointer (&user_agent, g_free);
+	}
+
+	return user_agent;
+}
+
 static void
 eos_office365_prepare_refresh_token_message (EOAuth2Service *service,
 					     ESource *source,
@@ -533,6 +553,7 @@ e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface)
 	iface->prepare_refresh_token_form = eos_office365_prepare_refresh_token_form;
 	iface->prepare_refresh_token_message = eos_office365_prepare_refresh_token_message;
 	iface->dup_credentials_prompter_cookies_sync = eos_office365_dup_credentials_prompter_cookies_sync;
+	iface->dup_credentials_user_agent = eos_office365_dup_credentials_user_agent;
 }
 
 static void

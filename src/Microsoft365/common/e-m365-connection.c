@@ -1104,11 +1104,21 @@ m365_connection_send_request_sync (EM365Connection *cnc,
 	gint need_retry_seconds = 5;
 	gboolean did_io_error_retry = FALSE;
 	gboolean success = FALSE, need_retry = TRUE;
+	gchar *user_agent;
 
 	g_return_val_if_fail (E_IS_M365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
 	g_return_val_if_fail (response_func != NULL || raw_data_func != NULL, FALSE);
 	g_return_val_if_fail (response_func == NULL || raw_data_func == NULL, FALSE);
+
+	if (camel_m365_settings_get_override_user_agent (cnc->priv->settings)) {
+		user_agent = camel_m365_settings_dup_user_agent (cnc->priv->settings);
+
+		if (user_agent && *user_agent)
+			soup_message_headers_replace (soup_message_get_request_headers (message), "User-Agent", user_agent);
+
+		g_free (user_agent);
+	}
 
 	while (need_retry && !g_cancellable_is_cancelled (cancellable)) {
 		need_retry = FALSE;
