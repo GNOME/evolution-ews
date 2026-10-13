@@ -2072,6 +2072,7 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 {
 	GPtrArray *use_requests;
 	gint need_retry_seconds = 5;
+	gint json_parse_retries = 0;
 	gboolean did_io_error_retry = FALSE;
 	gboolean success, need_retry = TRUE;
 
@@ -2101,6 +2102,22 @@ e_m365_connection_batch_request_sync (EM365Connection *cnc,
 				cnc->priv->backoff_for_usec = M365_RETRY_IO_ERROR_SECONDS * G_USEC_PER_SEC;
 
 			UNLOCK (cnc);
+		} else if (local_error && local_error->domain == JSON_PARSER_ERROR && json_parse_retries < 3) {
+			/* Microsoft can return invalid data on throttle errors, treat it as a back-off */
+			json_parse_retries++;
+			success = FALSE;
+			need_retry = TRUE;
+			g_clear_error (&local_error);
+
+			LOCK (cnc);
+
+			if (cnc->priv->backoff_for_usec < need_retry_seconds * G_USEC_PER_SEC)
+				cnc->priv->backoff_for_usec = need_retry_seconds * G_USEC_PER_SEC;
+
+			UNLOCK (cnc);
+
+			if (need_retry_seconds < 120)
+				need_retry_seconds *= 2;
 		}
 
 		if (local_error) {
