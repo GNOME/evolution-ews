@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues/\n"
-"POT-Creation-Date: 2026-02-05 16:26+0000\n"
-"PO-Revision-Date: 2026-02-06 22:37+0100\n"
+"POT-Creation-Date: 2026-10-14 22:49+0000\n"
+"PO-Revision-Date: 2026-10-18 20:48+0200\n"
 "Last-Translator: twlvnn kraftwerk <kraft_werk@tutanota.com>\n"
 "Language-Team: Bulgarian <dict-notifications@fsa-bg.org>\n"
 "Language: bg\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.10\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/EWS/camel/camel-ews-provider.c:66
@@ -60,8 +60,8 @@ msgstr "GAL не може да бъде обновено:"
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
-"Списъкът с контакти не може да бъде запазен, тази функция се поддържа само "
-"на EWS Server 2010 или по-нова версия"
+"Списъкът с контакти не може да бъде запазен, тази функция се поддържа само на "
+"EWS Server 2010 или по-нова версия"
 
 #: ../src/EWS/addressbook/e-book-backend-ews.c:4333
 msgid "Failed to set contact photo:"
@@ -93,7 +93,7 @@ msgid "Cannot determine EWS ItemId"
 msgstr "Установяването на EWS ItemId е неуспешно"
 
 #: ../src/EWS/calendar/e-cal-backend-ews.c:3261
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3965
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3972
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -106,8 +106,8 @@ msgid "Online meeting can be created only in the main user Calendar."
 msgstr ""
 "Онлайн срещи може да бъде създадени само в основния календар на потребителя."
 
-#: ../src/EWS/calendar/e-cal-backend-ews.c:3953
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1633
+#: ../src/EWS/calendar/e-cal-backend-ews.c:3960
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1712
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Потребителят „%s“ не може да бъде намерен в списъка с участниците"
@@ -130,30 +130,30 @@ msgstr ""
 msgid "Invalid occurrence ID"
 msgstr "Невалиден идентификатор на събитието"
 
-#: ../src/EWS/camel/camel-ews-folder.c:363
+#: ../src/EWS/camel/camel-ews-folder.c:357
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Временният файл mimecontent не може да бъде отворен!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:371
+#: ../src/EWS/camel/camel-ews-folder.c:365
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Анализатор не може да бъде генериран от mimecontent!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:380
+#: ../src/EWS/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr ""
 "Съдържанието mimecontent не може да бъде разчетено от заявката за срещата!"
 
-#: ../src/EWS/camel/camel-ews-folder.c:493
-#: ../src/EWS/camel/camel-ews-folder.c:706
+#: ../src/EWS/camel/camel-ews-folder.c:487
+#: ../src/EWS/camel/camel-ews-folder.c:700
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Файлът за кеш не може да бъде създаден"
 
-#: ../src/EWS/camel/camel-ews-folder.c:823
-#: ../src/EWS/camel/camel-ews-folder.c:967
+#: ../src/EWS/camel/camel-ews-folder.c:817
+#: ../src/EWS/camel/camel-ews-folder.c:961
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Местоположението за кеш не може да бъде създадено „%s“: %s"
@@ -161,35 +161,36 @@ msgstr "Местоположението за кеш не може да бъде
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/EWS/camel/camel-ews-folder.c:981
+#: ../src/EWS/camel/camel-ews-folder.c:975
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Преместването на кеш файла за писма от „%s“ до „%s“ е неуспешно: %s"
 
-#: ../src/EWS/camel/camel-ews-folder.c:1823
+#: ../src/EWS/camel/camel-ews-folder.c:1888
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1972
 #, c-format
-msgid "Could not load summary for %s"
+msgid "Could not load summary for “%s”"
 msgstr "Обобщената информация за „%s“ не може да бъде заредена"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2333
+#: ../src/EWS/camel/camel-ews-folder.c:2339
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Опресняване на папката „%s“"
 
-#: ../src/EWS/camel/camel-ews-folder.c:2526
+#: ../src/EWS/camel/camel-ews-folder.c:2551
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
 "Извършването на действия с папката, докато сте в режим „Изключен“, не е "
 "възможно"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3310
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1779
+#: ../src/EWS/camel/camel-ews-folder.c:3336
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1823
 msgid "Apply message _filters to this folder"
 msgstr "Прилагане на _филтри към тази папка"
 
-#: ../src/EWS/camel/camel-ews-folder.c:3322
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1791
+#: ../src/EWS/camel/camel-ews-folder.c:3348
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1835
 msgid "Always check for _new mail in this folder"
 msgstr "_Винаги да се проверява за нови писма в тази папка"
 
@@ -257,6 +258,7 @@ msgid "Numbe_r of concurrent connections to use"
 msgstr "_Брой едновременни връзки за ползване"
 
 #: ../src/EWS/camel/camel-ews-provider.c:55
+#: ../src/Microsoft365/camel/camel-m365-provider.c:45
 msgid "Override _User-Agent header value"
 msgstr "Заменяне на заглавната стойност на _потребителския агент"
 
@@ -328,8 +330,8 @@ msgstr "%s_%d"
 
 #: ../src/EWS/camel/camel-ews-store.c:645
 #: ../src/EWS/camel/camel-ews-store.c:1469
-#: ../src/Microsoft365/camel/camel-m365-store.c:516
-#: ../src/Microsoft365/camel/camel-m365-store.c:572
+#: ../src/Microsoft365/camel/camel-m365-store.c:517
+#: ../src/Microsoft365/camel/camel-m365-store.c:604
 msgid "Checking “Out of Office” settings"
 msgstr "Проверяване на „Извън офиса“ настройките"
 
@@ -338,7 +340,7 @@ msgid "Look up Exchange server categories"
 msgstr "Търсене на категории за Exchange сървъри"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/EWS/camel/camel-ews-store.c:1551
+#: ../src/EWS/camel/camel-ews-store.c:1547
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -349,47 +351,47 @@ msgstr[1] ""
 "Срокът на валидност на паролата изтича след %d дена. Отворете „%s“, за да я "
 "смените."
 
-#: ../src/EWS/camel/camel-ews-store.c:1557
+#: ../src/EWS/camel/camel-ews-store.c:1553
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Срокът на валидност на паролата изтича след един ден."
 msgstr[1] "Срокът на валидност на паролата изтича след %d дена."
 
-#: ../src/EWS/camel/camel-ews-store.c:1783
+#: ../src/EWS/camel/camel-ews-store.c:1779
 msgid "Updating foreign folder structure"
 msgstr "Обновяване на структурата на чуждите папки"
 
-#: ../src/EWS/camel/camel-ews-store.c:1921
+#: ../src/EWS/camel/camel-ews-store.c:1917
 msgid "Updating foreign folders"
 msgstr "Обновяване на чужди папки"
 
-#: ../src/EWS/camel/camel-ews-store.c:2337
-#: ../src/Microsoft365/camel/camel-m365-store.c:676
+#: ../src/EWS/camel/camel-ews-store.c:2334
+#: ../src/Microsoft365/camel/camel-m365-store.c:708
 #, c-format
 msgid "No such folder: %s"
 msgstr "Няма такава папка: %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:2683
+#: ../src/EWS/camel/camel-ews-store.c:2680
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Изброяването на публичните EWS папки не е възможно в режим „Изключен“"
 
-#: ../src/EWS/camel/camel-ews-store.c:2756
+#: ../src/EWS/camel/camel-ews-store.c:2753
 msgid "Cannot find any EWS public folders"
 msgstr "Публични EWS папки не може да бъдат намерени"
 
-#: ../src/EWS/camel/camel-ews-store.c:2869
-#: ../src/Microsoft365/camel/camel-m365-store.c:739
+#: ../src/EWS/camel/camel-ews-store.c:2865
+#: ../src/Microsoft365/camel/camel-m365-store.c:771
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Папката „%s“ не може да бъде създадена, тя вече съществува"
 
-#: ../src/EWS/camel/camel-ews-store.c:2884
+#: ../src/EWS/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Родителската папка %s не съществува"
 
-#: ../src/EWS/camel/camel-ews-store.c:2894
+#: ../src/EWS/camel/camel-ews-store.c:2890
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -397,139 +399,136 @@ msgstr ""
 "Създаването на папка в „%s“ е неуспешно, тя се използва само за папки на "
 "други потребители"
 
-#: ../src/EWS/camel/camel-ews-store.c:2904
+#: ../src/EWS/camel/camel-ews-store.c:2900
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
-"Създаването на папка в „%s“ е неуспешно, тя се използва само за публични "
-"папки"
+"Създаването на папка в „%s“ е неуспешно, тя се използва само за публични папки"
 
-#: ../src/EWS/camel/camel-ews-store.c:3011
-#: ../src/Microsoft365/camel/camel-m365-store.c:924
+#: ../src/EWS/camel/camel-ews-store.c:3007
+#: ../src/Microsoft365/camel/camel-m365-store.c:956
 #, c-format
 msgid "Folder does not exist"
 msgstr "Папката не съществува"
 
-#: ../src/EWS/camel/camel-ews-store.c:3021
+#: ../src/EWS/camel/camel-ews-store.c:3017
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Папката „%s“ не може да бъде премахната, тя се използва само за папки на "
 "други потребители"
 
-#: ../src/EWS/camel/camel-ews-store.c:3032
+#: ../src/EWS/camel/camel-ews-store.c:3028
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
-"Папката „%s“ не може да бъде премахната, тя се използва само за публични "
-"папки"
+"Папката „%s“ не може да бъде премахната, тя се използва само за публични папки"
 
-#: ../src/EWS/camel/camel-ews-store.c:3187
-#: ../src/EWS/camel/camel-ews-store.c:3314
+#: ../src/EWS/camel/camel-ews-store.c:3183
+#: ../src/EWS/camel/camel-ews-store.c:3310
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Папката %s не съществува"
 
-#: ../src/EWS/camel/camel-ews-store.c:3223
+#: ../src/EWS/camel/camel-ews-store.c:3219
 msgid "Cannot move a foreign folder"
 msgstr "Не може да се премести чужда папка"
 
-#: ../src/EWS/camel/camel-ews-store.c:3240
+#: ../src/EWS/camel/camel-ews-store.c:3236
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Няма запис на ключ за промяна за папката %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3270
+#: ../src/EWS/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
-msgstr ""
-"Едновременното преименуване и преместване на дадена папка не е възможно"
+msgstr "Едновременното преименуване и преместване на дадена папка не е възможно"
 
-#: ../src/EWS/camel/camel-ews-store.c:3301
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3297
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr ""
 "Идентификаторът на папката за родителската папка %s не може да бъде намерен"
 
 #. convert well-known names to their non-localized form
-#: ../src/EWS/camel/camel-ews-store.c:3314
-#: ../src/EWS/camel/camel-ews-store.c:3324
+#: ../src/EWS/camel/camel-ews-store.c:3310
+#: ../src/EWS/camel/camel-ews-store.c:3320
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:474
 #: ../src/EWS/evolution/e-ews-subscribe-foreign-folder.c:758
 msgid "Inbox"
 msgstr "Пощенска кутия"
 
-#: ../src/EWS/camel/camel-ews-store.c:3373
+#: ../src/EWS/camel/camel-ews-store.c:3369
 #: ../src/EWS/camel/camel-ews-transport.c:292
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange сървър %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3376
+#: ../src/EWS/camel/camel-ews-store.c:3372
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange услуга за %s на %s"
 
-#: ../src/EWS/camel/camel-ews-store.c:3440
-#: ../src/Microsoft365/camel/camel-m365-store.c:1494
+#: ../src/EWS/camel/camel-ews-store.c:3436
+#: ../src/Microsoft365/camel/camel-m365-store.c:1526
 msgid "Could not locate Inbox folder"
 msgstr "Входящата папка не може да бъде намерена"
 
-#: ../src/EWS/camel/camel-ews-store.c:3452
-#: ../src/Microsoft365/camel/camel-m365-store.c:1506
+#: ../src/EWS/camel/camel-ews-store.c:3448
+#: ../src/Microsoft365/camel/camel-m365-store.c:1538
 msgid "Could not locate Trash folder"
 msgstr "Папката за кошчето не може да бъде намерена"
 
-#: ../src/EWS/camel/camel-ews-store.c:3489
-#: ../src/Microsoft365/camel/camel-m365-store.c:1544
+#: ../src/EWS/camel/camel-ews-store.c:3485
+#: ../src/Microsoft365/camel/camel-m365-store.c:1576
 msgid "Could not locate Junk folder"
 msgstr "Папката за спам не може да бъде намерена"
 
-#: ../src/EWS/camel/camel-ews-store.c:3681
+#: ../src/EWS/camel/camel-ews-store.c:3677
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:60
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Абонирането за EWS папки не е възможно в режим „Изключен“"
 
-#: ../src/EWS/camel/camel-ews-store.c:3704
+#: ../src/EWS/camel/camel-ews-store.c:3700
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Абонирането към папката „%s“ е неуспешно, няма налична публична папка"
 
-#: ../src/EWS/camel/camel-ews-store.c:3714
+#: ../src/EWS/camel/camel-ews-store.c:3710
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Абонирането към папката „%s“ е неуспешно, папката не е намерена"
 
-#: ../src/EWS/camel/camel-ews-store.c:3723
+#: ../src/EWS/camel/camel-ews-store.c:3719
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder ID not found"
 msgstr ""
 "Абонирането към папката „%s“ е неуспешно, идентификаторът на папката не е "
 "намерен"
 
-#: ../src/EWS/camel/camel-ews-store.c:3734
+#: ../src/EWS/camel/camel-ews-store.c:3730
 #, c-format
 msgid "Cannot subscribe folder “%s”, public folder root not found"
 msgstr ""
 "За папката „%s“ не може да се абонирана, коренът на публичната папка не е "
 "намерен"
 
-#: ../src/EWS/camel/camel-ews-store.c:3810
+#: ../src/EWS/camel/camel-ews-store.c:3806
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Отписването от EWS папки не е възможно в режим „Изключен“"
 
-#: ../src/EWS/camel/camel-ews-store.c:3921
-#: ../src/Microsoft365/camel/camel-m365-store.c:1852
-#: ../src/Microsoft365/camel/camel-m365-store.c:1865
+#: ../src/EWS/camel/camel-ews-store.c:3917
+#: ../src/Microsoft365/camel/camel-m365-store.c:1884
+#: ../src/Microsoft365/camel/camel-m365-store.c:1897
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Трябва да сте в режим „Включен“, за да се извърши избраната операция"
 
-#: ../src/EWS/camel/camel-ews-store.c:3993
-#: ../src/EWS/camel/camel-ews-store.c:4030
-#: ../src/Microsoft365/camel/camel-m365-store.c:1988
-#: ../src/Microsoft365/camel/camel-m365-store.c:2029
+#: ../src/EWS/camel/camel-ews-store.c:3989
+#: ../src/EWS/camel/camel-ews-store.c:4026
+#: ../src/Microsoft365/camel/camel-m365-store.c:2020
+#: ../src/Microsoft365/camel/camel-m365-store.c:2061
 msgid "Unsetting the “Out of Office” status"
 msgstr "Премахване на състоянието „Извън офиса“"
 
@@ -575,8 +574,8 @@ msgid ""
 "This option will use an OAuth 2.0 access token to connect to the "
 "Office365.com server"
 msgstr ""
-"Тази опция ще използва OAuth 2.0 токен за достъп за свързване с "
-"Office365.com сървър"
+"Тази опция ще използва OAuth 2.0 токен за достъп за свързване с Office365.com "
+"сървър"
 
 #: ../src/EWS/common/e-ews-calendar-utils.c:1311
 #, c-format
@@ -584,9 +583,9 @@ msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
 "monthly or yearly recurrence without exceptions and with start date."
 msgstr ""
-"Това повторение не може да бъде съхранено. Променете го в обикновена "
-"единична дневна, седмична, месечна или годишна повторяемост без изключения и "
-"с начална дата."
+"Това повторение не може да бъде съхранено. Променете го в обикновена единична "
+"дневна, седмична, месечна или годишна повторяемост без изключения и с начална "
+"дата."
 
 #: ../src/EWS/common/e-ews-camel-common.c:386
 #, c-format
@@ -1144,8 +1143,8 @@ msgstr "Достъпност"
 #: ../src/EWS/evolution/e-mail-part-ews-sharing-metadata.c:95
 #, c-format
 msgid ""
-"Folder “%s” not found. Either it does not exist or you do not have "
-"permission to access it."
+"Folder “%s” not found. Either it does not exist or you do not have permission "
+"to access it."
 msgstr ""
 "Папката „%s“ не е намерена. Или тя не съществува, или нямате права за достъп "
 "до нея."
@@ -1457,10 +1456,10 @@ msgstr "Делегати"
 
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1024
 msgid ""
-"Delegates can send items on your behalf, including creating and responding "
-"to meeting requests. If you want to grant folder permissions without giving "
-"send-on-behalf-of permissions, close this dialog box, right-click the "
-"folder, click Permissions and change the options there."
+"Delegates can send items on your behalf, including creating and responding to "
+"meeting requests. If you want to grant folder permissions without giving send-"
+"on-behalf-of permissions, close this dialog box, right-click the folder, "
+"click Permissions and change the options there."
 msgstr ""
 "Делегатите могат да изпращат елементи от ваше име, включително да създават и "
 "отговарят на заявки за срещи. Ако искате да предоставите права за папки, без "
@@ -1473,8 +1472,8 @@ msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
 msgstr ""
-"Изпращане на адресирани до мен заявки за срещи и отговори на заявки за "
-"срещи, на които аз съм организатор:"
+"Изпращане на адресирани до мен заявки за срещи и отговори на заявки за срещи, "
+"на които аз съм организатор:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
 #: ../src/EWS/evolution/e-mail-config-ews-delegates-page.c:1086
@@ -1517,16 +1516,16 @@ msgstr "_Връщане на етикетите за синхронизация"
 #: ../src/EWS/evolution/e-mail-config-ews-folder-sizes-page.c:256
 msgid ""
 "Folders can sometimes get out of synchronization, for example after a long "
-"time not being connected to the server. By resetting the synchronization "
-"tags the folders are updated completely. This does not cause download of any "
+"time not being connected to the server. By resetting the synchronization tags "
+"the folders are updated completely. This does not cause download of any "
 "already locally stored messages. The change will take effect the next time "
 "the folders are refreshed."
 msgstr ""
 "Понякога папките може да не бъдат синхронизирани, например след като дълго "
 "време не сте били свързани със сървъра. Чрез връщане на етикетите за "
-"синхронизация папките се обновяват напълно. Това не води до изтегляне на "
-"вече локално съхранени писма. Промяната ще влезе в сила при следващото "
-"обновяване на папките."
+"синхронизация папките се обновяват напълно. Това не води до изтегляне на вече "
+"локално съхранени писма. Промяната ще влезе в сила при следващото обновяване "
+"на папките."
 
 #: ../src/EWS/evolution/e-mail-config-ews-gal.c:203
 msgid "Locating offline address books"
@@ -1562,8 +1561,8 @@ msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr ""
-"Писмата, посочени по-долу, ще бъдат изпращани автоматично на всяко вътрешно "
-"и външно лице, което ви изпрати писмо."
+"Писмата, посочени по-долу, ще бъдат изпращани автоматично на всяко вътрешно и "
+"външно лице, което ви изпрати писмо."
 
 #: ../src/EWS/evolution/e-mail-config-ews-ooo-page.c:394
 #: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:439
@@ -1705,7 +1704,7 @@ msgid "Folder of user “{0}” had been subscribed successfully."
 msgstr "Папката на потребителя „{0}“ е успешно абонирана."
 
 #: ../src/EWS/registry/e-ews-backend.c:1044
-#: ../src/Microsoft365/registry/e-m365-backend.c:728
+#: ../src/Microsoft365/registry/e-m365-backend.c:770
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
@@ -1717,7 +1716,7 @@ msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Източникът на данни „%s“ не представлява папка за Exchange уеб услуги"
 
 #: ../src/Microsoft365/addressbook/e-book-backend-m365.c:2092
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:394
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:400
 msgid "Folder ID is not set"
 msgstr "Идентификаторът на папката не е зададен"
 
@@ -1749,84 +1748,83 @@ msgstr "Потребителският контакт не може да бъд�
 msgid "Cannot remove recent contact"
 msgstr "Скорошният контакт не може да бъде премахнат"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:857
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:956
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:936
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1035
 msgid "Cannot store detached instances, because not supported in Microsoft 365"
 msgstr "Съхраняването на разкачени прозорци не се поддържа в Microsoft 365"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1115
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1194
 msgid "Can store only simple events into Microsoft 365 calendar"
 msgstr "Може да съхранява само прости събития в Microsoft 365 календара"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1128
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1207
 msgid "Can store only simple tasks into Microsoft 365 task folder"
-msgstr ""
-"Може да съхранява само прости задачи в Microsoft 365 папката със задачи"
+msgstr "Може да съхранява само прости задачи в Microsoft 365 папката със задачи"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1179
-#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1646
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1258
+#: ../src/Microsoft365/calendar/e-cal-backend-m365.c:1725
 msgid ""
 "Cannot create meetings organized by other users in a Microsoft 365 calendar."
 msgstr ""
 "Създаването на срещи, организирани от други потребители в Microsoft 365 "
 "календар, не е възможно."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1769
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1779
 msgid "Microsoft 365 calendar cannot store more than one recurrence"
 msgstr "Microsoft 365 календар не може да съхранява повече от едно повторение"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1777
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1787
 msgid ""
 "Microsoft 365 calendar cannot store component with RDATE or EXRULE properties"
 msgstr ""
 "Microsoft 365 календар не може да съхранява компонент със свойства RDATE или "
 "EXRULE"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1917
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:1927
 #, c-format
 msgid "Unknown recurrence frequency (%d)"
 msgstr "Неизвестен период на повтаряне (%d)"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2071
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2081
 msgid "Microsoft 365 calendar cannot store more than one event reminder"
 msgstr ""
 "Microsoft 365 календар не може да съхранява повече от едно напомняне за "
 "събитие"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2104
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2114
 msgid "Microsoft 365 event can have only a reminder before event start"
 msgstr ""
 "Microsoft 365 събитие може да има напомняне само преди началото на събитието"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2117
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2127
 msgid "Microsoft 365 task can have only a reminder with absolute time"
 msgstr "Microsoft 365 задача може да има само едно напомняне с абсолютно време"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2469
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2484
 #, c-format
 msgid "Microsoft 365 task cannot have attachments."
 msgstr "Microsoft 365 задача не може да има прикрепени файлове."
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2572
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2587
 #, c-format
 msgid "Cannot store attachment with URI “%s”"
 msgstr "Прикрепеният файл с адрес „%s“ не може да бъде съхранен"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2574
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2589
 msgid "Failed to read attachment URI"
 msgstr "Адресът на прикрепения файл не може да бъде прочетен"
 
-#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2588
+#: ../src/Microsoft365/calendar/e-cal-backend-m365-utils.c:2603
 msgid "Failed to get inline attachment data"
 msgstr "Данните за вградените прикрепени файлове не може да бъдат получени"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:285
+#: ../src/Microsoft365/camel/camel-m365-folder.c:264
 #: ../src/Microsoft365/camel/camel-m365-folder.c:386
 #: ../src/Microsoft365/camel/camel-m365-folder.c:889
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1291
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1422
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1489
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1571
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1315
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1470
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1537
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1619
 msgid "Invalid folder state (missing parent store)"
 msgstr "Невалидно състояние на папката (липсва родителско хранилище)"
 
@@ -1834,21 +1832,16 @@ msgstr "Невалидно състояние на папката (липсва 
 msgid "Follow-up"
 msgstr "Последвал отговор"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1870
+#: ../src/Microsoft365/camel/camel-m365-folder.c:1916
 #, c-format
 msgid "Folder “%s” doesn't correspond to any known folder"
 msgstr "Папката „%s“ не съответства на известна папка"
 
-#: ../src/Microsoft365/camel/camel-m365-folder.c:1889
-#, c-format
-msgid "Could not load summary for “%s”"
-msgstr "Обобщената информация за „%s“ не може да бъде заредена"
-
-#: ../src/Microsoft365/camel/camel-m365-provider.c:51
+#: ../src/Microsoft365/camel/camel-m365-provider.c:54
 msgid "Microsoft 365"
 msgstr "Microsoft 365"
 
-#: ../src/Microsoft365/camel/camel-m365-provider.c:52
+#: ../src/Microsoft365/camel/camel-m365-provider.c:55
 msgid "For accessing Microsoft 365 server"
 msgstr "За достъп до Microsoft 365 сървър"
 
@@ -1862,27 +1855,27 @@ msgid "Mail receive via Microsoft 365"
 msgstr "Получаване на поща чрез Microsoft 365"
 
 #: ../src/Microsoft365/camel/camel-m365-store.c:204
-#: ../src/Microsoft365/common/e-m365-connection.c:1470
+#: ../src/Microsoft365/common/e-m365-connection.c:1515
 #, c-format
 msgid "Malformed URI: “%s”"
 msgstr "Лошо форматиран адрес: „%s“"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:579
+#: ../src/Microsoft365/camel/camel-m365-store.c:611
 msgid "Look up Microsoft 365 categories"
 msgstr "Търсене на Microsoft 365 категории"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:588
+#: ../src/Microsoft365/camel/camel-m365-store.c:620
 #: ../src/Microsoft365/camel/camel-m365-transport.c:175
 msgid "Failed to create connection"
 msgstr "Създаването на нова връзка е неуспешно"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:753
+#: ../src/Microsoft365/camel/camel-m365-store.c:785
 #, c-format
 msgid "Parent folder “%s” does not exist"
 msgstr "Родителската папка „%s“ не съществува"
 
-#: ../src/Microsoft365/camel/camel-m365-store.c:996
-#: ../src/Microsoft365/camel/camel-m365-store.c:1034
+#: ../src/Microsoft365/camel/camel-m365-store.c:1028
+#: ../src/Microsoft365/camel/camel-m365-store.c:1066
 #, c-format
 msgid "Folder “%s” does not exist"
 msgstr "Папката „%s“ не съществува"
@@ -1896,7 +1889,7 @@ msgid "Microsoft 365 server cannot send message with multiple From addresses"
 msgstr "Microsoft 365 сървъра не може да изпрати писмо с няколко „От“ адреса"
 
 #: ../src/Microsoft365/camel/camel-m365-transport.c:315
-#: ../src/Microsoft365/camel/camel-m365-utils.c:1010
+#: ../src/Microsoft365/camel/camel-m365-utils.c:1011
 msgid "Failed to re-encode parts to base64: "
 msgstr "Прекодирането на частите в base64 е неуспешно: "
 
@@ -1909,8 +1902,8 @@ msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Microsoft "
 "365 server"
 msgstr ""
-"Тази опция ще използва OAuth 2.0 токен за достъп за свързване с Microsoft "
-"365 сървър"
+"Тази опция ще използва OAuth 2.0 токен за достъп за свързване с Microsoft 365 "
+"сървър"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/Microsoft365/common/e-oauth2-service-microsoft365.c:167
@@ -1918,7 +1911,12 @@ msgctxt "OAuth2Service"
 msgid "Microsoft365"
 msgstr "Microsoft365"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1111
+#: ../src/Microsoft365/common/e-m365-connection.c:47
+#, c-format
+msgid "Server returned URL with unexpected host '%s', expected '%s'"
+msgstr "Сървърът върна адрес с неочакван хост „%s“, очакваше се „%s“"
+
+#: ../src/Microsoft365/common/e-m365-connection.c:1154
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d:%02d minutes)"
@@ -1927,28 +1925,28 @@ msgstr[0] ""
 msgstr[1] ""
 "Microsoft 365 сървъра е зает, изчакване преди нов опит (%d:%02d минути)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1117
+#: ../src/Microsoft365/common/e-m365-connection.c:1160
 #, c-format
 msgid "Microsoft 365 server is busy, waiting to retry (%d second)"
 msgid_plural "Microsoft 365 server is busy, waiting to retry (%d seconds)"
 msgstr[0] "Microsoft 365 сървъра е зает, изчакване преди нов опит (%d секунда)"
 msgstr[1] "Microsoft 365 сървъра е зает, изчакване преди нов опит (%d секунди)"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1242
-#: ../src/Microsoft365/common/e-m365-connection.c:1269
+#: ../src/Microsoft365/common/e-m365-connection.c:1285
+#: ../src/Microsoft365/common/e-m365-connection.c:1312
 msgid "Invalid data"
 msgstr "Невалидни данни"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1267
+#: ../src/Microsoft365/common/e-m365-connection.c:1310
 msgid "Operation was cancelled"
 msgstr "Операцията е отменена"
 
-#: ../src/Microsoft365/common/e-m365-connection.c:1964
+#: ../src/Microsoft365/common/e-m365-connection.c:2016
 msgid "Failed to parse own Json data"
 msgstr "Собствените Json данни не може да бъдат разчитени"
 
 #. Translators: the '%s' is replaced with the date/time, which the instance was looked up for
-#: ../src/Microsoft365/common/e-m365-connection.c:5493
+#: ../src/Microsoft365/common/e-m365-connection.c:5567
 #, c-format
 msgid "Cannot find instance at '%s'"
 msgstr "Няма намерен случай на „%s“"
@@ -2116,30 +2114,34 @@ msgid ""
 "The Out of Office settings can be only seen here, use the web interface to "
 "change them."
 msgstr ""
-"Настройките за „Извън офиса“ може само тук да се виждат, използвайте "
-"Интернет интерфейса, за да ги промените."
+"Настройките за „Извън офиса“ може само тук да се виждат, използвайте Интернет "
+"интерфейса, за да ги промените."
 
 #: ../src/Microsoft365/evolution/e-mail-config-m365-ooo-page.c:761
 #, c-format
 msgid "The reported error was “%s”."
 msgstr "Докладваната грешка беше „%s“."
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:411
+#: ../src/Microsoft365/registry/e-m365-backend.c:453
 msgid "Organizational Contacts"
 msgstr "Контакти на организацията"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:418
+#: ../src/Microsoft365/registry/e-m365-backend.c:460
 msgid "Organizational Users"
 msgstr "Потребители на организацията"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:425
+#: ../src/Microsoft365/registry/e-m365-backend.c:467
 msgid "Recent Contacts"
 msgstr "Скорошни контакти"
 
-#: ../src/Microsoft365/registry/e-m365-backend.c:819
+#: ../src/Microsoft365/registry/e-m365-backend.c:861
 #, c-format
 msgid "Data source “%s” does not represent a Microsoft 365 folder"
 msgstr "Източникът на данни „%s“ не представлява Microsoft 365 папка"
+
+#, c-format
+#~ msgid "Could not load summary for %s"
+#~ msgstr "Обобщената информация за „%s“ не може да бъде заредена"
 
 #~ msgid "Cannot find “Deleted Items” folder"
 #~ msgstr "Папката за изтрити писма не може да бъде намерена"
