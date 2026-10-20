@@ -1183,18 +1183,34 @@ camel_m365_got_folders_delta_cb (EM365Connection *cnc,
 
 			camel_m365_store_summary_remove_folder (fdd->m365_store->priv->summary, id);
 		} else {
+			const gchar *parent_id = e_m365_folder_get_parent_folder_id (object);
 			gchar *old_full_name = NULL;
+			gboolean is_known;
 			guint32 flags;
 
-			if (camel_m365_store_summary_has_folder (fdd->m365_store->priv->summary, id))
-				old_full_name = camel_m365_store_summary_dup_folder_full_name (fdd->m365_store->priv->summary, id);
+			is_known = camel_m365_store_summary_has_folder (fdd->m365_store->priv->summary, id);
+
+			if (is_known) {
+				gchar *old_display_name, *old_parent_id;
+
+				old_display_name = camel_m365_store_summary_dup_folder_display_name (fdd->m365_store->priv->summary, id);
+				old_parent_id = camel_m365_store_summary_dup_folder_parent_id (fdd->m365_store->priv->summary, id);
+
+				/* it is a rename only when the display name or the parent changed */
+				if (g_strcmp0 (old_display_name, e_m365_folder_get_display_name (object)) != 0 ||
+				    g_strcmp0 (old_parent_id, (parent_id && *parent_id) ? parent_id : NULL) != 0)
+					old_full_name = camel_m365_store_summary_dup_folder_full_name (fdd->m365_store->priv->summary, id);
+
+				g_free (old_display_name);
+				g_free (old_parent_id);
+			}
 
 			flags = e_m365_mail_folder_get_child_folder_count (object) ? CAMEL_STORE_INFO_FOLDER_CHILDREN : CAMEL_STORE_INFO_FOLDER_NOCHILDREN;
 
 			flags |= GPOINTER_TO_UINT (g_hash_table_lookup (fdd->m365_store->priv->default_folders, id));
 
 			camel_m365_store_summary_set_folder (fdd->m365_store->priv->summary, FALSE, id,
-				e_m365_folder_get_parent_folder_id (object),
+				parent_id,
 				e_m365_folder_get_display_name (object),
 				e_m365_mail_folder_get_total_item_count (object),
 				e_m365_mail_folder_get_unread_item_count (object),
@@ -1202,7 +1218,7 @@ camel_m365_got_folders_delta_cb (EM365Connection *cnc,
 
 			if (old_full_name)
 				fdd->renamed_data = g_slist_prepend (fdd->renamed_data, folder_renamed_data_new (g_strdup (id), old_full_name));
-			else
+			else if (!is_known)
 				fdd->added_ids = g_slist_prepend (fdd->added_ids, g_strdup (id));
 		}
 	}
