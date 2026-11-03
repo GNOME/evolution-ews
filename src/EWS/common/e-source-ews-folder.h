@@ -7,7 +7,7 @@
 #define E_SOURCE_EWS_FOLDER_H
 
 #include <libedataserver/libedataserver.h>
-#include "common/e-ews-folder.h"
+#include "e-ews-folder.h"
 
 /* Standard GObject macros */
 #define E_TYPE_SOURCE_EWS_FOLDER \

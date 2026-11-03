@@ -6,48 +6,54 @@ set(DEPENDENCIES
 
 set(SOURCES
 	camel-ews-settings.c
-	camel-ews-settings.h
 	camel-sasl-xoauth2-office365.c
-	camel-sasl-xoauth2-office365.h
 	e-ews-calendar-utils.c
-	e-ews-calendar-utils.h
 	e-ews-camel-common.c
-	e-ews-camel-common.h
 	e-ews-connection.c
-	e-ews-connection.h
 	e-ews-connection-utils.c
-	e-ews-connection-utils.h
 	e-ews-debug.c
-	e-ews-debug.h
 	e-ews-folder.c
-	e-ews-folder.h
 	e-ews-item.c
-	e-ews-item.h
 	e-ews-item-change.c
-	e-ews-item-change.h
 	e-ews-notification.c
-	e-ews-notification.h
 	e-ews-oof-settings.c
 	e-ews-query-to-restriction.c
-	e-ews-query-to-restriction.h
 	e-ews-request.c
-	e-ews-request.h
 	e-oauth2-service-office365.c
-	e-oauth2-service-office365.h
 	e-soap-request.c
-	e-soap-request.h
 	e-soap-response.c
-	e-soap-response.h
 	e-source-ews-folder.c
-	e-source-ews-folder.h
 	ews-errors.c
-	ews-errors.h
 	${CMAKE_CURRENT_BINARY_DIR}/e-ews-enumtypes.c
+)
+
+set(HEADERS
+	camel-ews-settings.h
+	camel-sasl-xoauth2-office365.h
+	e-ews-calendar-utils.h
+	e-ews-camel-common.h
+	e-ews-connection.h
+	e-ews-connection-utils.h
+	e-ews-debug.h
+	e-ews-enums.h
+	e-ews-folder.h
+	e-ews-item.h
+	e-ews-item-change.h
+	e-ews-notification.h
+	e-ews-oof-settings.h
+	e-ews-query-to-restriction.h
+	e-ews-request.h
+	e-oauth2-service-office365.h
+	e-soap-request.h
+	e-soap-response.h
+	e-source-ews-folder.h
+	ews-errors.h
 	${CMAKE_CURRENT_BINARY_DIR}/e-ews-enumtypes.h
 )
 
 add_library(evolution-ews SHARED
 	${SOURCES}
+	${HEADERS}
 )
 
 add_dependencies(evolution-ews
@@ -95,4 +101,9 @@ target_link_libraries(evolution-ews
 
 install(TARGETS evolution-ews
 	DESTINATION ${privsolibdir}
+)
+
+install_development_files(evolution-ews "Exchange Web Services client library"
+	"evolution-ews-common = ${PROJECT_VERSION} camel-1.2 >= ${PROJECT_VERSION} libebackend-1.2 >= ${PROJECT_VERSION} libecal-2.0 >= ${PROJECT_VERSION} libedata-cal-2.0 >= ${PROJECT_VERSION} libedataserver-1.2 >= ${PROJECT_VERSION} libsoup-3.0 libxml-2.0"
+	${HEADERS}
 )

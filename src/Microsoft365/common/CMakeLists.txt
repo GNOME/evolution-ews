@@ -6,26 +6,30 @@ set(DEPENDENCIES
 
 set(SOURCES
 	camel-sasl-xoauth2-microsoft365.c
-	camel-sasl-xoauth2-microsoft365.h
 	camel-m365-settings.c
-	camel-m365-settings.h
 	e-m365-connection.c
+	e-m365-json-utils.c
+	e-m365-tz-utils.c
+	e-oauth2-service-microsoft365.c
+	e-source-m365-folder.c
+	${CMAKE_CURRENT_BINARY_DIR}/e-m365-enumtypes.c
+)
+
+set(HEADERS
+	camel-m365-settings.h
+	camel-sasl-xoauth2-microsoft365.h
 	e-m365-connection.h
 	e-m365-enums.h
-	e-m365-json-utils.c
 	e-m365-json-utils.h
-	e-m365-tz-utils.c
 	e-m365-tz-utils.h
-	e-oauth2-service-microsoft365.c
 	e-oauth2-service-microsoft365.h
-	e-source-m365-folder.c
 	e-source-m365-folder.h
-	${CMAKE_CURRENT_BINARY_DIR}/e-m365-enumtypes.c
 	${CMAKE_CURRENT_BINARY_DIR}/e-m365-enumtypes.h
 )
 
 add_library(evolution-microsoft365 SHARED
 	${SOURCES}
+	${HEADERS}
 )
 
 add_dependencies(evolution-microsoft365
@@ -77,4 +81,9 @@ target_link_libraries(evolution-microsoft365
 
 install(TARGETS evolution-microsoft365
 	DESTINATION ${privsolibdir}
+)
+
+install_development_files(evolution-microsoft365 "Microsoft 365 client library"
+	"evolution-ews-common = ${PROJECT_VERSION} camel-1.2 >= ${PROJECT_VERSION} libebackend-1.2 >= ${PROJECT_VERSION} libecal-2.0 >= ${PROJECT_VERSION} libedata-cal-2.0 >= ${PROJECT_VERSION} libedataserver-1.2 >= ${PROJECT_VERSION} libsoup-3.0 json-glib-1.0"
+	${HEADERS}
 )

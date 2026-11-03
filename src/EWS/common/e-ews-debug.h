@@ -7,7 +7,7 @@
 #define E_EWS_DEBUG_H
 
 #include <glib.h>
-#include <common/e-ews-connection.h>
+#include "e-ews-connection.h"
 
 G_BEGIN_DECLS
 

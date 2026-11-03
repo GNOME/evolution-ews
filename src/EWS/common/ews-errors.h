@@ -6,7 +6,7 @@
 #ifndef EWS_ERRORS_H
 #define EWS_ERRORS_H
 
-#include <common/e-soap-response.h>
+#include "e-soap-response.h"
 
 G_BEGIN_DECLS
 

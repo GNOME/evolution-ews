@@ -6,7 +6,9 @@
 #ifndef E_EWS_OOF_SETTINGS_H
 #define E_EWS_OOF_SETTINGS_H
 
-#include <common/e-ews-enums.h>
+#include <gio/gio.h>
+
+#include "e-ews-enums.h"
 
 /* Standard GObject macros */
 #define E_TYPE_EWS_OOF_SETTINGS \

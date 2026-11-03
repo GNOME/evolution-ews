@@ -9,8 +9,8 @@
 #include <time.h>
 #include <libecal/libecal.h>
 
-#include "common/e-soap-request.h"
-#include "common/e-ews-item.h"
+#include "e-soap-request.h"
+#include "e-ews-item.h"
 
 G_BEGIN_DECLS
 

@@ -8,8 +8,8 @@
 
 #include <camel/camel.h>
 
-#include "common/e-ews-connection.h"
-#include "common/e-ews-folder.h"
+#include "e-ews-connection.h"
+#include "e-ews-folder.h"
 
 G_BEGIN_DECLS
 

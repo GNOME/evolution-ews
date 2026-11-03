@@ -7,7 +7,7 @@
 #define E_EWS_CONNECTION_UTILS_H
 
 #include <glib.h>
-#include <common/e-ews-connection.h>
+#include "e-ews-connection.h"
 
 G_BEGIN_DECLS
 

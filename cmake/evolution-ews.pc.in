@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+privlibdir=@privsolibdir@
+includedir=@INCLUDE_INSTALL_DIR@/evolution-ews
+
+Name: @PC_LIBRARY@
+Description: @PC_DESCRIPTION@
+Version: @PROJECT_VERSION@
+Requires: @PC_REQUIRES@
+Libs: -L${privlibdir} -l@PC_LIBRARY@@PC_RPATH@
+Cflags: -I${includedir}

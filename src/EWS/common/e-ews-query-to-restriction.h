@@ -7,8 +7,8 @@
 #ifndef E_EWS_QUERY_TO_RESTRICTION_H
 #define E_EWS_QUERY_TO_RESTRICTION_H
 
-#include "common/e-soap-request.h"
-#include "common/e-ews-folder.h"
+#include "e-soap-request.h"
+#include "e-ews-folder.h"
 
 gboolean	e_ews_query_check_applicable	(const gchar *query,
 						 EEwsFolderType type);
