@@ -1514,6 +1514,7 @@ static EContact *
 ebb_m365_json_contact_to_vcard (EBookBackendM365 *bbm365,
 				EM365Contact *m365_contact,
 				EM365Connection *cnc,
+				gboolean with_photo,
 				gchar **out_object,
 				GCancellable *cancellable,
 				GError **error)
@@ -1530,6 +1531,9 @@ ebb_m365_json_contact_to_vcard (EBookBackendM365 *bbm365,
 	contact = e_contact_new ();
 
 	for (ii = 0; success && ii < G_N_ELEMENTS (mappings); ii++) {
+		if (!with_photo && mappings[ii].field_id == E_CONTACT_PHOTO)
+			continue;
+
 		if (mappings[ii].m365_get_func) {
 			ebb_m365_contact_get_string_attribute (m365_contact, contact, mappings[ii].field_id, mappings[ii].m365_get_func);
 		} else if (mappings[ii].get_func) {
@@ -1874,6 +1878,81 @@ ebb_m365_enum_cached_for_offline (EBookBackendM365 *bbm365)
 	return TRUE;
 }
 
+typedef struct {
+	EM365Connection *cnc;
+	gchar *folder_id;
+	GSList *contacts; /* EM365Contact * */
+} EM365PhotoData;
+
+static void
+ebb_m365_photo_data_free (gpointer user_data)
+{
+	EM365PhotoData *data = user_data;
+
+	g_object_unref (data->cnc);
+	g_free (data->folder_id);
+	g_slist_free_full (data->contacts, (GDestroyNotify) json_object_unref);
+	g_free (data);
+}
+
+static void
+ebb_m365_fetch_photos_thread (GTask *task,
+			     gpointer source_object,
+			     gpointer task_data,
+			     GCancellable *cancellable)
+{
+	EBookBackendM365 *bbm365 = source_object;
+	EM365PhotoData *data = task_data;
+	EBookCache *book_cache;
+	GSList *link;
+
+	book_cache = e_book_meta_backend_ref_cache (E_BOOK_META_BACKEND (bbm365));
+	for (link = data->contacts; book_cache && link && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+		EM365Contact *json_contact = link->data;
+		const gchar *uid = e_m365_contact_get_id (json_contact);
+		const gchar *photo_id = data->folder_id ? uid : e_m365_contact_org_get_mail (json_contact);
+		EContact *contact = NULL;
+		GByteArray *bytes = NULL;
+
+		if (!uid || !photo_id || !*photo_id)
+			continue;
+
+		if (!e_book_cache_get_contact (book_cache, uid, FALSE, &contact, cancellable, NULL))
+			continue;
+		if (e_vcard_get_attribute (E_VCARD (contact), EVC_PHOTO)) {
+			g_object_unref (contact);
+			continue;
+		}
+		g_clear_object (&contact);
+
+		LOCK (bbm365);
+		if (!g_cancellable_is_cancelled (cancellable) && bbm365->priv->cnc == data->cnc &&
+		    e_m365_connection_get_contact_photo_sync (data->cnc, NULL, data->folder_id,
+			photo_id, &bytes, cancellable, NULL) && bytes && bytes->len) {
+			/* Reload the current record so a late photo cannot overwrite newer fields. */
+			if (!g_cancellable_is_cancelled (cancellable) && bbm365->priv->cnc == data->cnc &&
+			    e_book_cache_get_contact (book_cache, uid, FALSE, &contact, cancellable, NULL)) {
+				EContactPhoto *photo = e_contact_photo_new ();
+				gchar *object;
+
+				e_contact_photo_set_inlined (photo, bytes->data, bytes->len);
+				e_contact_photo_set_mime_type (photo, "image/jpeg");
+				e_contact_set (contact, E_CONTACT_PHOTO, photo);
+				e_contact_photo_free (photo);
+				object = e_vcard_to_string (E_VCARD (contact));
+				if (e_book_cache_put_contact (book_cache, contact, object, 0, E_CACHE_IS_ONLINE, cancellable, NULL))
+					e_book_backend_notify_update (E_BOOK_BACKEND (bbm365), contact);
+				g_free (object);
+				g_clear_object (&contact);
+			}
+		}
+		UNLOCK (bbm365);
+		g_clear_pointer (&bytes, g_byte_array_unref);
+	}
+	g_clear_object (&book_cache);
+	g_task_return_boolean (task, TRUE);
+}
+
 static gboolean
 ebb_m365_update_cache_for_expression_sync (EBookBackendM365 *bbm365,
 					   const gchar *expr,
@@ -1928,12 +2007,24 @@ ebb_m365_update_cache_for_expression_sync (EBookBackendM365 *bbm365,
 			if (!id)
 				continue;
 
-			vcard = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, &object, cancellable, error);
+			vcard = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, FALSE, &object, cancellable, error);
 
 			if (!g_cancellable_is_cancelled (cancellable))
 				g_warn_if_fail (object != NULL);
 
 			if (object && vcard) {
+				EContact *cached_contact = NULL;
+
+				/* Keep an already downloaded photo when refreshing search results. */
+				if (e_book_cache_get_contact (book_cache, id, FALSE, &cached_contact, cancellable, NULL)) {
+					EContactPhoto *photo = e_contact_get (cached_contact, E_CONTACT_PHOTO);
+
+					e_contact_set (vcard, E_CONTACT_PHOTO, photo);
+					e_contact_photo_free (photo);
+					g_object_unref (cached_contact);
+					g_free (object);
+					object = e_vcard_to_string (E_VCARD (vcard));
+				}
 				success = e_book_cache_put_contact (book_cache, vcard, object, 0, E_CACHE_IS_ONLINE, cancellable, error);
 
 				if (success)
@@ -1942,6 +2033,19 @@ ebb_m365_update_cache_for_expression_sync (EBookBackendM365 *bbm365,
 
 			g_clear_object (&vcard);
 			g_free (object);
+		}
+
+		if (success && !g_cancellable_is_cancelled (cancellable)) {
+			EM365PhotoData *data = g_new0 (EM365PhotoData, 1);
+			GTask *task;
+
+			data->cnc = g_object_ref (bbm365->priv->cnc);
+			data->folder_id = g_strdup (bbm365->priv->folder_id);
+			data->contacts = g_steal_pointer (&contacts);
+			task = g_task_new (bbm365, cancellable, NULL, NULL);
+			g_task_set_task_data (task, data, ebb_m365_photo_data_free);
+			g_task_run_in_thread (task, ebb_m365_fetch_photos_thread);
+			g_object_unref (task);
 		}
 	}
 
@@ -2282,7 +2386,7 @@ ebb_m365_get_changes_sync (EBookMetaBackend *meta_backend,
 				else
 					out_slist = odd.out_created_objects;
 
-				vcard = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, &object, cancellable, error);
+				vcard = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, TRUE, &object, cancellable, error);
 
 				g_clear_object (&vcard);
 
@@ -2353,7 +2457,7 @@ ebb_m365_load_contact_sync (EBookMetaBackend *meta_backend,
 	}
 
 	if (success) {
-		*out_contact = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, out_extra, cancellable, error);
+		*out_contact = ebb_m365_json_contact_to_vcard (bbm365, contact, bbm365->priv->cnc, TRUE, out_extra, cancellable, error);
 
 		if (contact)
 			json_object_unref (contact);
@@ -2456,7 +2560,7 @@ ebb_m365_save_contact_sync (EBookMetaBackend *meta_backend,
 
 				*out_new_uid = g_strdup (e_m365_contact_get_id (created_contact));
 
-				vcard = ebb_m365_json_contact_to_vcard (bbm365, created_contact, bbm365->priv->cnc, out_new_extra, cancellable, error);
+				vcard = ebb_m365_json_contact_to_vcard (bbm365, created_contact, bbm365->priv->cnc, TRUE, out_new_extra, cancellable, error);
 
 				if (!vcard)
 					success = FALSE;
@@ -2627,12 +2731,9 @@ ebb_m365_start_view_search_thread_func (EBookBackend *book_backend,
 					GError **error)
 {
 	EDataBookView *view = user_data;
-	EBookBackendM365 *bbm365;
 
 	g_return_if_fail (E_IS_BOOK_BACKEND_M365 (book_backend));
 	g_return_if_fail (E_IS_DATA_BOOK_VIEW (view));
-
-	bbm365 = E_BOOK_BACKEND_M365 (book_backend);
 
 	if (!g_cancellable_set_error_if_cancelled (cancellable, error)) {
 		EBookBackendSExp *sexp;
@@ -2648,10 +2749,6 @@ ebb_m365_start_view_search_thread_func (EBookBackend *book_backend,
 		if (e_book_meta_backend_search_sync (E_BOOK_META_BACKEND (book_backend), expr, TRUE, &contacts, cancellable, NULL))
 			g_slist_free_full (contacts, g_object_unref);
 	}
-
-	LOCK (bbm365);
-	g_hash_table_remove (bbm365->priv->view_cancellables, view);
-	UNLOCK (bbm365);
 }
 
 static void
