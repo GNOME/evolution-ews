@@ -3926,7 +3926,7 @@ e_m365_connection_search_contacts_internal_sync (EM365Connection *cnc,
 		kind_str,
 		folder_id,
 		kind_path_str,
-		"$top", "50", /* no need for too many; server default is currently 250 */
+		"$top", "25", /* Interactive searches only need the first few matches. */
 		"$count", "true", /* required */
 		"$search", filter,
 		NULL);
@@ -3952,6 +3952,7 @@ e_m365_connection_search_contacts_internal_sync (EM365Connection *cnc,
 	memset (&rd, 0, sizeof (EM365ResponseData));
 
 	rd.out_items = out_contacts;
+	rd.read_only_once = TRUE; /* $top is a page size; do not fetch the whole directory. */
 
 	success = m365_connection_send_request_sync (cnc, message, e_m365_read_valued_response_cb, NULL, &rd, cancellable, error);
 
