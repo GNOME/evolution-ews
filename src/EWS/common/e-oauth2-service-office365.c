@@ -144,6 +144,12 @@ eos_office365_guess_can_process (EOAuth2Service *service,
 		protocol && g_ascii_strcasecmp (protocol, "ews") == 0;
 }
 
+static guint32
+eos_office365_get_flags (EOAuth2Service *service)
+{
+	return E_OAUTH2_SERVICE_FLAG_USE_PKCE;
+}
+
 static const gchar *
 eos_office365_get_name (EOAuth2Service *service)
 {
@@ -542,6 +548,7 @@ static void
 e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface)
 {
 	iface->guess_can_process = eos_office365_guess_can_process;
+	iface->get_flags = eos_office365_get_flags;
 	iface->get_name = eos_office365_get_name;
 	iface->get_display_name = eos_office365_get_display_name;
 	iface->get_client_id = eos_office365_get_client_id;
