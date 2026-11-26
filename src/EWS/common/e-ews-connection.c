@@ -33,6 +33,7 @@
 
 #define EWS_RETRY_IO_ERROR_SECONDS 3
 #define EWS_RETRY_AUTH_ERROR_SECONDS 0.1
+#define EWS_SERVER_BUSY_MAX_RETRIES 5
 
 #define QUEUE_LOCK(x) (g_rec_mutex_lock(&(x)->priv->queue_lock))
 #define QUEUE_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->queue_lock))
@@ -588,6 +589,43 @@ e_ews_connection_handle_backoff_policy (EEwsConnection *cnc,
 	return repeat;
 }
 
+static gboolean
+e_ews_connection_handle_http_error_backoff (EEwsConnection *cnc,
+					    SoupMessage *message,
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	ESoapResponse *response;
+	GByteArray *bytes;
+	GError *local_error = NULL;
+	gboolean repeat;
+
+	if (!message || !error || !*error ||
+	    !g_error_matches (*error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SERVERBUSY))
+		return FALSE;
+
+	bytes = e_soup_session_util_get_message_bytes (message);
+	if (!bytes || !bytes->len)
+		return FALSE;
+
+	response = e_soap_response_new_from_string ((const gchar *) bytes->data, bytes->len);
+	if (!response)
+		return FALSE;
+
+	repeat = e_ews_connection_handle_backoff_policy (cnc, response, cancellable, &local_error);
+
+	g_object_unref (response);
+
+	if (local_error) {
+		g_clear_error (error);
+		g_propagate_error (error, local_error);
+	} else if (repeat) {
+		g_clear_error (error);
+	}
+
+	return repeat;
+}
+
 static ESoapResponse *
 e_ews_connection_send_request_sync (EEwsConnection *cnc,
 				    ESoapRequest *request,
@@ -600,6 +638,7 @@ e_ews_connection_send_request_sync (EEwsConnection *cnc,
 	GTlsCertificateFlags certificate_errors = 0;
 	gboolean retrying_after_io_error = FALSE;
 	gboolean repeat = TRUE;
+	guint server_busy_retries = 0;
 	GError *local_error = NULL;
 
 	while (repeat) {
@@ -700,6 +739,13 @@ e_ews_connection_send_request_sync (EEwsConnection *cnc,
 		if (local_error2) {
 			g_clear_error (&local_error);
 			local_error = local_error2;
+		}
+
+		if (!repeat && !response && local_error && server_busy_retries < EWS_SERVER_BUSY_MAX_RETRIES &&
+		    e_ews_connection_get_backoff_enabled (cnc)) {
+			repeat = e_ews_connection_handle_http_error_backoff (cnc, message, cancellable, &local_error);
+			if (repeat)
+				server_busy_retries++;
 		}
 
 		if (!local_error && response && !repeat) {
