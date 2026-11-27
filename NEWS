@@ -1,3 +1,18 @@
+Evolution-EWS 3.62.2 2026-11-27
+-------------------------------
+
+Bug Fixes:
+	I#322 - m365: Speed up online directory searches (Jan-Michael Brummer)
+	M!21 - m365: Retry batch requests when the response envelope is unparseable (David Woodhouse)
+	M!30 - EWS: Do not drop password of a shared connection in try_credentials() (Florian Maurer)
+	M!31 - EWS: Fix NTLM auth failure of the offline address book download (Florian Maurer)
+
+Miscellaneous:
+	EWS: Retry requests after ErrorServerBusy returned with HTTP status 500 (affectioned)
+
+Translations:
+	Kjartan Maraas (nb)
+
 Evolution-EWS 3.62.1 2026-10-09
 -------------------------------
 
