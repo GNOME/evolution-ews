@@ -381,6 +381,7 @@ e_ews_connection_process_request_run_cb (gpointer user_data)
 static ESoapResponse *
 e_ews_connection_process_request_sync (EEwsConnection *cnc,
 				       ESoapRequest *request,
+				       gboolean use_new_connection,
 				       SoupMessage **out_message,
 				       gchar **out_certificate_pem,
 				       GTlsCertificateFlags *out_certificate_errors,
@@ -422,6 +423,9 @@ e_ews_connection_process_request_sync (EEwsConnection *cnc,
 
 	if (!pd.message)
 		return NULL;
+
+	if (use_new_connection)
+		soup_message_add_flags (pd.message, SOUP_MESSAGE_NEW_CONNECTION);
 
 	e_ews_connection_maybe_prepare_message_for_testing_sources (cnc, pd.message);
 
@@ -637,6 +641,7 @@ e_ews_connection_send_request_sync (EEwsConnection *cnc,
 	gchar *certificate_pem = NULL;
 	GTlsCertificateFlags certificate_errors = 0;
 	gboolean retrying_after_io_error = FALSE;
+	gboolean use_new_connection = FALSE;
 	gboolean repeat = TRUE;
 	guint server_busy_retries = 0;
 	GError *local_error = NULL;
@@ -648,7 +653,7 @@ e_ews_connection_send_request_sync (EEwsConnection *cnc,
 
 		g_clear_error (&local_error);
 
-		response = e_ews_connection_process_request_sync (cnc, request, &message, &certificate_pem, &certificate_errors, &repeat, cancellable, &local_error);
+		response = e_ews_connection_process_request_sync (cnc, request, use_new_connection, &message, &certificate_pem, &certificate_errors, &repeat, cancellable, &local_error);
 
 		g_mutex_lock (&cnc->priv->property_lock);
 		g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
@@ -670,6 +675,8 @@ e_ews_connection_send_request_sync (EEwsConnection *cnc,
 					e_ews_connection_wait_ms (EWS_RETRY_AUTH_ERROR_SECONDS * 1000, cancellable);
 
 					retrying_after_io_error = TRUE;
+					/* the pooled connections can be refused the same way */
+					use_new_connection = TRUE;
 					repeat = !g_cancellable_set_error_if_cancelled (cancellable, &local_error2);
 				} else {
 					if (soup_message_get_response_headers (message)) {
