@@ -2010,6 +2010,7 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 	ESourceAuthenticationResult result;
 	ESource *source;
 	gboolean de_set_source;
+	gboolean has_password, keep_credentials;
 	EwsFolderId *fid = NULL;
 	GSList *ids = NULL;
 	GError *local_error = NULL;
@@ -2020,7 +2021,16 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 	   make sure only one try_credentials() is running at a single time */
 	g_mutex_lock (&cnc->priv->try_credentials_lock);
 
-	e_ews_connection_update_credentials (cnc, credentials);
+	has_password = credentials && e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD);
+
+	/* do not drop the password set by another source sharing the connection */
+	g_mutex_lock (&cnc->priv->property_lock);
+	keep_credentials = !has_password && cnc->priv->credentials &&
+		e_named_parameters_exists (cnc->priv->credentials, E_SOURCE_CREDENTIAL_PASSWORD);
+	g_mutex_unlock (&cnc->priv->property_lock);
+
+	if (!keep_credentials)
+		e_ews_connection_update_credentials (cnc, credentials);
 
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup ("inbox");
@@ -2057,7 +2067,7 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 
 		auth_failed = g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
 		if (!auth_failed && g_error_matches (local_error, E_SOUP_SESSION_ERROR, SOUP_STATUS_FORBIDDEN) &&
-		    (!credentials || !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)))
+		    !has_password && !keep_credentials)
 			auth_failed = TRUE;
 
 		if (auth_failed) {
@@ -2065,7 +2075,7 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 
 			if (camel_ews_settings_get_auth_mechanism (cnc->priv->settings) != EWS_AUTH_TYPE_GSSAPI &&
 			    camel_ews_settings_get_auth_mechanism (cnc->priv->settings) != EWS_AUTH_TYPE_OAUTH2 &&
-			    (!credentials || !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD))) {
+			    !has_password) {
 				result = E_SOURCE_AUTHENTICATION_REQUIRED;
 			} else {
 				result = E_SOURCE_AUTHENTICATION_REJECTED;
@@ -2075,7 +2085,8 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 			result = E_SOURCE_AUTHENTICATION_ERROR;
 		}
 
-		e_ews_connection_set_password (cnc, NULL);
+		if (auth_failed || !keep_credentials)
+			e_ews_connection_set_password (cnc, NULL);
 	}
 
 	g_mutex_unlock (&cnc->priv->try_credentials_lock);
